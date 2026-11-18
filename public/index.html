@@ -2366,6 +2366,481 @@
       const [quizBranch, setQuizBranch] = useState('islamic'); // 'islamic', 'tajweed', 'hifz'
       const [quizIslamicCategory, setQuizIslamicCategory] = useState('aqeedah'); // 'aqeedah', 'fiqh', 'seerah', 'tazkiyah'
 
+      // ================= TEACHER TOOLS: WORKSHEET BUILDER STATES =================
+      const [worksheetMode, setWorksheetMode] = useState('preview'); // 'preview' or 'builder'
+      const [customIslamicWorksheets, setCustomIslamicWorksheets] = useState(() => {
+        try {
+          const s = localStorage.getItem('mishkah_custom_islamic_worksheets');
+          return s ? JSON.parse(s) : JSON.parse(JSON.stringify(ISLAMIC_BRANCH_WORKSHEETS));
+        } catch (e) {
+          return JSON.parse(JSON.stringify(ISLAMIC_BRANCH_WORKSHEETS));
+        }
+      });
+      const [customTajweedWorksheet, setCustomTajweedWorksheet] = useState(() => {
+        try {
+          const s = localStorage.getItem('mishkah_custom_tajweed_worksheet');
+          if (s) return JSON.parse(s);
+        } catch (e) {}
+        return {
+          titleAr: 'ورقة مدارسة وتطبيق في أحكام التجويد',
+          titleEn: 'Tajweed Student Worksheet',
+          surah: 'سورة الملك: الآيات 1-12',
+          items: [
+            { itemNumber: 1, wordUthmani: 'شَىْءٍ قَدِيرٌ', ruleApplied: 'إخفاء حقيقي بغنة مفخمة', reasonAr: 'تنوين بالكسر بعده حرف القاف (من حروف الاستعلاء المفخمة)', maxScore: 5 },
+            { itemNumber: 2, wordUthmani: 'خَلَقَ ٱلْمَوْتَ', ruleApplied: 'قلقلة صغرى', reasonAr: 'حرف القاف ساكن في وسط الكلمة / سكون أصلي مخفف', maxScore: 5 },
+            { itemNumber: 3, wordUthmani: 'مِّن تَفَٰوُتٍ', ruleApplied: 'إخفاء حقيقي بغنة مرققة', reasonAr: 'نون ساكنة بعدها حرف التاء (من حروف الاستفال)', maxScore: 5 },
+            { itemNumber: 4, wordUthmani: 'هَلْ تَرَىٰ مِن فُطُورٍ', ruleApplied: 'إظهار لامي + إخفاء نون', reasonAr: 'لام الحرف مظهرة + نون ساكنة بعدها حرف الفاء', maxScore: 5 }
+          ]
+        };
+      });
+
+      const [isAddingWorksheetItem, setIsAddingWorksheetItem] = useState(false);
+      const [editingWorksheetItemIdx, setEditingWorksheetItemIdx] = useState(null);
+      const [worksheetItemForm, setWorksheetItemForm] = useState({
+        topic: '',
+        scripture: '',
+        studentQuestion: '',
+        teacherAnswer: '',
+        practicalImpact: '',
+        maxScore: 5
+      });
+
+      const [isAddingTajweedItem, setIsAddingTajweedItem] = useState(false);
+      const [editingTajweedItemIdx, setEditingTajweedItemIdx] = useState(null);
+      const [tajweedItemForm, setTajweedItemForm] = useState({
+        wordUthmani: '',
+        ruleApplied: '',
+        reasonAr: '',
+        maxScore: 5
+      });
+
+      // ================= TEACHER TOOLS: QUIZ BUILDER STATES =================
+      const [quizMode, setQuizMode] = useState('student'); // 'student' or 'builder'
+      const [customIslamicQuizzes, setCustomIslamicQuizzes] = useState(() => {
+        try {
+          const s = localStorage.getItem('mishkah_custom_islamic_quizzes');
+          return s ? JSON.parse(s) : JSON.parse(JSON.stringify(ISLAMIC_BRANCH_QUIZZES));
+        } catch (e) {
+          return JSON.parse(JSON.stringify(ISLAMIC_BRANCH_QUIZZES));
+        }
+      });
+      const [customTajweedQuizzes, setCustomTajweedQuizzes] = useState(() => {
+        try {
+          const s = localStorage.getItem('mishkah_custom_tajweed_quizzes');
+          if (s) return JSON.parse(s);
+        } catch (e) {}
+        const list = [];
+        SUWAYD_TAJWEED_CURRICULUM.forEach(l => {
+          l.quizQuestions.forEach((q, idx) => {
+            list.push({
+              id: l.id + '_q' + idx,
+              lessonTitle: l.titleAr,
+              questionAr: '[' + l.titleAr + '] ' + q.qAr,
+              questionEn: q.qAr,
+              options: q.opts.map(o => ({ id: o.id, textAr: o.text, textEn: o.text })),
+              correctOptionId: q.correct,
+              explanationAr: q.exp,
+              explanationEn: q.exp
+            });
+          });
+        });
+        return list;
+      });
+      const [customHifzQuizzes, setCustomHifzQuizzes] = useState(() => {
+        try {
+          const s = localStorage.getItem('mishkah_custom_hifz_quizzes');
+          return s ? JSON.parse(s) : JSON.parse(JSON.stringify(HIFZ_BRANCH_QUIZ));
+        } catch (e) {
+          return JSON.parse(JSON.stringify(HIFZ_BRANCH_QUIZ));
+        }
+      });
+
+      const [isAddingQuizQuestion, setIsAddingQuizQuestion] = useState(false);
+      const [editingQuizQuestionId, setEditingQuizQuestionId] = useState(null);
+      const [quizQuestionForm, setQuizQuestionForm] = useState({
+        questionAr: '',
+        optA: '',
+        optB: '',
+        optC: '',
+        optD: '',
+        correctOptionId: 'a',
+        explanationAr: ''
+      });
+
+      // Auto-save custom worksheets & quizzes
+      useEffect(() => {
+        try {
+          localStorage.setItem('mishkah_custom_islamic_worksheets', JSON.stringify(customIslamicWorksheets));
+        } catch (e) {}
+      }, [customIslamicWorksheets]);
+
+      useEffect(() => {
+        try {
+          localStorage.setItem('mishkah_custom_tajweed_worksheet', JSON.stringify(customTajweedWorksheet));
+        } catch (e) {}
+      }, [customTajweedWorksheet]);
+
+      useEffect(() => {
+        try {
+          localStorage.setItem('mishkah_custom_islamic_quizzes', JSON.stringify(customIslamicQuizzes));
+        } catch (e) {}
+      }, [customIslamicQuizzes]);
+
+      useEffect(() => {
+        try {
+          localStorage.setItem('mishkah_custom_tajweed_quizzes', JSON.stringify(customTajweedQuizzes));
+        } catch (e) {}
+      }, [customTajweedQuizzes]);
+
+      useEffect(() => {
+        try {
+          localStorage.setItem('mishkah_custom_hifz_quizzes', JSON.stringify(customHifzQuizzes));
+        } catch (e) {}
+      }, [customHifzQuizzes]);
+
+      // Handlers for Islamic Worksheets
+      const handleSaveWorksheetItem = (e) => {
+        if (e) e.preventDefault();
+        if (!worksheetItemForm.topic.trim()) {
+          showToast(isRtl ? 'يرجى كتابة المسألة الشرعية' : 'Please enter the topic');
+          return;
+        }
+        setCustomIslamicWorksheets(prev => {
+          const current = prev[worksheetIslamicCategory] || JSON.parse(JSON.stringify(ISLAMIC_BRANCH_WORKSHEETS[worksheetIslamicCategory] || ISLAMIC_BRANCH_WORKSHEETS.aqeedah));
+          const items = [...(current.items || [])];
+          if (editingWorksheetItemIdx !== null && editingWorksheetItemIdx >= 0) {
+            items[editingWorksheetItemIdx] = {
+              num: editingWorksheetItemIdx + 1,
+              ...worksheetItemForm
+            };
+          } else {
+            items.push({
+              num: items.length + 1,
+              ...worksheetItemForm
+            });
+          }
+          return {
+            ...prev,
+            [worksheetIslamicCategory]: {
+              ...current,
+              items
+            }
+          };
+        });
+        setIsAddingWorksheetItem(false);
+        setEditingWorksheetItemIdx(null);
+        setWorksheetItemForm({ topic: '', scripture: '', studentQuestion: '', teacherAnswer: '', practicalImpact: '', maxScore: 5 });
+        showToast(isRtl ? 'تم حفظ البند في ورقة العمل بنجاح 💾' : 'Item saved to worksheet 💾');
+      };
+
+      const handleDeleteWorksheetItem = (idx) => {
+        setCustomIslamicWorksheets(prev => {
+          const current = prev[worksheetIslamicCategory] || prev.aqeedah;
+          const items = (current.items || []).filter((_, i) => i !== idx).map((it, i) => ({ ...it, num: i + 1 }));
+          return {
+            ...prev,
+            [worksheetIslamicCategory]: {
+              ...current,
+              items
+            }
+          };
+        });
+        showToast(isRtl ? 'تم حذف البند من ورقة العمل 🗑️' : 'Item deleted 🗑️');
+      };
+
+      const handleResetIslamicWorksheet = () => {
+        const canonical = ISLAMIC_BRANCH_WORKSHEETS[worksheetIslamicCategory] || ISLAMIC_BRANCH_WORKSHEETS.aqeedah;
+        setCustomIslamicWorksheets(prev => ({
+          ...prev,
+          [worksheetIslamicCategory]: JSON.parse(JSON.stringify(canonical))
+        }));
+        showToast(isRtl ? 'تمت استعادة ورقة العمل النموذجية المعتمدة 🔄' : 'Restored canonical template 🔄');
+      };
+
+      const handleClearIslamicWorksheet = () => {
+        setCustomIslamicWorksheets(prev => {
+          const current = prev[worksheetIslamicCategory] || prev.aqeedah;
+          return {
+            ...prev,
+            [worksheetIslamicCategory]: {
+              ...current,
+              items: []
+            }
+          };
+        });
+        showToast(isRtl ? 'تم تفريغ ورقة العمل — يمكنك البدء على نظافة 🧹' : 'Worksheet cleared 🧹');
+      };
+
+      // Handlers for Tajweed Worksheets
+      const handleSaveTajweedItem = (e) => {
+        if (e) e.preventDefault();
+        if (!tajweedItemForm.wordUthmani.trim()) {
+          showToast(isRtl ? 'يرجى إدخال الكلمة القرآنية' : 'Please enter the Quranic word');
+          return;
+        }
+        setCustomTajweedWorksheet(prev => {
+          const items = [...(prev.items || [])];
+          if (editingTajweedItemIdx !== null && editingTajweedItemIdx >= 0) {
+            items[editingTajweedItemIdx] = {
+              itemNumber: editingTajweedItemIdx + 1,
+              ...tajweedItemForm
+            };
+          } else {
+            items.push({
+              itemNumber: items.length + 1,
+              ...tajweedItemForm
+            });
+          }
+          return { ...prev, items };
+        });
+        setIsAddingTajweedItem(false);
+        setEditingTajweedItemIdx(null);
+        setTajweedItemForm({ wordUthmani: '', ruleApplied: '', reasonAr: '', maxScore: 5 });
+        showToast(isRtl ? 'تمت إضافة الكلمة والحكم التجويدي بنجاح 💾' : 'Tajweed word saved 💾');
+      };
+
+      const handleDeleteTajweedItem = (idx) => {
+        setCustomTajweedWorksheet(prev => ({
+          ...prev,
+          items: (prev.items || []).filter((_, i) => i !== idx).map((it, i) => ({ ...it, itemNumber: i + 1 }))
+        }));
+        showToast(isRtl ? 'تم حذف الكلمة من ورقة التجويد 🗑️' : 'Tajweed item deleted 🗑️');
+      };
+
+      const handleResetTajweedWorksheet = () => {
+        setCustomTajweedWorksheet({
+          titleAr: 'ورقة مدارسة وتطبيق في أحكام التجويد',
+          titleEn: 'Tajweed Student Worksheet',
+          surah: 'سورة الملك: الآيات 1-12',
+          items: [
+            { itemNumber: 1, wordUthmani: 'شَىْءٍ قَدِيرٌ', ruleApplied: 'إخفاء حقيقي بغنة مفخمة', reasonAr: 'تنوين بالكسر بعده حرف القاف (من حروف الاستعلاء المفخمة)', maxScore: 5 },
+            { itemNumber: 2, wordUthmani: 'خَلَقَ ٱلْمَوْتَ', ruleApplied: 'قلقلة صغرى', reasonAr: 'حرف القاف ساكن في وسط الكلمة / سكون أصلي مخفف', maxScore: 5 },
+            { itemNumber: 3, wordUthmani: 'مِّن تَفَٰوُتٍ', ruleApplied: 'إخفاء حقيقي بغنة مرققة', reasonAr: 'نون ساكنة بعدها حرف التاء (من حروف الاستفال)', maxScore: 5 },
+            { itemNumber: 4, wordUthmani: 'هَلْ تَرَىٰ مِن فُطُورٍ', ruleApplied: 'إظهار لامي + إخفاء نون', reasonAr: 'لام الحرف مظهرة + نون ساكنة بعدها حرف الفاء', maxScore: 5 }
+          ]
+        });
+        showToast(isRtl ? 'تمت استعادة ورقة التجويد النموذجية 🔄' : 'Tajweed worksheet reset 🔄');
+      };
+
+      const handleClearTajweedWorksheet = () => {
+        setCustomTajweedWorksheet(prev => ({ ...prev, items: [] }));
+        showToast(isRtl ? 'تم تفريغ ورقة التجويد للبدء على نظافة 🧹' : 'Tajweed worksheet cleared 🧹');
+      };
+
+      // Import from Active Branch 3 Lecture to Worksheet
+      const handleTransferLectureToWorksheet = () => {
+        if (!islamicData) {
+          showToast(isRtl ? 'لا توجد محاضرة نشطة حالياً في حقيبة العلوم الشرعية' : 'No active lecture to transfer');
+          return;
+        }
+        const newItems = [];
+        (islamicData.blueprint || []).forEach((b, idx) => {
+          newItems.push({
+            num: idx + 1,
+            topic: b.phaseNameAr || ('المحور ' + (idx + 1)),
+            scripture: (islamicData.hadithVerification && islamicData.hadithVerification[0]?.text) || 'الدليل الشرعي المعتمد من الصحيحين',
+            studentQuestion: 'ما المستفاد العملي والتأصيلي من ' + (b.phaseNameAr || 'هذا المحور') + '؟ مع الاستدلال.',
+            teacherAnswer: b.teacherFocusAr || 'التأصيل العلمي والتربوي المنضبط المستخلص من المحاضرة.',
+            practicalImpact: 'التطبيق العملي والسلوكي في حياة المسلم والدارس.',
+            maxScore: 5
+          });
+        });
+        setCustomIslamicWorksheets(prev => ({
+          ...prev,
+          [worksheetIslamicCategory]: {
+            id: worksheetIslamicCategory,
+            categoryAr: islamicData.metadata.category || 'العلوم الشرعية',
+            categoryEn: 'Islamic Studies',
+            titleAr: 'ورقة عمل وتطبيق: ' + (islamicData.metadata.topic || 'المحاضرة الشرعية'),
+            titleEn: 'Worksheet: ' + (islamicData.metadata.topic || 'Islamic Lecture'),
+            targetAudience: islamicData.metadata.audience || 'الدارسين والحلقة',
+            quranRef: 'مقتبس من محاور المحاضرة الشرعية المعتمدة',
+            hadithRef: (islamicData.hadithVerification && islamicData.hadithVerification[0]?.text) || 'تخريج صحيح البخاري / مسلم',
+            items: newItems
+          }
+        }));
+        setWorksheetBranch('islamic');
+        setWorksheetMode('preview');
+        setActiveTab('worksheet');
+        showToast(isRtl ? 'تم نقل محاور المحاضرة إلى ورقة العمل للطباعة بنجاح ⚡' : 'Lecture transferred to worksheet ⚡');
+      };
+
+      // Import from Active Branch 3 Lecture to Quiz
+      const handleTransferLectureToQuiz = () => {
+        if (!islamicData || !islamicData.quizQuestions || !islamicData.quizQuestions.length) {
+          showToast(isRtl ? 'لا توجد أسئلة مولدة في المحاضرة النشطة' : 'No generated questions in active lecture');
+          return;
+        }
+        const qs = islamicData.quizQuestions.map((q, idx) => ({
+          id: 'custom_lec_' + idx + '_' + Date.now(),
+          questionAr: q.questionAr,
+          questionEn: q.questionAr,
+          options: (q.options || []).map(opt => ({
+            id: opt.id,
+            textAr: opt.textAr || opt.text,
+            textEn: opt.textAr || opt.text
+          })),
+          correctOptionId: q.correctOptionId || 'a',
+          explanationAr: q.reflectionPrompt || 'توجيه شرعي مستفاد من المحاضرة',
+          explanationEn: q.reflectionPrompt || 'Islamic reflection from lecture'
+        }));
+        setCustomIslamicQuizzes(prev => ({
+          ...prev,
+          [quizIslamicCategory]: qs
+        }));
+        setQuizBranch('islamic');
+        setQuizMode('student');
+        setQuizAnswers({});
+        setQuizSubmitted(false);
+        setActiveTab('quiz');
+        showToast(isRtl ? 'تم نقل أسئلة المحاضرة إلى الاختبار الذاتي التفاعلي بنجاح ⚡' : 'Lecture questions transferred to quiz ⚡');
+      };
+
+      // Import from Active Tajweed Lesson to Worksheet
+      const handleTransferTajweedToWorksheet = () => {
+        if (!tajweedData || !tajweedData.worksheet || !tajweedData.worksheet.length) {
+          showToast(isRtl ? 'لا توجد كلمات في درس التجويد الحالي' : 'No words in current Tajweed lesson');
+          return;
+        }
+        const items = tajweedData.worksheet.map((w, idx) => ({
+          itemNumber: idx + 1,
+          wordUthmani: w.wordUthmani,
+          ruleApplied: w.ruleApplied,
+          reasonAr: w.reasonAr || 'بيان المخرج والصفة والعلة الصوتية',
+          maxScore: 5
+        }));
+        setCustomTajweedWorksheet({
+          titleAr: 'ورقة عمل في أحكام التجويد: ' + (currentSuwaydLesson?.titleAr || tajweedData.metadata?.titleAr || 'درس التجويد'),
+          titleEn: 'Tajweed Worksheet',
+          surah: tajweedData.metadata?.surah || currentSuwaydLesson?.titleAr || 'سورة الملك',
+          items
+        });
+        setWorksheetBranch('tajweed');
+        setWorksheetMode('preview');
+        setActiveTab('worksheet');
+        showToast(isRtl ? 'تم نقل كلمات درس التجويد إلى ورقة العمل ⚡' : 'Tajweed words transferred to worksheet ⚡');
+      };
+
+      // Handlers for Quiz Question Management
+      const handleSaveQuizQuestion = (e) => {
+        if (e) e.preventDefault();
+        if (!quizQuestionForm.questionAr.trim() || !quizQuestionForm.optA.trim() || !quizQuestionForm.optB.trim()) {
+          showToast(isRtl ? 'يرجى كتابة نص السؤال وخيارين على الأقل' : 'Please enter question and at least 2 options');
+          return;
+        }
+        const newQ = {
+          id: editingQuizQuestionId || ('custom_q_' + Date.now()),
+          questionAr: quizQuestionForm.questionAr.trim(),
+          questionEn: quizQuestionForm.questionAr.trim(),
+          options: [
+            { id: 'a', textAr: quizQuestionForm.optA.trim(), textEn: quizQuestionForm.optA.trim() },
+            { id: 'b', textAr: quizQuestionForm.optB.trim(), textEn: quizQuestionForm.optB.trim() },
+            { id: 'c', textAr: quizQuestionForm.optC.trim() || (isRtl ? 'خيار إضافي' : 'Option C'), textEn: quizQuestionForm.optC.trim() || 'Option C' },
+            { id: 'd', textAr: quizQuestionForm.optD.trim() || (isRtl ? 'خيار إضافي' : 'Option D'), textEn: quizQuestionForm.optD.trim() || 'Option D' }
+          ],
+          correctOptionId: quizQuestionForm.correctOptionId || 'a',
+          explanationAr: quizQuestionForm.explanationAr.trim() || (isRtl ? 'تأصيل وتوجيه السؤال' : 'Explanation'),
+          explanationEn: quizQuestionForm.explanationAr.trim() || 'Explanation'
+        };
+
+        if (quizBranch === 'islamic') {
+          setCustomIslamicQuizzes(prev => {
+            const list = [...(prev[quizIslamicCategory] || prev.aqeedah || [])];
+            if (editingQuizQuestionId) {
+              const idx = list.findIndex(item => item.id === editingQuizQuestionId);
+              if (idx >= 0) list[idx] = newQ;
+              else list.push(newQ);
+            } else {
+              list.push(newQ);
+            }
+            return { ...prev, [quizIslamicCategory]: list };
+          });
+        } else if (quizBranch === 'tajweed') {
+          setCustomTajweedQuizzes(prev => {
+            const list = [...(prev || [])];
+            if (editingQuizQuestionId) {
+              const idx = list.findIndex(item => item.id === editingQuizQuestionId);
+              if (idx >= 0) list[idx] = newQ;
+              else list.push(newQ);
+            } else {
+              list.push(newQ);
+            }
+            return list;
+          });
+        } else if (quizBranch === 'hifz') {
+          setCustomHifzQuizzes(prev => {
+            const list = [...(prev || [])];
+            if (editingQuizQuestionId) {
+              const idx = list.findIndex(item => item.id === editingQuizQuestionId);
+              if (idx >= 0) list[idx] = newQ;
+              else list.push(newQ);
+            } else {
+              list.push(newQ);
+            }
+            return list;
+          });
+        }
+
+        setIsAddingQuizQuestion(false);
+        setEditingQuizQuestionId(null);
+        setQuizQuestionForm({ questionAr: '', optA: '', optB: '', optC: '', optD: '', correctOptionId: 'a', explanationAr: '' });
+        showToast(isRtl ? 'تم حفظ السؤال في بنك الاختبار بنجاح 💾' : 'Question saved to quiz bank 💾');
+      };
+
+      const handleDeleteQuizQuestion = (qId) => {
+        if (quizBranch === 'islamic') {
+          setCustomIslamicQuizzes(prev => ({
+            ...prev,
+            [quizIslamicCategory]: (prev[quizIslamicCategory] || []).filter(q => q.id !== qId)
+          }));
+        } else if (quizBranch === 'tajweed') {
+          setCustomTajweedQuizzes(prev => (prev || []).filter(q => q.id !== qId));
+        } else if (quizBranch === 'hifz') {
+          setCustomHifzQuizzes(prev => (prev || []).filter(q => q.id !== qId));
+        }
+        showToast(isRtl ? 'تم حذف السؤال من بنك الاختبار 🗑️' : 'Question deleted 🗑️');
+      };
+
+      const handleResetQuizQuestions = () => {
+        if (quizBranch === 'islamic') {
+          setCustomIslamicQuizzes(prev => ({
+            ...prev,
+            [quizIslamicCategory]: JSON.parse(JSON.stringify(ISLAMIC_BRANCH_QUIZZES[quizIslamicCategory] || ISLAMIC_BRANCH_QUIZZES.aqeedah))
+          }));
+        } else if (quizBranch === 'tajweed') {
+          const list = [];
+          SUWAYD_TAJWEED_CURRICULUM.forEach(l => {
+            l.quizQuestions.forEach((q, idx) => {
+              list.push({
+                id: l.id + '_q' + idx,
+                lessonTitle: l.titleAr,
+                questionAr: '[' + l.titleAr + '] ' + q.qAr,
+                questionEn: q.qAr,
+                options: q.opts.map(o => ({ id: o.id, textAr: o.text, textEn: o.text })),
+                correctOptionId: q.correct,
+                explanationAr: q.exp,
+                explanationEn: q.exp
+              });
+            });
+          });
+          setCustomTajweedQuizzes(list);
+        } else if (quizBranch === 'hifz') {
+          setCustomHifzQuizzes(JSON.parse(JSON.stringify(HIFZ_BRANCH_QUIZ)));
+        }
+        showToast(isRtl ? 'تمت استعادة الأسئلة النموذجية المعتمدة 🔄' : 'Restored canonical quiz questions 🔄');
+      };
+
+      const handleClearQuizQuestions = () => {
+        if (quizBranch === 'islamic') {
+          setCustomIslamicQuizzes(prev => ({ ...prev, [quizIslamicCategory]: [] }));
+        } else if (quizBranch === 'tajweed') {
+          setCustomTajweedQuizzes([]);
+        } else if (quizBranch === 'hifz') {
+          setCustomHifzQuizzes([]);
+        }
+        showToast(isRtl ? 'تم تفريغ أسئلة الاختبار للبدء على نظافة 🧹' : 'Quiz cleared 🧹');
+      };
+
       // Module B: Islamic Studies State
       const [subjectCategory, setSubjectCategory] = useState('العقيدة (Aqeedah)');
       const [lessonTopic, setLessonTopic] = useState('أركان الإيمان الستة والسكينة النفسية');
@@ -2934,33 +3409,17 @@
         };
       }
 
-      // Dynamic Multi-Branch Quiz Selection
+      // Dynamic Multi-Branch Quiz Selection (Teacher Customizable Question Bank)
       const activeQuizQuestions = useMemo(() => {
         if (quizBranch === 'islamic') {
-          return ISLAMIC_BRANCH_QUIZZES[quizIslamicCategory] || ISLAMIC_BRANCH_QUIZZES.aqeedah;
+          return customIslamicQuizzes[quizIslamicCategory] || customIslamicQuizzes.aqeedah || [];
         } else if (quizBranch === 'tajweed') {
-          // Grounded in Dr. Ayman Suwayd Illustrated Tajweed
-          const suwaydQuestions = [];
-          SUWAYD_TAJWEED_CURRICULUM.forEach(l => {
-            l.quizQuestions.forEach((q, idx) => {
-              suwaydQuestions.push({
-                id: l.id + '_q' + idx,
-                lessonTitle: l.titleAr,
-                questionAr: '[' + l.titleAr + '] ' + q.qAr,
-                questionEn: q.qAr,
-                options: q.opts.map(o => ({ id: o.id, textAr: o.text, textEn: o.text })),
-                correctOptionId: q.correct,
-                explanationAr: q.exp,
-                explanationEn: q.exp
-              });
-            });
-          });
-          return suwaydQuestions;
+          return customTajweedQuizzes || [];
         } else if (quizBranch === 'hifz') {
-          return HIFZ_BRANCH_QUIZ;
+          return customHifzQuizzes || [];
         }
         return [];
-      }, [quizBranch, quizIslamicCategory, tajweedData]);
+      }, [quizBranch, quizIslamicCategory, customIslamicQuizzes, customTajweedQuizzes, customHifzQuizzes]);
 
       // Dynamic Quiz Score Calculation
       const quizScore = useMemo(() => {
@@ -4820,14 +5279,11 @@
                           </button>
                           <button
                             type="button"
-                            onClick={() => {
-                              setWorksheetBranch('tajweed');
-                              setActiveTab('worksheets');
-                            }}
-                            className="bg-white hover:bg-slate-50 text-emerald-950 border border-slate-300 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition"
+                            onClick={handleTransferTajweedToWorksheet}
+                            className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-3.5 py-2 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition"
                           >
-                            <span>🖨️</span>
-                            <span>{isRtl ? 'ورقة العمل' : 'Worksheet'}</span>
+                            <span>📝</span>
+                            <span>{isRtl ? 'إرسال لورقة العمل' : 'Send to Worksheet'}</span>
                           </button>
                         </div>
                       </div>
@@ -5964,25 +6420,30 @@
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <button
                           type="button"
                           onClick={handleSaveIslamicLecture}
-                          className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 px-4 py-2 rounded-xl text-xs font-black shadow-sm border border-gold-400 flex items-center gap-1.5 transition"
+                          className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 px-3.5 py-2 rounded-xl text-xs font-black shadow-sm border border-gold-400 flex items-center gap-1.5 transition"
                         >
                           <span>💾</span>
-                          <span>{isRtl ? 'حفظ في مكتبة محاضراتي' : 'Save to My Library'}</span>
+                          <span>{isRtl ? 'حفظ بمكتبتي' : 'Save to Library'}</span>
                         </button>
                         <button
                           type="button"
-                          onClick={() => {
-                            setWorksheetBranch('islamic');
-                            setActiveTab('worksheet');
-                          }}
-                          className="bg-white hover:bg-slate-50 text-emerald-950 border border-slate-300 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition"
+                          onClick={handleTransferLectureToWorksheet}
+                          className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-3.5 py-2 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition"
                         >
-                          <span>🖨️</span>
-                          <span>{isRtl ? 'ورقة العمل' : 'Worksheet'}</span>
+                          <span>📝</span>
+                          <span>{isRtl ? 'إرسال لورقة العمل والطباعة' : 'Send to Worksheet'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleTransferLectureToQuiz}
+                          className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition"
+                        >
+                          <span>🎯</span>
+                          <span>{isRtl ? 'إرسال للاختبار التفاعلي' : 'Send to Quiz'}</span>
                         </button>
                       </div>
                     </div>
@@ -6142,7 +6603,7 @@
               </div>
             )}
 
-{/* ================= VIEW: PRINTABLE MULTI-BRANCH WORKSHEETS ================= */}
+{/* ================= VIEW: PRINTABLE MULTI-BRANCH WORKSHEETS & TEACHER BUILDER ================= */}
             {activeTab === 'worksheet' && (
               <div className="space-y-6 animate-fadeIn">
                 
@@ -6151,7 +6612,7 @@
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
                       <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                        {isRtl ? 'منظومة أوراق العمل والتقييم للطباعة (Printable PDF)' : 'Printable Worksheets & Evaluation System'}
+                        {isRtl ? 'منظومة أوراق العمل وأدوات المعلم للطباعة (Worksheets System)' : 'Printable Worksheets & Teacher Authoring'}
                       </span>
                       <h3 className="text-base sm:text-lg font-extrabold text-emerald-950 font-cairo">
                         {isRtl ? 'اختر مجال ورقة العمل المطلوبة:' : 'Select Worksheet Branch:'}
@@ -6197,14 +6658,43 @@
                       </button>
                     </div>
 
-                    {/* Print Button */}
-                    <button 
-                      onClick={() => window.print()}
-                      className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-extrabold px-5 py-2.5 rounded-xl text-xs shadow transition flex items-center gap-2 ml-auto"
-                    >
-                      <span>🖨️</span>
-                      <span>{isRtl ? 'طباعة / تصدير PDF' : 'Print / Export to PDF'}</span>
-                    </button>
+                    {/* Mode Toggle (Preview / Print vs Builder) & Print Button */}
+                    <div className="flex items-center gap-2 ml-auto">
+                      <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200">
+                        <button
+                          type="button"
+                          onClick={() => setWorksheetMode('preview')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                            worksheetMode === 'preview'
+                              ? 'bg-emerald-800 text-gold-200 shadow-sm'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          📄 {isRtl ? 'معاينة وطباعة PDF' : 'Preview & Print'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setWorksheetMode('builder')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                            worksheetMode === 'builder'
+                              ? 'bg-gold-500 text-emerald-950 shadow-sm font-black'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          ✍️ {isRtl ? 'محرر وتخصيص البنود' : 'Worksheet Builder'}
+                        </button>
+                      </div>
+
+                      {worksheetMode === 'preview' && (
+                        <button 
+                          onClick={() => window.print()}
+                          className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-extrabold px-4 py-2 rounded-xl text-xs shadow transition flex items-center gap-2"
+                        >
+                          <span>🖨️</span>
+                          <span>{isRtl ? 'طباعة / تصدير PDF' : 'Print / Export to PDF'}</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Sub-Category Filter for Islamic Studies */}
@@ -6234,281 +6724,824 @@
                   )}
                 </div>
 
-                {/* --- BRANCH 3: ISLAMIC STUDIES WORKSHEET DUAL FORMAT --- */}
-                {worksheetBranch === 'islamic' && (() => {
-                  const ws = ISLAMIC_BRANCH_WORKSHEETS[worksheetIslamicCategory] || ISLAMIC_BRANCH_WORKSHEETS.aqeedah;
-                  return (
-                    <div className="space-y-8">
-                      {/* Printable Sheet 1: Student Version */}
-                      <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0">
-                        <div className="text-center border-b-2 border-emerald-900 pb-4 mb-6">
+                {/* ================= MODE: TEACHER WORKSHEET BUILDER / EDITOR ================= */}
+                {worksheetMode === 'builder' && (
+                  <div className="space-y-6">
+
+                    {/* Islamic Studies Builder */}
+                    {worksheetBranch === 'islamic' && (() => {
+                      const current = customIslamicWorksheets[worksheetIslamicCategory] || ISLAMIC_BRANCH_WORKSHEETS[worksheetIslamicCategory] || ISLAMIC_BRANCH_WORKSHEETS.aqeedah;
+                      return (
+                        <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md space-y-6">
+                          
+                          {/* Banner & Guidance */}
+                          <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-200 flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                              <h4 className="font-bold text-emerald-950 text-sm font-cairo">
+                                🛠️ {isRtl ? 'أداة المعلم: تخصيص وبناء ورقة عمل العلوم الشرعية' : 'Teacher Workbench: Build Islamic Studies Worksheet'}
+                              </h4>
+                              <p className="text-xs text-slate-600 mt-1">
+                                {isRtl 
+                                  ? 'يمكنك إضافة مسائلك وأسئلتك الخاصة، تحديد نموذج الإجابة، أو استيراد محاور ورقة العمل بضغطة زر من محاضرتك النشطة.'
+                                  : 'Add custom topics, questions, teacher answer keys, or import directly from your active lecture.'}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2">
+                              {islamicData && (
+                                <button
+                                  type="button"
+                                  onClick={handleTransferLectureToWorksheet}
+                                  className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-3.5 py-1.5 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition"
+                                >
+                                  <span>⚡</span>
+                                  <span>{isRtl ? 'استيراد من محاضرتي النشطة' : 'Import from Active Lecture'}</span>
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingWorksheetItemIdx(null);
+                                  setWorksheetItemForm({ topic: '', scripture: '', studentQuestion: '', teacherAnswer: '', practicalImpact: '', maxScore: 5 });
+                                  setIsAddingWorksheetItem(true);
+                                }}
+                                className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition"
+                              >
+                                <span>➕</span>
+                                <span>{isRtl ? 'إضافة مسألة / سؤال جديد' : 'Add New Question'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleClearIslamicWorksheet}
+                                className="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded-xl text-xs font-bold transition"
+                              >
+                                🧹 {isRtl ? 'تفريغ الورقة' : 'Clear Sheet'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleResetIslamicWorksheet}
+                                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold transition"
+                              >
+                                🔄 {isRtl ? 'استعادة النموذج المعتمد' : 'Restore Canonical'}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Editable Header Details */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-2xl border border-slate-200">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">
+                                {isRtl ? 'عنوان ورقة العمل الرئيسية:' : 'Worksheet Main Title:'}
+                              </label>
+                              <input
+                                type="text"
+                                value={current.titleAr || ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setCustomIslamicWorksheets(prev => ({
+                                    ...prev,
+                                    [worksheetIslamicCategory]: { ...(prev[worksheetIslamicCategory] || current), titleAr: val }
+                                  }));
+                                }}
+                                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 mb-1">
+                                {isRtl ? 'الفئة المستهدفة / المستوى:' : 'Target Audience:'}
+                              </label>
+                              <input
+                                type="text"
+                                value={current.targetAudience || ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setCustomIslamicWorksheets(prev => ({
+                                    ...prev,
+                                    [worksheetIslamicCategory]: { ...(prev[worksheetIslamicCategory] || current), targetAudience: val }
+                                  }));
+                                }}
+                                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Add / Edit Form Modal / Inline Box */}
+                          {isAddingWorksheetItem && (
+                            <form onSubmit={handleSaveWorksheetItem} className="card-islamic-amber rounded-2xl p-5 border-2 border-gold-400 shadow-md space-y-4">
+                              <div className="flex items-center justify-between border-b border-gold-400/40 pb-2">
+                                <h4 className="font-black text-emerald-950 text-sm font-cairo">
+                                  {editingWorksheetItemIdx !== null ? (isRtl ? '✏️ تعديل المسألة الشرعية' : 'Edit Question Item') : (isRtl ? '➕ إضافة مسألة وسؤال جديد لورقة العمل' : 'Add New Question Item')}
+                                </h4>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setIsAddingWorksheetItem(false);
+                                    setEditingWorksheetItemIdx(null);
+                                  }}
+                                  className="text-slate-500 hover:text-slate-700 font-bold text-xs"
+                                >
+                                  ✕ {isRtl ? 'إلغاء' : 'Cancel'}
+                                </button>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-xs font-bold text-emerald-950 mb-1">
+                                    {isRtl ? 'المسألة الشرعية / عنوان المحور:' : 'Topic / Core Subject:'}
+                                  </label>
+                                  <input
+                                    type="text"
+                                    required
+                                    placeholder={isRtl ? 'مثال: الإيمان بالقضاء والقدر وعلاج الجزع' : 'e.g. Belief in Divine Decree'}
+                                    value={worksheetItemForm.topic}
+                                    onChange={(e) => setWorksheetItemForm({ ...worksheetItemForm, topic: e.target.value })}
+                                    className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-bold text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-bold text-emerald-950 mb-1">
+                                    {isRtl ? 'الشاهد والدليل والتخريج:' : 'Scriptural Evidence / Citation:'}
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder={isRtl ? 'مثال: حديث مسلم #2664 أو آية القمر 49' : 'e.g. Sahih Muslim #2664'}
+                                    value={worksheetItemForm.scripture}
+                                    onChange={(e) => setWorksheetItemForm({ ...worksheetItemForm, scripture: e.target.value })}
+                                    className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="block text-xs font-bold text-emerald-950 mb-1">
+                                  {isRtl ? 'سؤال الطالب والتطبيق المطلوب منه الإجابة عليه في الورقة:' : 'Student Question & Prompt for the Worksheet:'}
+                                </label>
+                                <textarea
+                                  rows={2}
+                                  required
+                                  placeholder={isRtl ? 'اكتب صيغة السؤال الموجه للدارس...' : 'Enter prompt for the student to answer...'}
+                                  value={worksheetItemForm.studentQuestion}
+                                  onChange={(e) => setWorksheetItemForm({ ...worksheetItemForm, studentQuestion: e.target.value })}
+                                  className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-amiri text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700 leading-relaxed"
+                                />
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-xs font-bold text-emerald-950 mb-1">
+                                    {isRtl ? 'نموذج إجابة المعلم المعتمد والتأصيل (يظهر في نسخة المعلم فقط):' : 'Teacher Answer Key (Teacher Copy Only):'}
+                                  </label>
+                                  <textarea
+                                    rows={2}
+                                    placeholder={isRtl ? 'اكتب التأصيل والجواب النموذجي للتصحيح...' : 'Enter official answer for grading...'}
+                                    value={worksheetItemForm.teacherAnswer}
+                                    onChange={(e) => setWorksheetItemForm({ ...worksheetItemForm, teacherAnswer: e.target.value })}
+                                    className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-amiri text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700 leading-relaxed"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-bold text-emerald-950 mb-1">
+                                    {isRtl ? 'الأثر السلوكي والتربوي المستهدف:' : 'Target Behavioral & Spiritual Impact:'}
+                                  </label>
+                                  <textarea
+                                    rows={2}
+                                    placeholder={isRtl ? 'مثال: السكينة النفسية والتسليم لحكمة الله...' : 'e.g. Psychological peace...'}
+                                    value={worksheetItemForm.practicalImpact}
+                                    onChange={(e) => setWorksheetItemForm({ ...worksheetItemForm, practicalImpact: e.target.value })}
+                                    className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-amiri text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700 leading-relaxed"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex justify-end gap-2 pt-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setIsAddingWorksheetItem(false);
+                                    setEditingWorksheetItemIdx(null);
+                                  }}
+                                  className="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold border border-slate-300"
+                                >
+                                  {isRtl ? 'إلغاء' : 'Cancel'}
+                                </button>
+                                <button
+                                  type="submit"
+                                  className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 px-5 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5"
+                                >
+                                  <span>💾</span>
+                                  <span>{isRtl ? 'حفظ البند في ورقة العمل' : 'Save Item to Worksheet'}</span>
+                                </button>
+                              </div>
+                            </form>
+                          )}
+
+                          {/* Current Items Table / Management List */}
+                          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+                            <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                              <span className="text-xs font-bold text-emerald-950 font-cairo">
+                                📋 {isRtl ? `بنود ورقة العمل الحالية (${(current.items || []).length} مسائل):` : `Current Items (${(current.items || []).length}):`}
+                              </span>
+                              <span className="text-[11px] text-slate-500">
+                                {isRtl ? 'يمكنك التعديل أو الحذف، ثم الضغط على "معاينة وطباعة" بالترويسة' : 'Edit or delete items, then click Preview & Print'}
+                              </span>
+                            </div>
+
+                            <div className="divide-y divide-slate-100">
+                              {(current.items || []).length === 0 ? (
+                                <div className="p-8 text-center text-slate-400 text-xs">
+                                  {isRtl ? 'ورقة العمل فارغة حالياً. اضغط "إضافة مسألة جديدة" أو "استيراد من المحاضرة النشطة" للبدء.' : 'No items yet. Click Add Question or Import to begin.'}
+                                </div>
+                              ) : (
+                                (current.items || []).map((it, idx) => (
+                                  <div key={idx} className="p-4 hover:bg-slate-50 transition flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                                    <div className="flex items-start gap-3">
+                                      <span className="w-7 h-7 rounded-full bg-emerald-800 text-gold-200 font-bold text-xs flex items-center justify-center shrink-0">
+                                        {it.num || idx + 1}
+                                      </span>
+                                      <div>
+                                        <div className="flex items-center gap-2">
+                                          <h5 className="font-bold text-emerald-950 text-sm font-cairo">{it.topic}</h5>
+                                          {it.scripture && (
+                                            <span className="text-[10px] bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
+                                              {it.scripture}
+                                            </span>
+                                          )}
+                                        </div>
+                                        <p className="text-xs text-slate-700 font-amiri mt-1 leading-snug">
+                                          <strong>السؤال:</strong> {it.studentQuestion}
+                                        </p>
+                                        {it.teacherAnswer && (
+                                          <p className="text-[11px] text-slate-500 font-amiri mt-0.5 line-clamp-1">
+                                            <strong>نموذج الإجابة:</strong> {it.teacherAnswer}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.5 shrink-0 self-end md:self-center">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setWorksheetItemForm({
+                                            topic: it.topic || '',
+                                            scripture: it.scripture || '',
+                                            studentQuestion: it.studentQuestion || '',
+                                            teacherAnswer: it.teacherAnswer || '',
+                                            practicalImpact: it.practicalImpact || '',
+                                            maxScore: it.maxScore || 5
+                                          });
+                                          setEditingWorksheetItemIdx(idx);
+                                          setIsAddingWorksheetItem(true);
+                                        }}
+                                        className="bg-slate-100 hover:bg-gold-100 text-slate-700 hover:text-emerald-950 p-2 rounded-lg text-xs font-bold transition"
+                                        title={isRtl ? 'تعديل البند' : 'Edit'}
+                                      >
+                                        ✏️ {isRtl ? 'تعديل' : 'Edit'}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteWorksheetItem(idx)}
+                                        className="bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-700 p-2 rounded-lg text-xs font-bold transition"
+                                        title={isRtl ? 'حذف البند' : 'Delete'}
+                                      >
+                                        🗑️
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </div>
+
+                        </div>
+                      );
+                    })()}
+
+                    {/* Tajweed Worksheet Builder */}
+                    {worksheetBranch === 'tajweed' && (
+                      <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md space-y-6">
+                        
+                        {/* Banner & Guidance */}
+                        <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-200 flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <h4 className="font-bold text-emerald-950 text-sm font-cairo">
+                              🛠️ {isRtl ? 'أداة المعلم: تخصيص ورقة عمل أحكام التجويد' : 'Teacher Workbench: Build Tajweed Worksheet'}
+                            </h4>
+                            <p className="text-xs text-slate-600 mt-1">
+                              {isRtl 
+                                ? 'أدخل الكلمات القرآنية بالرسم العثماني، حدد الحكم التجويدي المطبق والعلة الصوتية، أو استورد الكلمات من درس التجويد النشط.'
+                                : 'Add Quranic words, specify rules and phonetic reasons, or import directly from current Tajweed lesson.'}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            {tajweedData && (
+                              <button
+                                type="button"
+                                onClick={handleTransferTajweedToWorksheet}
+                                className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-3.5 py-1.5 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition"
+                              >
+                                <span>⚡</span>
+                                <span>{isRtl ? 'استيراد الكلمات من درس التجويد' : 'Import from Tajweed Lesson'}</span>
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingTajweedItemIdx(null);
+                                setTajweedItemForm({ wordUthmani: '', ruleApplied: '', reasonAr: '', maxScore: 5 });
+                                setIsAddingTajweedItem(true);
+                              }}
+                              className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition"
+                            >
+                              <span>➕</span>
+                              <span>{isRtl ? 'إضافة كلمة وحكم جديد' : 'Add Quranic Word'}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleClearTajweedWorksheet}
+                              className="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded-xl text-xs font-bold transition"
+                            >
+                              🧹 {isRtl ? 'تفريغ الورقة' : 'Clear Sheet'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleResetTajweedWorksheet}
+                              className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold transition"
+                            >
+                              🔄 {isRtl ? 'استعادة النموذج المعتمد' : 'Restore Canonical'}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Editable Tajweed Header */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-2xl border border-slate-200">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              {isRtl ? 'عنوان ورقة التجويد:' : 'Tajweed Worksheet Title:'}
+                            </label>
+                            <input
+                              type="text"
+                              value={customTajweedWorksheet.titleAr || ''}
+                              onChange={(e) => setCustomTajweedWorksheet({ ...customTajweedWorksheet, titleAr: e.target.value })}
+                              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              {isRtl ? 'السورة والآيات المقررة:' : 'Surah / Passage:'}
+                            </label>
+                            <input
+                              type="text"
+                              value={customTajweedWorksheet.surah || ''}
+                              onChange={(e) => setCustomTajweedWorksheet({ ...customTajweedWorksheet, surah: e.target.value })}
+                              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Add/Edit Tajweed Word Form */}
+                        {isAddingTajweedItem && (
+                          <form onSubmit={handleSaveTajweedItem} className="card-islamic-amber rounded-2xl p-5 border-2 border-gold-400 shadow-md space-y-4">
+                            <div className="flex items-center justify-between border-b border-gold-400/40 pb-2">
+                              <h4 className="font-black text-emerald-950 text-sm font-cairo">
+                                {editingTajweedItemIdx !== null ? (isRtl ? '✏️ تعديل الكلمة والحكم التجويدي' : 'Edit Tajweed Word') : (isRtl ? '➕ إضافة كلمة وحكم تجويدي جديد' : 'Add New Tajweed Word')}
+                              </h4>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsAddingTajweedItem(false);
+                                  setEditingTajweedItemIdx(null);
+                                }}
+                                className="text-slate-500 hover:text-slate-700 font-bold text-xs"
+                              >
+                                ✕ {isRtl ? 'إلغاء' : 'Cancel'}
+                              </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-xs font-bold text-emerald-950 mb-1">
+                                  {isRtl ? 'الكلمة أو التركيب بالرسم العثماني المطهّر:' : 'Quranic Word (Uthmani Script):'}
+                                </label>
+                                <input
+                                  type="text"
+                                  required
+                                  placeholder={isRtl ? 'مثال: مِن بَعْدِ أو شَىْءٍ قَدِيرٌ' : 'e.g. مِن بَعْدِ'}
+                                  value={tajweedItemForm.wordUthmani}
+                                  onChange={(e) => setTajweedItemForm({ ...tajweedItemForm, wordUthmani: e.target.value })}
+                                  className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-base font-quran text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-bold text-emerald-950 mb-1">
+                                  {isRtl ? 'الحكم التجويدي المطبق:' : 'Applied Tajweed Rule:'}
+                                </label>
+                                <input
+                                  type="text"
+                                  required
+                                  placeholder={isRtl ? 'مثال: إقلاب / إخفاء حقيقي بغنة مفخمة' : 'e.g. Iqlab'}
+                                  value={tajweedItemForm.ruleApplied}
+                                  onChange={(e) => setTajweedItemForm({ ...tajweedItemForm, ruleApplied: e.target.value })}
+                                  className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-bold text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-emerald-950 mb-1">
+                                {isRtl ? 'التوجيه والعلة الصوتية والمخرج (نموذج الإجابة للتصحيح):' : 'Phonetic Reason / Makhraj (Teacher Answer Key):'}
+                              </label>
+                              <textarea
+                                rows={2}
+                                placeholder={isRtl ? 'مثال: لوقوع حرف الباء بعد النون الساكنة فتقلب ميماً مخفاة بغنة...' : 'Explain articulation point and rule...'}
+                                value={tajweedItemForm.reasonAr}
+                                onChange={(e) => setTajweedItemForm({ ...tajweedItemForm, reasonAr: e.target.value })}
+                                className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-amiri text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700 leading-relaxed"
+                              />
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsAddingTajweedItem(false);
+                                  setEditingTajweedItemIdx(null);
+                                }}
+                                className="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold border border-slate-300"
+                              >
+                                {isRtl ? 'إلغاء' : 'Cancel'}
+                              </button>
+                              <button
+                                type="submit"
+                                className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 px-5 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5"
+                              >
+                                <span>💾</span>
+                                <span>{isRtl ? 'حفظ الكلمة في الورقة' : 'Save Tajweed Word'}</span>
+                              </button>
+                            </div>
+                          </form>
+                        )}
+
+                        {/* Words Management List */}
+                        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+                          <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                            <span className="text-xs font-bold text-emerald-950 font-cairo">
+                              📋 {isRtl ? `الكلمات القرآنية المجدولة (${(customTajweedWorksheet.items || []).length} كلمات):` : `Scheduled Words (${(customTajweedWorksheet.items || []).length}):`}
+                            </span>
+                            <span className="text-[11px] text-slate-500">
+                              {isRtl ? 'تظهر الكلمات في جدول ورقة العمل للدارس ليكتب الحكم والعلة' : 'Words appear in student table to fill rules'}
+                            </span>
+                          </div>
+
+                          <div className="divide-y divide-slate-100">
+                            {(customTajweedWorksheet.items || []).length === 0 ? (
+                              <div className="p-8 text-center text-slate-400 text-xs">
+                                {isRtl ? 'لا توجد كلمات حالياً. اضغط "إضافة كلمة وحكم جديد" للبدء.' : 'No words scheduled yet.'}
+                              </div>
+                            ) : (
+                              (customTajweedWorksheet.items || []).map((it, idx) => (
+                                <div key={idx} className="p-4 hover:bg-slate-50 transition flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-3">
+                                    <span className="w-7 h-7 rounded-full bg-emerald-800 text-gold-200 font-bold text-xs flex items-center justify-center shrink-0">
+                                      {it.itemNumber || idx + 1}
+                                    </span>
+                                    <div>
+                                      <div className="flex items-center gap-3">
+                                        <span className="font-quran text-xl text-emerald-950 font-bold">{it.wordUthmani}</span>
+                                        <span className="text-xs bg-emerald-100 text-emerald-900 px-2.5 py-0.5 rounded-full font-bold">
+                                          {it.ruleApplied}
+                                        </span>
+                                      </div>
+                                      <p className="text-xs text-slate-600 font-amiri mt-1">
+                                        {it.reasonAr}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setTajweedItemForm({
+                                          wordUthmani: it.wordUthmani || '',
+                                          ruleApplied: it.ruleApplied || '',
+                                          reasonAr: it.reasonAr || '',
+                                          maxScore: it.maxScore || 5
+                                        });
+                                        setEditingTajweedItemIdx(idx);
+                                        setIsAddingTajweedItem(true);
+                                      }}
+                                      className="bg-slate-100 hover:bg-gold-100 text-slate-700 hover:text-emerald-950 p-2 rounded-lg text-xs font-bold transition"
+                                      title={isRtl ? 'تعديل' : 'Edit'}
+                                    >
+                                      ✏️ {isRtl ? 'تعديل' : 'Edit'}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteTajweedItem(idx)}
+                                      className="bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-700 p-2 rounded-lg text-xs font-bold transition"
+                                      title={isRtl ? 'حذف' : 'Delete'}
+                                    >
+                                      🗑️
+                                    </button>
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+
+                      </div>
+                    )}
+
+                  </div>
+                )}
+
+                {/* ================= MODE: PRINTABLE WORKSHEET PREVIEW (DUAL SHEETS) ================= */}
+                {worksheetMode === 'preview' && (
+                  <div className="space-y-8">
+                    
+                    {/* --- BRANCH 3: ISLAMIC STUDIES WORKSHEET DUAL FORMAT --- */}
+                    {worksheetBranch === 'islamic' && (() => {
+                      const ws = customIslamicWorksheets[worksheetIslamicCategory] || ISLAMIC_BRANCH_WORKSHEETS[worksheetIslamicCategory] || ISLAMIC_BRANCH_WORKSHEETS.aqeedah;
+                      return (
+                        <div className="space-y-8">
+                          {/* Printable Sheet 1: Student Version */}
+                          <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                            <div className="text-center border-b-2 border-emerald-900 pb-4 mb-6">
+                              <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
+                                {isRtl ? 'مِشكاة — نظام التشغيل الشامل للداعية والمعلم الشرعي | AnubisLand' : 'Mishkah Platform — AnubisLand'}
+                              </div>
+                              <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
+                                {isRtl ? ws.titleAr : ws.titleEn}
+                              </h2>
+                              <div className="inline-block bg-emerald-50 text-emerald-900 text-xs px-3 py-1 rounded-full font-bold border border-emerald-200 mt-1">
+                                {isRtl ? 'نسخة الطالب للمدارسة والتطبيق' : 'Student Study & Application Copy'}
+                              </div>
+                              <div className="flex flex-wrap justify-between items-center text-xs text-slate-600 mt-4 px-2">
+                                <span>{isRtl ? 'اسم الطالب / الدارس:' : 'Student Name:'} ____________________</span>
+                                <span>{isRtl ? 'المجال الشرعي:' : 'Discipline:'} {isRtl ? (ws.categoryAr || 'العلوم الشرعية') : (ws.categoryEn || 'Islamic Studies')}</span>
+                                <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
+                              </div>
+                            </div>
+
+                            {/* Core Scriptural Reference Box */}
+                            {(ws.quranRef || ws.hadithRef) && (
+                              <div className="bg-emerald-50/70 rounded-2xl p-4 border border-emerald-200 mb-6 text-xs">
+                                <div className="font-bold text-emerald-900 mb-1">{isRtl ? '📖 الشاهد المعتمد من الكتاب والسنة:' : 'Core Scriptural Evidence:'}</div>
+                                {ws.quranRef && <div className="font-quran text-base text-emerald-950 leading-relaxed mb-1">{ws.quranRef}</div>}
+                                {ws.hadithRef && <div className="font-amiri text-xs text-slate-700">{ws.hadithRef}</div>}
+                              </div>
+                            )}
+
+                            {/* Student Questions Table */}
+                            <div className="overflow-x-auto mb-6">
+                              <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                                <thead className="bg-emerald-800 text-white text-xs">
+                                  <tr>
+                                    <th className="p-3 w-10 text-center">#</th>
+                                    <th className="p-3 w-44">{isRtl ? 'المسألة الشرعية' : 'Topic'}</th>
+                                    <th className="p-3 w-48">{isRtl ? 'الدليل والتخريج' : 'Scripture / Source'}</th>
+                                    <th className="p-3">{isRtl ? 'إجابة الطالب والتأصيل المستفاد' : 'Student Answer & Deductions'}</th>
+                                    <th className="p-3 w-20 text-center">{isRtl ? 'الدرجة' : 'Grade'}</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-200 text-xs">
+                                  {(ws.items || []).map((it, idx) => (
+                                    <tr key={idx} className="hover:bg-slate-50">
+                                      <td className="p-3 text-center font-bold text-slate-500">{it.num || idx + 1}</td>
+                                      <td className="p-3 font-bold text-emerald-950 font-cairo">{it.topic}</td>
+                                      <td className="p-3 text-slate-600 font-amiri text-xs leading-relaxed">{it.scripture || '—'}</td>
+                                      <td className="p-3 space-y-2">
+                                        <div className="font-bold text-slate-800 font-amiri text-xs">{it.studentQuestion}</div>
+                                        <div className="text-slate-400 italic pt-1 border-b border-dashed border-slate-200">الإجابة: ____________________________________________________________________</div>
+                                        <div className="text-slate-400 italic border-b border-dashed border-slate-200">التطبيق العملي: ___________________________________________________________</div>
+                                      </td>
+                                      <td className="p-3 text-center text-slate-400">/ {it.maxScore || 5}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Student Version Footer */}
+                            <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
+                              <span>{isRtl ? 'تقييم وتوقيع المعلم:' : 'Teacher Signature & Grade:'} _______________</span>
+                              <span>Mishkah Operating System — AnubisLand</span>
+                            </div>
+                          </div>
+
+                          {/* Print Page Break */}
+                          <div className="page-break my-8 no-print border-t-2 border-dashed border-slate-300 text-center py-2 text-xs text-slate-400 font-bold">
+                            ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلم المعتمد' : 'Page Break — Teacher Answer Key Follows'}
+                          </div>
+
+                          {/* Printable Sheet 2: Teacher Answer Key */}
+                          <div className="bg-white rounded-3xl p-8 border-2 border-gold-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                            <div className="text-center border-b-2 border-gold-600 pb-4 mb-6">
+                              <span className="bg-gold-100 text-gold-900 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
+                                {isRtl ? 'خاص بالمعلم والشيخ — نموذج الإجابة المعتمد والتوجيهات التربوية' : 'Confidential Teacher Answer Key & Guidance'}
+                              </span>
+                              <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-2">
+                                {isRtl ? ws.titleAr : ws.titleEn}
+                              </h2>
+                              <div className="text-xs text-slate-500 mt-1">
+                                {isRtl ? 'دليل التصحيح النموذجي والتأصيل الشرعي المحكم' : 'Official Answer Key with Authentic Citations'}
+                              </div>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                                <thead className="bg-emerald-950 text-gold-300 text-xs">
+                                  <tr>
+                                    <th className="p-3 w-10 text-center">#</th>
+                                    <th className="p-3 w-40">{isRtl ? 'المسألة الشرعية' : 'Topic'}</th>
+                                    <th className="p-3">{isRtl ? 'نموذج الإجابة والتأصيل الشرعي المعتمد' : 'Official Teacher Answer Key'}</th>
+                                    <th className="p-3 w-64">{isRtl ? 'الأثر السلوكي والتربوي المستهدف' : 'Behavioral & Spiritual Impact'}</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-200 text-xs">
+                                  {(ws.items || []).map((it, idx) => (
+                                    <tr key={idx} className="hover:bg-gold-50/40">
+                                      <td className="p-3 text-center font-bold text-slate-500">{it.num || idx + 1}</td>
+                                      <td className="p-3 font-bold text-emerald-950 font-cairo">{it.topic}</td>
+                                      <td className="p-3 font-amiri text-xs text-slate-800 leading-relaxed">
+                                        <div className="font-bold text-emerald-900 mb-1">السؤال: {it.studentQuestion}</div>
+                                        <div className="text-emerald-950 font-medium bg-emerald-50/50 p-2.5 rounded-lg border border-emerald-100">{it.teacherAnswer || '—'}</div>
+                                      </td>
+                                      <td className="p-3 text-slate-700 text-xs font-amiri leading-relaxed bg-amber-50/30">
+                                        {it.practicalImpact || '—'}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* --- BRANCH 2: TAJWEED WORKSHEET --- */}
+                    {worksheetBranch === 'tajweed' && (
+                      <div className="space-y-8">
+                        {/* Printable Document Sheet 1: Student Version */}
+                        <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                          <div className="text-center border-b-2 border-emerald-900 pb-4 mb-6">
+                            <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
+                              {isRtl ? 'منصة مِشكاة لتعليم القرآن الكريم والتجويد — AnubisLand' : 'Mishkah Platform — AnubisLand'}
+                            </div>
+                            <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
+                              {isRtl ? customTajweedWorksheet.titleAr : customTajweedWorksheet.titleEn}
+                            </h2>
+                            <div className="flex justify-between items-center text-xs text-slate-600 mt-4 px-2">
+                              <span>{isRtl ? 'اسم الطالب / الدارس:' : 'Student Name:'} ____________________</span>
+                              <span>{isRtl ? 'السورة والآيات:' : 'Surah:'} {customTajweedWorksheet.surah}</span>
+                              <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
+                            </div>
+                          </div>
+
+                          <div className="overflow-x-auto mb-8">
+                            <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                              <thead className="bg-emerald-800 text-white text-xs">
+                                <tr>
+                                  <th className="p-3 w-12 text-center">#</th>
+                                  <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية (رسم عثماني)' : 'Quranic Word'}</th>
+                                  <th className="p-3">{isRtl ? 'الحكم التجويدي المطبق' : 'Tajweed Rule'}</th>
+                                  <th className="p-3">{isRtl ? 'العلة وسبب الحكم' : 'Reason / Articulation Rule'}</th>
+                                  <th className="p-3 w-28 text-center">{isRtl ? 'الدرجة' : 'Grade'}</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-200 text-sm">
+                                {(customTajweedWorksheet.items || []).map((row, i) => (
+                                  <tr key={i} className="hover:bg-slate-50">
+                                    <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
+                                    <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
+                                    <td className="p-3 text-slate-400 italic">____________________</td>
+                                    <td className="p-3 text-slate-400 italic">________________________________________</td>
+                                    <td className="p-3 text-center text-slate-400">/ {row.maxScore || 5}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
+                            <span>{isRtl ? 'ملاحظات المعلم / التقييم:' : 'Teacher Signature & Final Grade:'} _______________</span>
+                            <span>Mishkah PWA — AnubisLand</span>
+                          </div>
+                        </div>
+
+                        {/* Page Break for Print */}
+                        <div className="page-break my-8 no-print border-t-2 border-dashed border-slate-300 text-center py-2 text-xs text-slate-400 font-bold">
+                          ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلم' : 'Page Break — Teacher Answer Key Follows'}
+                        </div>
+
+                        {/* Printable Document Sheet 2: Teacher Answer Key */}
+                        <div className="bg-white rounded-3xl p-8 border-2 border-gold-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                          <div className="text-center border-b-2 border-gold-600 pb-4 mb-6">
+                            <span className="bg-gold-100 text-gold-900 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
+                              {isRtl ? 'خاص بالمعلم فقط — نموذج الإجابة المعتمد' : 'Teacher Answer Key (Confidential)'}
+                            </span>
+                            <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-2">
+                              {isRtl ? 'دليل تصحيح ورقة العمل والعلل الصوتية' : 'Teacher Correction Guide & Phonetic Explanations'}
+                            </h2>
+                          </div>
+
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                              <thead className="bg-emerald-950 text-gold-300 text-xs">
+                                <tr>
+                                  <th className="p-3 w-12 text-center">#</th>
+                                  <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية' : 'Quranic Word'}</th>
+                                  <th className="p-3">{isRtl ? 'الحكم الصحيح' : 'Correct Rule'}</th>
+                                  <th className="p-3">{isRtl ? 'التوجيه والعلة الصوتية' : 'Phonetic Explanation'}</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-200 text-sm">
+                                {(customTajweedWorksheet.items || []).map((row, i) => (
+                                  <tr key={i} className="hover:bg-gold-50/40">
+                                    <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
+                                    <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
+                                    <td className="p-3 font-bold text-emerald-800">{row.ruleApplied}</td>
+                                    <td className="p-3 text-slate-700 text-xs leading-relaxed font-amiri">
+                                      {row.reasonAr}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* --- BRANCH 1: HIFZ EVALUATION SHEET --- */}
+                    {worksheetBranch === 'hifz' && (
+                      <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0 space-y-6">
+                        <div className="text-center border-b-2 border-emerald-900 pb-4 mb-4">
                           <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
-                            {isRtl ? 'مِشكاة — نظام التشغيل الشامل للداعية والمعلم الشرعي | AnubisLand' : 'Mishkah Platform — AnubisLand'}
+                            {isRtl ? 'مِشكاة — سجل المتابعة القرآني المتكامل | AnubisLand' : 'Mishkah Platform — AnubisLand'}
                           </div>
                           <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
-                            {isRtl ? ws.titleAr : ws.titleEn}
+                            {isRtl ? HIFZ_BRANCH_WORKSHEET.titleAr : HIFZ_BRANCH_WORKSHEET.titleEn}
                           </h2>
-                          <div className="inline-block bg-emerald-50 text-emerald-900 text-xs px-3 py-1 rounded-full font-bold border border-emerald-200 mt-1">
-                            {isRtl ? 'نسخة الطالب للمدارسة والتطبيق' : 'Student Study & Application Copy'}
-                          </div>
                           <div className="flex flex-wrap justify-between items-center text-xs text-slate-600 mt-4 px-2">
-                            <span>{isRtl ? 'اسم الطالب / الدارس:' : 'Student Name:'} ____________________</span>
-                            <span>{isRtl ? 'المجال الشرعي:' : 'Discipline:'} {isRtl ? ws.categoryAr : ws.categoryEn}</span>
+                            <span>{isRtl ? 'اسم الطالب:' : 'Student Name:'} ____________________</span>
+                            <span>{isRtl ? 'السورة والآيات المقررة:' : 'Surah / Passage:'} {hifzSurahName} ({hifzAyahRange})</span>
                             <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
-                          </div>
-                        </div>
-
-                        {/* Core Scriptural Reference Box */}
-                        <div className="bg-emerald-50/70 rounded-2xl p-4 border border-emerald-200 mb-6 text-xs">
-                          <div className="font-bold text-emerald-900 mb-1">{isRtl ? '📖 الشاهد المعتمد من الكتاب والسنة:' : 'Core Scriptural Evidence:'}</div>
-                          <div className="font-quran text-base text-emerald-950 leading-relaxed mb-1">{ws.quranRef}</div>
-                          <div className="font-amiri text-xs text-slate-700">{ws.hadithRef}</div>
-                        </div>
-
-                        {/* Student Questions Table */}
-                        <div className="overflow-x-auto mb-6">
-                          <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
-                            <thead className="bg-emerald-800 text-white text-xs">
-                              <tr>
-                                <th className="p-3 w-10 text-center">#</th>
-                                <th className="p-3 w-44">{isRtl ? 'المسألة الشرعية' : 'Topic'}</th>
-                                <th className="p-3 w-48">{isRtl ? 'الدليل والتخريج' : 'Scripture / Source'}</th>
-                                <th className="p-3">{isRtl ? 'إجابة الطالب والتأصيل المستفاد' : 'Student Answer & Deductions'}</th>
-                                <th className="p-3 w-20 text-center">{isRtl ? 'الدرجة' : 'Grade'}</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-200 text-xs">
-                              {ws.items.map((it, idx) => (
-                                <tr key={idx} className="hover:bg-slate-50">
-                                  <td className="p-3 text-center font-bold text-slate-500">{it.num}</td>
-                                  <td className="p-3 font-bold text-emerald-950 font-cairo">{it.topic}</td>
-                                  <td className="p-3 text-slate-600 font-amiri text-xs leading-relaxed">{it.scripture}</td>
-                                  <td className="p-3 space-y-2">
-                                    <div className="font-bold text-slate-800 font-amiri text-xs">{it.studentQuestion}</div>
-                                    <div className="text-slate-400 italic pt-1 border-b border-dashed border-slate-200">الإجابة: ____________________________________________________________________</div>
-                                    <div className="text-slate-400 italic border-b border-dashed border-slate-200">التطبيق العملي: ___________________________________________________________</div>
-                                  </td>
-                                  <td className="p-3 text-center text-slate-400">/ 5</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        {/* Student Version Footer */}
-                        <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
-                          <span>{isRtl ? 'تقييم وتوقيع المعلم:' : 'Teacher Signature & Grade:'} _______________</span>
-                          <span>Mishkah Operating System — AnubisLand</span>
-                        </div>
-                      </div>
-
-                      {/* Print Page Break */}
-                      <div className="page-break my-8 no-print border-t-2 border-dashed border-slate-300 text-center py-2 text-xs text-slate-400 font-bold">
-                        ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلم المعتمد' : 'Page Break — Teacher Answer Key Follows'}
-                      </div>
-
-                      {/* Printable Sheet 2: Teacher Answer Key */}
-                      <div className="bg-white rounded-3xl p-8 border-2 border-gold-300 shadow-lg print:border-none print:shadow-none print:p-0">
-                        <div className="text-center border-b-2 border-gold-600 pb-4 mb-6">
-                          <span className="bg-gold-100 text-gold-900 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
-                            {isRtl ? 'خاص بالمعلم والشيخ — نموذج الإجابة المعتمد والتوجيهات التربوية' : 'Confidential Teacher Answer Key & Guidance'}
-                          </span>
-                          <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-2">
-                            {isRtl ? ws.titleAr : ws.titleEn}
-                          </h2>
-                          <div className="text-xs text-slate-500 mt-1">
-                            {isRtl ? 'دليل التصحيح النموذجي والتأصيل الشرعي المحكم' : 'Official Answer Key with Authentic Citations'}
                           </div>
                         </div>
 
                         <div className="overflow-x-auto">
                           <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
-                            <thead className="bg-emerald-950 text-gold-300 text-xs">
+                            <thead className="bg-emerald-800 text-white text-xs">
                               <tr>
-                                <th className="p-3 w-10 text-center">#</th>
-                                <th className="p-3 w-40">{isRtl ? 'المسألة الشرعية' : 'Topic'}</th>
-                                <th className="p-3">{isRtl ? 'نموذج الإجابة والتأصيل الشرعي المعتمد' : 'Official Teacher Answer Key'}</th>
-                                <th className="p-3 w-64">{isRtl ? 'الأثر السلوكي والتربوي المستهدف' : 'Behavioral & Spiritual Impact'}</th>
+                                <th className="p-3 w-12 text-center">#</th>
+                                <th className="p-3 w-56">{isRtl ? 'معيار التقييم' : 'Criterion'}</th>
+                                <th className="p-3">{isRtl ? 'الوصف التوجيهي والملاحظات' : 'Description & Teacher Notes'}</th>
+                                <th className="p-3 w-32 text-center">{isRtl ? 'الدرجة المستحقة' : 'Score'}</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-200 text-xs">
-                              {ws.items.map((it, idx) => (
-                                <tr key={idx} className="hover:bg-gold-50/40">
-                                  <td className="p-3 text-center font-bold text-slate-500">{it.num}</td>
-                                  <td className="p-3 font-bold text-emerald-950 font-cairo">{it.topic}</td>
-                                  <td className="p-3 font-amiri text-xs text-slate-800 leading-relaxed">
-                                    <div className="font-bold text-emerald-900 mb-1">السؤال: {it.studentQuestion}</div>
-                                    <div className="text-emerald-950 font-medium bg-emerald-50/50 p-2.5 rounded-lg border border-emerald-100">{it.teacherAnswer}</div>
+                            <tbody className="divide-y divide-slate-200 text-sm">
+                              {HIFZ_BRANCH_WORKSHEET.criteria.map((cr, idx) => (
+                                <tr key={idx} className="hover:bg-slate-50">
+                                  <td className="p-3 text-center font-bold text-slate-500">{cr.num}</td>
+                                  <td className="p-3 font-bold text-emerald-950 font-cairo">{cr.domain}</td>
+                                  <td className="p-3 text-slate-600 font-amiri text-xs leading-relaxed">
+                                    <div>{cr.description}</div>
+                                    <div className="text-slate-400 italic mt-2 border-b border-dashed border-slate-200 pb-1">ملاحظة المحفظ: __________________________________________________</div>
                                   </td>
-                                  <td className="p-3 text-slate-700 text-xs font-amiri leading-relaxed bg-amber-50/30">
-                                    {it.practicalImpact}
+                                  <td className="p-3 text-center font-bold text-emerald-900">
+                                    <span className="text-slate-400 font-normal">___ / </span>{cr.maxScore}
                                   </td>
                                 </tr>
                               ))}
                             </tbody>
+                            <tfoot className="bg-emerald-50 text-emerald-950 font-bold text-sm">
+                              <tr>
+                                <td colSpan="3" className="p-3 text-left pl-6">{isRtl ? 'المجموع النهائي للتقييم:' : 'Total Final Score:'}</td>
+                                <td className="p-3 text-center text-emerald-900 font-extrabold">_____ / 100</td>
+                              </tr>
+                            </tfoot>
                           </table>
                         </div>
-                      </div>
-                    </div>
-                  );
-                })()}
 
-                {/* --- BRANCH 2: TAJWEED WORKSHEET --- */}
-                {worksheetBranch === 'tajweed' && (
-                  <div className="space-y-8">
-                    {/* Printable Document Sheet 1: Student Version */}
-                    <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0">
-                      <div className="text-center border-b-2 border-emerald-900 pb-4 mb-6">
-                        <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
-                          {isRtl ? 'منصة مِشكاة لتعليم القرآن الكريم والتجويد — AnubisLand' : 'Mishkah Platform — AnubisLand'}
-                        </div>
-                        <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
-                          {isRtl ? 'ورقة مدارسة وتطبيق في أحكام التجويد (نسخة الطالب)' : 'Tajweed Student Worksheet'}
-                        </h2>
-                        <div className="flex justify-between items-center text-xs text-slate-600 mt-4 px-2">
-                          <span>{isRtl ? 'اسم الطالب / الدارس:' : 'Student Name:'} ____________________</span>
-                          <span>{isRtl ? 'السورة والآيات:' : 'Surah:'} {tajweedData?.metadata?.surah || currentSuwaydLesson.titleAr}</span>
-                          <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
+                        <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
+                          <span>{isRtl ? 'توقيع الشيخ المحفظ واعتماد الورد القادم:' : 'Teacher Signature & Next Assignment:'} _______________</span>
+                          <span>Mishkah PWA — AnubisLand</span>
                         </div>
                       </div>
+                    )}
 
-                      <div className="overflow-x-auto mb-8">
-                        <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
-                          <thead className="bg-emerald-800 text-white text-xs">
-                            <tr>
-                              <th className="p-3 w-12 text-center">#</th>
-                              <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية (رسم عثماني)' : 'Quranic Word'}</th>
-                              <th className="p-3">{isRtl ? 'الحكم التجويدي المطبق' : 'Tajweed Rule'}</th>
-                              <th className="p-3">{isRtl ? 'العلة وسبب الحكم' : 'Reason / Articulation Rule'}</th>
-                              <th className="p-3 w-28 text-center">{isRtl ? 'الدرجة' : 'Grade'}</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-200 text-sm">
-                            {(tajweedData?.worksheet || []).map((row, i) => (
-                              <tr key={i} className="hover:bg-slate-50">
-                                <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
-                                <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
-                                <td className="p-3 text-slate-400 italic">____________________</td>
-                                <td className="p-3 text-slate-400 italic">________________________________________</td>
-                                <td className="p-3 text-center text-slate-400">/ 5</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-
-                      <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
-                        <span>{isRtl ? 'ملاحظات المعلم / التقييم:' : 'Teacher Signature & Final Grade:'} _______________</span>
-                        <span>Mishkah PWA — AnubisLand</span>
-                      </div>
-                    </div>
-
-                    {/* Page Break for Print */}
-                    <div className="page-break my-8 no-print border-t-2 border-dashed border-slate-300 text-center py-2 text-xs text-slate-400 font-bold">
-                      ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلم' : 'Page Break — Teacher Answer Key Follows'}
-                    </div>
-
-                    {/* Printable Document Sheet 2: Teacher Answer Key */}
-                    <div className="bg-white rounded-3xl p-8 border-2 border-gold-300 shadow-lg print:border-none print:shadow-none print:p-0">
-                      <div className="text-center border-b-2 border-gold-600 pb-4 mb-6">
-                        <span className="bg-gold-100 text-gold-900 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
-                          {isRtl ? 'خاص بالمعلم فقط — نموذج الإجابة المعتمد' : 'Teacher Answer Key (Confidential)'}
-                        </span>
-                        <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-2">
-                          {isRtl ? 'دليل تصحيح ورقة العمل والعلل الصوتية' : 'Teacher Correction Guide & Phonetic Explanations'}
-                        </h2>
-                      </div>
-
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
-                          <thead className="bg-emerald-950 text-gold-300 text-xs">
-                            <tr>
-                              <th className="p-3 w-12 text-center">#</th>
-                              <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية' : 'Quranic Word'}</th>
-                              <th className="p-3">{isRtl ? 'الحكم الصحيح' : 'Correct Rule'}</th>
-                              <th className="p-3">{isRtl ? 'التوجيه والعلة الصوتية' : 'Phonetic Explanation'}</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-200 text-sm">
-                            {(tajweedData?.worksheet || []).map((row, i) => (
-                              <tr key={i} className="hover:bg-gold-50/40">
-                                <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
-                                <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
-                                <td className="p-3 font-bold text-emerald-800">{row.ruleApplied}</td>
-                                <td className="p-3 text-slate-700 text-xs leading-relaxed font-amiri">
-                                  {isRtl ? row.reasonAr : row.reasonEn}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* --- BRANCH 1: HIFZ EVALUATION SHEET --- */}
-                {worksheetBranch === 'hifz' && (
-                  <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0 space-y-6">
-                    <div className="text-center border-b-2 border-emerald-900 pb-4 mb-4">
-                      <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
-                        {isRtl ? 'مِشكاة — سجل المتابعة القرآني المتكامل | AnubisLand' : 'Mishkah Platform — AnubisLand'}
-                      </div>
-                      <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
-                        {isRtl ? HIFZ_BRANCH_WORKSHEET.titleAr : HIFZ_BRANCH_WORKSHEET.titleEn}
-                      </h2>
-                      <div className="flex flex-wrap justify-between items-center text-xs text-slate-600 mt-4 px-2">
-                        <span>{isRtl ? 'اسم الطالب:' : 'Student Name:'} ____________________</span>
-                        <span>{isRtl ? 'السورة والآيات المقررة:' : 'Surah / Passage:'} {hifzSurahName} ({hifzAyahRange})</span>
-                        <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
-                      </div>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
-                        <thead className="bg-emerald-800 text-white text-xs">
-                          <tr>
-                            <th className="p-3 w-12 text-center">#</th>
-                            <th className="p-3 w-56">{isRtl ? 'معيار التقييم' : 'Criterion'}</th>
-                            <th className="p-3">{isRtl ? 'الوصف التوجيهي والملاحظات' : 'Description & Teacher Notes'}</th>
-                            <th className="p-3 w-32 text-center">{isRtl ? 'الدرجة المستحقة' : 'Score'}</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200 text-sm">
-                          {HIFZ_BRANCH_WORKSHEET.criteria.map((cr, idx) => (
-                            <tr key={idx} className="hover:bg-slate-50">
-                              <td className="p-3 text-center font-bold text-slate-500">{cr.num}</td>
-                              <td className="p-3 font-bold text-emerald-950 font-cairo">{cr.domain}</td>
-                              <td className="p-3 text-slate-600 font-amiri text-xs leading-relaxed">
-                                <div>{cr.description}</div>
-                                <div className="text-slate-400 italic mt-2 border-b border-dashed border-slate-200 pb-1">ملاحظة المحفظ: __________________________________________________</div>
-                              </td>
-                              <td className="p-3 text-center font-bold text-emerald-900">
-                                <span className="text-slate-400 font-normal">___ / </span>{cr.maxScore}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                        <tfoot className="bg-emerald-50 text-emerald-950 font-bold text-sm">
-                          <tr>
-                            <td colSpan="3" className="p-3 text-left pl-6">{isRtl ? 'المجموع النهائي للتقييم:' : 'Total Final Score:'}</td>
-                            <td className="p-3 text-center text-emerald-900 font-extrabold">_____ / 100</td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
-
-                    <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
-                      <span>{isRtl ? 'توقيع الشيخ المحفظ واعتماد الورد القادم:' : 'Teacher Signature & Next Assignment:'} _______________</span>
-                      <span>Mishkah PWA — AnubisLand</span>
-                    </div>
                   </div>
                 )}
 
               </div>
             )}
 
-            {/* ================= VIEW: INTERACTIVE SELF-GRADING QUIZ (MULTI-BRANCH) ================= */}
+            {/* ================= VIEW: INTERACTIVE SELF-GRADING QUIZ & TEACHER QUESTION BANK ================= */}
             {activeTab === 'quiz' && (
               <div className="space-y-6 animate-fadeIn max-w-4xl mx-auto">
                 <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
@@ -6518,17 +7551,50 @@
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                       <div>
                         <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                          {isRtl ? 'منظومة المراجعة الذاتية التفاعلية للدارسين' : 'Interactive Self-Grading Student Quizzes'}
+                          {isRtl ? 'منظومة المراجعة الذاتية التفاعلية وبنك أسئلة المعلم' : 'Interactive Self-Grading Quiz & Teacher Question Bank'}
                         </span>
                         <h2 className="text-xl sm:text-2xl font-extrabold font-cairo text-emerald-950 mt-0.5">
                           {isRtl ? 'اختبر معلوماتكِ التفاعلية في علوم الشريعة والقرآن' : 'Test Your Knowledge Across All Disciplines'}
                         </h2>
                       </div>
-                      {quizSubmitted && (
-                        <div className="bg-emerald-900 text-gold-300 px-4 py-2 rounded-2xl border border-gold-400 font-bold text-sm shadow">
-                          {isRtl ? `النتيجة النهائية: ${quizScore}%` : `Score: ${quizScore}%`}
+
+                      {/* Mode Toggle & Score */}
+                      <div className="flex items-center gap-2">
+                        {quizSubmitted && quizMode === 'student' && (
+                          <div className="bg-emerald-900 text-gold-300 px-4 py-2 rounded-2xl border border-gold-400 font-bold text-sm shadow">
+                            {isRtl ? `النتيجة النهائية: ${quizScore}%` : `Score: ${quizScore}%`}
+                          </div>
+                        )}
+
+                        <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setQuizMode('student');
+                              setQuizAnswers({});
+                              setQuizSubmitted(false);
+                            }}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                              quizMode === 'student'
+                                ? 'bg-emerald-800 text-gold-200 shadow-sm'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                          >
+                            🎯 {isRtl ? 'وضع اختبار الدارس' : 'Student Mode'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setQuizMode('builder')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                              quizMode === 'builder'
+                                ? 'bg-gold-500 text-emerald-950 shadow-sm font-black'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                          >
+                            ✍️ {isRtl ? 'محرر وبنك الأسئلة' : 'Teacher Question Bank'}
+                          </button>
                         </div>
-                      )}
+                      </div>
                     </div>
 
                     {/* Quiz Branch Selector Pills */}
@@ -6597,88 +7663,406 @@
                     )}
                   </div>
 
-                  {/* Questions List */}
-                  <div className="space-y-6">
-                    {activeQuizQuestions.map((q, qIndex) => {
-                      const selected = quizAnswers[q.id];
-                      const isCorrect = selected === q.correctOptionId;
+                  {/* ================= QUIZ MODE: BUILDER / QUESTION BANK ================= */}
+                  {quizMode === 'builder' && (
+                    <div className="space-y-6">
                       
-                      return (
-                        <div key={q.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
-                          <div className="flex items-start gap-2.5 mb-3">
-                            <span className="w-7 h-7 rounded-full bg-emerald-800 text-gold-200 font-bold text-xs flex items-center justify-center shrink-0">
-                              {qIndex + 1}
-                            </span>
-                            <h3 className="font-bold text-emerald-950 text-base leading-snug font-cairo">
-                              {isRtl ? q.questionAr : q.questionEn}
-                            </h3>
+                      {/* Guidance Banner */}
+                      <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-200 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <h4 className="font-bold text-emerald-950 text-sm font-cairo">
+                            🛠️ {isRtl ? 'أداة المعلم: تحرير وإدارة بنك أسئلة الاختبار' : 'Teacher Workbench: Manage Quiz Question Bank'}
+                          </h4>
+                          <p className="text-xs text-slate-600 mt-1">
+                            {isRtl 
+                              ? 'أضف أسئلتك الخاصة، حدد الخيارات الأربعة والإجابة الصحيحة، واكتب التوجيه والشرح الشرعي لترسيخ الفهم لدى الدارس.'
+                              : 'Add custom questions with 4 options, specify correct answer, and provide authentic guidance for students.'}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          {quizBranch === 'islamic' && islamicData && islamicData.quizQuestions && (
+                            <button
+                              type="button"
+                              onClick={handleTransferLectureToQuiz}
+                              className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-3.5 py-1.5 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition"
+                            >
+                              <span>⚡</span>
+                              <span>{isRtl ? 'استيراد أسئلة المحاضرة النشطة' : 'Import from Active Lecture'}</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingQuizQuestionId(null);
+                              setQuizQuestionForm({ questionAr: '', optA: '', optB: '', optC: '', optD: '', correctOptionId: 'a', explanationAr: '' });
+                              setIsAddingQuizQuestion(true);
+                            }}
+                            className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition"
+                          >
+                            <span>➕</span>
+                            <span>{isRtl ? 'إضافة سؤال جديد' : 'Add Question'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleClearQuizQuestions}
+                            className="bg-white hover:bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded-xl text-xs font-bold transition"
+                          >
+                            🧹 {isRtl ? 'مسح الأسئلة' : 'Clear All'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleResetQuizQuestions}
+                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold transition"
+                          >
+                            🔄 {isRtl ? 'استعادة النموذج المعتمد' : 'Restore Canonical'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Add / Edit Question Form */}
+                      {isAddingQuizQuestion && (
+                        <form onSubmit={handleSaveQuizQuestion} className="card-islamic-amber rounded-2xl p-5 border-2 border-gold-400 shadow-md space-y-4">
+                          <div className="flex items-center justify-between border-b border-gold-400/40 pb-2">
+                            <h4 className="font-black text-emerald-950 text-sm font-cairo">
+                              {editingQuizQuestionId ? (isRtl ? '✏️ تعديل السؤال' : 'Edit Question') : (isRtl ? '➕ إضافة سؤال جديد لبنك الاختبار' : 'Add New Question')}
+                            </h4>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsAddingQuizQuestion(false);
+                                setEditingQuizQuestionId(null);
+                              }}
+                              className="text-slate-500 hover:text-slate-700 font-bold text-xs"
+                            >
+                              ✕ {isRtl ? 'إلغاء' : 'Cancel'}
+                            </button>
                           </div>
 
-                          {/* Options */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-3">
-                            {q.options.map(opt => {
-                              const isThisSelected = selected === opt.id;
-                              let btnClass = 'bg-white border-slate-200 text-slate-800 hover:border-emerald-300';
-                              
-                              if (quizSubmitted) {
-                                if (opt.id === q.correctOptionId) {
-                                  btnClass = 'bg-emerald-100 border-emerald-600 text-emerald-900 font-bold';
-                                } else if (isThisSelected && !isCorrect) {
-                                  btnClass = 'bg-red-100 border-red-500 text-red-900';
-                                }
-                              } else if (isThisSelected) {
-                                btnClass = 'bg-emerald-800 text-gold-200 border-emerald-900 font-bold shadow';
-                              }
-
-                              return (
-                                <button
-                                  key={opt.id}
-                                  disabled={quizSubmitted}
-                                  onClick={() => setQuizAnswers(prev => ({ ...prev, [q.id]: opt.id }))}
-                                  className={`p-3 rounded-xl border text-right text-xs transition flex items-center justify-between ${btnClass}`}
-                                >
-                                  <span>{isRtl ? opt.textAr : opt.textEn}</span>
-                                  {quizSubmitted && opt.id === q.correctOptionId && <span>✓</span>}
-                                </button>
-                              );
-                            })}
+                          <div>
+                            <label className="block text-xs font-bold text-emerald-950 mb-1">
+                              {isRtl ? 'نص السؤال:' : 'Question Text:'}
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              placeholder={isRtl ? 'مثال: ما حكم النون الساكنة إذا جاء بعدها حرف القاف؟' : 'Enter question...'}
+                              value={quizQuestionForm.questionAr}
+                              onChange={(e) => setQuizQuestionForm({ ...quizQuestionForm, questionAr: e.target.value })}
+                              className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-bold text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                            />
                           </div>
 
-                          {/* Explanations shown after submit */}
-                          {quizSubmitted && (
-                            <div className={`mt-3 p-3.5 rounded-xl text-xs font-amiri leading-relaxed ${
-                              isCorrect ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-red-50 text-red-900 border border-red-200'
-                            }`}>
-                              <strong>{isCorrect ? '✓ إجابة صحيحة بارك الله فيكِ:' : '✗ توضيح الإجابة الصحيحة والتأصيل الشرعي:'}</strong> {isRtl ? q.explanationAr : q.explanationEn}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="text-xs font-bold text-emerald-950">{isRtl ? 'الخيار (أ):' : 'Option A:'}</label>
+                                <label className="flex items-center gap-1 text-[11px] font-bold text-emerald-900 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="correctOption"
+                                    checked={quizQuestionForm.correctOptionId === 'a'}
+                                    onChange={() => setQuizQuestionForm({ ...quizQuestionForm, correctOptionId: 'a' })}
+                                  />
+                                  <span>{isRtl ? 'الإجابة الصحيحة' : 'Correct'}</span>
+                                </label>
+                              </div>
+                              <input
+                                type="text"
+                                required
+                                value={quizQuestionForm.optA}
+                                onChange={(e) => setQuizQuestionForm({ ...quizQuestionForm, optA: e.target.value })}
+                                className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs text-slate-900"
+                              />
                             </div>
+
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="text-xs font-bold text-emerald-950">{isRtl ? 'الخيار (ب):' : 'Option B:'}</label>
+                                <label className="flex items-center gap-1 text-[11px] font-bold text-emerald-900 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="correctOption"
+                                    checked={quizQuestionForm.correctOptionId === 'b'}
+                                    onChange={() => setQuizQuestionForm({ ...quizQuestionForm, correctOptionId: 'b' })}
+                                  />
+                                  <span>{isRtl ? 'الإجابة الصحيحة' : 'Correct'}</span>
+                                </label>
+                              </div>
+                              <input
+                                type="text"
+                                required
+                                value={quizQuestionForm.optB}
+                                onChange={(e) => setQuizQuestionForm({ ...quizQuestionForm, optB: e.target.value })}
+                                className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs text-slate-900"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="text-xs font-bold text-emerald-950">{isRtl ? 'الخيار (ج):' : 'Option C:'}</label>
+                                <label className="flex items-center gap-1 text-[11px] font-bold text-emerald-900 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="correctOption"
+                                    checked={quizQuestionForm.correctOptionId === 'c'}
+                                    onChange={() => setQuizQuestionForm({ ...quizQuestionForm, correctOptionId: 'c' })}
+                                  />
+                                  <span>{isRtl ? 'الإجابة الصحيحة' : 'Correct'}</span>
+                                </label>
+                              </div>
+                              <input
+                                type="text"
+                                value={quizQuestionForm.optC}
+                                onChange={(e) => setQuizQuestionForm({ ...quizQuestionForm, optC: e.target.value })}
+                                className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs text-slate-900"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <label className="text-xs font-bold text-emerald-950">{isRtl ? 'الخيار (د):' : 'Option D:'}</label>
+                                <label className="flex items-center gap-1 text-[11px] font-bold text-emerald-900 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="correctOption"
+                                    checked={quizQuestionForm.correctOptionId === 'd'}
+                                    onChange={() => setQuizQuestionForm({ ...quizQuestionForm, correctOptionId: 'd' })}
+                                  />
+                                  <span>{isRtl ? 'الإجابة الصحيحة' : 'Correct'}</span>
+                                </label>
+                              </div>
+                              <input
+                                type="text"
+                                value={quizQuestionForm.optD}
+                                onChange={(e) => setQuizQuestionForm({ ...quizQuestionForm, optD: e.target.value })}
+                                className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs text-slate-900"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-emerald-950 mb-1">
+                              {isRtl ? 'التوجيه والشرح والتأصيل الشرعي (يظهر للدارس بعد الإجابة):' : 'Explanation & Authentic Reflection (shown after answer):'}
+                            </label>
+                            <textarea
+                              rows={2}
+                              placeholder={isRtl ? 'اكتب الشرح المعتمد لتوضيح وجه الصواب...' : 'Enter explanation...'}
+                              value={quizQuestionForm.explanationAr}
+                              onChange={(e) => setQuizQuestionForm({ ...quizQuestionForm, explanationAr: e.target.value })}
+                              className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs font-amiri text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700 leading-relaxed"
+                            />
+                          </div>
+
+                          <div className="flex justify-end gap-2 pt-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsAddingQuizQuestion(false);
+                                setEditingQuizQuestionId(null);
+                              }}
+                              className="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold border border-slate-300"
+                            >
+                              {isRtl ? 'إلغاء' : 'Cancel'}
+                            </button>
+                            <button
+                              type="submit"
+                              className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 px-5 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5"
+                            >
+                              <span>💾</span>
+                              <span>{isRtl ? 'حفظ السؤال في بنك الاختبار' : 'Save Question'}</span>
+                            </button>
+                          </div>
+                        </form>
+                      )}
+
+                      {/* Question Bank Cards */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between px-1">
+                          <span className="text-xs font-bold text-emerald-950 font-cairo">
+                            📋 {isRtl ? `الأسئلة الحالية في هذا البنك (${activeQuizQuestions.length} أسئلة):` : `Current Questions (${activeQuizQuestions.length}):`}
+                          </span>
+                        </div>
+
+                        {activeQuizQuestions.length === 0 ? (
+                          <div className="bg-white rounded-2xl p-8 text-center text-slate-400 text-xs border border-slate-200">
+                            {isRtl ? 'بنك الأسئلة فارغ حالياً. اضغط "إضافة سؤال جديد" للبدء.' : 'No questions in this bank.'}
+                          </div>
+                        ) : (
+                          activeQuizQuestions.map((q, idx) => (
+                            <div key={q.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-start gap-2.5">
+                                  <span className="w-7 h-7 rounded-full bg-emerald-800 text-gold-200 font-bold text-xs flex items-center justify-center shrink-0">
+                                    {idx + 1}
+                                  </span>
+                                  <h4 className="font-bold text-emerald-950 text-sm font-cairo leading-snug">
+                                    {isRtl ? q.questionAr : q.questionEn}
+                                  </h4>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditingQuizQuestionId(q.id);
+                                      const opts = q.options || [];
+                                      setQuizQuestionForm({
+                                        questionAr: q.questionAr || '',
+                                        optA: opts[0]?.textAr || opts[0]?.text || '',
+                                        optB: opts[1]?.textAr || opts[1]?.text || '',
+                                        optC: opts[2]?.textAr || opts[2]?.text || '',
+                                        optD: opts[3]?.textAr || opts[3]?.text || '',
+                                        correctOptionId: q.correctOptionId || 'a',
+                                        explanationAr: q.explanationAr || ''
+                                      });
+                                      setIsAddingQuizQuestion(true);
+                                    }}
+                                    className="bg-slate-100 hover:bg-gold-100 text-slate-700 hover:text-emerald-950 p-2 rounded-lg text-xs font-bold transition"
+                                  >
+                                    ✏️ {isRtl ? 'تعديل' : 'Edit'}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteQuizQuestion(q.id)}
+                                    className="bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-700 p-2 rounded-lg text-xs font-bold transition"
+                                  >
+                                    🗑️
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                {(q.options || []).map(opt => {
+                                  const isCorrect = opt.id === q.correctOptionId;
+                                  return (
+                                    <div
+                                      key={opt.id}
+                                      className={`p-2.5 rounded-xl text-xs flex items-center justify-between border ${
+                                        isCorrect
+                                          ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold'
+                                          : 'bg-slate-50 border-slate-200 text-slate-700'
+                                      }`}
+                                    >
+                                      <span>{isRtl ? opt.textAr : opt.textEn}</span>
+                                      {isCorrect && (
+                                        <span className="text-emerald-700 font-extrabold text-[11px] bg-emerald-100 px-2 py-0.5 rounded-md">
+                                          ✓ {isRtl ? 'الإجابة الصحيحة' : 'Correct'}
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
+                              {q.explanationAr && (
+                                <div className="text-xs text-slate-600 bg-amber-50/50 p-3 rounded-xl border border-amber-200/60 font-amiri leading-relaxed">
+                                  <strong>{isRtl ? 'التوجيه والشرح:' : 'Explanation:'}</strong> {q.explanationAr}
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+
+                    </div>
+                  )}
+
+                  {/* ================= QUIZ MODE: STUDENT INTERACTIVE TEST ================= */}
+                  {quizMode === 'student' && (
+                    <div className="space-y-6">
+                      
+                      {activeQuizQuestions.length === 0 ? (
+                        <div className="bg-slate-50 rounded-2xl p-8 text-center text-slate-500 text-xs border border-slate-200">
+                          {isRtl ? 'لا توجد أسئلة حالياً في هذا القسم. اضغط "محرر وبنك الأسئلة" لإضافة أسئلتك الخاصة أو استيرادها.' : 'No questions yet. Click Teacher Question Bank to add questions.'}
+                        </div>
+                      ) : (
+                        activeQuizQuestions.map((q, qIndex) => {
+                          const selected = quizAnswers[q.id];
+                          const isCorrect = selected === q.correctOptionId;
+                          
+                          return (
+                            <div key={q.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                              <div className="flex items-start gap-2.5 mb-3">
+                                <span className="w-7 h-7 rounded-full bg-emerald-800 text-gold-200 font-bold text-xs flex items-center justify-center shrink-0">
+                                  {qIndex + 1}
+                                </span>
+                                <h3 className="font-bold text-emerald-950 text-base leading-snug font-cairo">
+                                  {isRtl ? q.questionAr : q.questionEn}
+                                </h3>
+                              </div>
+
+                              {/* Options */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-3">
+                                {q.options.map(opt => {
+                                  const isThisSelected = selected === opt.id;
+                                  let btnClass = 'bg-white border-slate-200 text-slate-800 hover:border-emerald-300';
+                                  
+                                  if (quizSubmitted) {
+                                    if (opt.id === q.correctOptionId) {
+                                      btnClass = 'bg-emerald-100 border-emerald-600 text-emerald-900 font-bold';
+                                    } else if (isThisSelected && !isCorrect) {
+                                      btnClass = 'bg-red-100 border-red-500 text-red-900';
+                                    }
+                                  } else if (isThisSelected) {
+                                    btnClass = 'bg-emerald-800 text-gold-200 border-emerald-900 font-bold shadow';
+                                  }
+
+                                  return (
+                                    <button
+                                      key={opt.id}
+                                      disabled={quizSubmitted}
+                                      onClick={() => setQuizAnswers(prev => ({ ...prev, [q.id]: opt.id }))}
+                                      className={`p-3 rounded-xl border text-right text-xs transition flex items-center justify-between ${btnClass}`}
+                                    >
+                                      <span>{isRtl ? opt.textAr : opt.textEn}</span>
+                                      {quizSubmitted && opt.id === q.correctOptionId && <span>✓</span>}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Explanations shown after submit */}
+                              {quizSubmitted && (
+                                <div className={`mt-3 p-3.5 rounded-xl text-xs font-amiri leading-relaxed ${
+                                  isCorrect ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-red-50 text-red-900 border border-red-200'
+                                }`}>
+                                  <strong>{isCorrect ? '✓ إجابة صحيحة بارك الله فيكِ:' : '✗ توضيح الإجابة الصحيحة والتأصيل الشرعي:'}</strong> {isRtl ? q.explanationAr : q.explanationEn}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+
+                      {/* Submit / Reset Actions */}
+                      {activeQuizQuestions.length > 0 && (
+                        <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
+                          {quizSubmitted ? (
+                            <button 
+                              onClick={() => {
+                                setQuizAnswers({});
+                                setQuizSubmitted(false);
+                              }}
+                              className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition"
+                            >
+                              {isRtl ? 'إعادة الاختبار من جديد' : 'Retake Quiz'}
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => setQuizSubmitted(true)}
+                              disabled={Object.keys(quizAnswers).length === 0}
+                              className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-xs shadow-lg transition disabled:opacity-40"
+                            >
+                              {isRtl ? 'تسليم الإجابات والتقييم الفوري' : 'Submit Answers'}
+                            </button>
                           )}
                         </div>
-                      );
-                    })}
-                  </div>
+                      )}
 
-                  {/* Submit / Reset Actions */}
-                  <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
-                    {quizSubmitted ? (
-                      <button 
-                        onClick={() => {
-                          setQuizAnswers({});
-                          setQuizSubmitted(false);
-                        }}
-                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition"
-                      >
-                        {isRtl ? 'إعادة الاختبار من جديد' : 'Retake Quiz'}
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => setQuizSubmitted(true)}
-                        disabled={Object.keys(quizAnswers).length === 0}
-                        className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-xs shadow-lg transition disabled:opacity-40"
-                      >
-                        {isRtl ? 'تسليم الإجابات والتقييم الفوري' : 'Submit Answers'}
-                      </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
+
                 </div>
               </div>
             )}
