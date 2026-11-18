@@ -138,11 +138,15 @@
       min-height: 100vh;
     }
 
-    /* Sacred Quranic Text strictly locked to Uthmani font */
+    /* Sacred Quranic Text strictly locked to Uthmani font with maximum crispness and high contrast */
     .font-quran, .font-quran * {
       font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif !important;
-      line-height: 2.3 !important;
-      letter-spacing: 0.02em;
+      font-weight: 700 !important;
+      color: #021a12 !important;
+      line-height: 2.5 !important;
+      letter-spacing: 0.03em;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* Exact Mawaqeet-Qibla Header & Islamic Accent Banners (Gold Khatam Rosettes on Rich Emerald Gradient) */
@@ -1762,7 +1766,7 @@
                           className={`p-4 rounded-2xl transition-all duration-200 border ${
                             activeRepeatAyah === ayah.num 
                               ? 'bg-emerald-900/5 border-gold-400 shadow-sm ring-1 ring-gold-400/40' 
-                              : 'bg-white/60 border-slate-200 hover:bg-white'
+                              : 'bg-white border-2 border-emerald-900/15 shadow-sm hover:border-gold-500/50'
                           }`}
                         >
                           {/* Ayah Header with Actions */}
@@ -1814,7 +1818,7 @@
                               🔒 {isRtl ? 'الآية مخفية للتسميع الغيبي — اضغط "كشف للطالب" عند إتمام القراءة' : 'Ayah hidden for blind recitation'}
                             </div>
                           ) : (
-                            <div className="font-quran text-2xl sm:text-3xl leading-[2.5] text-emerald-950 text-right flex flex-wrap gap-x-2 gap-y-3 items-baseline select-none">
+                            <div className="font-quran text-3xl sm:text-4xl font-bold leading-[2.6] text-black text-right flex flex-wrap gap-x-2.5 gap-y-3.5 items-baseline select-none">
                               {words.map((word, wIdx) => {
                                 const isEndingWord = isEndingsMasked && (wIdx >= words.length - 2);
                                 const isCustomMasked = customMaskedWords.has(ayah.num + '-' + wIdx);
