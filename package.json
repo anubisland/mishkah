@@ -1,0 +1,24 @@
+{
+  "name": "mishkah",
+  "version": "1.0.0",
+  "description": "مِشكاة | Mishkah — AI Copilot for Quran, Tajweed & Islamic Studies Educators",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node -e \"console.log('Mishkah environment check passed');\""
+  },
+  "keywords": [
+    "quran",
+    "tajweed",
+    "islamic-studies",
+    "educator",
+    "ai-copilot",
+    "pwa",
+    "uthmani-script",
+    "zoom-cards",
+    "bilingual"
+  ],
+  "author": "Mishkah Educational Technology",
+  "license": "Proprietary"
+}

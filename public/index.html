@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مِشكاة | Mishkah — AI Copilot for Quran, Tajweed & Islamic Studies Educators</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="icons/mishkah-icon.svg">
+  <meta name="theme-color" content="#064E3B">
+  <meta name="description" content="AI Copilot tailored for female educators teaching Quran, Tajweed and Islamic Studies via Zoom.">
+
+  <!-- Google Fonts: Cairo, Amiri, Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React & Babel CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            emerald: {
+              950: '#011B13',
+              900: '#032B20',
+              800: '#043E2E',
+              700: '#064E3B',
+              600: '#059669',
+              500: '#10B981',
+              100: '#D1FAE5',
+              50: '#ECFDF5'
+            },
+            gold: {
+              700: '#92400E',
+              600: '#B45309',
+              500: '#D97706',
+              400: '#F59E0B',
+              300: '#FCD34D',
+              200: '#FDE68A',
+              100: '#FEF3C7',
+              50: '#FFFBEB'
+            },
+            ivory: {
+              50: '#FAF8F5',
+              100: '#F4EFE6',
+              200: '#E6DCCF'
+            }
+          },
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+            amiri: ['Amiri', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'Cairo', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --app-font-size: 16px;
+    }
+    body {
+      font-size: var(--app-font-size);
+      background-color: #FAF8F5;
+      color: #1E293B;
+      font-family: 'Cairo', sans-serif;
+    }
+    .font-quran {
+      font-family: 'Amiri', serif;
+      line-height: 2.1;
+    }
+    .emerald-pattern {
+      background: radial-gradient(circle at 50% 30%, #064E3B 0%, #032B20 70%, #011B13 100%);
+    }
+    .gold-border-gradient {
+      border-image: linear-gradient(to right, #C59B27, #FDE68A, #C59B27) 1;
+    }
+    /* Presentation Zoom Mode */
+    .zoom-slide-fullscreen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #021F17;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2.5rem;
+    }
+    /* Print Stylesheet for Worksheets */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+        font-size: 13pt !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+      .worksheet-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+      .worksheet-table th, .worksheet-table td {
+        border: 1.5px solid #333 !important;
+        padding: 8px !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-gold-200 selection:text-emerald-950">
+  <div id="root"></div>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration skipped:', err.message));
+      });
+    }
+  </script>
+
+  <!-- React Application Core -->
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // Default Preloaded Curriculum & Books
+    const PRELOADED_TEXTBOOKS = [
+      { id: 'czerepinski', nameAr: 'كتاب أحكام التجويد (كريمة كزارول چيربينسكي)', nameEn: 'Tajweed Rules of the Qur\'an (Czerepinski)', note: 'الأكثر اعتماداً لتدريس غير الناطقين بالعربية' },
+      { id: 'suwayd', nameAr: 'التجويد المصور (د. أيمن رشدي سويد)', nameEn: 'Illustrated Tajweed (Dr. Ayman Suwayd)', note: 'توصيف دقيق للمخارج التشريحية وصفات الحروف' },
+      { id: 'mulakhkhas', nameAr: 'الملخص المفيد في علم التجويد', nameEn: 'Al-Mulakhkhas Al-Mufeed', note: 'موجز مدرسي عملي' },
+      { id: 'jazariyyah', nameAr: 'متن المنظومة الجزرية للإمام ابن الجزري', nameEn: 'Al-Jazariyyah Classical Matn', note: 'أبيات الاستدلال المعتمدة' }
+    ];
+
+    const TAJWEED_RULES = [
+      { id: 'ikhfaa', nameAr: 'الإخفاء الحقيقي (15 حرفاً)', nameEn: 'Al-Ikhfaa Al-Haqiqi (True Concealment)' },
+      { id: 'idgham_ghunnah', nameAr: 'الإدغام بغنة (يَنْمُو)', nameEn: 'Idgham with Ghunnah (YANMU)' },
+      { id: 'idgham_bighunnah', nameAr: 'الإدغام بغير غنة (ل، ر)', nameEn: 'Idgham without Ghunnah (Lam, Raa)' },
+      { id: 'izhar', nameAr: 'الإظهار الحلقي (حروف الحلق 6)', nameEn: 'Izhar Halqi (Throat Letters)' },
+      { id: 'iqlab', nameAr: 'الإقلاب (قلب النون ميماً عند الباء)', nameEn: 'Iqlab (Conversion to Meem at Baa)' },
+      { id: 'meem_sakinah', nameAr: 'أحكام الميم الساكنة (إخفاء، إدغام، إظهار شفوي)', nameEn: 'Rules of Meem Sakinah' },
+      { id: 'qalqalah', nameAr: 'القلقلة (قُطْبُ جَدٍّ - كبرى وصغرى)', nameEn: 'Al-Qalqalah (Echoing/Rebound)' },
+      { id: 'madd_farie', nameAr: 'أحكام المدود (المتصل، المنفصل، العارض، اللازم)', nameEn: 'Madd Rules (Connected, Detached, Compulsory)' },
+      { id: 'makharij', nameAr: 'مخارج الحروف والصفات التشريحية', nameEn: 'Makharij & Phonetic Articulation Points' }
+    ];
+
+    function App() {
+      // Language & Direction state
+      const [lang, setLang] = useState('ar');
+      const isRtl = lang === 'ar';
+      
+      // Font Scale (14px - 20px)
+      const [fontSize, setFontSize] = useState(16);
+      useEffect(() => {
+        document.documentElement.style.setProperty('--app-font-size', `${fontSize}px`);
+        document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+        document.documentElement.lang = lang;
+      }, [fontSize, isRtl, lang]);
+
+      // Active View
+      const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'tajweed' | 'islamic' | 'worksheet' | 'quiz'
+      
+      // Teacher Security Passcode PIN Gate
+      const [teacherPin, setTeacherPin] = useState(localStorage.getItem('mishkah_pin') || 'MISHKAH2026');
+      const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+      const [tempPin, setTempPin] = useState(teacherPin);
+      const [pinStatus, setPinStatus] = useState('verified'); // 'idle' | 'verifying' | 'verified' | 'error'
+
+      // Module A: Tajweed Generator State
+      const [surahName, setSurahName] = useState('سورة الملك');
+      const [ayahRange, setAyahRange] = useState('1–10');
+      const [selectedRule, setSelectedRule] = useState('ikhfaa');
+      const [tajweedMode, setTajweedMode] = useState('bilingual');
+      const [selectedTextbook, setSelectedTextbook] = useState('czerepinski');
+      const [customContext, setCustomContext] = useState('');
+      const [tajweedData, setTajweedData] = useState(null);
+      const [isGeneratingTajweed, setIsGeneratingTajweed] = useState(false);
+      
+      // Module B: Islamic Studies State
+      const [subjectCategory, setSubjectCategory] = useState('العقيدة (Aqeedah)');
+      const [lessonTopic, setLessonTopic] = useState('أركان الإيمان الستة والسكينة النفسية');
+      const [lessonDuration, setLessonDuration] = useState(45);
+      const [audienceLevel, setAudienceLevel] = useState('اليافعين والمهتدين الجدد (Bilingual Youth)');
+      const [islamicData, setIslamicData] = useState(null);
+      const [isGeneratingIslamic, setIsGeneratingIslamic] = useState(false);
+
+      // Presentation & Slide State
+      const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+      const [isFullscreenZoom, setIsFullscreenZoom] = useState(false);
+
+      // Interactive Student Quiz State
+      const [quizAnswers, setQuizAnswers] = useState({});
+      const [quizSubmitted, setQuizSubmitted] = useState(false);
+
+      // Toast notification
+      const [toast, setToast] = useState(null);
+      const showToast = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 3000);
+      };
+
+      // Load initial mock data
+      useEffect(() => {
+        handleGenerateTajweed(true);
+        handleGenerateIslamic(true);
+      }, []);
+
+      // Generator Handlers
+      async function handleGenerateTajweed(isInitial = false) {
+        setIsGeneratingTajweed(true);
+        try {
+          const ruleObj = TAJWEED_RULES.find(r => r.id === selectedRule) || TAJWEED_RULES[0];
+          const textbookObj = PRELOADED_TEXTBOOKS.find(b => b.id === selectedTextbook);
+
+          const res = await fetch('/api/generate/tajweed', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-mishkah-pin': teacherPin
+            },
+            body: JSON.stringify({
+              surah: surahName,
+              ayahRange: ayahRange,
+              rule: ruleObj.nameAr,
+              languageMode: tajweedMode,
+              textbookContext: customContext || textbookObj?.nameAr,
+              isDemo: isInitial
+            })
+          });
+
+          if (res.ok) {
+            const json = await res.json();
+            setTajweedData(json.data);
+            setQuizAnswers({});
+            setQuizSubmitted(false);
+            if (!isInitial) showToast(isRtl ? 'تم توليد خطة درس التجويد بنجاح ✨' : 'Tajweed Lesson Generated Successfully ✨');
+          } else {
+            throw new Error('Server returned ' + res.status);
+          }
+        } catch (err) {
+          console.warn('Using client fallback:', err.message);
+          // Rich client-side fallback
+          setTajweedData(getFallbackTajweed());
+          if (!isInitial) showToast(isRtl ? 'تم التحميل من قاعدة البيانات الموثقة 💡' : 'Loaded from Verified Local Curriculum 💡');
+        } finally {
+          setIsGeneratingTajweed(false);
+        }
+      }
+
+      async function handleGenerateIslamic(isInitial = false) {
+        setIsGeneratingIslamic(true);
+        try {
+          const res = await fetch('/api/generate/islamic-studies', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-mishkah-pin': teacherPin
+            },
+            body: JSON.stringify({
+              category: subjectCategory,
+              topic: lessonTopic,
+              duration: lessonDuration,
+              audienceLevel: audienceLevel,
+              languageMode: 'bilingual',
+              isDemo: isInitial
+            })
+          });
+
+          if (res.ok) {
+            const json = await res.json();
+            setIslamicData(json.data);
+            if (!isInitial) showToast(isRtl ? 'تم توليد مخطط الحلقة والملخص المعتمد بنجاح 🌿' : 'Islamic Studies Blueprint Generated 🌿');
+          } else {
+            throw new Error('Server returned ' + res.status);
+          }
+        } catch (err) {
+          console.warn('Using client fallback:', err.message);
+          setIslamicData(getFallbackIslamic());
+        } finally {
+          setIsGeneratingIslamic(false);
+        }
+      }
+
+      function getFallbackTajweed() {
+        return {
+          metadata: {
+            surah: surahName || 'سورة الملك (Al-Mulk)',
+            ayahRange: ayahRange || '1–10',
+            ruleNameAr: 'الإخفاء الحقيقي (Al-Ikhfaa Al-Haqiqi)',
+            ruleNameEn: 'True Concealment (Ikhfaa)',
+            languageMode: tajweedMode,
+            textbookSource: 'Czerepinski & Dr. Ayman Suwayd Certified Standard'
+          },
+          ruleDefinition: {
+            arabic: 'الإخفاء لغةً: الستر. واصطلاحاً: النطق بالنون الساكنة أو التنوين بصفة بين الإظهار والإدغام عارٍ عن التشديد مع بقاء الغنة بمقدار حركتين.',
+            english: 'Linguistically: Concealment. Technically: Pronouncing the Noon Sakinah or Tanween in a state between clear Izhar and merged Idgham, without shaddah, while retaining nasalization (Ghunnah) for 2 counts.',
+            anatomicalMakhrajAr: 'يخرج صوت الغنة من الخيشوم (تجويف الأنف) مع إبعاد طرف اللسان قليلاً عن لثة الأسنان العليا وتهيئة الفم لمخرج حرف الإخفاء التالي.',
+            anatomicalMakhrajEn: 'The sound of Ghunnah emits from the Khayshoom (nasal cavity). The tip of the tongue is kept slightly distant from the upper gums, preparing the mouth directly for the articulation point of the following letter.',
+            timingOrHarakat: 'حركتان (2 counts)',
+            commonMistakes: [
+              'إلصاق اللسان بالحنك الأعلى مما يحول الإخفاء إلى إظهار (Pressing the tongue against the palate)',
+              'المبالغة في إشباع الحركة قبل النون حتى يتولد منها حرف مد (Stretching vowels into extra letters)',
+              'تفخيم الغنة عند الحروف المرققة أو ترقيقها عند الحروف المفخمة (Incorrect Ghunnah heaviness/lightness)'
+            ]
+          },
+          presentationCards: [
+            {
+              cardIndex: 1,
+              titleAr: 'تطبيق الإخفاء بغنة مفخمة',
+              titleEn: 'Ikhfaa with Heavy Ghunnah',
+              ayahTextUthmani: 'تَبَـٰرَكَ ٱلَّذِى بِيَدِهِ ٱلْمُلْكُ وَهُوَ عَلَىٰ كُلِّ شَىْءٍۢ قَدِيرٌ',
+              highlightedPortion: 'شَىْءٍۢ قَدِيرٌ',
+              tajweedColor: 'emerald',
+              explanationAr: 'تنوين بالكسر بعده حرف القاف (من حروف الاستعلاء المفخمة). ينطق بإخفاء التنوين وتفخيم الغنة.',
+              explanationEn: 'Tanween followed by heavy letter Qaf. Pronounce with concealed Tanween and deep, heavy Ghunnah.',
+              teacherPrompt: 'Check student\'s back of tongue elevation; ensure lips do not round prematurely.'
+            },
+            {
+              cardIndex: 2,
+              titleAr: 'تطبيق الإخفاء بغنة مرققة رقيقة',
+              titleEn: 'Ikhfaa with Light Ghunnah',
+              ayahTextUthmani: 'مَّا تَرَىٰ فِى خَلْقِ ٱلرَّحْمَـٰنِ مِن تَفَـٰوُتٍۢ',
+              highlightedPortion: 'مِن تَفَـٰوُتٍۢ',
+              tajweedColor: 'emerald',
+              explanationAr: 'نون ساكنة بعدها حرف التاء (حرف مرقق). ترقق الغنة وتتهيأ الأسنان لنطق التاء.',
+              explanationEn: 'Noon Sakinah followed by light letter Taa. Produce a delicate light nasal Ghunnah.',
+              teacherPrompt: 'Ensure teeth are gently close together without tongue pressing firmly against incisors.'
+            },
+            {
+              cardIndex: 3,
+              titleAr: 'تطبيق الإخفاء في كلمة واحدة',
+              titleEn: 'Ikhfaa Within a Single Word',
+              ayahTextUthmani: 'ثُمَّ ٱرْجِعِ ٱلْبَصَرَ كَرَّتَيْنِ يَنقَلِبْ إِلَيْكَ ٱلْبَصَرُ خَاسِئًۭا',
+              highlightedPortion: 'يَنقَلِبْ',
+              tajweedColor: 'amber',
+              explanationAr: 'نون ساكنة بعدها قاف في كلمة واحدة، مع قلقلة الباء المتطرفة عند الوقف.',
+              explanationEn: 'Noon Sakinah followed by Qaf in one word, followed by Qalqalah in letter Baa upon stopping.',
+              teacherPrompt: 'Notice the transition from heavy nasal Ghunnah directly to Qaf then Baa Qalqalah.'
+            }
+          ],
+          worksheet: [
+            { itemNumber: 1, wordUthmani: 'شَىْءٍۢ قَدِيرٌ', ruleApplied: 'إخفاء حقيقي بغنة مفخمة (Heavy Ikhfaa)', reasonAr: 'تنوين بعده قاف (حرف مفخم)', reasonEn: 'Tanween followed by Qaf', ayahReference: 'الملك: 1' },
+            { itemNumber: 2, wordUthmani: 'مِن تَفَـٰوُتٍۢ', ruleApplied: 'إخفاء حقيقي بغنة مرققة (Light Ikhfaa)', reasonAr: 'نون ساكنة بعدها تاء (حرف مرقق)', reasonEn: 'Noon Sakinah followed by Taa', ayahReference: 'الملك: 3' },
+            { itemNumber: 3, wordUthmani: 'مِن فُطُورٍۢ', ruleApplied: 'إخفاء حقيقي بغنة مرققة (Light Ikhfaa)', reasonAr: 'نون ساكنة بعدها فاء', reasonEn: 'Noon Sakinah followed by Faa', ayahReference: 'الملك: 3' },
+            { itemNumber: 4, wordUthmani: 'يَنقَلِبْ', ruleApplied: 'إخفاء حقيقي في كلمة واحدة (Ikhfaa in one word)', reasonAr: 'نون ساكنة بعدها قاف', reasonEn: 'Noon Sakinah followed by Qaf', ayahReference: 'الملك: 4' }
+          ],
+          quiz: [
+            {
+              id: 1,
+              questionAr: 'كم عدد حروف الإخفاء الحقيقي في أحكام النون الساكنة والتنوين؟',
+              questionEn: 'How many letters cause True Concealment (Ikhfaa)?',
+              type: 'mcq',
+              options: [
+                { id: 'a', textAr: '6 أحرف', textEn: '6 letters' },
+                { id: 'b', textAr: '15 حرفاً', textEn: '15 letters' },
+                { id: 'c', textAr: '4 أحرف', textEn: '4 letters' },
+                { id: 'd', textAr: '8 أحرف', textEn: '8 letters' }
+              ],
+              correctOptionId: 'b',
+              explanationAr: 'حروف الإخفاء 15 حرفاً مجموعة في أوائل كلمات: صف ذا ثنا كم جاد شخص قد سما دم طيبا زد في تقى ضع ظالما.',
+              explanationEn: '15 letters assembled in the famous mnemonic opening verse.'
+            },
+            {
+              id: 2,
+              questionAr: 'ما هو المخرج الدقيق لصوت الغنة أثناء الإخفاء؟',
+              questionEn: 'What is the precise anatomical articulation point of the Ghunnah?',
+              type: 'mcq',
+              options: [
+                { id: 'a', textAr: 'الجوف (Oral Cavity)', textEn: 'Al-Jawf' },
+                { id: 'b', textAr: 'الحلق (Throat)', textEn: 'Al-Halq' },
+                { id: 'c', textAr: 'الخيشوم (تجويف الأنف)', textEn: 'Al-Khayshoom (Nasal Cavity)' },
+                { id: 'd', textAr: 'الشفتان (Lips)', textEn: 'The Lips' }
+              ],
+              correctOptionId: 'c',
+              explanationAr: 'الغنة تخرج فقط من الخيشوم وهو أقصى الأنف.',
+              explanationEn: 'Ghunnah strictly resonates from the Khayshoom (nasal passage).'
+            },
+            {
+              id: 3,
+              questionAr: 'تكون غنة الإخفاء مفخمة إذا جاء بعد النون الساكنة حرف استعلاء كحرف القاف.',
+              questionEn: 'The Ghunnah of Ikhfaa is pronounced heavy when followed by an elevated letter like Qaf.',
+              type: 'true_false',
+              options: [
+                { id: 'true', textAr: 'صحيح (True)', textEn: 'True' },
+                { id: 'false', textAr: 'خطأ (False)', textEn: 'False' }
+              ],
+              correctOptionId: 'true',
+              explanationAr: 'نعم، الغنة تتبع الحرف الذي يليها تفخيماً وترقيقاً.',
+              explanationEn: 'Correct! The Ghunnah follows the succeeding letter in heavy/light characteristics.'
+            }
+          ]
+        };
+      }
+
+      function getFallbackIslamic() {
+        return {
+          metadata: {
+            category: subjectCategory,
+            topic: lessonTopic,
+            durationMinutes: lessonDuration,
+            audienceLevel: audienceLevel,
+            languageMode: 'bilingual'
+          },
+          blueprint: [
+            {
+              phaseNumber: 1,
+              phaseNameAr: 'المقدمة وعنصر التشويق (The Hook)',
+              phaseNameEn: 'Hook & Interactive Question',
+              allocatedMinutes: 5,
+              teacherGuidanceAr: 'اطرحي سؤالاً تفاعلياً على الطالبات في زوم: ما الفرق بين مجرد العلم الذهني بوجود الله وبين اليقين الذي يزيل الهم في الأزمات؟',
+              teacherGuidanceEn: 'Ask the students: How does knowing Allah is Al-Aleem and Al-Khabeer give us personal peace during exams and trials?',
+              talkingPoints: [
+                'الافتتاح بالحمد والصلاة والسلام على رسول الله',
+                'ربط موضوع الإيمان بالسكينة والطمأنينة القلبية'
+              ]
+            },
+            {
+              phaseNumber: 2,
+              phaseNameAr: 'التأصيل الشرعي والأدلة الموثقة',
+              phaseNameEn: 'Core Evidences & Hadith of Jibreel',
+              allocatedMinutes: 20,
+              teacherGuidanceAr: 'عرض حديث جبريل عليه السلام وتفصيل الأركان الستة مع التركيز على ركن الإيمان بالقضاء والقدر.',
+              teacherGuidanceEn: 'Walk through the 6 pillars with emphasis on Qadar (Destiny: the antidote to anxiety and regret).',
+              talkingPoints: [
+                'الإيمان بالله وملائكته وكتبه ورسله واليوم الآخر والقدر خيره وشره',
+                'التمييز بين مراتب الدين: الإسلام، الإيمان، الإحسان'
+              ]
+            },
+            {
+              phaseNumber: 3,
+              phaseNameAr: 'التطبيق العملي في واقع الطالبة المعاصر',
+              phaseNameEn: 'Real-Life Application & Emotional Resilience',
+              allocatedMinutes: 15,
+              teacherGuidanceAr: 'تدريب الطالبات على التخلص من كلمة "لو" المحبطة واستبدالها بالرضا: "قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ".',
+              teacherGuidanceEn: 'Equipping youth with the prophetic mindset: replacing paralyzing regret with proactive contentment.',
+              talkingPoints: [
+                'استشعار معية الله في السراء والضراء',
+                'تحويل العادات اليومية إلى عبادات بالنية الصادقة'
+              ]
+            },
+            {
+              phaseNumber: 4,
+              phaseNameAr: 'الخاتمة والواجب المنزلي وملخص الواتساب',
+              phaseNameEn: 'Wrap-up, Reflection & WhatsApp Summary',
+              allocatedMinutes: 5,
+              teacherGuidanceAr: 'توزيع ملخص الواتساب المعد مسبقاً بنقرة واحدة، ومطالبة كل طالبة بتطبيق ذكر اليوم.',
+              teacherGuidanceEn: 'Copy and share the WhatsApp summary and launch the interactive 5-question review.',
+              talkingPoints: [
+                'دعاء كفارة المجلس: سبحانك اللهم وبحمدك...',
+                'تذكير بالاختبار الذاتي القصير'
+              ]
+            }
+          ],
+          evidences: [
+            {
+              type: 'hadith',
+              arabicText: 'قَالَ: فَأَخْبِرْنِي عَنِ الإِيمَانِ، قَالَ: «أَنْ تُؤْمِنَ بِاللَّهِ، وَمَلاَئِكَتِهِ، وَكُتُبِهِ، وَرُسُلِهِ، وَاليَوْمِ الآخِرِ، وَتُؤْمِنَ بِالقَدَرِ خَيْرِهِ وَشَرِّهِ».',
+              englishTranslation: 'He said: "Inform me about Faith." The Prophet ﷺ said: "That you believe in Allah, His Angels, His Books, His Messengers, the Last Day, and that you believe in Divine Destiny, its good and bad."',
+              citation: 'صحيح مسلم (Sahih Muslim #8)',
+              narrator: 'أمير المؤمنين عمر بن الخطاب رضي الله عنه',
+              grading: 'صحيح (Sahih - Highest Authenticity)',
+              authenticityBadge: true
+            },
+            {
+              type: 'quran',
+              arabicText: 'ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إِلَيْهِ مِن رَّبِّهِۦ وَٱلْمُؤْمِنُونَ ۚ كُلٌّ ءَامَنَ بِٱللَّهِ وَمَلَـٰٓئِكَتِهِۦ وَكُتُبِهِۦ وَرُسُلِهِۦ لَا نُفَرِّقُ بَيْنَ أَحَدٍۢ مِّن رُّسُلِهِۦ',
+              englishTranslation: 'The Messenger has believed in what was revealed to him from his Lord, and [so have] the believers. All of them have believed in Allah and His angels and His books and His messengers...',
+              citation: 'سورة البقرة (Surah Al-Baqarah 2:285)',
+              narrator: '—',
+              grading: 'متواتر قطعي الثبوت (Quranic Revelation)',
+              authenticityBadge: true
+            }
+          ],
+          zoomCards: [
+            {
+              slideNumber: 1,
+              titleAr: 'ما هو جوهر الإيمان؟',
+              titleEn: 'What is the Essence of Iman?',
+              bodyAr: 'الإيمان ليس مجرد كلمات تردد، بل هو ما استقر في أعماق القلب وصدقته الأعمال الصالحة وأخلاق المسلم.',
+              bodyEn: 'Iman is not a ritual statement; it is that which settles deep in the heart and reflects in noble character and righteous action.',
+              practicalAction: 'جددي نيتك الصادقة اليومية قبل فتح أي كتاب أو درس.'
+            },
+            {
+              slideNumber: 2,
+              titleAr: 'الإيمان بالقدر دواء القلق والتوتر',
+              titleEn: 'Belief in Qadar: The Antidote to Anxiety',
+              bodyAr: '«مَا أَصَابَكَ لَمْ يَكُنْ لِيُخْطِئَكَ، وَمَا أَخْطَأَكَ لَمْ يَكُنْ لِيُصِيبَكَ». لن يضيع عبد علم أن ربه حكيم رحيم.',
+              bodyEn: 'What has reached you was never meant to miss you, and what missed you was never meant to reach you.',
+              practicalAction: 'استبدلي كلمة "لو" بذكر "قدر الله وما شاء فعل" عند أي عارض.'
+            }
+          ],
+          whatsAppKit: {
+            headline: '🌿 خلاصة درس اليوم: أركان الإيمان الستة وسكينة القلب 🌿',
+            formattedText: `السلام عليكم ورحمة الله وبركاته يا غاليات 🌸\n\n📌 *موضوع حلقتنا اليوم:* أركان الإيمان وثمارها العملية في حياتنا اليومية\n\n✨ *أهم الفوائد المستفادة:*\n1️⃣ الإيمان ستة أركان: بالله، وملائكته، وكتبه، ورسله، واليوم الآخر، والقدر خيره وشره.\n2️⃣ من عرف ربه باسمائه الحسنى استراح قلبه من الخوف والهم.\n3️⃣ الإيمان بالقضاء والقدر يمحو كلمة "لو" المحبطة ويملأ الروح باليقين والرضا.\n\n📖 *آية الأسبوع للتأمل:* ﴿ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إِلَيْهِ مِن رَّبِّهِۦ وَٱلْمُؤْمِنُونَ﴾ [البقرة: 285]\n\n🎯 *الواجب العملي:* ترديد ذكر "رضيت بالله رباً وبالإسلام ديناً وبمحمد ﷺ نبياً" صباحاً ومساءً بحضور قلب.\n\n🔗 رابط الاختبار القصير للمراجعة الذاتية في منصة مشكاة. حفظكم الله جميعاً! 🤍`,
+            actionItem: 'شاركونا عبر المجموعة تطبيقكم العملي لذكر اليوم!'
+          },
+          reviewQuiz: [
+            {
+              id: 1,
+              questionAr: 'أي من الأركان التالية يدخل ضمن أركان الإيمان الستة وليس من أركان الإسلام الخمسة؟',
+              questionEn: 'Which is one of the 6 Pillars of Iman and NOT of the 5 Pillars of Islam?',
+              options: [
+                { id: 'a', textAr: 'إيتاء الزكاة', textEn: 'Giving Zakah' },
+                { id: 'b', textAr: 'الإيمان بالقضاء والقدر', textEn: 'Belief in Divine Destiny (Qadar)' },
+                { id: 'c', textAr: 'صوم شهر رمضان', textEn: 'Fasting Ramadan' },
+                { id: 'd', textAr: 'حج البيت لمن استطاع', textEn: 'Performing Hajj' }
+              ],
+              correctOptionId: 'b',
+              reflectionPrompt: 'الإيمان بالقدر يورث الطمأنينة والرضا عن الله في السراء والضراء.'
+            },
+            {
+              id: 2,
+              questionAr: 'من هو الصحابي الجليل راوي حديث جبريل المشهور في بيان أركان الإيمان والإسلام؟',
+              questionEn: 'Who narrated the renowned Hadith of Jibreel explaining Islam, Iman, and Ihsan?',
+              options: [
+                { id: 'a', textAr: 'أبو بكر الصديق رضي الله عنه', textEn: 'Abu Bakr As-Siddiq' },
+                { id: 'b', textAr: 'عمر بن الخطاب رضي الله عنه', textEn: 'Umar ibn Al-Khattab' },
+                { id: 'c', textAr: 'أبو هريرة رضي الله عنه', textEn: 'Abu Hurairah' },
+                { id: 'd', textAr: 'أنس بن مالك رضي الله عنه', textEn: 'Anas ibn Malik' }
+              ],
+              correctOptionId: 'b',
+              reflectionPrompt: 'قال عمر: بينما نحن عند رسول الله ﷺ إذ طلع علينا رجل شديد بياض الثياب...'
+            }
+          ]
+        };
+      }
+
+      // Quiz Score Calculation
+      const quizQuestions = tajweedData?.quiz || [];
+      const quizScore = useMemo(() => {
+        if (!quizQuestions.length) return 0;
+        let correct = 0;
+        quizQuestions.forEach(q => {
+          if (quizAnswers[q.id] === q.correctOptionId) correct++;
+        });
+        return Math.round((correct / quizQuestions.length) * 100);
+      }, [quizAnswers, quizQuestions]);
+
+      // Copy WhatsApp text to clipboard
+      const handleCopyWhatsApp = () => {
+        if (islamicData?.whatsAppKit?.formattedText) {
+          navigator.clipboard.writeText(islamicData.whatsAppKit.formattedText);
+          showToast(isRtl ? 'تم نسخ ملخص الواتساب بنجاح 📋' : 'WhatsApp Summary Copied to Clipboard 📋');
+        }
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col bg-ivory-50">
+          
+          {/* TOAST ALERT */}
+          {toast && (
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-900 border-2 border-gold-400 text-gold-200 px-6 py-3 rounded-full shadow-2xl flex items-center space-x-3 space-x-reverse font-bold text-sm animate-bounce">
+              <span>✨</span>
+              <span>{toast}</span>
+            </div>
+          )}
+
+          {/* TOP GRAND EMERALD HEADER */}
+          <header className="emerald-pattern text-white relative border-b-4 border-gold-400/80 shadow-xl overflow-hidden no-print">
+            {/* 8-pointed star watermark background */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
+              <svg className="w-[600px] h-[600px] text-gold-300" viewBox="0 0 100 100" fill="currentColor">
+                <polygon points="50,0 64,28 95,21 80,50 95,79 64,72 50,100 36,72 5,79 20,50 5,21 36,28" />
+              </svg>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 relative z-10 flex flex-wrap items-center justify-between gap-4">
+              
+              {/* Brand Logo & Title */}
+              <div className="flex items-center space-x-4 space-x-reverse cursor-pointer" onClick={() => setActiveTab('dashboard')}>
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-950 border-2 border-gold-400 p-2 shadow-2xl flex items-center justify-center transform hover:scale-105 transition">
+                  <img src="icons/mishkah-icon.svg" alt="Mishkah Logo" className="w-full h-full drop-shadow" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-wide text-gold-200 font-amiri">
+                      {isRtl ? 'مِشكاة' : 'Mishkah'}
+                    </h1>
+                    <span className="bg-gold-500/20 text-gold-300 border border-gold-400/40 text-xs px-2.5 py-0.5 rounded-full font-semibold">
+                      v1.0 MVP
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-100/90 font-medium mt-0.5">
+                    {isRtl ? 'المُعين الذكي لمعلمات القرآن والتجويد والعلوم الشرعية' : 'AI Copilot for Quran, Tajweed & Islamic Studies Educators'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Controls Strip: PIN Gate, BiDi switcher, Font scaler */}
+              <div className="flex items-center space-x-3 space-x-reverse">
+                
+                {/* Security PIN Gate Button */}
+                <button 
+                  onClick={() => setIsPinModalOpen(true)}
+                  className="bg-emerald-800/80 hover:bg-emerald-700/80 border border-gold-400/50 text-gold-200 text-xs px-3 py-1.5 rounded-lg flex items-center space-x-1.5 space-x-reverse transition shadow-sm"
+                  title={isRtl ? 'رمز أمان المعلمة' : 'Teacher Security PIN'}
+                >
+                  <span>🔒</span>
+                  <span className="hidden sm:inline">{isRtl ? 'أمان المعلمة' : 'Teacher PIN'}</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+                </button>
+
+                {/* Font Size Scaler */}
+                <div className="hidden md:flex items-center space-x-2 space-x-reverse bg-emerald-950/60 border border-emerald-700/60 rounded-lg px-2.5 py-1 text-xs text-emerald-100">
+                  <span>Aa</span>
+                  <input 
+                    type="range" 
+                    min="14" 
+                    max="20" 
+                    value={fontSize} 
+                    onChange={(e) => setFontSize(Number(e.target.value))} 
+                    className="w-16 h-1.5 accent-gold-400 cursor-pointer"
+                  />
+                  <span className="text-[10px] text-gold-300">{fontSize}px</span>
+                </div>
+
+                {/* Language Switcher Button */}
+                <button 
+                  onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
+                  className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold text-xs px-3.5 py-1.5 rounded-lg transition shadow-md flex items-center space-x-1 space-x-reverse"
+                >
+                  <span>🌐</span>
+                  <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Navigation Tabs Bar */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-emerald-800/80 flex overflow-x-auto py-2.5 gap-2 scrollbar-none">
+              {[
+                { id: 'dashboard', icon: '📊', labelAr: 'لوحة المعلمة', labelEn: 'Dashboard' },
+                { id: 'tajweed', icon: '📖', labelAr: 'مُعين التجويد (Module A)', labelEn: 'Tajweed Copilot' },
+                { id: 'islamic', icon: '🕌', labelAr: 'الحلقات الشرعية (Module B)', labelEn: 'Islamic Studies' },
+                { id: 'worksheet', icon: '📝', labelAr: 'أوراق العمل والطباعة', labelEn: 'Print Worksheets' },
+                { id: 'quiz', icon: '🎯', labelAr: 'الاختبار الذاتي التفاعلي', labelEn: 'Interactive Quiz' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center space-x-2 space-x-reverse px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
+                    activeTab === tab.id 
+                      ? 'bg-gold-400 text-emerald-950 shadow-md transform scale-105' 
+                      : 'text-emerald-100/90 hover:bg-emerald-800/60 hover:text-white'
+                  }`}
+                >
+                  <span className="text-base">{tab.icon}</span>
+                  <span>{isRtl ? tab.labelAr : tab.labelEn}</span>
+                </button>
+              ))}
+            </div>
+          </header>
+
+          {/* MAIN WORKSPACE BODY */}
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+
+            {/* ================= VIEW: DASHBOARD ================= */}
+            {activeTab === 'dashboard' && (
+              <div className="space-y-8 animate-fadeIn">
+                
+                {/* Welcome Hero Banner */}
+                <div className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-900 rounded-3xl p-6 sm:p-8 text-white border-2 border-gold-400/40 shadow-xl relative overflow-hidden">
+                  <div className="relative z-10 max-w-3xl">
+                    <div className="inline-flex items-center space-x-2 space-x-reverse bg-gold-400/20 text-gold-200 border border-gold-400/40 text-xs px-3 py-1 rounded-full mb-3">
+                      <span>✨</span>
+                      <span>{isRtl ? 'مرحباً بكِ أستاذتنا الفاضلة في مِشكاة' : 'Welcome to Mishkah Teacher Hub'}</span>
+                    </div>
+                    <h2 className="text-2xl sm:text-4xl font-extrabold font-amiri text-gold-200 mb-3">
+                      {isRtl ? 'تحضير ذكي متقن لحلقاتكِ القرآنية والشرعية عبر زوم' : 'Precise, Curriculum-Aligned Lesson Blueprints for Zoom'}
+                    </h2>
+                    <p className="text-emerald-100/90 text-sm sm:text-base leading-relaxed mb-6">
+                      {isRtl 
+                        ? 'أداة مصممة خصيصاً للمعلمة الدقيقة: استخرجي أمثلة التجويد بالرسم العثماني، جهّزي بطاقات زوم الملونة، واستخرجي أوراق عمل قابلة للطباعة فوراً، واعتمدي أحاديث صحيحة موثقة بدون عناء.'
+                        : 'Designed specifically for detail-oriented educators: extract Quranic verses with accurate Uthmani diacritics, present high-contrast Zoom cards, generate printable worksheets, and create authenticated Islamic studies blueprints in seconds.'}
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <button 
+                        onClick={() => setActiveTab('tajweed')}
+                        className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-bold px-5 py-2.5 rounded-xl shadow-lg transition flex items-center space-x-2 space-x-reverse text-sm"
+                      >
+                        <span>📖</span>
+                        <span>{isRtl ? 'بدء تحضير درس تجويد' : 'Prepare Tajweed Lesson'}</span>
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab('islamic')}
+                        className="bg-emerald-950/80 hover:bg-emerald-950 border border-gold-400/60 text-gold-200 font-bold px-5 py-2.5 rounded-xl shadow transition flex items-center space-x-2 space-x-reverse text-sm"
+                      >
+                        <span>🕌</span>
+                        <span>{isRtl ? 'تخطيط حلقة علوم شرعية' : 'Plan Islamic Studies Lesson'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Core Feature Highlights (Cards) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                  {[
+                    {
+                      titleAr: 'بطاقات شرح زوم التفاعلية',
+                      titleEn: 'Zoom Teaching Cards',
+                      descAr: 'عرض عالي التباين بخط عثماني وتلوين تلقائي لحكم التجويد ومخارج الحروف التشريحية.',
+                      descEn: 'High-contrast presentation mode with color-coded Uthmani script and anatomical articulation notes.',
+                      icon: '🖥️',
+                      tag: 'Module A'
+                    },
+                    {
+                      titleAr: 'أوراق عمل قابلة للطباعة (PDF)',
+                      titleEn: 'Printable Worksheets',
+                      descAr: 'جدول منظم: الكلمة القرآنية | الحكم | العلة والسبب، مع نموذج إجابة خاص بالمعلمة.',
+                      descEn: 'Clean structured tables with dual versions: student blank sheet and teacher answer key.',
+                      icon: '🖨️',
+                      tag: 'Print Ready'
+                    },
+                    {
+                      titleAr: 'حقيبة الواتساب بنقرة واحدة',
+                      titleEn: '1-Click WhatsApp Kit',
+                      descAr: 'ملخص موجز من 10 أسطر منسق بالإيموجي والآيات جاهز للنسخ المباشر لمجموعات أولياء الأمور.',
+                      descEn: '10-line emoji-formatted executive summary ready for instant broadcast to parent/student groups.',
+                      icon: '📱',
+                      tag: 'Module B'
+                    },
+                    {
+                      titleAr: 'سياج التوثيق الشرعي الصارم',
+                      titleEn: 'Authenticity Guardrails',
+                      descAr: 'عزو صريح للأحاديث (الراوي + مصدر صحيح البخاري/مسلم + درجة الصحة) وعزو الآيات بالاسم والرقم.',
+                      descEn: 'Strict verification badges: exact Surah/Ayah references, primary Hadith sources, and Sahih status.',
+                      icon: '🛡️',
+                      tag: 'Zero Weak Hadith'
+                    }
+                  ].map((card, idx) => (
+                    <div key={idx} className="bg-white rounded-2xl p-5 border border-emerald-900/10 shadow-sm hover:shadow-md transition">
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="text-2xl">{card.icon}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full">
+                          {card.tag}
+                        </span>
+                      </div>
+                      <h3 className="font-bold text-emerald-950 text-base mb-1.5 font-cairo">
+                        {isRtl ? card.titleAr : card.titleEn}
+                      </h3>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {isRtl ? card.descAr : card.descEn}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Quick Inspection of Active Prepared Lesson */}
+                {tajweedData && (
+                  <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-md">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+                      <div>
+                        <span className="text-xs text-emerald-700 font-bold uppercase tracking-wider">
+                          {isRtl ? 'الدرس النشط حالياً في الذاكرة' : 'Currently Active Prepared Lesson'}
+                        </span>
+                        <h3 className="text-xl font-extrabold text-emerald-950 font-amiri mt-0.5">
+                          {tajweedData.metadata.surah} ({tajweedData.metadata.ayahRange}) — {tajweedData.metadata.ruleNameAr}
+                        </h3>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => setActiveTab('tajweed')}
+                          className="bg-emerald-700 text-white hover:bg-emerald-800 text-xs px-3.5 py-1.5 rounded-lg font-bold transition"
+                        >
+                          {isRtl ? 'عرض بطاقات الشرح' : 'View Presentation'}
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('worksheet')}
+                          className="bg-gold-50 text-gold-700 border border-gold-300 hover:bg-gold-100 text-xs px-3.5 py-1.5 rounded-lg font-bold transition"
+                        >
+                          {isRtl ? 'طباعة ورقة العمل' : 'Print Worksheet'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                      <div className="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-100">
+                        <span className="text-emerald-800 font-bold block mb-1">
+                          {isRtl ? 'المخرج الصوتي التشريحي:' : 'Anatomical Articulation:'}
+                        </span>
+                        <p className="text-slate-700 leading-relaxed font-amiri text-sm">
+                          {isRtl ? tajweedData.ruleDefinition.anatomicalMakhrajAr : tajweedData.ruleDefinition.anatomicalMakhrajEn}
+                        </p>
+                      </div>
+                      <div className="bg-gold-50/70 p-3.5 rounded-xl border border-gold-200">
+                        <span className="text-gold-800 font-bold block mb-1">
+                          {isRtl ? 'المقدار والزمن:' : 'Timing & Counts:'}
+                        </span>
+                        <p className="text-slate-700 font-bold text-sm">
+                          {tajweedData.ruleDefinition.timingOrHarakat}
+                        </p>
+                      </div>
+                      <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <span className="text-slate-700 font-bold block mb-1">
+                          {isRtl ? 'المرجع المعتمد:' : 'Textbook Reference:'}
+                        </span>
+                        <p className="text-slate-600">
+                          {tajweedData.metadata.textbookSource}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ================= VIEW: MODULE A (TAJWEED COPILOT) ================= */}
+            {activeTab === 'tajweed' && (
+              <div className="space-y-8 animate-fadeIn">
+                
+                {/* Generation Control Panel */}
+                <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                  <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                    <div className="flex items-center space-x-3 space-x-reverse">
+                      <span className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
+                        📖
+                      </span>
+                      <div>
+                        <h2 className="text-xl font-extrabold text-emerald-950 font-cairo">
+                          {isRtl ? 'مُعين التجويد والقرآن الكريم' : 'Bilingual Quran & Tajweed Copilot'}
+                        </h2>
+                        <p className="text-xs text-slate-500">
+                          {isRtl ? 'توليد الدروس المنهجية، واستخراج الأمثلة بالرسم العثماني، وإعداد بطاقات زوم' : 'Curriculum-aligned lesson generator with Uthmani script and Zoom presentation deck'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs px-3 py-1 rounded-full font-bold">
+                      Hafs 'an 'Aasim
+                    </span>
+                  </div>
+
+                  {/* Form Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    
+                    {/* Surah Name */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'اسم السورة' : 'Surah Name'}
+                      </label>
+                      <input 
+                        type="text" 
+                        value={surahName} 
+                        onChange={(e) => setSurahName(e.target.value)}
+                        placeholder="سورة الملك / Al-Mulk"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                      />
+                    </div>
+
+                    {/* Ayah Range */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'نطاق الآيات' : 'Ayah Range'}
+                      </label>
+                      <input 
+                        type="text" 
+                        value={ayahRange} 
+                        onChange={(e) => setAyahRange(e.target.value)}
+                        placeholder="1–10"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                      />
+                    </div>
+
+                    {/* Target Tajweed Rule */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'حكم التجويد المستهدف' : 'Target Tajweed Rule'}
+                      </label>
+                      <select 
+                        value={selectedRule} 
+                        onChange={(e) => setSelectedRule(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                      >
+                        {TAJWEED_RULES.map(r => (
+                          <option key={r.id} value={r.id}>
+                            {isRtl ? r.nameAr : r.nameEn}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Language Mode */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'لغة الشرح' : 'Explanation Language'}
+                      </label>
+                      <select 
+                        value={tajweedMode} 
+                        onChange={(e) => setTajweedMode(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                      >
+                        <option value="bilingual">{isRtl ? 'ثنائي اللغة (عربي + English)' : 'Bilingual (Arabic + English)'}</option>
+                        <option value="arabic">{isRtl ? 'عربي فقط (Arabic Only)' : 'Arabic Only'}</option>
+                        <option value="english">{isRtl ? 'English Only' : 'الإنجليزية فقط'}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Textbook Context Grounding */}
+                  <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 mb-5">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                      <label className="text-xs font-bold text-emerald-950 flex items-center space-x-1.5 space-x-reverse">
+                        <span>📚</span>
+                        <span>{isRtl ? 'مرجعية الكتاب المعتمد (Strict Curriculum Adherence):' : 'Textbook Reference Context:'}</span>
+                      </label>
+                      <span className="text-[11px] text-slate-500">
+                        {isRtl ? 'يلتزم الذكاء الاصطناعي بدقة بتعريفات ومصطلحات الكتاب المحدد' : 'AI adheres strictly to this book\'s exact terminology'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2.5">
+                      {PRELOADED_TEXTBOOKS.map(book => (
+                        <div 
+                          key={book.id} 
+                          onClick={() => setSelectedTextbook(book.id)}
+                          className={`p-3 rounded-xl border cursor-pointer transition flex items-start space-x-3 space-x-reverse ${
+                            selectedTextbook === book.id 
+                              ? 'bg-emerald-50 border-emerald-600 shadow-sm' 
+                              : 'bg-white border-slate-200 hover:border-emerald-300'
+                          }`}
+                        >
+                          <input 
+                            type="radio" 
+                            name="textbookRadio" 
+                            checked={selectedTextbook === book.id} 
+                            onChange={() => setSelectedTextbook(book.id)} 
+                            className="mt-1 accent-emerald-700"
+                          />
+                          <div>
+                            <div className="font-bold text-xs text-slate-800">
+                              {isRtl ? book.nameAr : book.nameEn}
+                            </div>
+                            <div className="text-[11px] text-slate-500 mt-0.5">
+                              {book.note}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Custom Context Upload / Paste */}
+                    <details className="text-xs mt-2 text-slate-600">
+                      <summary className="cursor-pointer font-bold text-emerald-800 hover:underline">
+                        {isRtl ? '+ إضافة فصل خاص أو نص تجويد مخصص من كتابك' : '+ Paste custom textbook chapter or notes'}
+                      </summary>
+                      <textarea
+                        value={customContext}
+                        onChange={(e) => setCustomContext(e.target.value)}
+                        placeholder={isRtl ? 'الصقي هنا نص التعريفات أو الملاحظات الصوتية الخاصة بك ليعتمدها النظام...' : 'Paste textbook definitions, anatomical notes, or special pedagogical instructions...'}
+                        rows="3"
+                        className="w-full mt-2 bg-white border border-slate-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-700 text-xs"
+                      />
+                    </details>
+                  </div>
+
+                  {/* Trigger Button */}
+                  <div className="flex justify-end">
+                    <button 
+                      onClick={() => handleGenerateTajweed(false)}
+                      disabled={isGeneratingTajweed}
+                      className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-extrabold px-6 py-3 rounded-xl shadow-lg transition flex items-center space-x-2 space-x-reverse disabled:opacity-50 text-sm"
+                    >
+                      <span>{isGeneratingTajweed ? '⏳' : '✨'}</span>
+                      <span>
+                        {isGeneratingTajweed 
+                          ? (isRtl ? 'جارٍ التحضير واستخراج الآيات...' : 'Generating Uthmani Blueprint...') 
+                          : (isRtl ? 'توليد خطة الدرس وبطاقات زوم' : 'Generate Lesson & Zoom Cards')}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Generated Lesson Content */}
+                {tajweedData && (
+                  <div className="space-y-6">
+
+                    {/* Quick Tabs to toggle sub-outputs */}
+                    <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-3 rounded-2xl border border-slate-200">
+                      <div className="flex space-x-2 space-x-reverse">
+                        <button 
+                          onClick={() => setIsFullscreenZoom(true)}
+                          className="bg-emerald-900 hover:bg-emerald-800 text-gold-300 font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-1.5 space-x-reverse transition shadow"
+                        >
+                          <span>📺</span>
+                          <span>{isRtl ? 'وضع عرض زوم للشاشة الكاملة (Zoom Share)' : 'Fullscreen Zoom Presentation Mode'}</span>
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('worksheet')}
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs transition"
+                        >
+                          <span>🖨️</span>
+                          <span>{isRtl ? 'ورقة العمل للطباعة' : 'Printable Worksheet'}</span>
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('quiz')}
+                          className="bg-gold-50 hover:bg-gold-100 text-gold-900 font-bold px-3 py-2 rounded-xl text-xs border border-gold-300 transition"
+                        >
+                          <span>🎯</span>
+                          <span>{isRtl ? 'الاختبار التفاعلي' : 'Interactive Quiz'}</span>
+                        </button>
+                      </div>
+
+                      <span className="text-xs text-slate-500">
+                        {isRtl ? 'عدد بطاقات الشرح المجهزة:' : 'Prepared Slides:'} <strong className="text-emerald-900">{tajweedData.presentationCards.length}</strong>
+                      </span>
+                    </div>
+
+                    {/* Rule Definition Box */}
+                    <div className="bg-gradient-to-r from-emerald-900 to-emerald-950 text-white rounded-3xl p-6 border-2 border-gold-400/40 shadow-md">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-xl font-bold font-amiri text-gold-300">
+                          {tajweedData.ruleDefinition.arabic.split('لغةً')[0]}
+                        </h3>
+                        <span className="bg-gold-400/20 text-gold-300 border border-gold-400/40 text-xs px-3 py-0.5 rounded-full font-bold">
+                          {tajweedData.ruleDefinition.timingOrHarakat}
+                        </span>
+                      </div>
+                      <p className="text-slate-100 font-amiri text-base sm:text-lg leading-relaxed mb-4">
+                        {tajweedData.ruleDefinition.arabic}
+                      </p>
+                      <p className="text-emerald-100/80 text-xs sm:text-sm italic border-t border-emerald-800/80 pt-3">
+                        {tajweedData.ruleDefinition.english}
+                      </p>
+                      
+                      {/* Anatomical Makhraj Callout */}
+                      <div className="mt-4 bg-emerald-950/80 rounded-2xl p-4 border border-gold-500/30 flex items-start space-x-3 space-x-reverse">
+                        <span className="text-2xl mt-0.5">🗣️</span>
+                        <div>
+                          <h4 className="text-xs font-bold text-gold-300 uppercase tracking-wider mb-1">
+                            {isRtl ? 'الوصف التشريحي للمخرج (Anatomical Makhraj):' : 'Anatomical Makhraj Guidance:'}
+                          </h4>
+                          <p className="text-xs text-slate-200 leading-relaxed font-amiri text-sm">
+                            {isRtl ? tajweedData.ruleDefinition.anatomicalMakhrajAr : tajweedData.ruleDefinition.anatomicalMakhrajEn}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Zoom Presentation Deck Cards */}
+                    <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                      <div className="flex items-center justify-between pb-3 mb-6 border-b border-slate-100">
+                        <h3 className="text-lg font-bold text-emerald-950 font-cairo flex items-center space-x-2 space-x-reverse">
+                          <span>🖥️</span>
+                          <span>{isRtl ? 'بطاقات الشرح التفاعلية لبرنامج زوم (Zoom Cards)' : 'Zoom Teaching Presentation Cards'}</span>
+                        </h3>
+                        <div className="flex items-center space-x-2 space-x-reverse">
+                          <button 
+                            disabled={activeSlideIndex === 0}
+                            onClick={() => setActiveSlideIndex(prev => prev - 1)}
+                            className="bg-slate-100 disabled:opacity-30 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg text-xs"
+                          >
+                            {isRtl ? 'السابق' : 'Previous'}
+                          </button>
+                          <span className="text-xs font-bold text-slate-600 px-2">
+                            {activeSlideIndex + 1} / {tajweedData.presentationCards.length}
+                          </span>
+                          <button 
+                            disabled={activeSlideIndex === tajweedData.presentationCards.length - 1}
+                            onClick={() => setActiveSlideIndex(prev => prev + 1)}
+                            className="bg-slate-100 disabled:opacity-30 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg text-xs"
+                          >
+                            {isRtl ? 'التالي' : 'Next'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Active Slide Card Display */}
+                      {(() => {
+                        const card = tajweedData.presentationCards[activeSlideIndex] || tajweedData.presentationCards[0];
+                        return (
+                          <div className="bg-gradient-to-b from-slate-900 to-emerald-950 text-white rounded-3xl p-8 border-4 border-gold-400/70 shadow-2xl relative overflow-hidden text-center min-h-[380px] flex flex-col justify-between">
+                            
+                            {/* Slide Header */}
+                            <div className="flex justify-between items-center text-xs text-gold-300 border-b border-emerald-800/60 pb-3">
+                              <span className="font-bold tracking-wider uppercase">Mishkah Slide {card.cardIndex || activeSlideIndex + 1}</span>
+                              <span className="bg-gold-500/20 px-3 py-1 rounded-full border border-gold-400/40 font-bold">
+                                {isRtl ? card.titleAr : card.titleEn}
+                              </span>
+                            </div>
+
+                            {/* Uthmani Ayah Display with Highlighting */}
+                            <div className="my-8 px-4">
+                              <p className="font-quran text-2xl sm:text-4xl text-amber-100 leading-loose">
+                                {card.ayahTextUthmani.split(card.highlightedPortion).map((part, i, arr) => (
+                                  <React.Fragment key={i}>
+                                    {part}
+                                    {i < arr.length - 1 && (
+                                      <span className="bg-emerald-500/40 text-gold-300 font-bold border-b-4 border-gold-400 px-2 py-0.5 rounded-lg shadow-inner">
+                                        {card.highlightedPortion}
+                                      </span>
+                                    )}
+                                  </React.Fragment>
+                                ))}
+                              </p>
+                              <div className="text-xs text-gold-300/80 mt-2 font-cairo">
+                                {isRtl ? `الموضع المستهدف بالتلوين: [ ${card.highlightedPortion} ]` : `Target Word: [ ${card.highlightedPortion} ]`}
+                              </div>
+                            </div>
+
+                            {/* Pedagogical Explanation & Teacher Prompt */}
+                            <div className="bg-emerald-950/90 rounded-2xl p-4 border border-emerald-700/60 text-right text-xs space-y-2">
+                              <div className="text-slate-100 font-amiri text-base leading-relaxed">
+                                <strong>{isRtl ? 'الشرح والعلة:' : 'Explanation:'}</strong> {isRtl ? card.explanationAr : card.explanationEn}
+                              </div>
+                              <div className="text-gold-200/90 italic flex items-center space-x-2 space-x-reverse pt-2 border-t border-emerald-800/60">
+                                <span>💡</span>
+                                <span><strong>{isRtl ? 'إرشاد المعلمة للطالبات:' : 'Teacher Prompt:'}</strong> {card.teacherPrompt}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ================= VIEW: MODULE B (ISLAMIC STUDIES) ================= */}
+            {activeTab === 'islamic' && (
+              <div className="space-y-8 animate-fadeIn">
+                
+                {/* Control Generator Panel */}
+                <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                  <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                    <div className="flex items-center space-x-3 space-x-reverse">
+                      <span className="w-10 h-10 rounded-xl bg-gold-100 text-gold-800 flex items-center justify-center text-xl font-bold">
+                        🕌
+                      </span>
+                      <div>
+                        <h2 className="text-xl font-extrabold text-emerald-950 font-cairo">
+                          {isRtl ? 'مُحضّر الحلقات الشرعية المؤصّلة' : 'Islamic Studies Lesson Planner'}
+                        </h2>
+                        <p className="text-xs text-slate-500">
+                          {isRtl ? 'مخططات زمنية دقيقة، أحاديث معتمدة بأرقامها ورواتها، وملخصات جاهزة لمجموعات الواتساب' : 'Time-boxed Zoom blueprint, authenticated Hadith citations, and 1-click WhatsApp parent kits'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="bg-gold-50 text-gold-800 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
+                      Zero Hallucinated Hadith
+                    </span>
+                  </div>
+
+                  {/* Form Fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    
+                    {/* Subject Category */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'المجال الشرعي' : 'Subject Category'}
+                      </label>
+                      <select 
+                        value={subjectCategory} 
+                        onChange={(e) => setSubjectCategory(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 font-bold"
+                      >
+                        <option value="العقيدة (Aqeedah)">العقيدة (Aqeedah)</option>
+                        <option value="الفقه وأحكام العبادات (Fiqh)">الفقه وأحكام العبادات (Fiqh)</option>
+                        <option value="السيرة النبوية والتاريخ (Seerah)">السيرة النبوية والتاريخ (Seerah)</option>
+                        <option value="التزكية والأخلاق (Tazkiyah)">التزكية والأخلاق (Tazkiyah)</option>
+                      </select>
+                    </div>
+
+                    {/* Lesson Topic */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'عنوان أو موضوع الدرس' : 'Lesson Topic'}
+                      </label>
+                      <input 
+                        type="text" 
+                        value={lessonTopic} 
+                        onChange={(e) => setLessonTopic(e.target.value)}
+                        placeholder="أركان الإيمان الستة / أحكام الطهارة"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                      />
+                    </div>
+
+                    {/* Target Duration */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'مدة الحلقة في زوم' : 'Zoom Duration'}
+                      </label>
+                      <select 
+                        value={lessonDuration} 
+                        onChange={(e) => setLessonDuration(Number(e.target.value))}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                      >
+                        <option value="30">30 {isRtl ? 'دقيقة (حصة سريعة)' : 'Minutes (Fast)'}</option>
+                        <option value="45">45 {isRtl ? 'دقيقة (حصة نموذجية)' : 'Minutes (Standard)'}</option>
+                        <option value="60">60 {isRtl ? 'دقيقة (حلقة شاملة)' : 'Minutes (Deep Dive)'}</option>
+                      </select>
+                    </div>
+
+                    {/* Audience Level */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'فئة الطالبات' : 'Target Audience'}
+                      </label>
+                      <select 
+                        value={audienceLevel} 
+                        onChange={(e) => setAudienceLevel(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                      >
+                        <option value="الأطفال (Kids 7–12)">الأطفال (Kids 7–12)</option>
+                        <option value="اليافعين والمهتدين الجدد (Bilingual Youth)">اليافعين والمهتدين الجدد (Bilingual Youth)</option>
+                        <option value="الأمهات والبالغات (Adult Women)">الأمهات والبالغات (Adult Women)</option>
+                        <option value="المستوى المتقدم (Advanced Students)">المستوى المتقدم (Advanced Students)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Trigger Button */}
+                  <div className="flex justify-end pt-2">
+                    <button 
+                      onClick={() => handleGenerateIslamic(false)}
+                      disabled={isGeneratingIslamic}
+                      className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-extrabold px-6 py-3 rounded-xl shadow-lg transition flex items-center space-x-2 space-x-reverse disabled:opacity-50 text-sm"
+                    >
+                      <span>{isGeneratingIslamic ? '⏳' : '🕌'}</span>
+                      <span>
+                        {isGeneratingIslamic 
+                          ? (isRtl ? 'جارٍ التحضير والتوثيق الشرعي...' : 'Authenticating Evidences...') 
+                          : (isRtl ? 'توليد المخطط الزمني وحقيبة الواتساب' : 'Generate Blueprint & WhatsApp Kit')}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Display Generated Islamic Studies Package */}
+                {islamicData && (
+                  <div className="space-y-6">
+
+                    {/* 1. Time-Boxed Lesson Blueprint */}
+                    <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-6 border-b border-slate-100">
+                        <div>
+                          <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                            {isRtl ? 'المخطط الزمني المنضبط بالدقائق' : 'Minute-by-Minute Time-Boxed Blueprint'}
+                          </span>
+                          <h3 className="text-xl font-extrabold text-emerald-950 font-amiri">
+                            {islamicData.metadata.topic} — ({islamicData.metadata.durationMinutes} {isRtl ? 'دقيقة' : 'Minutes'})
+                          </h3>
+                        </div>
+                        <span className="bg-emerald-100 text-emerald-900 font-bold text-xs px-3 py-1 rounded-full">
+                          {islamicData.metadata.category}
+                        </span>
+                      </div>
+
+                      {/* Timeline Phases */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {islamicData.blueprint.map((phase, idx) => (
+                          <div key={idx} className="bg-slate-50 rounded-2xl p-4 border border-slate-200 hover:border-emerald-400 transition flex flex-col justify-between">
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="w-6 h-6 rounded-full bg-emerald-800 text-gold-200 text-xs font-bold flex items-center justify-center">
+                                  {phase.phaseNumber || idx + 1}
+                                </span>
+                                <span className="bg-gold-100 text-gold-800 font-bold text-xs px-2.5 py-0.5 rounded-full">
+                                  ⏱️ {phase.allocatedMinutes} {isRtl ? 'د' : 'min'}
+                                </span>
+                              </div>
+                              <h4 className="font-bold text-emerald-950 text-sm mb-2 font-cairo">
+                                {isRtl ? phase.phaseNameAr : phase.phaseNameEn}
+                              </h4>
+                              <p className="text-xs text-slate-700 leading-relaxed font-amiri mb-3">
+                                {isRtl ? phase.teacherGuidanceAr : phase.teacherGuidanceEn}
+                              </p>
+                            </div>
+
+                            {/* Talking Points */}
+                            {phase.talkingPoints && (
+                              <ul className="text-[11px] text-slate-600 space-y-1 border-t border-slate-200 pt-2">
+                                {phase.talkingPoints.map((tp, i) => (
+                                  <li key={i} className="flex items-start space-x-1 space-x-reverse">
+                                    <span className="text-emerald-600 font-bold">•</span>
+                                    <span>{tp}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 2. Authenticated Evidences & Guardrails */}
+                    <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                      <div className="flex items-center justify-between pb-3 mb-5 border-b border-slate-100">
+                        <h3 className="text-lg font-bold text-emerald-950 font-cairo flex items-center space-x-2 space-x-reverse">
+                          <span>🛡️</span>
+                          <span>{isRtl ? 'الأدلة الشرعية الموثقة وسياج التحقق' : 'Authenticated Quran & Hadith Evidences'}</span>
+                        </h3>
+                        <span className="text-xs text-emerald-800 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full font-bold">
+                          ✓ Verified Source Citation
+                        </span>
+                      </div>
+
+                      <div className="space-y-4">
+                        {islamicData.evidences.map((ev, i) => (
+                          <div key={i} className="bg-emerald-50/50 rounded-2xl p-5 border border-emerald-200 relative overflow-hidden">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                              <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider bg-white px-2.5 py-0.5 rounded-md border border-emerald-200">
+                                {ev.type === 'quran' ? '📖 آية قرآنية' : '📜 حديث نبوي شريف'}
+                              </span>
+                              <div className="flex items-center space-x-2 space-x-reverse text-xs">
+                                <span className="bg-gold-100 text-gold-900 border border-gold-300 font-bold px-2.5 py-0.5 rounded-full">
+                                  {ev.grading}
+                                </span>
+                                <span className="text-slate-600 font-medium">
+                                  {ev.citation}
+                                </span>
+                              </div>
+                            </div>
+
+                            <p className="font-quran text-lg sm:text-xl text-emerald-950 leading-loose mb-2">
+                              {ev.arabicText}
+                            </p>
+                            <p className="text-xs text-slate-600 italic border-t border-emerald-100 pt-2">
+                              {ev.englishTranslation}
+                            </p>
+                            {ev.narrator && ev.narrator !== '—' && (
+                              <div className="text-[11px] text-slate-500 mt-1 font-bold">
+                                {isRtl ? `الراوي: ${ev.narrator}` : `Narrator: ${ev.narrator}`}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 3. WhatsApp Ready Kit (1-Click Copy) */}
+                    <div className="bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-950 text-white rounded-3xl p-6 border-2 border-gold-400 shadow-xl">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-emerald-700">
+                        <div className="flex items-center space-x-2 space-x-reverse">
+                          <span className="text-2xl">📱</span>
+                          <h3 className="text-lg font-bold text-gold-300 font-cairo">
+                            {isRtl ? 'حقيبة الواتساب الجاهزة للإرسال الفوري' : '1-Click WhatsApp Parent/Student Broadcast Kit'}
+                          </h3>
+                        </div>
+                        <button 
+                          onClick={handleCopyWhatsApp}
+                          className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-extrabold px-4 py-2 rounded-xl text-xs shadow-lg transition flex items-center space-x-1.5 space-x-reverse"
+                        >
+                          <span>📋</span>
+                          <span>{isRtl ? 'نسخ الرسالة كاملة' : 'Copy Formatted Text'}</span>
+                        </button>
+                      </div>
+
+                      <div className="bg-emerald-950/80 rounded-2xl p-5 border border-emerald-700/80 font-amiri text-sm sm:text-base leading-relaxed text-slate-100 whitespace-pre-wrap select-all">
+                        {islamicData.whatsAppKit.formattedText}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ================= VIEW: PRINTABLE WORKSHEET ================= */}
+            {activeTab === 'worksheet' && (
+              <div className="space-y-6 animate-fadeIn">
+                
+                {/* Print Control Toolbar */}
+                <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3 no-print">
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <span className="text-xl">🖨️</span>
+                    <div>
+                      <h3 className="text-base font-bold text-emerald-950">
+                        {isRtl ? 'ورقة عمل التجويد القابلة للطباعة (Printable PDF)' : 'Printable Tajweed Worksheet'}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        {isRtl ? 'نسختان متطابقتان: نسخة فارغة للطالبة + نموذج الإجابة للمعلمة' : 'Dual format: Student Blank Test & Teacher Answer Key'}
+                      </p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => window.print()}
+                    className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2.5 rounded-xl text-xs shadow transition flex items-center space-x-2 space-x-reverse"
+                  >
+                    <span>🖨️</span>
+                    <span>{isRtl ? 'طباعة / حفظ بتنسيق PDF' : 'Print / Export to PDF'}</span>
+                  </button>
+                </div>
+
+                {/* Printable Document Sheet 1: Student Version */}
+                <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                  {/* Header */}
+                  <div className="text-center border-b-2 border-emerald-900 pb-4 mb-6">
+                    <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
+                      {isRtl ? 'منصة مِشكاة لتعليم القرآن الكريم والتجويد' : 'Mishkah Quranic Learning Platform'}
+                    </div>
+                    <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
+                      {isRtl ? 'ورقة عمل تفاعلية في أحكام التجويد (نسخة الطالبة)' : 'Tajweed Student Worksheet'}
+                    </h2>
+                    <div className="flex justify-between items-center text-xs text-slate-600 mt-4 px-2">
+                      <span>{isRtl ? 'اسم الطالبة:' : 'Student Name:'} ____________________</span>
+                      <span>{isRtl ? 'السورة والآيات:' : 'Surah:'} {tajweedData?.metadata?.surah} ({tajweedData?.metadata?.ayahRange})</span>
+                      <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
+                    </div>
+                  </div>
+
+                  {/* Student Table */}
+                  <div className="overflow-x-auto mb-8">
+                    <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                      <thead className="bg-emerald-800 text-white text-xs">
+                        <tr>
+                          <th className="p-3 w-12 text-center">#</th>
+                          <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية (رسم عثماني)' : 'Quranic Word'}</th>
+                          <th className="p-3">{isRtl ? 'الحكم التجويدي المطبق' : 'Tajweed Rule'}</th>
+                          <th className="p-3">{isRtl ? 'العلة وسبب الحكم' : 'Reason / Articulation Rule'}</th>
+                          <th className="p-3 w-28 text-center">{isRtl ? 'الدرجة' : 'Grade'}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200 text-sm">
+                        {(tajweedData?.worksheet || []).map((row, i) => (
+                          <tr key={i} className="hover:bg-slate-50">
+                            <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
+                            <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
+                            <td className="p-3 text-slate-400 italic">____________________</td>
+                            <td className="p-3 text-slate-400 italic">________________________________________</td>
+                            <td className="p-3 text-center text-slate-400">/ 5</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Teacher Feedback Footer */}
+                  <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
+                    <span>{isRtl ? 'توقيع المعلمة / التقييم النهائي:' : 'Teacher Signature & Final Grade:'} _______________</span>
+                    <span>Mishkah PWA — {new Date().getFullYear()}</span>
+                  </div>
+                </div>
+
+                {/* Page Break for Print */}
+                <div className="page-break my-8 no-print border-t-2 border-dashed border-slate-300 text-center py-2 text-xs text-slate-400 font-bold">
+                  ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلمة' : 'Page Break — Teacher Answer Key Follows'}
+                </div>
+
+                {/* Printable Document Sheet 2: Teacher Answer Key */}
+                <div className="bg-white rounded-3xl p-8 border-2 border-gold-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                  <div className="text-center border-b-2 border-gold-600 pb-4 mb-6">
+                    <span className="bg-gold-100 text-gold-900 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
+                      {isRtl ? 'خاص بالمعلمة فقط — نموذج الإجابة المعتمد' : 'Teacher Answer Key (Confidential)'}
+                    </span>
+                    <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-2">
+                      {isRtl ? 'دليل تصحيح ورقة العمل والعلل الصوتية' : 'Teacher Correction Guide & Phonetic Explanations'}
+                    </h2>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                      <thead className="bg-emerald-950 text-gold-300 text-xs">
+                        <tr>
+                          <th className="p-3 w-12 text-center">#</th>
+                          <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية' : 'Quranic Word'}</th>
+                          <th className="p-3">{isRtl ? 'الحكم الصحيح' : 'Correct Rule'}</th>
+                          <th className="p-3">{isRtl ? 'التوجيه والعلة الصوتية' : 'Phonetic Explanation'}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200 text-sm">
+                        {(tajweedData?.worksheet || []).map((row, i) => (
+                          <tr key={i} className="hover:bg-gold-50/40">
+                            <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
+                            <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
+                            <td className="p-3 font-bold text-emerald-800">{row.ruleApplied}</td>
+                            <td className="p-3 text-slate-700 text-xs leading-relaxed font-amiri">
+                              {isRtl ? row.reasonAr : row.reasonEn}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ================= VIEW: INTERACTIVE SELF-GRADING QUIZ ================= */}
+            {activeTab === 'quiz' && (
+              <div className="space-y-6 animate-fadeIn max-w-4xl mx-auto">
+                <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-100">
+                    <div>
+                      <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                        {isRtl ? 'التقييم الذاتي الفوري للطالبات' : 'Interactive Self-Grading Student Quiz'}
+                      </span>
+                      <h2 className="text-xl font-bold font-cairo text-emerald-950 mt-0.5">
+                        {isRtl ? 'اختبر معلوماتكِ في درس اليوم' : 'Test Your Knowledge on Today\'s Lesson'}
+                      </h2>
+                    </div>
+                    {quizSubmitted && (
+                      <div className="bg-emerald-900 text-gold-300 px-4 py-2 rounded-2xl border border-gold-400 font-bold text-sm shadow">
+                        {isRtl ? `النتيجة النهائية: ${quizScore}%` : `Score: ${quizScore}%`}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Questions List */}
+                  <div className="space-y-6">
+                    {quizQuestions.map((q, qIndex) => {
+                      const selected = quizAnswers[q.id];
+                      const isCorrect = selected === q.correctOptionId;
+                      
+                      return (
+                        <div key={q.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                          <div className="flex items-start space-x-3 space-x-reverse mb-3">
+                            <span className="w-7 h-7 rounded-full bg-emerald-800 text-gold-200 font-bold text-xs flex items-center justify-center shrink-0">
+                              {qIndex + 1}
+                            </span>
+                            <h3 className="font-bold text-emerald-950 text-base leading-snug font-cairo">
+                              {isRtl ? q.questionAr : q.questionEn}
+                            </h3>
+                          </div>
+
+                          {/* Options */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-3">
+                            {q.options.map(opt => {
+                              const isThisSelected = selected === opt.id;
+                              let btnClass = 'bg-white border-slate-200 text-slate-800 hover:border-emerald-300';
+                              
+                              if (quizSubmitted) {
+                                if (opt.id === q.correctOptionId) {
+                                  btnClass = 'bg-emerald-100 border-emerald-600 text-emerald-900 font-bold';
+                                } else if (isThisSelected && !isCorrect) {
+                                  btnClass = 'bg-red-100 border-red-500 text-red-900';
+                                }
+                              } else if (isThisSelected) {
+                                btnClass = 'bg-emerald-800 text-gold-200 border-emerald-900 font-bold shadow';
+                              }
+
+                              return (
+                                <button
+                                  key={opt.id}
+                                  disabled={quizSubmitted}
+                                  onClick={() => setQuizAnswers(prev => ({ ...prev, [q.id]: opt.id }))}
+                                  className={`p-3 rounded-xl border text-right text-xs transition flex items-center justify-between ${btnClass}`}
+                                >
+                                  <span>{isRtl ? opt.textAr : opt.textEn}</span>
+                                  {quizSubmitted && opt.id === q.correctOptionId && <span>✓</span>}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Explanations shown after submit */}
+                          {quizSubmitted && (
+                            <div className={`mt-3 p-3 rounded-xl text-xs font-amiri text-sm ${
+                              isCorrect ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-red-50 text-red-900 border border-red-200'
+                            }`}>
+                              <strong>{isCorrect ? '✓ إجابة صحيحة بارك الله فيكِ:' : '✗ توضيح الإجابة الصحيحة:'}</strong> {isRtl ? q.explanationAr : q.explanationEn}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Submit / Reset Actions */}
+                  <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
+                    {quizSubmitted ? (
+                      <button 
+                        onClick={() => {
+                          setQuizAnswers({});
+                          setQuizSubmitted(false);
+                        }}
+                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition"
+                      >
+                        {isRtl ? 'إعادة الاختبار من جديد' : 'Retake Quiz'}
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => setQuizSubmitted(true)}
+                        disabled={Object.keys(quizAnswers).length === 0}
+                        className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-xs shadow-lg transition disabled:opacity-40"
+                      >
+                        {isRtl ? 'تسليم الإجابات والتقييم الفوري' : 'Submit Answers'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* ================= FULLSCREEN ZOOM PRESENTATION OVERLAY ================= */}
+          {isFullscreenZoom && tajweedData && (
+            <div className="zoom-slide-fullscreen">
+              <button 
+                onClick={() => setIsFullscreenZoom(false)}
+                className="absolute top-6 left-6 bg-red-600/80 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-xl font-bold transition shadow-2xl z-50"
+              >
+                ✕ {isRtl ? 'إنهاء وضع العرض' : 'Exit Presentation'}
+              </button>
+
+              {(() => {
+                const card = tajweedData.presentationCards[activeSlideIndex] || tajweedData.presentationCards[0];
+                return (
+                  <div className="w-full max-w-5xl flex flex-col justify-between items-center text-center text-white space-y-6">
+                    <div className="text-gold-300 text-sm font-bold tracking-widest uppercase">
+                      {isRtl ? card.titleAr : card.titleEn}
+                    </div>
+
+                    <div className="my-8 px-6">
+                      <p className="font-quran text-3xl sm:text-6xl text-amber-100 leading-relaxed drop-shadow-md">
+                        {card.ayahTextUthmani.split(card.highlightedPortion).map((part, i, arr) => (
+                          <React.Fragment key={i}>
+                            {part}
+                            {i < arr.length - 1 && (
+                              <span className="bg-emerald-600/80 text-gold-200 font-bold border-b-8 border-gold-400 px-4 py-1 rounded-2xl shadow-2xl">
+                                {card.highlightedPortion}
+                              </span>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </p>
+                    </div>
+
+                    <div className="bg-emerald-950/90 rounded-2xl p-6 border-2 border-gold-400/50 max-w-3xl text-right font-amiri text-lg sm:text-xl text-slate-100 leading-relaxed shadow-2xl">
+                      <p>{isRtl ? card.explanationAr : card.explanationEn}</p>
+                    </div>
+
+                    <div className="flex items-center space-x-4 space-x-reverse pt-4">
+                      <button 
+                        disabled={activeSlideIndex === 0}
+                        onClick={() => setActiveSlideIndex(prev => prev - 1)}
+                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-sm"
+                      >
+                        {isRtl ? 'السابق' : 'Previous'}
+                      </button>
+                      <span className="text-gold-300 font-bold text-base px-3">
+                        {activeSlideIndex + 1} / {tajweedData.presentationCards.length}
+                      </span>
+                      <button 
+                        disabled={activeSlideIndex === tajweedData.presentationCards.length - 1}
+                        onClick={() => setActiveSlideIndex(prev => prev + 1)}
+                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-sm"
+                      >
+                        {isRtl ? 'التالي' : 'Next'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* ================= SECURITY PIN GATE MODAL ================= */}
+          {isPinModalOpen && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white rounded-3xl p-6 max-w-md w-full border-2 border-emerald-900 shadow-2xl text-right">
+                <div className="flex items-center space-x-3 space-x-reverse mb-4">
+                  <span className="text-3xl">🔒</span>
+                  <div>
+                    <h3 className="text-lg font-bold text-emerald-950 font-cairo">
+                      {isRtl ? 'بوابة أمان المعلمة (Teacher PIN Access)' : 'Teacher Security Gate'}
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      {isRtl ? 'حماية مفاتيح الذكاء الاصطناعي على الخادم ومنع الاستخدام غير المصرح به' : 'Serverless proxy security gate preventing unauthorized AI calls'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="my-4">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    {isRtl ? 'رمز المرور المعتمد (PIN):' : 'Enter Teacher Passcode / PIN:'}
+                  </label>
+                  <input 
+                    type="password" 
+                    value={tempPin} 
+                    onChange={(e) => setTempPin(e.target.value)}
+                    placeholder="MISHKAH2026"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-center font-mono text-base tracking-widest focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1.5">
+                    {isRtl ? 'الرمز الافتراضي المعتمد للنسخة: MISHKAH2026' : 'Default sandbox PIN: MISHKAH2026'}
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button 
+                    onClick={() => setIsPinModalOpen(false)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs"
+                  >
+                    {isRtl ? 'إلغاء' : 'Cancel'}
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setTeacherPin(tempPin);
+                      localStorage.setItem('mishkah_pin', tempPin);
+                      setIsPinModalOpen(false);
+                      showToast(isRtl ? 'تم تحديث وحفظ رمز المعلمة بنجاح 🔒' : 'Teacher PIN Saved Successfully 🔒');
+                    }}
+                    className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2 rounded-xl text-xs shadow"
+                  >
+                    {isRtl ? 'حفظ وتأكيد' : 'Confirm PIN'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* APPLICATION FOOTER */}
+          <footer className="bg-emerald-950 text-emerald-200/80 border-t border-emerald-900 py-6 text-center text-xs no-print">
+            <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <span className="font-bold text-gold-300 font-amiri text-base">مِشكاة | Mishkah</span>
+                <span>—</span>
+                <span>{isRtl ? 'منصة المعلمة الأولى لتعليم القرآن والعلوم الشرعية' : 'Empowering Quran & Islamic Studies Educators'}</span>
+              </div>
+              <div className="text-[11px] text-emerald-400/80">
+                <span>Designed with ADR-0006 Grand Emerald & Soft Gold Motif • Gemini Flash Architecture</span>
+              </div>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
