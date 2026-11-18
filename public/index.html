@@ -357,7 +357,7 @@
       icon: '👃',
       organAr: 'التجويف الأنفي الداخلي الممتد فوق سقف الحنك',
       organEn: 'The upper nasal chamber extending above the hard palate',
-      letters: ['الغنة (ن، م)'],
+      letters: ['ن', 'م'],
       lettersLabelAr: 'مخرج صوت الغنة الرخيم المركب في جسم حرفي النون والميم في سائر أحوالهما',
       lettersLabelEn: 'The resonant Ghunnah sound inherent in Noon and Meem across all conditions',
       mannerAr: 'ينسحب تيار الهواء من الرئتين ماراً بالتجويف الأنفي ليعطي رنيناً صوتياً شجياً مقداره حركتان.',
@@ -4368,6 +4368,16 @@
                                     </span>
                                   </div>
                                 ))}
+
+                                {makhraj.id === 'khayshoom' && (
+                                  <div className="bg-amber-100/90 text-emerald-950 border-2 border-gold-500 rounded-2xl px-4 py-2 flex items-center gap-2.5 shadow-xs">
+                                    <span className="text-2xl">👃</span>
+                                    <div>
+                                      <div className="text-xs font-black font-cairo">{isRtl ? 'صوت الغنة التجويدي الرخيم' : 'Ghunnah Resonant Sound'}</div>
+                                      <div className="text-[11px] text-emerald-900 font-bold">{isRtl ? 'يخرج من الخيشوم بمقدار حركتين ويلازم (النون والميم)' : 'Resonates from nasal cavity for 2 counts in (N & M)'}</div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
 
