@@ -142,15 +142,19 @@
     .font-quran, .font-quran * {
       font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif !important;
       font-weight: 700 !important;
-      color: #021a12 !important;
+      color: #021a12;
       line-height: 2.5 !important;
       letter-spacing: 0.03em;
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
     }
+    .zoom-quran-gold, .zoom-quran-gold * {
+      color: #fde68a !important;
+      text-shadow: 0 0 35px rgba(245, 158, 11, 0.7) !important;
+    }
 
     /* Exact Mawaqeet-Qibla Header & Islamic Accent Banners (Gold Khatam Rosettes on Rich Emerald Gradient) */
-    header, .emerald-pattern, .islamic-header-pattern, .islamic-hero-banner {
+    , .islamic-header-pattern, .islamic-hero-banner {
       background-color: #064e3b !important;
       background-image:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23fbbf24' stroke-opacity='0.12' stroke-width='1.2'%3E%3Cpolygon points='48,6 60,36 90,48 60,60 48,90 36,60 6,48 36,36'/%3E%3Crect x='22' y='22' width='52' height='52'/%3E%3Crect x='22' y='22' width='52' height='52' transform='rotate(45 48 48)'/%3E%3C/g%3E%3C/svg%3E"),
@@ -1347,6 +1351,501 @@
       }
     ];
 
+
+
+  // ================= BRANCH 2: DR. AYMAN SUWAYD TAJWEED CURRICULUM =================
+  const SUWAYD_TAJWEED_CURRICULUM = [
+    {
+      id: 'ikhfaa_haqiqi',
+      categoryId: 'noon_sakinah',
+      categoryAr: 'أحكام النون الساكنة والتنوين',
+      categoryEn: 'Noon Sakinah & Tanween Rules',
+      titleAr: 'الإخفاء الحقيقي (15 حرفاً) — المفخم والمرقق',
+      titleEn: 'Al-Ikhfaa Al-Haqiqi (Concealment)',
+      suwaydRef: 'كتاب التجويد المصور — د. أيمن رشدي سويد (ص 58–68)',
+      timingCounts: 2,
+      timingLabelAr: 'حركتان (2)',
+      timingDescription: 'غنة كاملة بمقدار حركتين تتبع الحرف التالي تفخيماً وترقيقاً',
+      matnVerseAr: 'وَالرَّابِـعُ الإِخْفَـاءُ عِنْـدَ الفَاضِـلِ ... مِـنَ الحُـرُوفِ وَاجِـبٌ لِلْفَاضِـلِ\nفِي خَمْسَةٍ مِنْ بَعْدِ عَشْرٍ رَمْزُهَا ... صِفْ ذَا ثَنَا كَمْ جَادَ شَخْصٌ قَدْ سَمَا دُمْ طَيِّباً زِدْ فِي تُقَى ضَعْ ظَالِمَا',
+      definitionAr: 'النطق بالنون الساكنة أو التنوين بصفة بين الإظهار والإدغام عارٍ عن التشديد مع بقاء الغنة في الحرف الأول بمقدار حركتين.',
+      mechanismAr: 'يتجافى طرف اللسان عن لثة الأسنان العليا تماماً فلا يصطدم بها، ويتهيأ الفم لمخرج الحرف التالي، بينما ينسحب تيار الصوت ليمر كاملاً برنين شجي عبر التجويف الأنفي (الخيشوم). تفخم الغنة إذا تلاها حرف استعلاء (ص، ض، ط، ظ، ق) وترقق مع الباقي.',
+      svgType: 'ikhfaa',
+      examples: [
+        { word: 'مِن قَبْلِكُمْ', surah: 'البقرة 25', highlight: 'مِن قَ', note: 'غنة مفخمة لاستعلاء القاف' },
+        { word: 'شَيْءٍ قَدِيرٌ', surah: 'الملك 1', highlight: 'ءٍ قَ', note: 'تنوين مع قاف — غنة مفخمة' },
+        { word: 'عَن طَبَقٍ', surah: 'الانشقاق 19', highlight: 'عَن طَ', note: 'غنة مفخمة لأعلى مراتب الاستعلاء (الطاء)' },
+        { word: 'مِن شَرِّ', surah: 'الفلق 2', highlight: 'مِن شَ', note: 'غنة مرققة لترقيق الشين' },
+        { word: 'أَنفُسَكُمْ', surah: 'البقرة 54', highlight: 'أَنفُ', note: 'إخفاء في كلمة واحدة مع الفاء مرققة' },
+        { word: 'مَآءً ثَجَّاجاً', surah: 'النبأ 14', highlight: 'ءً ثَ', note: 'تنوين يليه ثاء — غنة مرققة رخيمة' }
+      ],
+      commonMistakesAr: '1. إلصاق اللسان باللثة العليا مما يحول الإخفاء إلى إظهار صريح.\n2. كتم الغنة أو تقصيرها عن حركتين كاملتين.\n3. ترقيق الغنة عند حروف الاستعلاء (نطق "من قبلكم" بغنة كاف عامية).',
+      teacherPromptAr: 'نبّه الدارس ألا يلامس طرف لسانه سقف الفم إطلاقاً، واجعله يضع أصبعه على أنفه ليشعر باهتزاز الخيشوم.',
+      quizQuestions: [
+        {
+          qAr: 'ما وضع طرف اللسان عند نطق النون المخفاة في كتاب التجويد المصور لد. أيمن سويد؟',
+          opts: [
+            { id: 'a', text: 'يتجافى ويبتعد قليلاً عن لثة الأسنان العليا دون ملامسة' },
+            { id: 'b', text: 'يلتصق بقوة بالحنك الأعلى' },
+            { id: 'c', text: 'يخرج بين الثنايا العليا والسفلى' }
+          ],
+          correct: 'a',
+          exp: 'بين د. أيمن سويد أن طرف اللسان يتجافى تماماً عن اللثة ليمر صوت الغنة من الخيشوم.'
+        },
+        {
+          qAr: 'متى تكون غنة الإخفاء مفخمة؟',
+          opts: [
+            { id: 'a', text: 'إذا جاء بعدها أحد حروف الاستعلاء الخمسة (ص، ض، ط، ظ، ق)' },
+            { id: 'b', text: 'دائماً تكون مفخمة' },
+            { id: 'c', text: 'فقط عند حرف الراء' }
+          ],
+          correct: 'a',
+          exp: 'الغنة تتبع ما بعدها تفخيماً وترقيقاً، فتفخم عند حروف الاستعلاء المتبقية بعد حروف الحلق.'
+        }
+      ]
+    },
+    {
+      id: 'idgham_ahkam',
+      categoryId: 'noon_sakinah',
+      categoryAr: 'أحكام النون الساكنة والتنوين',
+      categoryEn: 'Noon Sakinah & Tanween Rules',
+      titleAr: 'الإدغام بقسميه (بغنة وبغير غنة) — حروف (يَرْمَلُون)',
+      titleEn: 'Al-Idgham (Assimilation)',
+      suwaydRef: 'كتاب التجويد المصور — د. أيمن رشدي سويد (ص 42–54)',
+      timingCounts: 2,
+      timingLabelAr: 'حركتان (2)',
+      timingDescription: 'زمن الغنة حركتان في إدغام (يَنْمُو)، ودون غنة في (اللام والراء)',
+      matnVerseAr: 'وَالثَّـانِ إِدْغَـامٌ بِسِتَّـةٍ أَتَـتْ ... فِي (يَرْمَلُـونَ) عِنْدَهُـمْ قَـدْ ثَبَتَـتْ\nلَكِنَّهَـا قِسْمَـانِ قِسْـمٌ يُدْغَمَـا ... فِيهِ بِغُنَّـةٍ بِـ (يَنْمُـو) عُلِمَـا',
+      definitionAr: 'إدخال حرف ساكن في حرف متحرك بحيث يصيران حرفاً واحداً مشدداً كالثاني، يرتفع عنهما المخرج ارتفاعة واحدة.',
+      mechanismAr: 'في الإدغام بغنة (ي، و): يتقسم الصوت بنسبة 50% من الفم و 50% من الأنف (الخيشوم) في إدغام ناقص. وفي (ن، م): إدغام كامل بغنة حركتين. أما في (ل، ر): إدغام كامل بغير غنة حيث يذهب الحرف وصفته بالكامل.',
+      svgType: 'idgham',
+      examples: [
+        { word: 'مَن يَقُولُ', surah: 'البقرة 8', highlight: 'مَن يَ', note: 'إدغام ناقص بغنة حركتين مع الياء' },
+        { word: 'مِن وَالٍ', surah: 'الرعد 11', highlight: 'مِن وَ', note: 'إدغام ناقص بغنة مع استدارة الشفتين للواو' },
+        { word: 'مِن مَّالٍ', surah: 'المؤمنون 55', highlight: 'مِن مَّ', note: 'إدغام كامل بغنة حركتين مع انطباق الشفتين' },
+        { word: 'مِن نَّفْسٍ', surah: 'البقرة 48', highlight: 'مِن نَّ', note: 'إدغام كامل متماثل بغنة تامة' },
+        { word: 'مِن رَّبِّهِمْ', surah: 'البقرة 5', highlight: 'مِن رَّ', note: 'إدغام كامل بغير غنة مع قفل مخرج الراء دون تكرير مفرط' },
+        { word: 'هُدًى لِّلْمُتَّقِينَ', surah: 'البقرة 2', highlight: 'دًى لِّ', note: 'تنوين مع لام — إدغام كامل بغير غنة' }
+      ],
+      commonMistakesAr: '1. حبس الصوت في الأنف فقط دون إشراك الفم عند إدغام الواو والياء.\n2. إبقاء شائبة غنة مع اللام والراء.\n3. تشديد الياء والواو كالمشدد الصامت دون مد الصوت بالغنة.',
+      teacherPromptAr: 'وضح للدارس ميزان الـ 50% فم و 50% خيشوم عند نطق "من يقول"، باختبار كتم الأنف أثناء النطق.',
+      quizQuestions: [
+        {
+          qAr: 'ما هي نسبة توزيع الصوت عند إدغام النون في الياء والواو بحسب د. أيمن سويد؟',
+          opts: [
+            { id: 'a', text: 'نصف الصوت من الفم ونصفه من الخيشوم' },
+            { id: 'b', text: 'الصوت كله من الأنف فقط' },
+            { id: 'c', text: 'الصوت كله من الفم فقط' }
+          ],
+          correct: 'a',
+          exp: 'بيّن د. أيمن سويد أن إدغام النون في الواو والياء إدغام ناقص يخرج فيه نصف الصوت من الفم ونصفه الآخر غنة من الخيشوم.'
+        }
+      ]
+    },
+    {
+      id: 'izhar_halqi',
+      categoryId: 'noon_sakinah',
+      categoryAr: 'أحكام النون الساكنة والتنوين',
+      categoryEn: 'Noon Sakinah & Tanween Rules',
+      titleAr: 'الإظهار الحلقي (حروف الحلق الستة)',
+      titleEn: 'Al-Izhar Al-Halqi (Clear Pronunciation)',
+      suwaydRef: 'كتاب التجويد المصور — د. أيمن رشدي سويد (ص 35–41)',
+      timingCounts: 2,
+      timingLabelAr: 'حركتان (2)',
+      timingDescription: 'زمن التوسط الطبيعي للنون دون زيادة في زمن الغنة',
+      matnVerseAr: 'فَالأَوَّلُ الإِظْهَـارُ قَبْـلَ أَحْـرُفِ ... لِلْحَلْـقِ سِـتٌّ رُتِّبَـتْ فَلْتَعْـرِفِ\nهَمْـزٌ فَهَـاءٌ ثُـمَّ عَيْـنٌ حَـاءُ ... مُهْمَلَتَـانِ ثُـمَّ غَيْـنٌ خَـاءُ',
+      definitionAr: 'إخراج كل حرف من مخرجه من غير غنة زائدة في الحرف المظهر.',
+      mechanismAr: 'يقرع طرف اللسان لثة الثنايا العليا بقوة واستقرار لخروج النون بصفة البينية (التوسط)، ثم يخرج حرف الحلق من مخرجه المخصص دون سكت ودون تمطيط للغنة.',
+      svgType: 'izhar',
+      examples: [
+        { word: 'مَنْ ءَامَنَ', surah: 'البقرة 62', highlight: 'مَنْ ءَ', note: 'نون مع همزة من أقصى الحلق' },
+        { word: 'يَنْأَوْنَ', surah: 'الأنعام 26', highlight: 'يَنْأَ', note: 'إظهار في كلمة واحدة' },
+        { word: 'مِنْ هَادٍ', surah: 'الرعد 33', highlight: 'مِنْ هَ', note: 'نون مع هاء من أقصى الحلق' },
+        { word: 'مِنْ عِلْمٍ', surah: 'الأنعام 148', highlight: 'مِنْ عِ', note: 'نون مع عين من وسط الحلق' },
+        { word: 'أَنْعَمْتَ', surah: 'الفاتحة 7', highlight: 'أَنْعَ', note: 'إظهار حلقي في كلمة واحدة' },
+        { word: 'فَسَيُنْغِضُونَ', surah: 'الإسراء 51', highlight: 'يُنْغِ', note: 'نون مع غين من أدنى الحلق' }
+      ],
+      commonMistakesAr: '1. السكت والوقوف على النون قبل نطق حرف الحلق.\n2. قلقلة النون الساكنة بفك المخرج بسرعة.\n3. تمطيط الغنة فوق زمن التوسط الطبيعي.',
+      teacherPromptAr: 'درب الطالب على قرع لثة النون بنعومة دون قلقلة ودون سكت فاصل بين النون وحرف الحلق.',
+      quizQuestions: [
+        {
+          qAr: 'ما الخطأ الشائع الذي حذر منه د. أيمن سويد عند نطق الإظهار الحلقي في نحو (أنعمت)؟',
+          opts: [
+            { id: 'a', text: 'قلقلة النون أو السكت عليها فصلاً عن العين' },
+            { id: 'b', text: 'تفخيم حرف النون' },
+            { id: 'c', text: 'مد النون 6 حركات' }
+          ],
+          correct: 'a',
+          exp: 'كثير من المبتدئين يقلقلون النون أو يسكتون عليها سكتة لطيفة خوفاً من إخفائها، وهو خطأ نبه عليه د. أيمن سويد.'
+        }
+      ]
+    },
+    {
+      id: 'meem_sakinah_rules',
+      categoryId: 'meem_sakinah',
+      categoryAr: 'أحكام الميم الساكنة والمشددتين',
+      categoryEn: 'Meem Sakinah & Shaddah Rules',
+      titleAr: 'أحكام الميم الساكنة الثلاثة (إخفاء، إدغام، إظهار شفوي)',
+      titleEn: 'Rules of Meem Sakinah',
+      suwaydRef: 'كتاب التجويد المصور — د. أيمن رشدي سويد (ص 70–78)',
+      timingCounts: 2,
+      timingLabelAr: 'حركتان (2)',
+      timingDescription: 'غنة حركتين للإخفاء والإدغام، وزمن توسط للإظهار',
+      matnVerseAr: 'وَالمِيـمُ إِنْ تَسْكُـنْ تَجِي قَبْلَ الهِجَا ... لاَ أَلِـفٍ لَيِّنَـةٍ لِـذِي الحِجَـا\nأَحْكَامُهَـا ثَلاَثَـةٌ لِمَـنْ ضَبَـطْ ... إِخْفَـاءٌ ادْغَـامٌ وَإِظْهَـارٌ فَقَـطْ',
+      definitionAr: 'للميم الساكنة 3 أحكام: الإخفاء الشفوي عند الباء بغنة حركتين بانطباق لطيف للشفتين دون كز، وإدغام المتماثلين الصغير عند الميم بغنة حركتين، والإظهار الشفوي عند باقي الحروف الـ 26 وأشدها عند الواو والفاء.',
+      mechanismAr: 'تخرج الميم بانطباق الشفتين، وفي الإخفاء الشفوي تنطبق الشفتان انطباقاً لطيفاً دون ضغط ولا فرجة مفتوحة، مع سريان صوت الغنة الرخيم من الخيشوم.',
+      svgType: 'shafatan',
+      examples: [
+        { word: 'تَرْمِيهِم بِحِجَارَةٍ', surah: 'الفيل 4', highlight: 'هِم بِ', note: 'إخفاء شفوي بانطباق لطيف للشفتين' },
+        { word: 'فَاحْكُم بَيْنَهُم', surah: 'المائدة 48', highlight: 'كُم بَ', note: 'إخفاء شفوي مع الباء' },
+        { word: 'لَهُم مَّا يَشَآءُونَ', surah: 'ق 35', highlight: 'هُم مَّ', note: 'إدغام متماثلين صغير بغنة حركتين' },
+        { word: 'عَلَيْهِمْ وَلَا', surah: 'الفاتحة 7', highlight: 'هِمْ وَ', note: 'إظهار شفوي شديد الحذر لاتحاد المخرج مع الواو' },
+        { word: 'هُمْ فِيهَا', surah: 'البقرة 39', highlight: 'هُمْ فِ', note: 'إظهار شفوي شديد لقرب مخرج الفاء' }
+      ],
+      commonMistakesAr: '1. كز الشفتين وضغطهما بعنف في الإخفاء الشفوي.\n2. فتح فرجة كبيرة بين الشفتين.\n3. إخفاء الميم عند الواو أو الفاء لقرب مخرجهما.',
+      teacherPromptAr: 'أكّد للدارس قول ابن الجزري: (واحذر لدى واو وفا أن تختفي لقربها ولاتحاد فاعرفِ).',
+      quizQuestions: [
+        {
+          qAr: 'لماذا شدد علماء التجويد ود. أيمن سويد على إظهار الميم الساكنة عند حرفي الواو والفاء؟',
+          opts: [
+            { id: 'a', text: 'لاتحاد مخرج الميم مع الواو، وقرب مخرجها من الفاء، فيخشى أن تسبق إلى الإخفاء' },
+            { id: 'b', text: 'لأن الواو والفاء من حروف القلقلة' },
+            { id: 'c', text: 'لأن الميم تسقط في الدرج' }
+          ],
+          correct: 'a',
+          exp: 'نبه أئمة التجويد على الحذر الشديد من إخفاء الميم عند الواو (لاتحادهما في الشفتين) وعند الفاء (لقرب بطن الشفة من الشفتين).'
+        }
+      ]
+    },
+    {
+      id: 'madd_akham',
+      categoryId: 'madd_rules',
+      categoryAr: 'أحكام المدود ومقاديرها',
+      categoryEn: 'Quranic Madd Durations',
+      titleAr: 'أحكام المدود وموازين أزمنتها (المتصل، المنفصل، اللازم، العارض)',
+      titleEn: 'Comprehensive Madd System',
+      suwaydRef: 'كتاب التجويد المصور — د. أيمن رشدي سويد (ص 115–140)',
+      timingCounts: 4,
+      timingLabelAr: '4 حركات',
+      timingDescription: 'ميزان التوسط (4 حركات) للمتصل والمنفصل، و6 حركات للإشباع اللازم',
+      matnVerseAr: 'وَالمَـدُّ أَصْلِـيٌّ وَفَرْعِـيٌّ لَـهُ ... وَسَـمِّ أَوَّلاً طَبِيعِيّـاً وَهُـو\nفَوَاجِـبٌ إِنْ جَـاءَ هَمْـزٌ بَعْـدَ مَـدْ ... فِي كِلْمَـةٍ وَذَا بِمُتَّصِـلٍ يُعَـدْ\nوَجَائِـزٌ مَـدٌّ وَقَصْـرٌ إِنْ فُصِـلْ ... كُـلٌّ بِكِلْمَـةٍ وَهَـذَا المُنْفَصِـلْ',
+      definitionAr: 'المد هو إطالة الصوت بحرف من حروف المد الثلاثة (الألف الساكنة المفتوح ما قبلها، الواو الساكنة المضموم ما قبلها، الياء الساكنة المكسور ما قبلها) عند ملاقاة همز أو سكون.',
+      mechanismAr: 'يمتد الصوت عبر الجوف (التجويف الفموي والحلقي) بامتداد مرن منتظم يضبطه الميزان الإيقاعي: القصر (حركتان)، والتوسط (4 حركات)، وفويق التوسط (5 حركات)، والإشباع التام (6 حركات حتماً في اللازم).',
+      svgType: 'madd',
+      examples: [
+        { word: 'جَآءَ', surah: 'النصر 1', highlight: 'جَآءَ', note: 'مد واجب متصل — 4 إلى 5 حركات' },
+        { word: 'السَّمَآءِ', surah: 'البقرة 19', highlight: 'مَآءِ', note: 'مد متصل لاجتماع الهمز والمد في كلمة' },
+        { word: 'بِمَآ أُنزِلَ', surah: 'البقرة 4', highlight: 'مَآ أُ', note: 'مد جائز منفصل — 4 حركات لحفص من الشاطبية' },
+        { word: 'قُوٓا أَنفُسَكُمْ', surah: 'التحريم 6', highlight: 'وٓا أَ', note: 'مد منفصل لانفصال حرف المد عن الهمزة' },
+        { word: 'الضَّآلِّينَ', surah: 'الفاتحة 7', highlight: 'ضَّآلِّي', note: 'مد لازم كلمي مثقل — 6 حركات حتماً' },
+        { word: 'ٱلْعَالَمِينَ', surah: 'الفاتحة 2', highlight: 'مِينَ', note: 'مد عارض للسكون عند الوقف (2 أو 4 أو 6)' }
+      ],
+      commonMistakesAr: '1. التمطيط والزيادة المفرطة فوق 6 حركات.\n2. تقصير المنفصل عن 4 حركات لمن يقرأ من طريق الشاطبية.\n3. خلط صوت المد بغنة من الأنف بسبب عدم فتح الفم بالقدر المناسب.',
+      teacherPromptAr: 'استخدم الميزان الإيقاعي الصوتي لتدريب أذن الدارس على التفريق الدقيق بين الحركتين والأربع والست حركات.',
+      quizQuestions: [
+        {
+          qAr: 'ما هو مقدار مد المد اللازم الكلمي المثقل (مثل: الضالين) عند جميع القراء بحسب د. أيمن سويد؟',
+          opts: [
+            { id: 'a', text: '6 حركات وجوباً وإشباعاً تاماً' },
+            { id: 'b', text: '4 حركات جوازاً' },
+            { id: 'c', text: 'حركتان كالمثنى' }
+          ],
+          correct: 'a',
+          exp: 'المد اللازم يمد 6 حركات إشباعاً بالإجماع لجميع القراء، ولا يجوز قصره بحال.'
+        }
+      ]
+    },
+    {
+      id: 'qalqalah_sifah',
+      categoryId: 'sifat_letters',
+      categoryAr: 'صفات الحروف وأحكام القلقلة',
+      categoryEn: 'Letters Attributes & Qalqalah',
+      titleAr: 'أحكام القلقلة ومراتبها (قُطْبُ جَدٍّ)',
+      titleEn: 'Al-Qalqalah & Its Degrees',
+      suwaydRef: 'كتاب التجويد المصور — د. أيمن رشدي سويد (ص 98–108)',
+      timingCounts: 2,
+      timingLabelAr: 'نبضة سريعة',
+      timingDescription: 'اضطراب مخرجي سريع ومحكم دون تمطيط زمني',
+      matnVerseAr: 'قَلْقَلَـةٌ قُطْـبُ جَـدٍّ ... وَبَيِّنَـنْ مُقَلْقَـلاً إِنْ سَكَنَـا\nوَإِنْ يَكُـنْ فِي الوَقْـفِ كَـانَ أَبْيَنَـا',
+      definitionAr: 'اضطراب المخرج عند النطق بالحرف الساكن حتى يُسمع له نبرة قوية، وتحدث بالتباعد بين طرفي عضو النطق دون أن يصاحبها شائبة حركة من الحركات الثلاث.',
+      mechanismAr: 'ينقفل المخرج تماماً لانحباس الصوت (الشدة) والنفس (الجهر)، ثم يبتعد طرفا عضو النطق بضربة ارتدادية سريعة محكمة محررة للصوت، دون إمالة للفتح أو الكسر أو الضم ودون همزة في آخرها.',
+      svgType: 'qalqalah',
+      examples: [
+        { word: 'قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ', surah: 'الفلق 1', highlight: 'لَقِ', note: 'قلقلة كبرى عند الوقف على القاف الساكنة' },
+        { word: 'وَتَبَّ', surah: 'المسد 1', highlight: 'تَبَّ', note: 'قلقلة أكبر عند الوقف على الحرف المشدد' },
+        { word: 'ٱلْحَقُّ', surah: 'البقرة 147', highlight: 'حَقُّ', note: 'قلقلة أكبر في الوقف المشدد' },
+        { word: 'يَطْمَعُونَ', surah: 'البقرة 75', highlight: 'يَطْ', note: 'قلقلة صغرى في وسط الكلمة' },
+        { word: 'يَجْعَلُونَ', surah: 'البقرة 19', highlight: 'يَجْ', note: 'قلقلة صغرى للجيم' },
+        { word: 'أَبْصَارِهِمْ', surah: 'البقرة 20', highlight: 'أَبْ', note: 'قلقلة صغرى للباء الساكنة' }
+      ],
+      commonMistakesAr: '1. سحب القلقلة نحو حركة الفتحة.\n2. إنهاء القلقلة بهمزة قطعية ساكتة (نحو: الفلقء).\n3. تمطيط زمن القلقلة حتى تشبه الحرف المشدد.',
+      teacherPromptAr: 'علّم الطالب أن القلقلة انفراج سريع نقي كارتداد الكرة المطاطية دون أي إضافة صوتية.',
+      quizQuestions: [
+        {
+          qAr: 'ما هو المذهب الراجح الذي قرره د. أيمن سويد في حركة القلقلة؟',
+          opts: [
+            { id: 'a', text: 'أنها لا تميل إلى أي حركة من الحركات الثلاث، بل تباعد مخرجي محض' },
+            { id: 'b', text: 'أنها تتبع حركة ما قبلها' },
+            { id: 'c', text: 'أنها مائلة إلى الفتحة دائماً' }
+          ],
+          correct: 'a',
+          exp: 'أكد د. أيمن سويد بالتحليل الصوتي المعملي أن القلقلة تباعد مخرجي صرف مبرأ من شوائب الفتح أو الضم أو الكسر.'
+        }
+      ]
+    }
+  ];
+
+
+
+// Visual Anatomical Cross-Section Renderer inspired by Dr. Ayman Suwayd
+    function renderSuwaydAnatomySvg(type) {
+      if (type === 'ikhfaa') {
+        return (
+          <svg viewBox="0 0 420 280" className="w-full h-auto max-h-64 drop-shadow-md select-none rounded-2xl bg-gradient-to-b from-emerald-50/70 via-white to-emerald-50/40 border border-emerald-300">
+            {/* Header Badge */}
+            <rect x="20" y="12" width="380" height="28" rx="8" fill="#ecfdf5" stroke="#10b981" strokeWidth="1.2" />
+            <text x="210" y="30" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#065f46" fontFamily="Cairo">
+              مقطع تشريحي: مخرج النون المخفاة — د. أيمن رشدي سويد
+            </text>
+
+            {/* Profile Outline (Forehead, Nose, Lips, Chin, Throat) */}
+            <path d="M 90 50 Q 80 65 70 95 Q 65 105 50 110 Q 75 115 75 125 Q 60 135 75 145 Q 65 165 80 195 Q 90 220 100 240" fill="none" stroke="#64748b" strokeWidth="3" strokeLinecap="round" />
+            
+            {/* Nasal Cavity (Khayshoom) with Active Amber Glow */}
+            <path d="M 85 95 Q 130 80 190 80 Q 240 85 260 120 L 240 120 Q 210 95 165 95 Q 120 95 85 105 Z" fill="#fef3c7" stroke="#f59e0b" strokeWidth="2" />
+            <rect x="145" y="70" width="135" height="20" rx="6" fill="#fef3c7" stroke="#d97706" strokeWidth="1" />
+            <text x="212" y="84" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#b45309" fontFamily="Cairo">
+              التجويف الأنفي (الخيشوم)
+            </text>
+
+            {/* Golden Resonant Ghunnah Flow from Nose */}
+            <g className="animate-pulse">
+              <path d="M 160 88 Q 110 88 65 102" fill="none" stroke="#d97706" strokeWidth="4" strokeDasharray="5 3" />
+              <polygon points="55,104 68,98 66,108" fill="#d97706" />
+              <rect x="15" y="75" width="100" height="22" rx="6" fill="#fef3c7" stroke="#d97706" strokeWidth="1.2" />
+              <text x="65" y="90" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#b45309" fontFamily="Cairo">
+                صوت الغنة (100%)
+              </text>
+            </g>
+
+            {/* Hard Palate & Soft Palate */}
+            <path d="M 100 125 Q 150 122 200 128 Q 235 138 245 155" fill="none" stroke="#475569" strokeWidth="5" strokeLinecap="round" />
+            <text x="180" y="120" textAnchor="middle" fontSize="9.5" fontWeight="bold" fill="#334155" fontFamily="Cairo">الحنك الأعلى</text>
+
+            {/* Upper Teeth (Incisors) */}
+            <rect x="94" y="125" width="9" height="15" rx="2" fill="#ffffff" stroke="#334155" strokeWidth="1.5" />
+
+            {/* Lower Teeth */}
+            <rect x="94" y="160" width="9" height="15" rx="2" fill="#ffffff" stroke="#334155" strokeWidth="1.5" />
+
+            {/* Tongue Body (Clearly Detached from Upper Gum) */}
+            <path d="M 116 148 Q 150 160 190 170 Q 230 185 240 215 L 210 225 Q 190 190 150 180 Q 120 170 108 170 Z" fill="#fca5a5" stroke="#e11d48" strokeWidth="2.5" />
+            
+            {/* The Gap Highlight (No Contact Point) */}
+            <circle cx="108" cy="135" r="14" fill="#fee2e2" stroke="#ef4444" strokeWidth="2" strokeDasharray="3 2" />
+            <line x1="122" y1="135" x2="165" y2="148" stroke="#ef4444" strokeWidth="2" />
+            <rect x="165" y="140" width="235" height="24" rx="7" fill="#fee2e2" stroke="#ef4444" strokeWidth="1.2" />
+            <text x="282" y="156" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#991b1b" fontFamily="Cairo">
+              تجافي طرف اللسان عن اللثة (عدم التصادم)
+            </text>
+
+            {/* Pharynx Airway */}
+            <path d="M 245 155 Q 255 190 255 240" fill="none" stroke="#64748b" strokeWidth="3" />
+            <rect x="265" y="210" width="135" height="22" rx="6" fill="#ecfdf5" stroke="#10b981" strokeWidth="1" />
+            <text x="332" y="225" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#065f46" fontFamily="Cairo">
+              الفم مهيأ لمخرج التالي
+            </text>
+          </svg>
+        );
+      }
+
+      if (type === 'idgham') {
+        return (
+          <svg viewBox="0 0 420 280" className="w-full h-auto max-h-64 drop-shadow-md select-none rounded-2xl bg-gradient-to-b from-amber-50/70 via-white to-amber-50/40 border border-amber-300">
+            <rect x="20" y="12" width="380" height="28" rx="8" fill="#fef3c7" stroke="#f59e0b" strokeWidth="1.2" />
+            <text x="210" y="30" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#92400e" fontFamily="Cairo">
+              مقطع تشريحي: ميزان الـ 50% فم و 50% خيشوم — د. أيمن سويد
+            </text>
+
+            {/* Profile */}
+            <path d="M 90 50 Q 80 65 70 95 Q 65 105 50 110 Q 75 115 75 125 Q 60 135 75 145 Q 65 165 80 195" fill="none" stroke="#64748b" strokeWidth="3" />
+            
+            {/* Nasal Stream (50% Ghunnah) */}
+            <path d="M 90 95 Q 140 82 200 82 Q 240 88 250 120" fill="none" stroke="#d97706" strokeWidth="5" strokeDasharray="5 3" />
+            <polygon points="65,102 78,96 76,106" fill="#d97706" />
+            <rect x="15" y="80" width="125" height="24" rx="7" fill="#fef3c7" stroke="#d97706" strokeWidth="1.2" />
+            <text x="77" y="96" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#92400e" fontFamily="Cairo">
+              50% غنة (خيشوم)
+            </text>
+
+            {/* Oral Stream (50% Mouth) */}
+            <path d="M 230 170 Q 180 145 90 135" fill="none" stroke="#0284c7" strokeWidth="5" strokeDasharray="5 3" />
+            <polygon points="65,135 78,130 76,140" fill="#0284c7" />
+            <rect x="15" y="125" width="125" height="24" rx="7" fill="#e0f2fe" stroke="#0284c7" strokeWidth="1.2" />
+            <text x="77" y="141" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#0369a1" fontFamily="Cairo">
+              50% صوت فموي (ي، و)
+            </text>
+
+            {/* Palate & Lips */}
+            <path d="M 100 125 Q 150 122 200 128" fill="none" stroke="#475569" strokeWidth="5" />
+            <circle cx="76" cy="132" r="9" fill="none" stroke="#d97706" strokeWidth="2.5" />
+            <rect x="160" y="180" width="240" height="24" rx="7" fill="#ecfdf5" stroke="#10b981" strokeWidth="1.2" />
+            <text x="280" y="196" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#065f46" fontFamily="Cairo">
+              استدارة الشفتين (و) أو تسفل الفك (ي)
+            </text>
+
+            {/* Tongue Body */}
+            <path d="M 120 150 Q 165 140 215 175" fill="none" stroke="#f43f5e" strokeWidth="9" strokeLinecap="round" />
+          </svg>
+        );
+      }
+
+      if (type === 'izhar') {
+        return (
+          <svg viewBox="0 0 420 280" className="w-full h-auto max-h-64 drop-shadow-md select-none rounded-2xl bg-gradient-to-b from-teal-50/70 via-white to-teal-50/40 border border-teal-300">
+            <rect x="20" y="12" width="380" height="28" rx="8" fill="#ccfbf1" stroke="#0d9488" strokeWidth="1.2" />
+            <text x="210" y="30" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#115e59" fontFamily="Cairo">
+              مقطع تشريحي: قرع طرف اللسان للثة في الإظهار — د. أيمن سويد
+            </text>
+
+            <path d="M 90 50 Q 80 65 70 95 Q 65 105 50 110 Q 75 115 75 125 Q 60 135 75 145 Q 65 165 80 195" fill="none" stroke="#64748b" strokeWidth="3" />
+            <path d="M 100 125 Q 150 122 210 128" fill="none" stroke="#475569" strokeWidth="5" />
+            
+            {/* Firm Tongue Contact Point at Gum */}
+            <rect x="96" y="125" width="8" height="15" rx="2" fill="#ffffff" stroke="#334155" strokeWidth="1.5" />
+            <path d="M 104 130 Q 135 145 195 160 L 185 180 Q 135 165 104 150 Z" fill="#fca5a5" stroke="#e11d48" strokeWidth="2.5" />
+            <circle cx="104" cy="130" r="10" fill="#10b981" opacity="0.4" />
+            <circle cx="104" cy="130" r="5" fill="#047857" />
+            
+            <rect x="140" y="80" width="260" height="26" rx="7" fill="#d1fae5" stroke="#059669" strokeWidth="1.2" />
+            <text x="270" y="97" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#065f46" fontFamily="Cairo">
+              قرع طرف اللسان للثة العليا بثبات (بينية النون)
+            </text>
+
+            {/* Throat Articulation Arrow below */}
+            <g transform="translate(160, 160)">
+              <rect x="0" y="0" width="240" height="48" rx="8" fill="#f0fdfa" stroke="#0d9488" strokeWidth="1.2" />
+              <text x="120" y="20" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#0f766e" fontFamily="Cairo">
+                خروج حرف الحلق بعد النون مباشرة
+              </text>
+              <text x="120" y="38" textAnchor="middle" fontSize="9.5" fontWeight="bold" fill="#115e59" fontFamily="Cairo">
+                (همز، هاء، عين، حاء، غين، خاء) دون سكت
+              </text>
+            </g>
+          </svg>
+        );
+      }
+
+      if (type === 'qalqalah') {
+        return (
+          <svg viewBox="0 0 420 280" className="w-full h-auto max-h-64 drop-shadow-md select-none rounded-2xl bg-gradient-to-b from-rose-50/70 via-white to-rose-50/40 border border-rose-300">
+            <rect x="20" y="12" width="380" height="28" rx="8" fill="#ffe4e6" stroke="#e11d48" strokeWidth="1.2" />
+            <text x="210" y="30" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#9f1239" fontFamily="Cairo">
+              مقطع تشريحي: التباعد الميكانيكي السريع للقلقلة — د. أيمن سويد
+            </text>
+
+            {/* Lock Phase vs Burst Rebound */}
+            <g transform="translate(20, 55)">
+              <rect x="0" y="0" width="180" height="190" rx="16" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.5" />
+              <text x="90" y="28" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#475569" fontFamily="Cairo">
+                1. مرحلة القفل (الانحباس)
+              </text>
+              <circle cx="90" cy="90" r="28" fill="#ef4444" opacity="0.15" />
+              <line x1="50" y1="90" x2="130" y2="90" stroke="#b91c1c" strokeWidth="8" strokeLinecap="round" />
+              <text x="90" y="145" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#b91c1c" fontFamily="Cairo">
+                انحباس الصوت (الشدة)
+              </text>
+              <text x="90" y="165" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#b91c1c" fontFamily="Cairo">
+                وانحباس النفس (الجهر)
+              </text>
+            </g>
+
+            <g transform="translate(220, 55)">
+              <rect x="0" y="0" width="180" height="190" rx="16" fill="#fff1f2" stroke="#f43f5e" strokeWidth="2" />
+              <text x="90" y="28" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#9f1239" fontFamily="Cairo">
+                2. مرحلة التباعد (النبرة)
+              </text>
+              {/* Explosive Wave */}
+              <circle cx="90" cy="90" r="36" fill="none" stroke="#e11d48" strokeWidth="2" strokeDasharray="4 3" />
+              <circle cx="90" cy="90" r="18" fill="#f43f5e" />
+              <path d="M 65 72 L 48 55 M 115 72 L 132 55 M 65 108 L 48 125 M 115 108 L 132 125" stroke="#e11d48" strokeWidth="3.5" strokeLinecap="round" />
+              <text x="90" y="145" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#881337" fontFamily="Cairo">
+                تباعد مخرجي ارتدادي
+              </text>
+              <text x="90" y="165" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#be123c" fontFamily="Cairo">
+                (دون شائبة حركة فتح/ضم/كسر)
+              </text>
+            </g>
+          </svg>
+        );
+      }
+
+      if (type === 'madd') {
+        return (
+          <svg viewBox="0 0 420 280" className="w-full h-auto max-h-64 drop-shadow-md select-none rounded-2xl bg-gradient-to-b from-sky-50/70 via-white to-sky-50/40 border border-sky-300">
+            <rect x="20" y="12" width="380" height="28" rx="8" fill="#e0f2fe" stroke="#0284c7" strokeWidth="1.2" />
+            <text x="210" y="30" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#075985" fontFamily="Cairo">
+              مقطع تشريحي: امتداد الصوت في خلاء الجوف — د. أيمن سويد
+            </text>
+
+            {/* Waveform timeline from 2 to 6 counts */}
+            <g transform="translate(20, 60)">
+              <rect x="0" y="0" width="380" height="135" rx="16" fill="#ffffff" stroke="#bae6fd" strokeWidth="2" />
+              
+              {/* Timeline ticks */}
+              <line x1="30" y1="95" x2="350" y2="95" stroke="#94a3b8" strokeWidth="2.5" />
+              
+              <circle cx="65" cy="95" r="7" fill="#0284c7" />
+              <text x="65" y="120" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#0369a1" fontFamily="Cairo">حركتان (قصر)</text>
+              
+              <circle cx="190" cy="95" r="8" fill="#d97706" />
+              <text x="190" y="120" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#b45309" fontFamily="Cairo">4 حركات (توسط)</text>
+
+              <circle cx="315" cy="95" r="9" fill="#dc2626" />
+              <text x="315" y="120" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#991b1b" fontFamily="Cairo">6 حركات (لازم)</text>
+
+              {/* Sine Wave */}
+              <path d="M 25 50 Q 55 15 85 50 T 145 50 T 205 50 T 265 50 T 325 50 T 365 50" fill="none" stroke="#0284c7" strokeWidth="3.5" />
+            </g>
+            <rect x="30" y="215" width="360" height="26" rx="7" fill="#e0f2fe" stroke="#0284c7" strokeWidth="1.2" />
+            <text x="210" y="232" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#0369a1" fontFamily="Cairo">
+              خلاء الفم والحلق يجري فيه الصوت مرناً دون عائق ولا ضغط
+            </text>
+          </svg>
+        );
+      }
+
+      // Default: Shafatan (Lips)
+      return (
+        <svg viewBox="0 0 420 280" className="w-full h-auto max-h-64 drop-shadow-md select-none rounded-2xl bg-gradient-to-b from-purple-50/70 via-white to-purple-50/40 border border-purple-300">
+          <rect x="20" y="12" width="380" height="28" rx="8" fill="#f3e8ff" stroke="#9333ea" strokeWidth="1.2" />
+          <text x="210" y="30" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#6b21a8" fontFamily="Cairo">
+            مقطع تشريحي: انطباق الشفتين في الميم والباء — د. أيمن سويد
+          </text>
+
+          <g transform="translate(30, 55)">
+            <rect x="0" y="0" width="360" height="150" rx="16" fill="#ffffff" stroke="#e9d5ff" strokeWidth="2" />
+            
+            {/* Upper Lip */}
+            <path d="M 90 55 Q 180 42 270 55 Q 180 68 90 55 Z" fill="#f472b6" stroke="#db2777" strokeWidth="2.5" />
+            
+            {/* Lower Lip */}
+            <path d="M 90 95 Q 180 108 270 95 Q 180 82 90 95 Z" fill="#f472b6" stroke="#db2777" strokeWidth="2.5" />
+            
+            {/* Soft seal line */}
+            <line x1="95" y1="75" x2="265" y2="75" stroke="#be185d" strokeWidth="5" strokeLinecap="round" />
+            
+            <text x="180" y="132" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#831843" fontFamily="Cairo">
+              انطباق لطيف للشفتين دون كز (الإخفاء الشفوي للميم)
+            </text>
+          </g>
+          <rect x="50" y="222" width="320" height="24" rx="7" fill="#f3e8ff" stroke="#9333ea" strokeWidth="1" />
+          <text x="210" y="238" textAnchor="middle" fontSize="10.5" fontWeight="bold" fill="#6b21a8" fontFamily="Cairo">
+            جريان الغنة الرخيمة بالتوازي من الخيشوم
+          </text>
+        </svg>
+      );
+    }
+
     // Main Application Component
     function App() {
       // Language & Direction state
@@ -1806,6 +2305,18 @@
       const [tajweedData, setTajweedData] = useState(null);
       const [isGeneratingTajweed, setIsGeneratingTajweed] = useState(false);
       const [tajweedSubTab, setTajweedSubTab] = useState('generator'); // 'generator', 'makhaarij', 'metronome'
+      const [suwaydLessonId, setSuwaydLessonId] = useState('ikhfaa_haqiqi');
+      const [suwaydFilterCategory, setSuwaydFilterCategory] = useState('all');
+      const [suwaydZoomModalOpen, setSuwaydZoomModalOpen] = useState(false);
+      const [suwaydZoomSlideIndex, setSuwaydZoomSlideIndex] = useState(0);
+      const [suwaydQuizModalOpen, setSuwaydQuizModalOpen] = useState(false);
+      const [suwaydQuizAnswers, setSuwaydQuizAnswers] = useState({});
+      const [suwaydQuizSubmitted, setSuwaydQuizSubmitted] = useState(false);
+
+      const currentSuwaydLesson = useMemo(() => {
+        return SUWAYD_TAJWEED_CURRICULUM.find(l => l.id === suwaydLessonId) || SUWAYD_TAJWEED_CURRICULUM[0];
+      }, [suwaydLessonId]);
+
       const [activeMakhrajId, setActiveMakhrajId] = useState('lisan');
       const [metronomeCount, setMetronomeCount] = useState(2); // 2, 4, 5, 6
       const [metronomePlaying, setMetronomePlaying] = useState(false);
@@ -2223,7 +2734,23 @@
         if (quizBranch === 'islamic') {
           return ISLAMIC_BRANCH_QUIZZES[quizIslamicCategory] || ISLAMIC_BRANCH_QUIZZES.aqeedah;
         } else if (quizBranch === 'tajweed') {
-          return tajweedData?.quiz || [];
+          // Grounded in Dr. Ayman Suwayd Illustrated Tajweed
+          const suwaydQuestions = [];
+          SUWAYD_TAJWEED_CURRICULUM.forEach(l => {
+            l.quizQuestions.forEach((q, idx) => {
+              suwaydQuestions.push({
+                id: l.id + '_q' + idx,
+                lessonTitle: l.titleAr,
+                questionAr: '[' + l.titleAr + '] ' + q.qAr,
+                questionEn: q.qAr,
+                options: q.opts.map(o => ({ id: o.id, textAr: o.text, textEn: o.text })),
+                correctOptionId: q.correct,
+                explanationAr: q.exp,
+                explanationEn: q.exp
+              });
+            });
+          });
+          return suwaydQuestions;
         } else if (quizBranch === 'hifz') {
           return HIFZ_BRANCH_QUIZ;
         }
@@ -3910,7 +4437,7 @@
                       )}
                     >
                       <span>📑</span>
-                      <span>{isRtl ? '1. مُولّد الدروس وبطاقات زوم' : '1. Lesson & Slides'}</span>
+                      <span>{isRtl ? '1. حقيبة التجويد المصور (د. أيمن سويد)' : '1. Illustrated Tajweed (Dr. Suwayd)'}</span>
                     </button>
 
                     {/* Tab 2: Interactive Makhaarij Atlas */}
@@ -3946,334 +4473,650 @@
                 {/* ================= SUB-TAB 1: LESSON & SLIDES GENERATOR ================= */}
                 {tajweedSubTab === 'generator' && (
                   <div className="space-y-8 animate-fadeIn">
-                {/* Generation Control Panel */}
-                <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
-                  <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
-                    <div className="flex items-center gap-2">
-                      <span className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
-                        📖
-                      </span>
-                      <div>
-                        <h2 className="text-xl font-extrabold text-emerald-950 font-cairo">
-                          {isRtl ? 'مُعين التجويد والقرآن الكريم' : 'Bilingual Quran & Tajweed Copilot'}
-                        </h2>
-                        <p className="text-xs text-slate-500">
-                          {isRtl ? 'توليد الدروس المنهجية، واستخراج الأمثلة بالرسم العثماني، وإعداد بطاقات زوم' : 'Curriculum-aligned lesson generator with Uthmani script and Zoom presentation deck'}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs px-3 py-1 rounded-full font-bold">
-                      Hafs 'an 'Aasim
-                    </span>
-                  </div>
-
-                  {/* Form Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    
-                    {/* Surah Name */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        {isRtl ? 'اسم السورة' : 'Surah Name'}
-                      </label>
-                      <input 
-                        type="text" 
-                        value={surahName} 
-                        onChange={(e) => setSurahName(e.target.value)}
-                        placeholder="سورة الملك / Al-Mulk"
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
-                      />
-                    </div>
-
-                    {/* Ayah Range */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        {isRtl ? 'نطاق الآيات' : 'Ayah Range'}
-                      </label>
-                      <input 
-                        type="text" 
-                        value={ayahRange} 
-                        onChange={(e) => setAyahRange(e.target.value)}
-                        placeholder="1–10"
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
-                      />
-                    </div>
-
-                    {/* Target Tajweed Rule */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        {isRtl ? 'حكم التجويد المستهدف' : 'Target Tajweed Rule'}
-                      </label>
-                      <select 
-                        value={selectedRule} 
-                        onChange={(e) => setSelectedRule(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
-                      >
-                        {TAJWEED_RULES.map(r => (
-                          <option key={r.id} value={r.id}>
-                            {isRtl ? r.nameAr : r.nameEn}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Language Mode */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        {isRtl ? 'لغة الشرح' : 'Explanation Language'}
-                      </label>
-                      <select 
-                        value={tajweedMode} 
-                        onChange={(e) => setTajweedMode(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
-                      >
-                        <option value="bilingual">{isRtl ? 'ثنائي اللغة (عربي + English)' : 'Bilingual (Arabic + English)'}</option>
-                        <option value="arabic">{isRtl ? 'عربي فقط (Arabic Only)' : 'Arabic Only'}</option>
-                        <option value="english">{isRtl ? 'English Only' : 'الإنجليزية فقط'}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Textbook Context Grounding */}
-                  <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 mb-5">
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                      <label className="text-xs font-bold text-emerald-950 flex items-center gap-2">
-                        <span>📚</span>
-                        <span>{isRtl ? 'مرجعية الكتاب المعتمد (Strict Curriculum Adherence):' : 'Textbook Reference Context:'}</span>
-                      </label>
-                      <span className="text-[11px] text-slate-500">
-                        {isRtl ? 'يلتزم الذكاء الاصطناعي بدقة بتعريفات ومصطلحات الكتاب المحدد' : 'AI adheres strictly to this book\'s exact terminology'}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2.5">
-                      {PRELOADED_TEXTBOOKS.map(book => (
-                        <div 
-                          key={book.id} 
-                          onClick={() => setSelectedTextbook(book.id)}
-                          className={`p-3 rounded-xl border cursor-pointer transition flex items-start gap-2 ${
-                            selectedTextbook === book.id 
-                              ? 'bg-emerald-50 border-emerald-600 shadow-sm' 
-                              : 'bg-white border-slate-200 hover:border-emerald-300'
-                          }`}
-                        >
-                          <input 
-                            type="radio" 
-                            name="textbookRadio" 
-                            checked={selectedTextbook === book.id} 
-                            onChange={() => setSelectedTextbook(book.id)} 
-                            className="mt-1 accent-emerald-700"
-                          />
+                    {/* Header Banner - Dr. Ayman Suwayd Certified Workbench */}
+                    <div className="card-islamic-pearl rounded-3xl p-6 border-2 border-emerald-900/15 shadow-md">
+                      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 mb-5 border-b border-emerald-900/10">
+                        <div className="flex items-center gap-3">
+                          <span className="w-12 h-12 rounded-2xl bg-emerald-900 text-gold-300 flex items-center justify-center text-2xl font-black shadow-md border border-gold-400">
+                            📖
+                          </span>
                           <div>
-                            <div className="font-bold text-xs text-slate-800">
-                              {isRtl ? book.nameAr : book.nameEn}
+                            <div className="flex items-center gap-2">
+                              <h2 className="text-xl sm:text-2xl font-black text-emerald-950 font-cairo">
+                                {isRtl ? 'حقيبة التجويد المصور — المرجع المعتمد: د. أيمن رشدي سويد' : 'Illustrated Tajweed Curriculum — Dr. Ayman Suwayd'}
+                              </h2>
+                              <span className="bg-emerald-100 text-emerald-900 border border-emerald-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                                {isRtl ? 'تحضير جاهز وموثق 100%' : '100% Pre-loaded'}
+                              </span>
                             </div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">
-                              {book.note}
-                            </div>
+                            <p className="text-xs text-slate-600 font-medium mt-1">
+                              {isRtl
+                                ? 'منهج تجويدي متكامل: نصوص المتون الموثقة، المقاطع التشريحية الدقيقة، الأمثلة بالرسم العثماني، وميزان الحركات المدمج'
+                                : 'Complete pedagogical workbench: Matn citations, anatomical cross-sections, Uthmani script examples, and live rhythmic metronome'}
+                            </p>
                           </div>
                         </div>
-                      ))}
-                    </div>
 
-                    {/* Custom Context Upload / Paste */}
-                    <details className="text-xs mt-2 text-slate-600">
-                      <summary className="cursor-pointer font-bold text-emerald-800 hover:underline">
-                        {isRtl ? '+ إضافة فصل خاص أو نص تجويد مخصص من كتابك' : '+ Paste custom textbook chapter or notes'}
-                      </summary>
-                      <textarea
-                        value={customContext}
-                        onChange={(e) => setCustomContext(e.target.value)}
-                        placeholder={isRtl ? 'الصقي هنا نص التعريفات أو الملاحظات الصوتية الخاصة بك ليعتمدها النظام...' : 'Paste textbook definitions, anatomical notes, or special pedagogical instructions...'}
-                        rows="3"
-                        className="w-full mt-2 bg-white border border-slate-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-700 text-xs"
-                      />
-                    </details>
-                  </div>
-
-                  {/* Trigger Buttons */}
-                  <div className="flex flex-wrap items-center justify-end gap-3">
-                    <button 
-                      onClick={() => handleLoadDemoTajweed()}
-                      disabled={isGeneratingTajweed}
-                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold px-4 py-3 rounded-xl transition flex items-center gap-2 text-xs"
-                      title="تحميل الدرس التجريبي الجاهز فوراً"
-                    >
-                      <span>⚡</span>
-                      <span>{isRtl ? 'تحميل الدرس التجريبي (سورة الملك)' : 'Load Demo Lesson (Surah Al-Mulk)'}</span>
-                    </button>
-                    <button 
-                      onClick={() => handleGenerateTajweed(false)}
-                      disabled={isGeneratingTajweed}
-                      className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-extrabold px-6 py-3 rounded-xl shadow-lg transition flex items-center gap-2 disabled:opacity-50 text-sm"
-                    >
-                      <span>{isGeneratingTajweed ? '⏳' : '✨'}</span>
-                      <span>
-                        {isGeneratingTajweed 
-                          ? (isRtl ? 'جارٍ التحضير واستخراج الآيات...' : 'Generating Uthmani Blueprint...') 
-                          : (isRtl ? 'توليد خطة الدرس وبطاقات زوم' : 'Generate Lesson & Zoom Cards')}
-                      </span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Generated Lesson Content */}
-                {tajweedData && (
-                  <div className="space-y-6">
-
-                    {/* Quick Tabs to toggle sub-outputs */}
-                    <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-3 rounded-2xl border border-slate-200">
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => setIsFullscreenZoom(true)}
-                          className="bg-emerald-900 hover:bg-emerald-800 text-gold-300 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition shadow"
-                        >
-                          <span>📺</span>
-                          <span>{isRtl ? 'وضع عرض زوم للشاشة الكاملة (Zoom Share)' : 'Fullscreen Zoom Presentation Mode'}</span>
-                        </button>
-                        <button 
-                          onClick={() => setActiveTab('worksheet')}
-                          className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs transition"
-                        >
-                          <span>🖨️</span>
-                          <span>{isRtl ? 'ورقة العمل للطباعة' : 'Printable Worksheet'}</span>
-                        </button>
-                        <button 
-                          onClick={() => setActiveTab('quiz')}
-                          className="bg-gold-50 hover:bg-gold-100 text-gold-900 font-bold px-3 py-2 rounded-xl text-xs border border-gold-300 transition"
-                        >
-                          <span>🎯</span>
-                          <span>{isRtl ? 'الاختبار التفاعلي' : 'Interactive Quiz'}</span>
-                        </button>
+                        {/* Hafs badge */}
+                        <div className="flex items-center gap-2">
+                          <span className="bg-gold-500/15 text-emerald-950 border border-gold-400 font-black text-xs px-3 py-1.5 rounded-xl shadow-xs">
+                            رواية حفص عن عاصم من طريق الشاطبية
+                          </span>
+                        </div>
                       </div>
 
-                      <span className="text-xs text-slate-500">
-                        {isRtl ? 'عدد بطاقات الشرح المجهزة:' : 'Prepared Slides:'} <strong className="text-emerald-900">{(tajweedData.presentationCards || []).length}</strong>
-                      </span>
-                    </div>
-
-                    {/* Rule Definition Box */}
-                    <div className="bg-gradient-to-r from-emerald-900 to-emerald-950 text-white rounded-3xl p-6 border-2 border-gold-400/40 shadow-md">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-xl font-bold font-amiri text-gold-300">
-                          {(tajweedData.ruleDefinition?.arabic || '').includes('لغةً') ? tajweedData.ruleDefinition.arabic.split('لغةً')[0] : (tajweedData.ruleDefinition?.arabic || (isRtl ? 'حكم التجويد المستهدف' : 'Target Tajweed Rule'))}
-                        </h3>
-                        <span className="bg-gold-400/20 text-gold-300 border border-gold-400/40 text-xs px-3 py-0.5 rounded-full font-bold">
-                          {tajweedData.ruleDefinition.timingOrHarakat}
+                      {/* Category Filter Pills */}
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <span className="text-xs font-bold text-slate-500 ml-1">
+                          {isRtl ? 'أبواب التجويد:' : 'Chapters:'}
                         </span>
+                        {[
+                          { id: 'all', labelAr: 'كافة الأبواب (6)', count: 6 },
+                          { id: 'noon_sakinah', labelAr: 'أحكام النون والتنوين (3)', count: 3 },
+                          { id: 'meem_sakinah', labelAr: 'أحكام الميم الساكنة (1)', count: 1 },
+                          { id: 'madd_rules', labelAr: 'أحكام المدود (1)', count: 1 },
+                          { id: 'sifat_letters', labelAr: 'صفات الحروف والقلقلة (1)', count: 1 }
+                        ].map(cat => (
+                          <button
+                            key={cat.id}
+                            onClick={() => setSuwaydFilterCategory(cat.id)}
+                            className={'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ' + (
+                              suwaydFilterCategory === cat.id
+                                ? 'bg-emerald-900 text-gold-200 border-gold-400 font-black shadow-sm ring-1 ring-gold-400'
+                                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                            )}
+                          >
+                            <span>{cat.labelAr}</span>
+                          </button>
+                        ))}
                       </div>
-                      <p className="text-slate-100 font-amiri text-base sm:text-lg leading-relaxed mb-4">
-                        {tajweedData.ruleDefinition.arabic}
-                      </p>
-                      <p className="text-emerald-100/80 text-xs sm:text-sm italic border-t border-emerald-800/80 pt-3">
-                        {tajweedData.ruleDefinition.english}
-                      </p>
-                      
-                      {/* Anatomical Makhraj Callout */}
-                      <div className="mt-4 bg-emerald-950/80 rounded-2xl p-4 border border-gold-500/30 flex items-start gap-2">
-                        <span className="text-2xl mt-0.5">🗣️</span>
+
+                      {/* Lessons Horizontal Ribbon */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-200/80">
+                        {SUWAYD_TAJWEED_CURRICULUM
+                          .filter(l => suwaydFilterCategory === 'all' || l.categoryId === suwaydFilterCategory)
+                          .map(lesson => {
+                            const isSelected = suwaydLessonId === lesson.id;
+                            return (
+                              <button
+                                key={lesson.id}
+                                onClick={() => {
+                                  setSuwaydLessonId(lesson.id);
+                                  setMetronomeCount(lesson.timingCounts);
+                                  setMetronomePlaying(false);
+                                  setMetronomeBeat(1);
+                                }}
+                                className={'p-3.5 rounded-2xl text-right transition border flex flex-col justify-between ' + (
+                                  isSelected
+                                    ? 'bg-emerald-900 text-white border-gold-400 shadow-md ring-2 ring-gold-400'
+                                    : 'bg-white hover:bg-emerald-50/50 border-slate-200 text-slate-800'
+                                )}
+                              >
+                                <div>
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className={'text-[10px] font-bold px-2 py-0.5 rounded-md ' + (
+                                      isSelected ? 'bg-emerald-800 text-gold-300' : 'bg-slate-100 text-slate-600'
+                                    )}>
+                                      {lesson.categoryAr}
+                                    </span>
+                                    <span className={'text-[11px] font-bold ' + (isSelected ? 'text-gold-300' : 'text-emerald-700')}>
+                                      ⏱️ {lesson.timingLabelAr}
+                                    </span>
+                                  </div>
+                                  <h4 className={'text-sm font-black font-cairo leading-snug ' + (
+                                    isSelected ? 'text-gold-200' : 'text-emerald-950'
+                                  )}>
+                                    {lesson.titleAr}
+                                  </h4>
+                                </div>
+                                <div className={'text-[10px] mt-2 font-medium ' + (isSelected ? 'text-slate-300' : 'text-slate-500')}>
+                                  {lesson.suwaydRef}
+                                </div>
+                              </button>
+                            );
+                          })}
+                      </div>
+                    </div>
+
+                    {/* ================= MASTER PRESENTATION CARD (ALL-IN-ONE) ================= */}
+                    <div className="card-islamic-pearl rounded-3xl p-6 sm:p-8 border-2 border-emerald-900/20 shadow-xl space-y-6">
+                      {/* Card Title & Suwayd Citation Header */}
+                      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-emerald-900/15">
                         <div>
-                          <h4 className="text-xs font-bold text-gold-300 uppercase tracking-wider mb-1">
-                            {isRtl ? 'الوصف التشريحي للمخرج (Anatomical Makhraj):' : 'Anatomical Makhraj Guidance:'}
-                          </h4>
-                          <p className="text-xs text-slate-200 leading-relaxed font-amiri text-sm">
-                            {isRtl ? tajweedData.ruleDefinition.anatomicalMakhrajAr : tajweedData.ruleDefinition.anatomicalMakhrajEn}
+                          <div className="flex items-center gap-2">
+                            <span className="text-gold-500 text-xl font-bold">۞</span>
+                            <h3 className="text-xl sm:text-2xl font-black text-emerald-950 font-cairo">
+                              {currentSuwaydLesson.titleAr}
+                            </h3>
+                          </div>
+                          <p className="text-xs font-bold text-emerald-800 mt-1 flex items-center gap-1.5">
+                            <span>📚</span>
+                            <span>{currentSuwaydLesson.suwaydRef}</span>
                           </p>
                         </div>
-                      </div>
-                    </div>
 
-                    {/* Zoom Presentation Deck Cards */}
-                    <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
-                      <div className="flex items-center justify-between pb-3 mb-6 border-b border-slate-100">
-                        <h3 className="text-lg font-bold text-emerald-950 font-cairo flex items-center gap-2">
-                          <span>🖥️</span>
-                          <span>{isRtl ? 'بطاقات الشرح التفاعلية لبرنامج زوم (Zoom Cards)' : 'Zoom Teaching Presentation Cards'}</span>
-                        </h3>
+                        {/* Top Action Pills */}
                         <div className="flex items-center gap-2">
-                          <button 
-                            disabled={activeSlideIndex === 0}
-                            onClick={() => setActiveSlideIndex(prev => prev - 1)}
-                            className="bg-slate-100 disabled:opacity-30 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg text-xs"
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSuwaydZoomSlideIndex(0);
+                              setSuwaydZoomModalOpen(true);
+                            }}
+                            className="bg-emerald-950 hover:bg-emerald-900 text-gold-200 px-4 py-2 rounded-xl text-xs font-black shadow-md border border-gold-500/50 flex items-center gap-2 transition transform active:scale-95"
                           >
-                            {isRtl ? 'السابق' : 'Previous'}
+                            <span>📺</span>
+                            <span>{isRtl ? 'عرض زوم للشاشة الكاملة' : 'Full Zoom Share'}</span>
                           </button>
-                          <span className="text-xs font-bold text-slate-600 px-2">
-                            {activeSlideIndex + 1} / {(tajweedData.presentationCards || []).length}
-                          </span>
-                          <button 
-                            disabled={activeSlideIndex === (tajweedData.presentationCards || []).length - 1}
-                            onClick={() => setActiveSlideIndex(prev => prev + 1)}
-                            className="bg-slate-100 disabled:opacity-30 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg text-xs"
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSuwaydQuizAnswers({});
+                              setSuwaydQuizSubmitted(false);
+                              setSuwaydQuizModalOpen(true);
+                            }}
+                            className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-4 py-2 rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 transition transform active:scale-95"
                           >
-                            {isRtl ? 'التالي' : 'Next'}
+                            <span>🎯</span>
+                            <span>{isRtl ? 'اختبار الدرس' : 'Lesson Quiz'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setWorksheetBranch('tajweed');
+                              setActiveTab('worksheets');
+                            }}
+                            className="bg-white hover:bg-slate-50 text-emerald-950 border border-slate-300 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition"
+                          >
+                            <span>🖨️</span>
+                            <span>{isRtl ? 'ورقة العمل' : 'Worksheet'}</span>
                           </button>
                         </div>
                       </div>
 
-                      {/* Active Slide Card Display (Illuminated Parchment, Zero Pitch-Black!) */}
-                      {(() => {
-                        const cardsList = tajweedData.presentationCards || [];
-                        const card = cardsList[activeSlideIndex] || cardsList[0] || { ayahTextUthmani: '', highlightedPortion: '', titleAr: '', titleEn: '', explanationAr: '', explanationEn: '' };
-                        return (
-                          <div className="card-islamic-pearl rounded-3xl p-6 sm:p-8 border-4 border-gold-500/70 shadow-2xl relative overflow-hidden text-center min-h-[380px] flex flex-col justify-between">
-                            
-                            {/* Slide Header */}
-                            <div className="flex justify-between items-center text-xs text-emerald-950 border-b border-emerald-900/10 pb-3">
-                              <span className="font-black tracking-wider uppercase bg-emerald-100/90 text-emerald-950 border border-emerald-300 px-3 py-1 rounded-full shadow-2xs">
-                                Mishkah Slide {card.cardIndex || activeSlideIndex + 1}
-                              </span>
-                              <span className="bg-gold-500/20 text-emerald-950 px-3 py-1 rounded-full border border-gold-500/60 font-black shadow-2xs">
-                                {isRtl ? card.titleAr : card.titleEn}
+                      {/* Poetic Matn Box */}
+                      <div className="bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-950 text-gold-200 rounded-2xl p-4 sm:p-5 border border-gold-500/40 shadow-inner">
+                        <div className="flex items-center justify-between mb-2 pb-2 border-b border-gold-500/20 text-xs">
+                          <span className="font-bold text-gold-300 flex items-center gap-1.5">
+                            <span>📜</span>
+                            <span>{isRtl ? 'الشاهد المعتمد من المتن (تحفة الأطفال / الجزرية):' : 'Authentic Matn Citation:'}</span>
+                          </span>
+                          <span className="text-[11px] text-slate-300 font-naskh">ضبط تام بالشكل</span>
+                        </div>
+                        <div className="font-naskh text-sm sm:text-base leading-loose whitespace-pre-line text-center text-gold-100 font-bold select-all">
+                          {currentSuwaydLesson.matnVerseAr}
+                        </div>
+                      </div>
+
+                      {/* Core Two-Column Workbench Layout */}
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        {/* Right Column: Definition, Examples, and Integrated Metronome (7 cols) */}
+                        <div className="lg:col-span-7 space-y-5">
+                          {/* Definition Card */}
+                          <div className="bg-white/90 rounded-2xl p-4 sm:p-5 border border-emerald-900/10 shadow-xs">
+                            <h4 className="text-xs font-extrabold text-emerald-900 mb-2 flex items-center gap-1.5">
+                              <span>💎</span>
+                              <span>{isRtl ? 'التعريف المعتمد لغةً واصطلاحاً:' : 'Canonical Definition:'}</span>
+                            </h4>
+                            <p className="text-sm font-medium text-slate-800 leading-relaxed font-cairo">
+                              {currentSuwaydLesson.definitionAr}
+                            </p>
+                          </div>
+
+                          {/* Quranic Examples in Uthmani Script */}
+                          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-900/10 shadow-xs">
+                            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+                              <h4 className="text-xs font-extrabold text-emerald-900 flex items-center gap-1.5">
+                                <span>📖</span>
+                                <span>{isRtl ? 'الأمثلة التطبيقية بالرسم العثماني المصحفي:' : 'Verified Uthmani Script Examples:'}</span>
+                              </h4>
+                              <span className="text-[11px] text-slate-500 font-medium">
+                                {currentSuwaydLesson.examples.length} {isRtl ? 'أمثلة منتقاة' : 'Examples'}
                               </span>
                             </div>
 
-                            {/* Uthmani Ayah Display with Highlighting */}
-                            <div className="my-8 px-4">
-                              <p className="font-quran text-2xl sm:text-4xl text-emerald-950 leading-loose font-bold">
-                                {(() => {
-                                  const text = card.ayahTextUthmani || '';
-                                  const target = card.highlightedPortion || '';
-                                  if (!target || !text.includes(target)) {
-                                    return <span>{text}</span>;
-                                  }
-                                  return text.split(target).map((part, i, arr) => (
-                                    <React.Fragment key={i}>
-                                      {part}
-                                      {i < arr.length - 1 && (
-                                        <span className="bg-amber-200/90 text-emerald-950 font-black border-2 border-gold-600 px-3 py-1 rounded-xl shadow-xs inline-block mx-1">
-                                          {target}
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-right border-collapse">
+                                <thead>
+                                  <tr className="bg-emerald-50/70 text-emerald-950 text-xs border-b border-emerald-100">
+                                    <th className="p-2.5 w-10 text-center font-bold">#</th>
+                                    <th className="p-2.5 font-bold font-cairo">{isRtl ? 'الكلمة القرآنية' : 'Quranic Word'}</th>
+                                    <th className="p-2.5 font-bold font-cairo w-28">{isRtl ? 'الموضع' : 'Surah'}</th>
+                                    <th className="p-2.5 font-bold font-cairo">{isRtl ? 'التوجيه الصوتي والعلة' : 'Phonetic Rationale'}</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 text-xs">
+                                  {currentSuwaydLesson.examples.map((ex, idx) => (
+                                    <tr key={idx} className="hover:bg-amber-50/40 transition">
+                                      <td className="p-2.5 text-center text-slate-400 font-bold">{idx + 1}</td>
+                                      <td className="p-2.5 font-quran text-lg text-emerald-950 font-bold leading-none select-all">
+                                        <span className="bg-amber-100/80 text-amber-950 px-2 py-0.5 rounded-lg border border-amber-300/60 inline-block">
+                                          {ex.word}
                                         </span>
-                                      )}
-                                    </React.Fragment>
-                                  ));
-                                })()}
-                              </p>
-                              <div className="text-xs text-gold-900 font-bold mt-3 font-cairo">
-                                {isRtl ? `الموضع المستهدف بالتلوين: [ ${card.highlightedPortion} ]` : `Target Word: [ ${card.highlightedPortion} ]`}
+                                      </td>
+                                      <td className="p-2.5 text-slate-600 font-medium font-cairo text-[11px]">
+                                        {ex.surah}
+                                      </td>
+                                      <td className="p-2.5 text-emerald-900 font-medium font-cairo text-xs leading-snug">
+                                        {ex.note}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          {/* ================= INTEGRATED HARAKAT METRONOME ================= */}
+                          <div className="card-islamic-amber rounded-2xl p-5 border-2 border-amber-300 shadow-md">
+                            <div className="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-amber-300/60">
+                              <div className="flex items-center gap-2">
+                                <span className="w-8 h-8 rounded-xl bg-amber-500 text-emerald-950 flex items-center justify-center font-black text-lg shadow-xs">
+                                  ⏱️
+                                </span>
+                                <div>
+                                  <h4 className="text-xs sm:text-sm font-black text-amber-950 font-cairo">
+                                    {isRtl ? 'ميزان الحركات المدمج مع الدرس والتطبيق الصوتي' : 'Integrated Lesson Harakat Metronome'}
+                                  </h4>
+                                  <p className="text-[11px] text-amber-800 font-medium">
+                                    {currentSuwaydLesson.timingDescription}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Speed selector */}
+                              <div className="flex items-center gap-1 bg-white/70 p-1 rounded-xl border border-amber-300">
+                                {[
+                                  { id: 'tahqeeq', label: 'تحقيق (بطيء)' },
+                                  { id: 'tadweer', label: 'تدوير (معتدل)' },
+                                  { id: 'hadr', label: 'حدر (سريع)' }
+                                ].map(sp => (
+                                  <button
+                                    key={sp.id}
+                                    type="button"
+                                    onClick={() => setMetronomeSpeed(sp.id)}
+                                    className={'px-2 py-1 rounded-lg text-[10px] font-bold transition ' + (
+                                      metronomeSpeed === sp.id
+                                        ? 'bg-amber-600 text-white font-black shadow-xs'
+                                        : 'text-amber-900 hover:bg-amber-100'
+                                    )}
+                                  >
+                                    {sp.label}
+                                  </button>
+                                ))}
                               </div>
                             </div>
 
-                            {/* Pedagogical Explanation & Teacher Prompt (High contrast card-islamic-sage, zero dark-on-dark!) */}
-                            <div className="card-islamic-sage rounded-2xl p-4 sm:p-5 border-2 border-emerald-700/30 text-right text-xs space-y-2.5 shadow-sm">
-                              <div className="text-emerald-950 font-amiri text-base sm:text-lg leading-relaxed font-bold">
-                                <strong className="text-emerald-900">{isRtl ? 'الشرح والعلة:' : 'Explanation:'}</strong> {isRtl ? card.explanationAr : card.explanationEn}
+                            {/* Metronome Pulse Grid & Controls */}
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                              {/* Rhythmic beat indicator circles */}
+                              <div className="flex items-center gap-3">
+                                {Array.from({ length: currentSuwaydLesson.timingCounts }).map((_, bIdx) => {
+                                  const beatNum = bIdx + 1;
+                                  const isCurrentBeat = metronomePlaying && metronomeBeat === beatNum;
+                                  return (
+                                    <div
+                                      key={beatNum}
+                                      className={'w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-black text-base transition-all duration-150 shadow-sm border ' + (
+                                        isCurrentBeat
+                                          ? 'bg-amber-500 text-emerald-950 border-amber-600 scale-110 shadow-lg ring-4 ring-amber-300 font-black animate-pulse'
+                                          : 'bg-white/90 text-amber-950 border-amber-200'
+                                      )}
+                                    >
+                                      <span className="leading-none">{beatNum}</span>
+                                      <span className="text-[9px] font-medium leading-none mt-0.5">حركة</span>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                              <div className="text-emerald-900 font-bold italic flex items-center gap-2 pt-2 border-t border-emerald-700/20 text-xs sm:text-sm">
-                                <span className="text-base">💡</span>
-                                <span><strong>{isRtl ? 'إرشاد المعلم للدارسين:' : 'Teacher Prompt:'}</strong> {card.teacherPrompt}</span>
+
+                              {/* Play / Stop Button */}
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (metronomeCount !== currentSuwaydLesson.timingCounts) {
+                                      setMetronomeCount(currentSuwaydLesson.timingCounts);
+                                    }
+                                    setMetronomePlaying(!metronomePlaying);
+                                  }}
+                                  className={'px-5 py-2.5 rounded-xl font-black text-xs shadow-md transition flex items-center gap-2 transform active:scale-95 ' + (
+                                    metronomePlaying
+                                      ? 'bg-rose-700 hover:bg-rose-800 text-white ring-2 ring-rose-400'
+                                      : 'bg-emerald-900 hover:bg-emerald-950 text-gold-200 border border-gold-400'
+                                  )}
+                                >
+                                  <span>{metronomePlaying ? '⏸️' : '▶️'}</span>
+                                  <span>{metronomePlaying ? 'إيقاف الميزان' : 'تشغيل النبض التجويدي'}</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setMetronomeSound(!metronomeSound)}
+                                  className={'p-2.5 rounded-xl text-xs font-bold border ' + (
+                                    metronomeSound ? 'bg-white text-emerald-950 border-amber-300' : 'bg-slate-100 text-slate-400 border-slate-200'
+                                  )}
+                                  title="كتم / تشغيل صوت النبض الخشبي"
+                                >
+                                  {metronomeSound ? '🔔' : '🔕'}
+                                </button>
                               </div>
                             </div>
                           </div>
-                        );
-                      })()}
+                        </div>
+
+                        {/* Left Column: Anatomical Cross-Section & Articulation Mechanism (5 cols) */}
+                        <div className="lg:col-span-5 space-y-5">
+                          {/* SVG Anatomical Diagram Card */}
+                          <div className="bg-white rounded-2xl p-4 border border-emerald-900/10 shadow-xs">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="text-xs font-extrabold text-emerald-900 flex items-center gap-1.5">
+                                <span>🗣️</span>
+                                <span>{isRtl ? 'المقطع التشريحي التوضيحي:' : 'Anatomical Cross-Section:'}</span>
+                              </h4>
+                              <span className="text-[10px] bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded-md border border-emerald-200">
+                                التجويد المصور
+                              </span>
+                            </div>
+
+                            {/* Render Vector SVG */}
+                            <div className="w-full flex items-center justify-center p-1 bg-slate-50/50 rounded-xl border border-slate-100">
+                              {renderSuwaydAnatomySvg(currentSuwaydLesson.svgType)}
+                            </div>
+                            <p className="text-[10px] text-center text-slate-500 font-medium mt-2">
+                              {isRtl ? 'مخطط بياني توضيحي مستوحى من كتاب التجويد المصور لفضيلة د. أيمن سويد' : 'Diagrammatic vector illustration inspired by Dr. Ayman Suwayd'}
+                            </p>
+                          </div>
+
+                          {/* Anatomical Mechanism Card */}
+                          <div className="bg-emerald-50/60 rounded-2xl p-4 sm:p-5 border border-emerald-200/80 shadow-xs">
+                            <h4 className="text-xs font-extrabold text-emerald-950 mb-2 flex items-center gap-1.5">
+                              <span>⚙️</span>
+                              <span>{isRtl ? 'الآلية التشريحية وحركة أعضاء النطق:' : 'Biomechanical Mechanism:'}</span>
+                            </h4>
+                            <p className="text-xs sm:text-sm font-medium text-emerald-950 leading-relaxed font-cairo">
+                              {currentSuwaydLesson.mechanismAr}
+                            </p>
+                          </div>
+
+                          {/* Common Mistakes Card */}
+                          <div className="bg-rose-50/60 rounded-2xl p-4 sm:p-5 border border-rose-200/80 shadow-xs">
+                            <h4 className="text-xs font-extrabold text-rose-950 mb-2 flex items-center gap-1.5">
+                              <span>⚠️</span>
+                              <span>{isRtl ? 'أبرز الأخطاء الشائعة وطرق تقويم اللسان:' : 'Common Mistakes & Fixes:'}</span>
+                            </h4>
+                            <p className="text-xs font-medium text-rose-950 leading-relaxed font-cairo whitespace-pre-line">
+                              {currentSuwaydLesson.commonMistakesAr}
+                            </p>
+                          </div>
+
+                          {/* Teacher Guidance Card */}
+                          <div className="bg-amber-50/70 rounded-2xl p-4 border border-amber-300 shadow-xs">
+                            <div className="flex items-start gap-2">
+                              <span className="text-base">💡</span>
+                              <div>
+                                <h4 className="text-xs font-bold text-amber-950 font-cairo">
+                                  {isRtl ? 'إرشاد وتوجيه المعلم للدارسين والحلقة:' : 'Teacher Prompt for the Ring:'}
+                                </h4>
+                                <p className="text-xs text-amber-900 font-medium mt-1 leading-snug">
+                                  {currentSuwaydLesson.teacherPromptAr}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+
+                    {/* ================= FULLSCREEN ZOOM PRESENTATION MODAL ================= */}
+                    {suwaydZoomModalOpen && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
+                        <div className="bg-gradient-to-b from-emerald-950 to-slate-950 text-white rounded-3xl max-w-4xl w-full border-2 border-gold-400/80 shadow-2xl p-6 sm:p-8 flex flex-col max-h-[92vh] overflow-y-auto">
+                          {/* Modal Header */}
+                          <div className="flex items-center justify-between pb-4 border-b border-gold-500/30">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-gold-400 font-bold">۞</span>
+                                <h3 className="text-lg sm:text-xl font-black text-gold-200 font-cairo">
+                                  {currentSuwaydLesson.titleAr}
+                                </h3>
+                              </div>
+                              <p className="text-xs text-slate-300 mt-0.5">
+                                {currentSuwaydLesson.suwaydRef} — شريحة العرض لبرنامج Zoom
+                              </p>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => setSuwaydZoomModalOpen(false)}
+                              className="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black flex items-center justify-center transition border border-slate-700"
+                            >
+                              ✕
+                            </button>
+                          </div>
+
+                          {/* Modal Slide Body */}
+                          <div className="py-6 flex-1 flex flex-col justify-center">
+                            {suwaydZoomSlideIndex === 0 ? (
+                              /* Slide 0: Matn and Anatomical Cross Section */
+                              <div className="space-y-6">
+                                <div className="bg-emerald-900/60 rounded-2xl p-5 border border-gold-500/40 text-center">
+                                  <span className="text-xs font-bold text-gold-300 block mb-2">الشاهد المعتمد من المتن:</span>
+                                  <div className="font-naskh text-lg sm:text-xl text-gold-100 font-bold leading-loose whitespace-pre-line">
+                                    {currentSuwaydLesson.matnVerseAr}
+                                  </div>
+                                </div>
+
+                                <div className="bg-white/95 rounded-2xl p-3 border border-emerald-400 max-w-md mx-auto">
+                                  {renderSuwaydAnatomySvg(currentSuwaydLesson.svgType)}
+                                </div>
+                              </div>
+                            ) : (
+                              /* Slide 1+: Individual Quranic Word & Live Metronome */
+                              (() => {
+                                const example = currentSuwaydLesson.examples[suwaydZoomSlideIndex - 1];
+                                if (!example) return null;
+                                return (
+                                  <div className="space-y-8 text-center">
+                                    <div className="text-xs text-gold-300 font-bold uppercase tracking-widest">
+                                      {example.surah}
+                                    </div>
+
+                                    {/* Big Quranic Word */}
+                                    <div className="zoom-quran-box py-8 px-6 bg-gradient-to-b from-emerald-950 to-slate-950 rounded-3xl border-2 border-gold-400/60 shadow-[0_0_40px_rgba(217,119,6,0.25)] my-4">
+                                      <div className="font-quran zoom-quran-gold text-5xl sm:text-7xl font-black select-all tracking-wide">
+                                        {example.word}
+                                      </div>
+                                    </div>
+
+                                    {/* Note */}
+                                    <div className="bg-white/10 rounded-2xl p-4 max-w-xl mx-auto border border-white/20 text-slate-200 text-sm font-cairo">
+                                      {example.note}
+                                    </div>
+
+                                    {/* Live Metronome inside Zoom slide */}
+                                    <div className="flex items-center justify-center gap-3 pt-2">
+                                      {Array.from({ length: currentSuwaydLesson.timingCounts }).map((_, bIdx) => {
+                                        const beatNum = bIdx + 1;
+                                        const isCurrentBeat = metronomePlaying && metronomeBeat === beatNum;
+                                        return (
+                                          <div
+                                            key={beatNum}
+                                            className={'w-14 h-14 rounded-2xl flex flex-col items-center justify-center font-black text-lg transition-all ' + (
+                                              isCurrentBeat
+                                                ? 'bg-gold-400 text-emerald-950 scale-110 shadow-lg ring-4 ring-gold-200 font-black'
+                                                : 'bg-emerald-900/80 text-gold-200 border border-gold-500/30'
+                                            )}
+                                          >
+                                            <span>{beatNum}</span>
+                                          </div>
+                                        );
+                                      })}
+
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          if (metronomeCount !== currentSuwaydLesson.timingCounts) {
+                                            setMetronomeCount(currentSuwaydLesson.timingCounts);
+                                          }
+                                          setMetronomePlaying(!metronomePlaying);
+                                        }}
+                                        className={'px-5 py-3 rounded-2xl font-black text-xs shadow-lg transition ' + (
+                                          metronomePlaying ? 'bg-rose-700 text-white' : 'bg-gold-500 text-emerald-950 font-black'
+                                        )}
+                                      >
+                                        {metronomePlaying ? '⏸️ إيقاف النبض' : '▶️ تشغيل النبض الصوتي'}
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })()
+                            )}
+                          </div>
+
+                          {/* Modal Footer Controls */}
+                          <div className="flex items-center justify-between pt-4 border-t border-gold-500/30">
+                            <button
+                              type="button"
+                              disabled={suwaydZoomSlideIndex === 0}
+                              onClick={() => setSuwaydZoomSlideIndex(prev => Math.max(0, prev - 1))}
+                              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-white font-bold text-xs transition"
+                            >
+                              {isRtl ? '◀ الشريحة السابقة' : '◀ Previous'}
+                            </button>
+
+                            <span className="text-xs font-bold text-gold-300">
+                              {suwaydZoomSlideIndex + 1} / {currentSuwaydLesson.examples.length + 1}
+                            </span>
+
+                            <button
+                              type="button"
+                              disabled={suwaydZoomSlideIndex >= currentSuwaydLesson.examples.length}
+                              onClick={() => setSuwaydZoomSlideIndex(prev => Math.min(currentSuwaydLesson.examples.length, prev + 1))}
+                              className="px-4 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 disabled:opacity-40 text-emerald-950 font-black text-xs transition"
+                            >
+                              {isRtl ? 'الشريحة التالية ▶' : 'Next ▶'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ================= SELF-EVALUATION QUIZ MODAL ================= */}
+                    {suwaydQuizModalOpen && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
+                        <div className="card-islamic-pearl rounded-3xl max-w-2xl w-full border-2 border-gold-500 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+                          <div className="flex items-center justify-between pb-4 mb-5 border-b border-emerald-900/15">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xl">🎯</span>
+                                <h3 className="text-lg font-black text-emerald-950 font-cairo">
+                                  {isRtl ? 'الاختبار الذاتي التقييمي — د. أيمن سويد' : 'Evaluative Quiz — Dr. Suwayd Standard'}
+                                </h3>
+                              </div>
+                              <p className="text-xs text-slate-600 mt-1">
+                                {currentSuwaydLesson.titleAr}
+                              </p>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => setSuwaydQuizModalOpen(false)}
+                              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition"
+                            >
+                              ✕
+                            </button>
+                          </div>
+
+                          {/* Questions */}
+                          <div className="space-y-6">
+                            {currentSuwaydLesson.quizQuestions.map((q, qIdx) => {
+                              const qKey = currentSuwaydLesson.id + '_' + qIdx;
+                              const selected = suwaydQuizAnswers[qKey];
+                              const isCorrect = selected === q.correct;
+                              return (
+                                <div key={qIdx} className="bg-white rounded-2xl p-4 border border-slate-200">
+                                  <div className="flex items-start gap-2 mb-3">
+                                    <span className="w-6 h-6 rounded-full bg-emerald-900 text-gold-200 text-xs font-bold flex items-center justify-center shrink-0">
+                                      {qIdx + 1}
+                                    </span>
+                                    <h4 className="font-bold text-emerald-950 text-sm font-cairo leading-snug">
+                                      {q.qAr}
+                                    </h4>
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    {q.opts.map(opt => {
+                                      const isThis = selected === opt.id;
+                                      let optClass = 'bg-slate-50 border-slate-200 text-slate-800 hover:border-emerald-300';
+                                      if (suwaydQuizSubmitted) {
+                                        if (opt.id === q.correct) {
+                                          optClass = 'bg-emerald-100 border-emerald-500 text-emerald-900 font-bold';
+                                        } else if (isThis && !isCorrect) {
+                                          optClass = 'bg-rose-100 border-rose-400 text-rose-900';
+                                        }
+                                      } else if (isThis) {
+                                        optClass = 'bg-emerald-900 text-gold-200 font-bold border-emerald-950 shadow-sm';
+                                      }
+
+                                      return (
+                                        <button
+                                          key={opt.id}
+                                          type="button"
+                                          disabled={suwaydQuizSubmitted}
+                                          onClick={() => setSuwaydQuizAnswers(prev => ({ ...prev, [qKey]: opt.id }))}
+                                          className={'w-full p-3 rounded-xl border text-right text-xs transition flex items-center justify-between ' + optClass}
+                                        >
+                                          <span>{opt.text}</span>
+                                          {suwaydQuizSubmitted && opt.id === q.correct && <span className="font-bold">✓</span>}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+
+                                  {suwaydQuizSubmitted && (
+                                    <div className={'mt-3 p-3 rounded-xl text-xs font-cairo leading-relaxed border ' + (
+                                      isCorrect ? 'bg-emerald-50 text-emerald-900 border-emerald-200' : 'bg-rose-50 text-rose-900 border-rose-200'
+                                    )}>
+                                      <strong>{isCorrect ? '✓ أحسنت بارك الله فيك:' : '✗ تصحيح د. أيمن سويد:'}</strong> {q.exp}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Submit / Reset Actions */}
+                          <div className="flex items-center justify-end gap-3 pt-5 border-t border-slate-200 mt-6">
+                            {suwaydQuizSubmitted ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSuwaydQuizAnswers({});
+                                  setSuwaydQuizSubmitted(false);
+                                }}
+                                className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-5 py-2 rounded-xl text-xs transition"
+                              >
+                                إعادة الاختبار
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={Object.keys(suwaydQuizAnswers).length === 0}
+                                onClick={() => setSuwaydQuizSubmitted(true)}
+                                className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 font-black px-6 py-2.5 rounded-xl text-xs shadow-md transition disabled:opacity-40"
+                              >
+                                تسليم الإجابات والتقييم الفوري
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
-{/* ================= SUB-TAB 2: INTERACTIVE ARTICULATION ATLAS ================= */}
-                {tajweedSubTab === 'makhaarij' && (
+{tajweedSubTab === 'makhaarij' && (
                   <div className="space-y-6 animate-fadeIn">
                     {/* Header Banner */}
                     <div className="card-islamic-pearl rounded-3xl p-6 border-2 border-emerald-900/15 shadow-sm">
@@ -5182,7 +6025,7 @@
                         </h2>
                         <div className="flex justify-between items-center text-xs text-slate-600 mt-4 px-2">
                           <span>{isRtl ? 'اسم الطالب / الدارس:' : 'Student Name:'} ____________________</span>
-                          <span>{isRtl ? 'السورة والآيات:' : 'Surah:'} {tajweedData?.metadata?.surah} ({tajweedData?.metadata?.ayahRange})</span>
+                          <span>{isRtl ? 'السورة والآيات:' : 'Surah:'} {tajweedData?.metadata?.surah || currentSuwaydLesson.titleAr}</span>
                           <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
                         </div>
                       </div>
