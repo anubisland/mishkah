@@ -1,9 +1,9 @@
-# مِشكاة (Mishkah) — AI Copilot for Quran, Tajweed & Islamic Studies Educators
+# مِشكاة (Mishkah) — نظام التشغيل الشامل للداعية والمعلم الشرعي
 
 <div align="center">
-  <img src="public/icons/mishkah-icon.svg" width="140" height="140" alt="Mishkah Logo" />
-  <h3>المُعين الذكي ثنائي اللغة لمعلمات القرآن والتجويد والعلوم الشرعية عبر زوم</h3>
-  <p><strong>Bilingual AI Copilot for Quran, Tajweed, and Islamic Studies Online Educators</strong></p>
+  <img src="public/icons/mishkah-app-icon.jpg" width="160" height="160" style="border-radius: 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.25);" alt="Mishkah Official App Icon" />
+  <h3>مِشكاة — نظام التشغيل الشامل للداعية والمعلم الشرعي</h3>
+  <p><strong>The Comprehensive Operating System for Da'wah, Quran, Tajweed & Islamic Studies Educators</strong></p>
   <p>
     <code>Grand Emerald & Soft Gold Aesthetic</code> • <code>Uthmani Script</code> • <code>Zoom Ready</code> • <code>Printable Worksheets</code> • <code>PWA Enabled</code>
   </p>

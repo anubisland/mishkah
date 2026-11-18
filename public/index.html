@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مِشكاة | Mishkah — AI Copilot for Quran, Tajweed & Islamic Studies Educators</title>
+  <title>مِشكاة | نظام التشغيل الشامل للداعية والمعلم الشرعي</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" type="image/svg+xml" href="icons/mishkah-icon.svg">
+  <link rel="icon" type="image/jpeg" href="icons/mishkah-app-icon.jpg">
   <meta name="theme-color" content="#064E3B">
-  <meta name="description" content="AI Copilot tailored for female educators teaching Quran, Tajweed and Islamic Studies via Zoom.">
+  <meta name="description" content="مِشكاة — نظام التشغيل الشامل للداعية والمعلم الشرعي: القرآن الكريم، أحكام التجويد، والعلوم الشرعية عبر زوم وحلقات العلم.">
 
   <!-- Google Fonts: Cairo, Amiri, Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -213,26 +213,40 @@
         setTimeout(() => setToast(null), 3000);
       };
 
-      // Load initial mock data
+      // Load initial pre-loaded demo lessons
       useEffect(() => {
-        handleGenerateTajweed(true);
-        handleGenerateIslamic(true);
+        handleLoadDemoTajweed();
+        handleLoadDemoIslamic();
       }, []);
 
-      // Generator Handlers
+      // Handlers to load Pre-loaded Demo Lessons instantly
+      function handleLoadDemoTajweed() {
+        setTajweedData(getFallbackTajweed());
+        setQuizAnswers({});
+        setQuizSubmitted(false);
+        showToast(isRtl ? 'تم تحميل درس التجويد التجريبي الجاهز (سورة الملك) ⚡' : 'Pre-loaded Tajweed Demo Lesson Loaded (Al-Mulk) ⚡');
+      }
+
+      function handleLoadDemoIslamic() {
+        setIslamicData(getFallbackIslamic());
+        showToast(isRtl ? 'تم تحميل درس العقيدة التجريبي الجاهز (أركان الإيمان) ⚡' : 'Pre-loaded Aqeedah Demo Lesson Loaded (Six Pillars) ⚡');
+      }
+
+      // Generator Handlers via /api/generate
       async function handleGenerateTajweed(isInitial = false) {
         setIsGeneratingTajweed(true);
         try {
           const ruleObj = TAJWEED_RULES.find(r => r.id === selectedRule) || TAJWEED_RULES[0];
           const textbookObj = PRELOADED_TEXTBOOKS.find(b => b.id === selectedTextbook);
 
-          const res = await fetch('/api/generate/tajweed', {
+          const res = await fetch('/api/generate', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'x-mishkah-pin': teacherPin
             },
             body: JSON.stringify({
+              type: 'tajweed',
               surah: surahName,
               ayahRange: ayahRange,
               rule: ruleObj.nameAr,
@@ -253,7 +267,6 @@
           }
         } catch (err) {
           console.warn('Using client fallback:', err.message);
-          // Rich client-side fallback
           setTajweedData(getFallbackTajweed());
           if (!isInitial) showToast(isRtl ? 'تم التحميل من قاعدة البيانات الموثقة 💡' : 'Loaded from Verified Local Curriculum 💡');
         } finally {
@@ -264,13 +277,14 @@
       async function handleGenerateIslamic(isInitial = false) {
         setIsGeneratingIslamic(true);
         try {
-          const res = await fetch('/api/generate/islamic-studies', {
+          const res = await fetch('/api/generate', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'x-mishkah-pin': teacherPin
             },
             body: JSON.stringify({
+              type: 'islamic',
               category: subjectCategory,
               topic: lessonTopic,
               duration: lessonDuration,
@@ -582,8 +596,8 @@
               
               {/* Brand Logo & Title */}
               <div className="flex items-center space-x-4 space-x-reverse cursor-pointer" onClick={() => setActiveTab('dashboard')}>
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-950 border-2 border-gold-400 p-2 shadow-2xl flex items-center justify-center transform hover:scale-105 transition">
-                  <img src="icons/mishkah-icon.svg" alt="Mishkah Logo" className="w-full h-full drop-shadow" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-950 border-2 border-gold-400 p-0.5 shadow-2xl flex items-center justify-center transform hover:scale-105 transition overflow-hidden">
+                  <img src="icons/mishkah-app-icon.jpg" alt="Mishkah Logo" className="w-full h-full object-cover rounded-xl drop-shadow" />
                 </div>
                 <div>
                   <div className="flex items-center space-x-2 space-x-reverse">
@@ -595,7 +609,7 @@
                     </span>
                   </div>
                   <p className="text-xs text-emerald-100/90 font-medium mt-0.5">
-                    {isRtl ? 'المُعين الذكي لمعلمات القرآن والتجويد والعلوم الشرعية' : 'AI Copilot for Quran, Tajweed & Islamic Studies Educators'}
+                    {isRtl ? 'نظام التشغيل الشامل للداعية والمعلم الشرعي' : 'Comprehensive Operating System for Da\'wah & Islamic Educators'}
                   </p>
                 </div>
               </div>
@@ -672,19 +686,19 @@
               <div className="space-y-8 animate-fadeIn">
                 
                 {/* Welcome Hero Banner */}
-                <div className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-900 rounded-3xl p-6 sm:p-8 text-white border-2 border-gold-400/40 shadow-xl relative overflow-hidden">
-                  <div className="relative z-10 max-w-3xl">
+                <div className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-900 rounded-3xl p-6 sm:p-8 text-white border-2 border-gold-400/40 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="relative z-10 max-w-2xl">
                     <div className="inline-flex items-center space-x-2 space-x-reverse bg-gold-400/20 text-gold-200 border border-gold-400/40 text-xs px-3 py-1 rounded-full mb-3">
                       <span>✨</span>
-                      <span>{isRtl ? 'مرحباً بكِ أستاذتنا الفاضلة في مِشكاة' : 'Welcome to Mishkah Teacher Hub'}</span>
+                      <span>{isRtl ? 'نظام التشغيل الشامل للداعية والمعلم الشرعي' : 'Comprehensive OS for Da\'wah & Islamic Educators'}</span>
                     </div>
                     <h2 className="text-2xl sm:text-4xl font-extrabold font-amiri text-gold-200 mb-3">
-                      {isRtl ? 'تحضير ذكي متقن لحلقاتكِ القرآنية والشرعية عبر زوم' : 'Precise, Curriculum-Aligned Lesson Blueprints for Zoom'}
+                      {isRtl ? 'منظومة متكاملة لحلقات القرآن، التجويد، ومتابعة الأداء الشرعي' : 'Integrated OS for Quran, Tajweed, Islamic Studies & Performance Tracking'}
                     </h2>
                     <p className="text-emerald-100/90 text-sm sm:text-base leading-relaxed mb-6">
                       {isRtl 
-                        ? 'أداة مصممة خصيصاً للمعلمة الدقيقة: استخرجي أمثلة التجويد بالرسم العثماني، جهّزي بطاقات زوم الملونة، واستخرجي أوراق عمل قابلة للطباعة فوراً، واعتمدي أحاديث صحيحة موثقة بدون عناء.'
-                        : 'Designed specifically for detail-oriented educators: extract Quranic verses with accurate Uthmani diacritics, present high-contrast Zoom cards, generate printable worksheets, and create authenticated Islamic studies blueprints in seconds.'}
+                        ? 'مِشكاة — يجمع بين دقة استخراج الأحكام التجويدية بالرسم العثماني، وبطاقات زوم الملونة، والتوثيق الشرعي الصارم لأحاديث صحيح البخاري ومسلم، مع منظومة المتابعة وتقييم الجودة وإصدار التقارير.'
+                        : 'Mishkah integrates Uthmani script Tajweed extraction, Zoom presentation cards, rigorous Hadith authentication, performance tracking, and printable student worksheets in one cohesive platform.'}
                     </p>
                     <div className="flex flex-wrap gap-3">
                       <button 
@@ -701,6 +715,13 @@
                         <span>🕌</span>
                         <span>{isRtl ? 'تخطيط حلقة علوم شرعية' : 'Plan Islamic Studies Lesson'}</span>
                       </button>
+                    </div>
+                  </div>
+
+                  {/* Official Emblem Display */}
+                  <div className="relative z-10 flex-shrink-0">
+                    <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl p-1 bg-gradient-to-b from-gold-300 via-gold-500 to-emerald-950 shadow-2xl border-2 border-gold-300/80 transform hover:scale-105 transition flex items-center justify-center overflow-hidden">
+                      <img src="icons/mishkah-app-icon.jpg" alt="Mishkah Official App Icon" className="w-full h-full object-cover rounded-2xl" />
                     </div>
                   </div>
                 </div>
@@ -965,8 +986,17 @@
                     </details>
                   </div>
 
-                  {/* Trigger Button */}
-                  <div className="flex justify-end">
+                  {/* Trigger Buttons */}
+                  <div className="flex flex-wrap items-center justify-end gap-3">
+                    <button 
+                      onClick={() => handleLoadDemoTajweed()}
+                      disabled={isGeneratingTajweed}
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold px-4 py-3 rounded-xl transition flex items-center space-x-2 space-x-reverse text-xs"
+                      title="تحميل الدرس التجريبي الجاهز فوراً"
+                    >
+                      <span>⚡</span>
+                      <span>{isRtl ? 'تحميل الدرس التجريبي (سورة الملك)' : 'Load Demo Lesson (Surah Al-Mulk)'}</span>
+                    </button>
                     <button 
                       onClick={() => handleGenerateTajweed(false)}
                       disabled={isGeneratingTajweed}
@@ -1221,8 +1251,17 @@
                     </div>
                   </div>
 
-                  {/* Trigger Button */}
-                  <div className="flex justify-end pt-2">
+                  {/* Trigger Buttons */}
+                  <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
+                    <button 
+                      onClick={() => handleLoadDemoIslamic()}
+                      disabled={isGeneratingIslamic}
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold px-4 py-3 rounded-xl transition flex items-center space-x-2 space-x-reverse text-xs"
+                      title="تحميل الدرس التجريبي الجاهز فوراً"
+                    >
+                      <span>⚡</span>
+                      <span>{isRtl ? 'تحميل الدرس التجريبي (أركان الإيمان)' : 'Load Demo Lesson (Six Pillars)'}</span>
+                    </button>
                     <button 
                       onClick={() => handleGenerateIslamic(false)}
                       disabled={isGeneratingIslamic}

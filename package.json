@@ -1,7 +1,7 @@
 {
   "name": "mishkah",
   "version": "1.0.0",
-  "description": "مِشكاة | Mishkah — AI Copilot for Quran, Tajweed & Islamic Studies Educators",
+  "description": "مِشكاة | Mishkah — نظام التشغيل الشامل للداعية والمعلم الشرعي",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

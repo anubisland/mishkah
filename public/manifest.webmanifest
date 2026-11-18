@@ -1,13 +1,19 @@
 {
-  "name": "Mishkah | مِشكاة — AI Quran, Tajweed & Islamic Studies Copilot",
-  "short_name": "Mishkah | مِشكاة",
-  "description": "Bilingual AI Copilot for Quran, Tajweed, and Islamic Studies Online Educators",
+  "name": "مِشكاة — نظام التشغيل الشامل للداعية والمعلم الشرعي",
+  "short_name": "مِشكاة | Mishkah",
+  "description": "نظام التشغيل الشامل للداعية والمعلم الشرعي — القرآن الكريم والتجويد والعلوم الشرعية",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#032B20",
   "theme_color": "#064E3B",
   "orientation": "any",
   "icons": [
+    {
+      "src": "./icons/mishkah-app-icon.jpg",
+      "sizes": "1024x1024",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
     {
       "src": "./icons/mishkah-icon.svg",
       "sizes": "192x192 512x512",

@@ -29,6 +29,8 @@ function loadEnv() {
 }
 loadEnv();
 
+const apiGenerateHandler = require('./api/generate.js');
+
 const PORT = process.env.PORT || 3000;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const TEACHER_PIN = process.env.MISHKAH_TEACHER_PIN || 'MISHKAH2026';
@@ -615,9 +617,11 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Security Gate Check for Generator Endpoints
-  const authPin = req.headers['x-mishkah-pin'] || parsedUrl.query.pin;
-  const isPinAuthorized = (authPin && authPin.toString().trim().toUpperCase() === TEACHER_PIN.toUpperCase());
+  // Generator Endpoints (Unified /api/generate, /api/generate/tajweed, /api/generate/islamic-studies)
+  // Shared between Vercel Serverless Function and Local Node HTTP Server
+  if (pathname === '/api/generate' || pathname === '/api/generate/tajweed' || pathname === '/api/generate/islamic-studies') {
+    return apiGenerateHandler(req, res);
+  }
 
   // Tajweed Generator Endpoint
   if (req.method === 'POST' && pathname === '/api/generate/tajweed') {
