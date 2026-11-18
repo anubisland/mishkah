@@ -742,9 +742,9 @@
       return (
         <div className="min-h-screen flex flex-col islamic-screen-pattern">
           
-          {/* TOAST ALERT */}
+          {/* TOAST ALERT: Floating Bottom Snackbar so it never blocks header controls */}
           {toast && (
-            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-900 border-2 border-gold-400 text-gold-200 px-6 py-3 rounded-full shadow-2xl flex items-center gap- font-bold text-sm animate-bounce">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-950/95 border-2 border-gold-400 text-gold-200 px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 font-bold text-sm backdrop-blur-md transition-all">
               <span>✨</span>
               <span>{toast}</span>
             </div>
@@ -858,9 +858,6 @@
                   <span>🌐</span>
                   <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
                 </button>
-                  <span>🌐</span>
-                  <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
-                </button>
               </div>
             </div>
 
@@ -904,7 +901,7 @@
                   <div className="absolute bottom-2.5 right-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
                   <div className="absolute bottom-2.5 left-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
                   <div className="relative z-10 max-w-2xl">
-                    <div className="inline-flex items-center gap- bg-gold-400/20 text-gold-200 border border-gold-400/40 text-xs px-3 py-1 rounded-full mb-3">
+                    <div className="inline-flex items-center gap-2 bg-gold-400/20 text-gold-200 border border-gold-400/40 text-xs px-3 py-1 rounded-full mb-3">
                       <span>✨</span>
                       <span>{isRtl ? 'نظام التشغيل الشامل للداعية والمعلم الشرعي' : 'Comprehensive OS for Da\'wah & Islamic Educators'}</span>
                     </div>
@@ -919,14 +916,14 @@
                     <div className="flex flex-wrap gap-3">
                       <button 
                         onClick={() => setActiveTab('tajweed')}
-                        className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-bold px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap- text-sm"
+                        className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-bold px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2 text-sm"
                       >
                         <span>📖</span>
                         <span>{isRtl ? 'بدء تحضير درس تجويد' : 'Prepare Tajweed Lesson'}</span>
                       </button>
                       <button 
                         onClick={() => setActiveTab('islamic')}
-                        className="bg-emerald-950/80 hover:bg-emerald-950 border border-gold-400/60 text-gold-200 font-bold px-5 py-2.5 rounded-xl shadow transition flex items-center gap- text-sm"
+                        className="bg-emerald-950/80 hover:bg-emerald-950 border border-gold-400/60 text-gold-200 font-bold px-5 py-2.5 rounded-xl shadow transition flex items-center gap-2 text-sm"
                       >
                         <span>🕌</span>
                         <span>{isRtl ? 'تخطيط حلقة علوم شرعية' : 'Plan Islamic Studies Lesson'}</span>
@@ -1069,7 +1066,7 @@
                 {/* Generation Control Panel */}
                 <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
                   <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
-                    <div className="flex items-center gap-">
+                    <div className="flex items-center gap-2">
                       <span className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
                         📖
                       </span>
@@ -1156,7 +1153,7 @@
                   {/* Textbook Context Grounding */}
                   <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 mb-5">
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                      <label className="text-xs font-bold text-emerald-950 flex items-center gap-">
+                      <label className="text-xs font-bold text-emerald-950 flex items-center gap-2">
                         <span>📚</span>
                         <span>{isRtl ? 'مرجعية الكتاب المعتمد (Strict Curriculum Adherence):' : 'Textbook Reference Context:'}</span>
                       </label>
@@ -1170,7 +1167,7 @@
                         <div 
                           key={book.id} 
                           onClick={() => setSelectedTextbook(book.id)}
-                          className={`p-3 rounded-xl border cursor-pointer transition flex items-start gap- ${
+                          className={`p-3 rounded-xl border cursor-pointer transition flex items-start gap-2 ${
                             selectedTextbook === book.id 
                               ? 'bg-emerald-50 border-emerald-600 shadow-sm' 
                               : 'bg-white border-slate-200 hover:border-emerald-300'
@@ -1215,7 +1212,7 @@
                     <button 
                       onClick={() => handleLoadDemoTajweed()}
                       disabled={isGeneratingTajweed}
-                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold px-4 py-3 rounded-xl transition flex items-center gap- text-xs"
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold px-4 py-3 rounded-xl transition flex items-center gap-2 text-xs"
                       title="تحميل الدرس التجريبي الجاهز فوراً"
                     >
                       <span>⚡</span>
@@ -1224,7 +1221,7 @@
                     <button 
                       onClick={() => handleGenerateTajweed(false)}
                       disabled={isGeneratingTajweed}
-                      className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-extrabold px-6 py-3 rounded-xl shadow-lg transition flex items-center gap- disabled:opacity-50 text-sm"
+                      className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-extrabold px-6 py-3 rounded-xl shadow-lg transition flex items-center gap-2 disabled:opacity-50 text-sm"
                     >
                       <span>{isGeneratingTajweed ? '⏳' : '✨'}</span>
                       <span>
@@ -1242,10 +1239,10 @@
 
                     {/* Quick Tabs to toggle sub-outputs */}
                     <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-3 rounded-2xl border border-slate-200">
-                      <div className="flex gap-">
+                      <div className="flex gap-2">
                         <button 
                           onClick={() => setIsFullscreenZoom(true)}
-                          className="bg-emerald-900 hover:bg-emerald-800 text-gold-300 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap- transition shadow"
+                          className="bg-emerald-900 hover:bg-emerald-800 text-gold-300 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition shadow"
                         >
                           <span>📺</span>
                           <span>{isRtl ? 'وضع عرض زوم للشاشة الكاملة (Zoom Share)' : 'Fullscreen Zoom Presentation Mode'}</span>
@@ -1289,7 +1286,7 @@
                       </p>
                       
                       {/* Anatomical Makhraj Callout */}
-                      <div className="mt-4 bg-emerald-950/80 rounded-2xl p-4 border border-gold-500/30 flex items-start gap-">
+                      <div className="mt-4 bg-emerald-950/80 rounded-2xl p-4 border border-gold-500/30 flex items-start gap-2">
                         <span className="text-2xl mt-0.5">🗣️</span>
                         <div>
                           <h4 className="text-xs font-bold text-gold-300 uppercase tracking-wider mb-1">
@@ -1305,11 +1302,11 @@
                     {/* Zoom Presentation Deck Cards */}
                     <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
                       <div className="flex items-center justify-between pb-3 mb-6 border-b border-slate-100">
-                        <h3 className="text-lg font-bold text-emerald-950 font-cairo flex items-center gap-">
+                        <h3 className="text-lg font-bold text-emerald-950 font-cairo flex items-center gap-2">
                           <span>🖥️</span>
                           <span>{isRtl ? 'بطاقات الشرح التفاعلية لبرنامج زوم (Zoom Cards)' : 'Zoom Teaching Presentation Cards'}</span>
                         </h3>
-                        <div className="flex items-center gap-">
+                        <div className="flex items-center gap-2">
                           <button 
                             disabled={activeSlideIndex === 0}
                             onClick={() => setActiveSlideIndex(prev => prev - 1)}
@@ -1368,7 +1365,7 @@
                               <div className="text-slate-100 font-amiri text-base leading-relaxed">
                                 <strong>{isRtl ? 'الشرح والعلة:' : 'Explanation:'}</strong> {isRtl ? card.explanationAr : card.explanationEn}
                               </div>
-                              <div className="text-gold-200/90 italic flex items-center gap- pt-2 border-t border-emerald-800/60">
+                              <div className="text-gold-200/90 italic flex items-center gap-2 pt-2 border-t border-emerald-800/60">
                                 <span>💡</span>
                                 <span><strong>{isRtl ? 'إرشاد المعلمة للطالبات:' : 'Teacher Prompt:'}</strong> {card.teacherPrompt}</span>
                               </div>
@@ -1389,7 +1386,7 @@
                 {/* Control Generator Panel */}
                 <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
                   <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
-                    <div className="flex items-center gap-">
+                    <div className="flex items-center gap-2">
                       <span className="w-10 h-10 rounded-xl bg-gold-100 text-gold-800 flex items-center justify-center text-xl font-bold">
                         🕌
                       </span>
@@ -1480,7 +1477,7 @@
                     <button 
                       onClick={() => handleLoadDemoIslamic()}
                       disabled={isGeneratingIslamic}
-                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold px-4 py-3 rounded-xl transition flex items-center gap- text-xs"
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold px-4 py-3 rounded-xl transition flex items-center gap-2 text-xs"
                       title="تحميل الدرس التجريبي الجاهز فوراً"
                     >
                       <span>⚡</span>
@@ -1489,7 +1486,7 @@
                     <button 
                       onClick={() => handleGenerateIslamic(false)}
                       disabled={isGeneratingIslamic}
-                      className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-extrabold px-6 py-3 rounded-xl shadow-lg transition flex items-center gap- disabled:opacity-50 text-sm"
+                      className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-extrabold px-6 py-3 rounded-xl shadow-lg transition flex items-center gap-2 disabled:opacity-50 text-sm"
                     >
                       <span>{isGeneratingIslamic ? '⏳' : '🕌'}</span>
                       <span>
@@ -1546,7 +1543,7 @@
                             {phase.talkingPoints && (
                               <ul className="text-[11px] text-slate-600 space-y-1 border-t border-slate-200 pt-2">
                                 {phase.talkingPoints.map((tp, i) => (
-                                  <li key={i} className="flex items-start gap-">
+                                  <li key={i} className="flex items-start gap-2">
                                     <span className="text-emerald-600 font-bold">•</span>
                                     <span>{tp}</span>
                                   </li>
@@ -1561,7 +1558,7 @@
                     {/* 2. Authenticated Evidences & Guardrails */}
                     <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
                       <div className="flex items-center justify-between pb-3 mb-5 border-b border-slate-100">
-                        <h3 className="text-lg font-bold text-emerald-950 font-cairo flex items-center gap-">
+                        <h3 className="text-lg font-bold text-emerald-950 font-cairo flex items-center gap-2">
                           <span>🛡️</span>
                           <span>{isRtl ? 'الأدلة الشرعية الموثقة وسياج التحقق' : 'Authenticated Quran & Hadith Evidences'}</span>
                         </h3>
@@ -1577,7 +1574,7 @@
                               <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider bg-white px-2.5 py-0.5 rounded-md border border-emerald-200">
                                 {ev.type === 'quran' ? '📖 آية قرآنية' : '📜 حديث نبوي شريف'}
                               </span>
-                              <div className="flex items-center gap- text-xs">
+                              <div className="flex items-center gap-2 text-xs">
                                 <span className="bg-gold-100 text-gold-900 border border-gold-300 font-bold px-2.5 py-0.5 rounded-full">
                                   {ev.grading}
                                 </span>
@@ -1606,7 +1603,7 @@
                     {/* 3. WhatsApp Ready Kit with Islamic Chat Wallpaper */}
                     <div className="card-islamic-pearl rounded-3xl p-6 border-2 border-emerald-900/15 shadow-xl overflow-hidden">
                       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-200">
-                        <div className="flex items-center gap-">
+                        <div className="flex items-center gap-2">
                           <span className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl shadow-inner">
                             💬
                           </span>
@@ -1621,7 +1618,7 @@
                         </div>
                         <button 
                           onClick={handleCopyWhatsApp}
-                          className="bg-emerald-700 hover:bg-emerald-800 text-gold-100 font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md transition flex items-center gap-"
+                          className="bg-emerald-700 hover:bg-emerald-800 text-gold-100 font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md transition flex items-center gap-2"
                         >
                           <span>📋</span>
                           <span>{isRtl ? 'نسخ الرسالة كاملة' : 'Copy Formatted Text'}</span>
@@ -1633,7 +1630,7 @@
                         <div className="max-w-2xl mx-auto bg-white/95 backdrop-blur-md rounded-2xl p-5 shadow-md border border-emerald-900/10 relative">
                           {/* Chat sender header */}
                           <div className="flex items-center justify-between pb-2 mb-3 border-b border-emerald-50 text-xs">
-                            <span className="font-bold text-emerald-900 flex items-center gap-">
+                            <span className="font-bold text-emerald-900 flex items-center gap-2">
                               <span>🕌</span>
                               <span>{isRtl ? 'رسالة حلقة اليوم المعتمدة' : 'Official Lesson Broadcast'}</span>
                             </span>
@@ -1646,7 +1643,7 @@
                           </div>
 
                           {/* Chat message footer with blue checks */}
-                          <div className="flex items-center justify-end gap- text-[11px] text-slate-400 pt-3 border-t border-slate-100 mt-3">
+                          <div className="flex items-center justify-end gap-2 text-[11px] text-slate-400 pt-3 border-t border-slate-100 mt-3">
                             <span>جاهزة للنسخ</span>
                             <span className="text-sky-500 font-bold">✓✓</span>
                           </div>
@@ -1664,7 +1661,7 @@
                 
                 {/* Print Control Toolbar */}
                 <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3 no-print">
-                  <div className="flex items-center gap-">
+                  <div className="flex items-center gap-2">
                     <span className="text-xl">🖨️</span>
                     <div>
                       <h3 className="text-base font-bold text-emerald-950">
@@ -1677,7 +1674,7 @@
                   </div>
                   <button 
                     onClick={() => window.print()}
-                    className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2.5 rounded-xl text-xs shadow transition flex items-center gap-"
+                    className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2.5 rounded-xl text-xs shadow transition flex items-center gap-2"
                   >
                     <span>🖨️</span>
                     <span>{isRtl ? 'طباعة / حفظ بتنسيق PDF' : 'Print / Export to PDF'}</span>
@@ -1806,7 +1803,7 @@
                       
                       return (
                         <div key={q.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
-                          <div className="flex items-start gap- mb-3">
+                          <div className="flex items-start gap-2 mb-3">
                             <span className="w-7 h-7 rounded-full bg-emerald-800 text-gold-200 font-bold text-xs flex items-center justify-center shrink-0">
                               {qIndex + 1}
                             </span>
@@ -1922,7 +1919,7 @@
                       <p>{isRtl ? card.explanationAr : card.explanationEn}</p>
                     </div>
 
-                    <div className="flex items-center gap- pt-4">
+                    <div className="flex items-center gap-2 pt-4">
                       <button 
                         disabled={activeSlideIndex === 0}
                         onClick={() => setActiveSlideIndex(prev => prev - 1)}
@@ -1951,7 +1948,7 @@
           {isPinModalOpen && (
             <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
               <div className="bg-white rounded-3xl p-6 max-w-md w-full border-2 border-emerald-900 shadow-2xl text-right">
-                <div className="flex items-center gap- mb-4">
+                <div className="flex items-center gap-2 mb-4">
                   <span className="text-3xl">🔒</span>
                   <div>
                     <h3 className="text-lg font-bold text-emerald-950 font-cairo">
@@ -2005,7 +2002,7 @@
           {/* APPLICATION FOOTER */}
           <footer className="bg-emerald-950 text-emerald-200/80 border-t border-emerald-900 py-6 text-center text-xs no-print">
             <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center gap-">
+              <div className="flex items-center gap-2">
                 <span className="font-bold text-gold-300 font-amiri text-base">مِشكاة | Mishkah</span>
                 <span>—</span>
                 <span>{isRtl ? 'منصة المعلمة الأولى لتعليم القرآن والعلوم الشرعية' : 'Empowering Quran & Islamic Studies Educators'}</span>
