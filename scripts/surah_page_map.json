@@ -1,0 +1,800 @@
+[
+  {
+    "id": 1,
+    "name": "الفاتحة",
+    "startPage": 1,
+    "endPage": 1,
+    "totalAyahs": 7
+  },
+  {
+    "id": 2,
+    "name": "البقرة",
+    "startPage": 2,
+    "endPage": 49,
+    "totalAyahs": 286
+  },
+  {
+    "id": 3,
+    "name": "آل عمران",
+    "startPage": 50,
+    "endPage": 76,
+    "totalAyahs": 200
+  },
+  {
+    "id": 4,
+    "name": "النساء",
+    "startPage": 77,
+    "endPage": 106,
+    "totalAyahs": 176
+  },
+  {
+    "id": 5,
+    "name": "المائدة",
+    "startPage": 106,
+    "endPage": 127,
+    "totalAyahs": 120
+  },
+  {
+    "id": 6,
+    "name": "الأنعام",
+    "startPage": 128,
+    "endPage": 150,
+    "totalAyahs": 165
+  },
+  {
+    "id": 7,
+    "name": "الأعراف",
+    "startPage": 151,
+    "endPage": 176,
+    "totalAyahs": 206
+  },
+  {
+    "id": 8,
+    "name": "الأنفال",
+    "startPage": 177,
+    "endPage": 186,
+    "totalAyahs": 75
+  },
+  {
+    "id": 9,
+    "name": "التوبة",
+    "startPage": 187,
+    "endPage": 207,
+    "totalAyahs": 129
+  },
+  {
+    "id": 10,
+    "name": "يونس",
+    "startPage": 208,
+    "endPage": 221,
+    "totalAyahs": 109
+  },
+  {
+    "id": 11,
+    "name": "هود",
+    "startPage": 221,
+    "endPage": 235,
+    "totalAyahs": 123
+  },
+  {
+    "id": 12,
+    "name": "يوسف",
+    "startPage": 235,
+    "endPage": 248,
+    "totalAyahs": 111
+  },
+  {
+    "id": 13,
+    "name": "الرعد",
+    "startPage": 249,
+    "endPage": 255,
+    "totalAyahs": 43
+  },
+  {
+    "id": 14,
+    "name": "ابراهيم",
+    "startPage": 255,
+    "endPage": 261,
+    "totalAyahs": 52
+  },
+  {
+    "id": 15,
+    "name": "الحجر",
+    "startPage": 262,
+    "endPage": 267,
+    "totalAyahs": 99
+  },
+  {
+    "id": 16,
+    "name": "النحل",
+    "startPage": 267,
+    "endPage": 281,
+    "totalAyahs": 128
+  },
+  {
+    "id": 17,
+    "name": "الإسراء",
+    "startPage": 282,
+    "endPage": 293,
+    "totalAyahs": 111
+  },
+  {
+    "id": 18,
+    "name": "الكهف",
+    "startPage": 293,
+    "endPage": 304,
+    "totalAyahs": 110
+  },
+  {
+    "id": 19,
+    "name": "مريم",
+    "startPage": 305,
+    "endPage": 312,
+    "totalAyahs": 98
+  },
+  {
+    "id": 20,
+    "name": "طه",
+    "startPage": 312,
+    "endPage": 321,
+    "totalAyahs": 135
+  },
+  {
+    "id": 21,
+    "name": "الأنبياء",
+    "startPage": 322,
+    "endPage": 331,
+    "totalAyahs": 112
+  },
+  {
+    "id": 22,
+    "name": "الحج",
+    "startPage": 332,
+    "endPage": 341,
+    "totalAyahs": 78
+  },
+  {
+    "id": 23,
+    "name": "المؤمنون",
+    "startPage": 342,
+    "endPage": 349,
+    "totalAyahs": 118
+  },
+  {
+    "id": 24,
+    "name": "النور",
+    "startPage": 350,
+    "endPage": 359,
+    "totalAyahs": 64
+  },
+  {
+    "id": 25,
+    "name": "الفرقان",
+    "startPage": 359,
+    "endPage": 366,
+    "totalAyahs": 77
+  },
+  {
+    "id": 26,
+    "name": "الشعراء",
+    "startPage": 367,
+    "endPage": 376,
+    "totalAyahs": 227
+  },
+  {
+    "id": 27,
+    "name": "النمل",
+    "startPage": 377,
+    "endPage": 385,
+    "totalAyahs": 93
+  },
+  {
+    "id": 28,
+    "name": "القصص",
+    "startPage": 385,
+    "endPage": 396,
+    "totalAyahs": 88
+  },
+  {
+    "id": 29,
+    "name": "العنكبوت",
+    "startPage": 396,
+    "endPage": 404,
+    "totalAyahs": 69
+  },
+  {
+    "id": 30,
+    "name": "الروم",
+    "startPage": 404,
+    "endPage": 410,
+    "totalAyahs": 60
+  },
+  {
+    "id": 31,
+    "name": "لقمان",
+    "startPage": 411,
+    "endPage": 414,
+    "totalAyahs": 34
+  },
+  {
+    "id": 32,
+    "name": "السجدة",
+    "startPage": 415,
+    "endPage": 417,
+    "totalAyahs": 30
+  },
+  {
+    "id": 33,
+    "name": "الأحزاب",
+    "startPage": 418,
+    "endPage": 427,
+    "totalAyahs": 73
+  },
+  {
+    "id": 34,
+    "name": "سبإ",
+    "startPage": 428,
+    "endPage": 434,
+    "totalAyahs": 54
+  },
+  {
+    "id": 35,
+    "name": "فاطر",
+    "startPage": 434,
+    "endPage": 440,
+    "totalAyahs": 45
+  },
+  {
+    "id": 36,
+    "name": "يس",
+    "startPage": 440,
+    "endPage": 445,
+    "totalAyahs": 83
+  },
+  {
+    "id": 37,
+    "name": "الصافات",
+    "startPage": 446,
+    "endPage": 452,
+    "totalAyahs": 182
+  },
+  {
+    "id": 38,
+    "name": "ص",
+    "startPage": 453,
+    "endPage": 458,
+    "totalAyahs": 88
+  },
+  {
+    "id": 39,
+    "name": "الزمر",
+    "startPage": 458,
+    "endPage": 467,
+    "totalAyahs": 75
+  },
+  {
+    "id": 40,
+    "name": "غافر",
+    "startPage": 467,
+    "endPage": 476,
+    "totalAyahs": 85
+  },
+  {
+    "id": 41,
+    "name": "فصلت",
+    "startPage": 477,
+    "endPage": 482,
+    "totalAyahs": 54
+  },
+  {
+    "id": 42,
+    "name": "الشورى",
+    "startPage": 483,
+    "endPage": 489,
+    "totalAyahs": 53
+  },
+  {
+    "id": 43,
+    "name": "الزخرف",
+    "startPage": 489,
+    "endPage": 495,
+    "totalAyahs": 89
+  },
+  {
+    "id": 44,
+    "name": "الدخان",
+    "startPage": 496,
+    "endPage": 498,
+    "totalAyahs": 59
+  },
+  {
+    "id": 45,
+    "name": "الجاثية",
+    "startPage": 499,
+    "endPage": 502,
+    "totalAyahs": 37
+  },
+  {
+    "id": 46,
+    "name": "الأحقاف",
+    "startPage": 502,
+    "endPage": 506,
+    "totalAyahs": 35
+  },
+  {
+    "id": 47,
+    "name": "محمد",
+    "startPage": 507,
+    "endPage": 510,
+    "totalAyahs": 38
+  },
+  {
+    "id": 48,
+    "name": "الفتح",
+    "startPage": 511,
+    "endPage": 515,
+    "totalAyahs": 29
+  },
+  {
+    "id": 49,
+    "name": "الحجرات",
+    "startPage": 515,
+    "endPage": 517,
+    "totalAyahs": 18
+  },
+  {
+    "id": 50,
+    "name": "ق",
+    "startPage": 518,
+    "endPage": 520,
+    "totalAyahs": 45
+  },
+  {
+    "id": 51,
+    "name": "الذاريات",
+    "startPage": 520,
+    "endPage": 523,
+    "totalAyahs": 60
+  },
+  {
+    "id": 52,
+    "name": "الطور",
+    "startPage": 523,
+    "endPage": 525,
+    "totalAyahs": 49
+  },
+  {
+    "id": 53,
+    "name": "النجم",
+    "startPage": 526,
+    "endPage": 528,
+    "totalAyahs": 62
+  },
+  {
+    "id": 54,
+    "name": "القمر",
+    "startPage": 528,
+    "endPage": 531,
+    "totalAyahs": 55
+  },
+  {
+    "id": 55,
+    "name": "الرحمن",
+    "startPage": 531,
+    "endPage": 534,
+    "totalAyahs": 78
+  },
+  {
+    "id": 56,
+    "name": "الواقعة",
+    "startPage": 534,
+    "endPage": 537,
+    "totalAyahs": 96
+  },
+  {
+    "id": 57,
+    "name": "الحديد",
+    "startPage": 537,
+    "endPage": 541,
+    "totalAyahs": 29
+  },
+  {
+    "id": 58,
+    "name": "المجادلة",
+    "startPage": 542,
+    "endPage": 545,
+    "totalAyahs": 22
+  },
+  {
+    "id": 59,
+    "name": "الحشر",
+    "startPage": 545,
+    "endPage": 548,
+    "totalAyahs": 24
+  },
+  {
+    "id": 60,
+    "name": "الممتحنة",
+    "startPage": 549,
+    "endPage": 551,
+    "totalAyahs": 13
+  },
+  {
+    "id": 61,
+    "name": "الصف",
+    "startPage": 551,
+    "endPage": 552,
+    "totalAyahs": 14
+  },
+  {
+    "id": 62,
+    "name": "الجمعة",
+    "startPage": 553,
+    "endPage": 554,
+    "totalAyahs": 11
+  },
+  {
+    "id": 63,
+    "name": "المنافقون",
+    "startPage": 554,
+    "endPage": 555,
+    "totalAyahs": 11
+  },
+  {
+    "id": 64,
+    "name": "التغابن",
+    "startPage": 556,
+    "endPage": 557,
+    "totalAyahs": 18
+  },
+  {
+    "id": 65,
+    "name": "الطلاق",
+    "startPage": 558,
+    "endPage": 559,
+    "totalAyahs": 12
+  },
+  {
+    "id": 66,
+    "name": "التحريم",
+    "startPage": 560,
+    "endPage": 561,
+    "totalAyahs": 12
+  },
+  {
+    "id": 67,
+    "name": "الملك",
+    "startPage": 562,
+    "endPage": 564,
+    "totalAyahs": 30
+  },
+  {
+    "id": 68,
+    "name": "القلم",
+    "startPage": 564,
+    "endPage": 566,
+    "totalAyahs": 52
+  },
+  {
+    "id": 69,
+    "name": "الحاقة",
+    "startPage": 566,
+    "endPage": 568,
+    "totalAyahs": 52
+  },
+  {
+    "id": 70,
+    "name": "المعارج",
+    "startPage": 568,
+    "endPage": 570,
+    "totalAyahs": 44
+  },
+  {
+    "id": 71,
+    "name": "نوح",
+    "startPage": 570,
+    "endPage": 571,
+    "totalAyahs": 28
+  },
+  {
+    "id": 72,
+    "name": "الجن",
+    "startPage": 572,
+    "endPage": 573,
+    "totalAyahs": 28
+  },
+  {
+    "id": 73,
+    "name": "المزمل",
+    "startPage": 574,
+    "endPage": 575,
+    "totalAyahs": 20
+  },
+  {
+    "id": 74,
+    "name": "المدثر",
+    "startPage": 575,
+    "endPage": 577,
+    "totalAyahs": 56
+  },
+  {
+    "id": 75,
+    "name": "القيامة",
+    "startPage": 577,
+    "endPage": 578,
+    "totalAyahs": 40
+  },
+  {
+    "id": 76,
+    "name": "الانسان",
+    "startPage": 578,
+    "endPage": 580,
+    "totalAyahs": 31
+  },
+  {
+    "id": 77,
+    "name": "المرسلات",
+    "startPage": 580,
+    "endPage": 581,
+    "totalAyahs": 50
+  },
+  {
+    "id": 78,
+    "name": "النبإ",
+    "startPage": 582,
+    "endPage": 583,
+    "totalAyahs": 40
+  },
+  {
+    "id": 79,
+    "name": "النازعات",
+    "startPage": 583,
+    "endPage": 584,
+    "totalAyahs": 46
+  },
+  {
+    "id": 80,
+    "name": "عبس",
+    "startPage": 585,
+    "endPage": 585,
+    "totalAyahs": 42
+  },
+  {
+    "id": 81,
+    "name": "التكوير",
+    "startPage": 586,
+    "endPage": 586,
+    "totalAyahs": 29
+  },
+  {
+    "id": 82,
+    "name": "الإنفطار",
+    "startPage": 587,
+    "endPage": 587,
+    "totalAyahs": 19
+  },
+  {
+    "id": 83,
+    "name": "المطففين",
+    "startPage": 587,
+    "endPage": 589,
+    "totalAyahs": 36
+  },
+  {
+    "id": 84,
+    "name": "الإنشقاق",
+    "startPage": 589,
+    "endPage": 589,
+    "totalAyahs": 25
+  },
+  {
+    "id": 85,
+    "name": "البروج",
+    "startPage": 590,
+    "endPage": 590,
+    "totalAyahs": 22
+  },
+  {
+    "id": 86,
+    "name": "الطارق",
+    "startPage": 591,
+    "endPage": 591,
+    "totalAyahs": 17
+  },
+  {
+    "id": 87,
+    "name": "الأعلى",
+    "startPage": 591,
+    "endPage": 592,
+    "totalAyahs": 19
+  },
+  {
+    "id": 88,
+    "name": "الغاشية",
+    "startPage": 592,
+    "endPage": 592,
+    "totalAyahs": 26
+  },
+  {
+    "id": 89,
+    "name": "الفجر",
+    "startPage": 593,
+    "endPage": 594,
+    "totalAyahs": 30
+  },
+  {
+    "id": 90,
+    "name": "البلد",
+    "startPage": 594,
+    "endPage": 594,
+    "totalAyahs": 20
+  },
+  {
+    "id": 91,
+    "name": "الشمس",
+    "startPage": 595,
+    "endPage": 595,
+    "totalAyahs": 15
+  },
+  {
+    "id": 92,
+    "name": "الليل",
+    "startPage": 595,
+    "endPage": 596,
+    "totalAyahs": 21
+  },
+  {
+    "id": 93,
+    "name": "الضحى",
+    "startPage": 596,
+    "endPage": 596,
+    "totalAyahs": 11
+  },
+  {
+    "id": 94,
+    "name": "الشرح",
+    "startPage": 596,
+    "endPage": 596,
+    "totalAyahs": 8
+  },
+  {
+    "id": 95,
+    "name": "التين",
+    "startPage": 597,
+    "endPage": 597,
+    "totalAyahs": 8
+  },
+  {
+    "id": 96,
+    "name": "العلق",
+    "startPage": 597,
+    "endPage": 597,
+    "totalAyahs": 19
+  },
+  {
+    "id": 97,
+    "name": "القدر",
+    "startPage": 598,
+    "endPage": 598,
+    "totalAyahs": 5
+  },
+  {
+    "id": 98,
+    "name": "البينة",
+    "startPage": 598,
+    "endPage": 599,
+    "totalAyahs": 8
+  },
+  {
+    "id": 99,
+    "name": "الزلزلة",
+    "startPage": 599,
+    "endPage": 599,
+    "totalAyahs": 8
+  },
+  {
+    "id": 100,
+    "name": "العاديات",
+    "startPage": 599,
+    "endPage": 600,
+    "totalAyahs": 11
+  },
+  {
+    "id": 101,
+    "name": "القارعة",
+    "startPage": 600,
+    "endPage": 600,
+    "totalAyahs": 11
+  },
+  {
+    "id": 102,
+    "name": "التكاثر",
+    "startPage": 600,
+    "endPage": 600,
+    "totalAyahs": 8
+  },
+  {
+    "id": 103,
+    "name": "العصر",
+    "startPage": 601,
+    "endPage": 601,
+    "totalAyahs": 3
+  },
+  {
+    "id": 104,
+    "name": "الهمزة",
+    "startPage": 601,
+    "endPage": 601,
+    "totalAyahs": 9
+  },
+  {
+    "id": 105,
+    "name": "الفيل",
+    "startPage": 601,
+    "endPage": 601,
+    "totalAyahs": 5
+  },
+  {
+    "id": 106,
+    "name": "قريش",
+    "startPage": 602,
+    "endPage": 602,
+    "totalAyahs": 4
+  },
+  {
+    "id": 107,
+    "name": "الماعون",
+    "startPage": 602,
+    "endPage": 602,
+    "totalAyahs": 7
+  },
+  {
+    "id": 108,
+    "name": "الكوثر",
+    "startPage": 602,
+    "endPage": 602,
+    "totalAyahs": 3
+  },
+  {
+    "id": 109,
+    "name": "الكافرون",
+    "startPage": 603,
+    "endPage": 603,
+    "totalAyahs": 6
+  },
+  {
+    "id": 110,
+    "name": "النصر",
+    "startPage": 603,
+    "endPage": 603,
+    "totalAyahs": 3
+  },
+  {
+    "id": 111,
+    "name": "المسد",
+    "startPage": 603,
+    "endPage": 603,
+    "totalAyahs": 5
+  },
+  {
+    "id": 112,
+    "name": "الإخلاص",
+    "startPage": 604,
+    "endPage": 604,
+    "totalAyahs": 4
+  },
+  {
+    "id": 113,
+    "name": "الفلق",
+    "startPage": 604,
+    "endPage": 604,
+    "totalAyahs": 5
+  },
+  {
+    "id": 114,
+    "name": "الناس",
+    "startPage": 604,
+    "endPage": 604,
+    "totalAyahs": 6
+  }
+]
