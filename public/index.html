@@ -301,6 +301,89 @@
       { id: 'makharij', nameAr: 'مخارج الحروف والصفات التشريحية', nameEn: 'Makharij & Phonetic Articulation Points' }
     ];
 
+    
+    // ================= BRANCH 1: HIFZ & RECITATION DATA & MUTASHABIHAT =================
+    const PRELOADED_HIFZ_PASSAGES = [
+      {
+        id: 'mulk_1_5',
+        surahAr: 'سورة الملك',
+        surahEn: 'Surah Al-Mulk',
+        ayahRange: '1–5',
+        ayahs: [
+          { num: 1, text: 'تَبَارَكَ الَّذِي بِيَدِهِ الْمُلْكُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ' },
+          { num: 2, text: 'الَّذِي خَلَقَ الْمَوْتَ وَالْحَيَاةَ لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًا وَهُوَ الْعَزِيزُ الْغَفُورُ' },
+          { num: 3, text: 'الَّذِي خَلَقَ سَبْعَ سَمَاوَاتٍ طِبَاقًا مَّا تَرَىٰ فِي خَلْقِ الرَّحْمَٰنِ مِن تَفَاوُتٍ فَارْجِعِ الْبَصَرَ هَلْ تَرَىٰ مِن فُطُورٍ' },
+          { num: 4, text: 'ثُمَّ ارْجِعِ الْبَصَرَ كَرَّتَيْنِ يَنقَلِبْ إِلَيْكَ الْبَصَرُ خَاسِئًا وَهُوَ حَسِيرٌ' },
+          { num: 5, text: 'وَلَقَدْ زَيَّنَّا السَّمَاءَ الدُّنْيَا بِمَصَابِيحَ وَجَعَلْنَاهَا رُجُومًا لِّلشَّيَاطِينِ وَأَعْتَدْنَا لَهُمْ عَذَابَ السَّعِيرِ' }
+        ],
+        mutashabihat: [
+          {
+            ayah: 'الَّذِي خَلَقَ الْمَوْتَ وَالْحَيَاةَ ... وَهُوَ الْعَزِيزُ الْغَفُورُ (الملك: 2)',
+            similar: '... إِنَّمَا يَخْشَى اللَّهَ مِنْ عِبَادِهِ الْعُلَمَاءُ إِنَّ اللَّهَ عَزِيزٌ غَفُورٌ (فاطر: 28)',
+            difference: 'في الملك معرّفة باللام (الْعَزِيزُ الْغَفُورُ)، وفي فاطر منكرة (عَزِيزٌ غَفُورٌ).'
+          },
+          {
+            ayah: 'وَأَعْتَدْنَا لَهُمْ عَذَابَ السَّعِيرِ (الملك: 5)',
+            similar: '... وَأَعْتَدْنَا لِمَن كَذَّبَ بِالسَّاعَةِ سَعِيرًا (الفرقان: 11)',
+            difference: 'في الملك أضيفت كلمة (عذاب) قبل (السعير) لبيان العقوبة المعدة للشياطين.'
+          }
+        ]
+      },
+      {
+        id: 'naba_1_10',
+        surahAr: 'سورة النبأ',
+        surahEn: 'Surah An-Naba',
+        ayahRange: '1–10',
+        ayahs: [
+          { num: 1, text: 'عَمَّ يَتَسَاءَلُونَ' },
+          { num: 2, text: 'عَنِ النَّبَإِ الْعَظِيمِ' },
+          { num: 3, text: 'الَّذِي هُمْ فِيهِ مُخْتَلِفُونَ' },
+          { num: 4, text: 'كَلَّا سَيَعْلَمُونَ' },
+          { num: 5, text: 'ثُمَّ كَلَّا سَيَعْلَمُونَ' },
+          { num: 6, text: 'أَلَمْ نَجْعَلِ الْأَرْضَ مِهَادًا' },
+          { num: 7, text: 'وَالْجِبَالَ أَوْتَادًا' },
+          { num: 8, text: 'وَخَلَقْنَاكُمْ أَزْوَاجًا' },
+          { num: 9, text: 'وَجَعَلْنَا نَوْمَكُمْ سُبَاتًا' },
+          { num: 10, text: 'وَجَعَلْنَا اللَّيْلَ لِبَاسًا' }
+        ],
+        mutashabihat: [
+          {
+            ayah: 'كَلَّا سَيَعْلَمُونَ * ثُمَّ كَلَّا سَيَعْلَمُونَ (النبأ: 4-5)',
+            similar: 'كَلَّا سَوْفَ تَعْلَمُونَ * ثُمَّ كَلَّا سَوْفَ تَعْلَمُونَ (التكاثر: 3-4)',
+            difference: 'في النبأ بصيغة الغائب بحرف السين (سَيَعْلَمُونَ)، وفي التكاثر بـ (سَوْفَ تَعْلَمُونَ) للمخاطب.'
+          }
+        ]
+      },
+      {
+        id: 'rahman_1_13',
+        surahAr: 'سورة الرحمن',
+        surahEn: 'Surah Ar-Rahman',
+        ayahRange: '1–13',
+        ayahs: [
+          { num: 1, text: 'الرَّحْمَٰنُ' },
+          { num: 2, text: 'عَلَّمَ الْقُرْآنَ' },
+          { num: 3, text: 'خَلَقَ الْإِنسَانَ' },
+          { num: 4, text: 'عَلَّمَهُ الْبَيَانَ' },
+          { num: 5, text: 'الشَّمْسُ وَالْقَمَرُ بِحُسْبَانٍ' },
+          { num: 6, text: 'وَالنَّجْمُ وَالشَّجَرُ يَسْجُدَانِ' },
+          { num: 7, text: 'وَالسَّمَاءَ رَفَعَهَا وَوَضَعَ الْمِيزَانَ' },
+          { num: 8, text: 'أَلَّا تَطْغَوْا فِي الْمِيزَانِ' },
+          { num: 9, text: 'وَأَقِيمُوا الْوَزْنَ بِالْقِسْطِ وَلَا تُخْسِرُوا الْمِيزَانَ' },
+          { num: 10, text: 'وَالْأَرْضَ وَضَعَهَا لِلْأَنَامِ' },
+          { num: 11, text: 'فِيهَا فَاكِهَةٌ وَالنَّخْلُ ذَاتُ الْأَكْمَامِ' },
+          { num: 12, text: 'وَالْحَبُّ ذُو الْعَصْفِ وَالرَّيْحَانُ' },
+          { num: 13, text: 'فَبِأَيِّ آلَاءِ رَبِّكُمَا تُكَذِّبَانِ' }
+        ],
+        mutashabihat: [
+          {
+            ayah: 'فَبِأَيِّ آلَاءِ رَبِّكُمَا تُكَذِّبَانِ (الرحمن)',
+            similar: 'فَبِأَيِّ آلَاءِ رَبِّكَ تَتَمَارَىٰ (النجم: 55)',
+            difference: 'في الرحمن تثنية للثقلين (رَبِّكُمَا تُكَذِّبَانِ) تكررت 31 مرة، وفي النجم للمفرد (رَبِّكَ تَتَمَارَىٰ).'
+          }
+        ]
+      }
+    ];
+
     function App() {
       // Language & Direction state
       const [lang, setLang] = useState('ar');
@@ -339,7 +422,116 @@
       }, [fontSizeLevel, isRtl, lang, appFont]);
 
       // Active View
-      const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'tajweed' | 'islamic' | 'worksheet' | 'quiz'
+      const [activeTab, setActiveTab] = useState('dashboard');
+
+      // ================= BRANCH 1: HIFZ & RECITATION STATE =================
+      const [hifzPassageId, setHifzPassageId] = useState('mulk_1_5');
+      const [hifzAyahs, setHifzAyahs] = useState(PRELOADED_HIFZ_PASSAGES[0].ayahs);
+      const [hifzMutashabihat, setHifzMutashabihat] = useState(PRELOADED_HIFZ_PASSAGES[0].mutashabihat);
+      const [hifzSurahName, setHifzSurahName] = useState(PRELOADED_HIFZ_PASSAGES[0].surahAr);
+      const [hifzAyahRange, setHifzAyahRange] = useState(PRELOADED_HIFZ_PASSAGES[0].ayahRange);
+      
+      // Teacher Live Masking Controls
+      const [isEndingsMasked, setIsEndingsMasked] = useState(false);
+      const [isFullMasked, setIsFullMasked] = useState(false);
+      const [revealedAyahSet, setRevealedAyahSet] = useState(new Set([1]));
+      const [customMaskedWords, setCustomMaskedWords] = useState(new Set());
+      
+      // Repetition Loop State
+      const [repeatTarget, setRepeatTarget] = useState(3);
+      const [repeatCount, setRepeatCount] = useState(0);
+      const [activeRepeatAyah, setActiveRepeatAyah] = useState(1);
+      
+      // Mutashabihat live search
+      const [mutashabihSearch, setMutashabihSearch] = useState('');
+      
+      // Custom Text Input Box
+      const [customAyahInput, setCustomAyahInput] = useState('');
+      const [showCustomInput, setShowCustomInput] = useState(false);
+
+      // Helper function to switch passages
+      function handleSelectHifzPassage(pId) {
+        const p = PRELOADED_HIFZ_PASSAGES.find(item => item.id === pId);
+        if (p) {
+          setHifzPassageId(p.id);
+          setHifzAyahs(p.ayahs);
+          setHifzMutashabihat(p.mutashabihat);
+          setHifzSurahName(p.surahAr);
+          setHifzAyahRange(p.ayahRange);
+          setIsEndingsMasked(false);
+          setIsFullMasked(false);
+          setRevealedAyahSet(new Set([1]));
+          setCustomMaskedWords(new Set());
+          setRepeatCount(0);
+          setActiveRepeatAyah(1);
+          showToast(isRtl ? 'تم تحميل ' + p.surahAr + ' (' + p.ayahRange + ') في لوحة التحفيظ ✨' : 'Loaded ' + p.surahEn + ' in Hifz Board ✨');
+        }
+      }
+
+      // Helper function to load custom user entered text
+      function handleApplyCustomAyahs() {
+        if (!customAyahInput.trim()) return;
+        const lines = customAyahInput.split('\n').filter(l => l.trim().length > 0);
+        const parsedAyahs = lines.map((line, idx) => ({
+          num: idx + 1,
+          text: line.trim()
+        }));
+        setHifzAyahs(parsedAyahs);
+        setHifzSurahName(isRtl ? 'مقطع خاص بالمعلم' : 'Custom Teacher Passage');
+        setHifzAyahRange('1–' + parsedAyahs.length);
+        setHifzMutashabihat([]);
+        setIsEndingsMasked(false);
+        setIsFullMasked(false);
+        setRevealedAyahSet(new Set([1]));
+        setCustomMaskedWords(new Set());
+        setRepeatCount(0);
+        setShowCustomInput(false);
+        showToast(isRtl ? 'تم تطبيق آيات المعلم الخاصة في لوحة التسميع بنجاح 🕋' : 'Custom Ayahs loaded successfully 🕋');
+      }
+
+      // Word click to mask/unmask
+      function toggleWordMask(ayahNum, wordIdx) {
+        const key = ayahNum + '-' + wordIdx;
+        setCustomMaskedWords(prev => {
+          const next = new Set(prev);
+          if (next.has(key)) {
+            next.delete(key);
+          } else {
+            next.add(key);
+          }
+          return next;
+        });
+      }
+
+      // Reveal specific ayah in blind recitation mode
+      function toggleRevealAyah(num) {
+        setRevealedAyahSet(prev => {
+          const next = new Set(prev);
+          if (next.has(num)) {
+            next.delete(num);
+          } else {
+            next.add(num);
+          }
+          return next;
+        });
+      }
+
+      // Copy WhatsApp Hifz Broadcast
+      function handleCopyHifzWhatsApp() {
+        const ayahsText = hifzAyahs.map(a => '﴿' + a.num + '﴾ ' + a.text).join(' ');
+        const mutaText = hifzMutashabihat.length > 0 
+          ? '\n\n🔍 *تنبيه المتشابهات للحفظ:*\n' + hifzMutashabihat.map(m => '• ' + m.ayah + '\n  فارق الحفظ: ' + m.difference).join('\n')
+          : '';
+        const msg = '🕌 *حلقة القرآن الكريم — وِرد التحفيظ والمراجعة*\n' +
+          '📖 *المقطع المقرر:* ' + hifzSurahName + ' (الآيات ' + hifzAyahRange + ')\n\n' +
+          ayahsText +
+          mutaText + '\n\n' +
+          '🔁 *توجيه المحفظ:* يُرجى تكرار المقطع 5 مرات غيباً قبل الحلقة القادمة.\n' +
+          '✨ *منظومة مِشكاة — AnubisLand*';
+        navigator.clipboard.writeText(msg);
+        showToast(isRtl ? 'تم نسخ رسالة وِرد التحفيظ للواتساب بنجاح 📋' : 'Hifz Broadcast Copied to Clipboard 📋');
+      }
+ // 'dashboard' | 'tajweed' | 'islamic' | 'worksheet' | 'quiz'
       
       // Teacher Security Passcode PIN Gate
       const [teacherPin, setTeacherPin] = useState(localStorage.getItem('mishkah_pin') || 'MISHKAH2026');
@@ -865,9 +1057,10 @@
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-emerald-800/80 flex overflow-x-auto py-2.5 gap-2 scrollbar-none">
               {[
                 { id: 'dashboard', icon: '📊', labelAr: 'لوحة المعلم', labelEn: 'Dashboard' },
-                { id: 'tajweed', icon: '📖', labelAr: 'مُعين التجويد (Module A)', labelEn: 'Tajweed Copilot' },
-                { id: 'islamic', icon: '🕌', labelAr: 'الحلقات الشرعية (Module B)', labelEn: 'Islamic Studies' },
-                { id: 'worksheet', icon: '📝', labelAr: 'أوراق العمل والطباعة', labelEn: 'Print Worksheets' },
+                { id: 'hifz', icon: '🕋', labelAr: 'أدوات التحفيظ (Branch 1)', labelEn: 'Memorization Tools' },
+                { id: 'tajweed', icon: '📖', labelAr: 'أدوات التجويد (Branch 2)', labelEn: 'Tajweed Tools' },
+                { id: 'islamic', icon: '🕌', labelAr: 'العلوم الشرعية (Branch 3)', labelEn: 'Islamic Studies' },
+                                { id: 'worksheet', icon: '📝', labelAr: 'أوراق العمل والطباعة', labelEn: 'Print Worksheets' },
                 { id: 'quiz', icon: '🎯', labelAr: 'الاختبار الذاتي التفاعلي', labelEn: 'Interactive Quiz' }
               ].map(tab => (
                 <button
@@ -915,11 +1108,18 @@
                     </p>
                     <div className="flex flex-wrap gap-3">
                       <button 
+                        onClick={() => setActiveTab('hifz')}
+                        className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-black px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2 text-sm"
+                      >
+                        <span>🕋</span>
+                        <span>{isRtl ? 'أدوات التحفيظ والتسميع' : 'Memorization Tools'}</span>
+                      </button>
+                      <button 
                         onClick={() => setActiveTab('tajweed')}
-                        className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-bold px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2 text-sm"
+                        className="bg-emerald-900/90 hover:bg-emerald-800 text-gold-200 border border-gold-400/60 font-bold px-5 py-2.5 rounded-xl shadow transition flex items-center gap-2 text-sm"
                       >
                         <span>📖</span>
-                        <span>{isRtl ? 'بدء تحضير درس تجويد' : 'Prepare Tajweed Lesson'}</span>
+                        <span>{isRtl ? 'أدوات التجويد والتحليل' : 'Tajweed Tools'}</span>
                       </button>
                       <button 
                         onClick={() => setActiveTab('islamic')}
@@ -1060,6 +1260,402 @@
             )}
 
             {/* ================= VIEW: MODULE A (TAJWEED COPILOT) ================= */}
+                        {/* ================= VIEW: HIFZ & RECITATION WORKBENCH (BRANCH 1) ================= */}
+            {activeTab === 'hifz' && (
+              <div className="space-y-8 animate-fadeIn">
+                
+                {/* Header Banner */}
+                <div className="emerald-pattern rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden border-2 border-gold-400 shadow-xl">
+                  <div className="absolute top-2.5 right-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
+                  <div className="absolute top-2.5 left-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
+                  <div className="relative z-10 max-w-3xl">
+                    <div className="inline-flex items-center gap-2 bg-gold-400/20 text-gold-200 border border-gold-400/40 text-xs px-3 py-1 rounded-full mb-3 font-bold">
+                      <span>🕋</span>
+                      <span>{isRtl ? 'الفرع الأول: أدوات التحفيظ ومدارسة الحفظ القرآني' : 'Branch 1: Quran Memorization Tools'}</span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold font-amiri text-gold-200 mb-2">
+                      {isRtl ? 'لوحة التسميع التفاعلية وكاشف المتشابهات' : 'Interactive Recitation & Mutashabihat Workbench'}
+                    </h2>
+                    <p className="text-emerald-100/90 text-xs sm:text-sm leading-relaxed mb-4">
+                      {isRtl 
+                        ? 'أدوات مساعدة للمحفظ والمعلم: طمس أواخر الآيات، التسميع الغيبي التدريجي، النقر على أي كلمة لإخفائها أثناء التسميع المباشر، وتنبيهات المتشابهات اللفظية لتثبيت الحفظ.'
+                        : 'Interactive utilities for Quran instructors: Mask ayah endings, progressive blind recitation, click-to-mask any word, and mutashabihat cross-referencing.'}
+                    </p>
+
+                    {/* Passage Selection & Custom Input Pill Buttons */}
+                    <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-emerald-800/80">
+                      <span className="text-xs font-bold text-gold-300">{isRtl ? 'المقطع المختار:' : 'Passage:'}</span>
+                      {PRELOADED_HIFZ_PASSAGES.map(p => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => handleSelectHifzPassage(p.id)}
+                          className={`text-xs px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 ${
+                            hifzPassageId === p.id && !showCustomInput
+                              ? 'bg-gold-500 text-emerald-950 shadow-md font-black ring-2 ring-gold-300'
+                              : 'bg-emerald-900/80 hover:bg-emerald-800 text-emerald-200 border border-emerald-700/60'
+                          }`}
+                        >
+                          <span>📖</span>
+                          <span>{isRtl ? p.surahAr : p.surahEn} ({p.ayahRange})</span>
+                        </button>
+                      ))}
+                      
+                      <button
+                        type="button"
+                        onClick={() => setShowCustomInput(!showCustomInput)}
+                        className={`text-xs px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 ${
+                          showCustomInput 
+                            ? 'bg-gold-500 text-emerald-950 font-black' 
+                            : 'bg-emerald-900/90 hover:bg-emerald-800 text-gold-300 border border-gold-400/40'
+                        }`}
+                      >
+                        <span>✏️</span>
+                        <span>{isRtl ? 'إدخال آيات خاصة بك' : 'Enter Custom Ayahs'}</span>
+                      </button>
+                    </div>
+
+                    {/* Custom Ayah Input Drawer */}
+                    {showCustomInput && (
+                      <div className="mt-4 bg-emerald-950/90 border border-gold-400/40 rounded-2xl p-4 animate-fadeIn">
+                        <label className="block text-xs font-bold text-gold-300 mb-1.5">
+                          {isRtl ? 'ألصق أو اكتب الآيات (كل آية في سطر مستقل):' : 'Enter Ayahs (one per line):'}
+                        </label>
+                        <textarea
+                          rows={4}
+                          value={customAyahInput}
+                          onChange={(e) => setCustomAyahInput(e.target.value)}
+                          placeholder={isRtl ? 'مثال:\nوَالضُّحَىٰ\nوَاللَّيْلِ إِذَا سَجَىٰ\nمَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ' : 'Enter lines...'}
+                          className="w-full bg-emerald-900/80 border border-emerald-700 rounded-xl p-3 text-sm text-gold-100 font-quran focus:outline-none focus:border-gold-400 leading-relaxed"
+                          dir="rtl"
+                        />
+                        <div className="flex justify-end gap-2 mt-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowCustomInput(false)}
+                            className="text-xs px-3 py-1.5 rounded-lg text-emerald-300 hover:bg-emerald-800/60"
+                          >
+                            {isRtl ? 'إلغاء' : 'Cancel'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleApplyCustomAyahs}
+                            className="bg-gold-500 hover:bg-gold-400 text-emerald-950 text-xs font-black px-4 py-1.5 rounded-lg shadow"
+                          >
+                            {isRtl ? 'تطبيق في لوحة التسميع 🕋' : 'Apply Ayahs'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* TEACHER LIVE CONTROL RIBBON */}
+                <div className="card-islamic-amber rounded-2xl p-4 sm:p-5 shadow-sm border border-gold-300/80 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🎛️</span>
+                    <div>
+                      <h3 className="text-sm font-bold text-emerald-950 font-cairo">
+                        {isRtl ? 'شريط أدوات المحفظ المباشرة (أثناء الحلقة والتسميع)' : 'Teacher Recitation Controls'}
+                      </h3>
+                      <p className="text-[11px] text-slate-600">
+                        {isRtl ? 'انقر على أي أداة لتطبيقها فوراً على مصحف التسميع أدناه' : 'Click any utility to toggle live during recitation'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Toggle Mask Endings */}
+                    <button
+                      type="button"
+                      onClick={() => setIsEndingsMasked(!isEndingsMasked)}
+                      className={`text-xs px-3.5 py-2 rounded-xl font-bold transition flex items-center gap-1.5 shadow-sm ${
+                        isEndingsMasked 
+                          ? 'bg-amber-600 text-white font-black ring-2 ring-amber-400' 
+                          : 'bg-white hover:bg-amber-50 text-emerald-950 border border-amber-300'
+                      }`}
+                      title={isRtl ? 'إخفاء آخر كلمتين من كل آية لاختبار حفظ الخواتيم' : 'Hide last words of each ayah'}
+                    >
+                      <span>{isEndingsMasked ? '🙈' : '👁️'}</span>
+                      <span>{isRtl ? (isEndingsMasked ? 'إلغاء طمس النهايات' : 'طمس أواخر الآيات') : 'Mask Endings'}</span>
+                    </button>
+
+                    {/* Toggle Full Blind Recitation */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsFullMasked(!isFullMasked);
+                        setRevealedAyahSet(new Set([1]));
+                      }}
+                      className={`text-xs px-3.5 py-2 rounded-xl font-bold transition flex items-center gap-1.5 shadow-sm ${
+                        isFullMasked 
+                          ? 'bg-emerald-800 text-gold-300 font-black ring-2 ring-emerald-500' 
+                          : 'bg-white hover:bg-emerald-50 text-emerald-950 border border-emerald-300'
+                      }`}
+                      title={isRtl ? 'إخفاء كامل للآيات مع إمكانية كشف آية آية بنقرة زر' : 'Blind recitation mode'}
+                    >
+                      <span>{isFullMasked ? '📖' : '🔒'}</span>
+                      <span>{isRtl ? (isFullMasked ? 'عرض كل الآيات' : 'تسميع غيبي كامل') : 'Blind Recitation'}</span>
+                    </button>
+
+                    {/* Reset All Custom Masks */}
+                    {customMaskedWords.size > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setCustomMaskedWords(new Set())}
+                        className="bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 text-xs px-3 py-2 rounded-xl font-bold transition flex items-center gap-1"
+                      >
+                        <span>🔄</span>
+                        <span>{isRtl ? 'إظهار الكلمات المطموسة (' + customMaskedWords.size + ')' : 'Reset Masked Words'}</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* MAIN INTERACTIVE RECITATION BOARD */}
+                <div className="card-islamic-pearl rounded-3xl p-6 sm:p-8 shadow-md border-2 border-emerald-900/20 relative">
+                  {/* Top Bar inside Recitation Card */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-emerald-900/10">
+                    <div className="flex items-center gap-2">
+                      <span className="w-9 h-9 rounded-xl bg-emerald-900 text-gold-300 font-amiri font-bold flex items-center justify-center text-lg shadow-sm">
+                        ۝
+                      </span>
+                      <div>
+                        <h3 className="text-xl font-extrabold text-emerald-950 font-amiri">
+                          {hifzSurahName} — {isRtl ? 'الآيات (' + hifzAyahRange + ')' : 'Ayahs (' + hifzAyahRange + ')'}
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          {isRtl ? '💡 نصيحة للمعلم: انقر على أي كلمة مباشرة لطمسها أو إظهارها أثناء التسميع' : 'Click any individual word to mask/unmask'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Repetition Loop Counter Pill */}
+                    <div className="flex items-center gap-2 bg-emerald-950 text-gold-200 rounded-xl px-3 py-1.5 border border-gold-400/40 text-xs shadow-sm">
+                      <span>🔁 {isRtl ? 'عداد التكرار:' : 'Loop:'}</span>
+                      <div className="flex items-center gap-1">
+                        {[3, 5, 7].map(num => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => { setRepeatTarget(num); setRepeatCount(0); }}
+                            className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                              repeatTarget === num ? 'bg-gold-500 text-emerald-950 font-black' : 'text-emerald-300 hover:text-white'
+                            }`}
+                          >
+                            {num}x
+                          </button>
+                        ))}
+                      </div>
+                      <span className="text-gold-400 font-bold px-1">({repeatCount}/{repeatTarget})</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = repeatCount + 1;
+                          setRepeatCount(next > repeatTarget ? 1 : next);
+                          if (next === repeatTarget) {
+                            showToast(isRtl ? '🎉 ما شاء الله! اكتمل نصاب التكرار المطلوب' : 'Target reached! 🎉');
+                          }
+                        }}
+                        className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-black px-2.5 py-0.5 rounded shadow text-xs transition"
+                        title={isRtl ? 'تسجيل تكرار ناجح +1' : '+1 Count'}
+                      >
+                        +1
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Basmalah Display */}
+                  <div className="text-center font-quran text-2xl text-emerald-900 mb-8 py-2 select-none border-b border-gold-400/20 max-w-md mx-auto">
+                    بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                  </div>
+
+                  {/* Quranic Ayahs Container with Clickable Words */}
+                  <div className="space-y-6">
+                    {hifzAyahs.map((ayah) => {
+                      const words = ayah.text.split(' ');
+                      const isRevealed = !isFullMasked || revealedAyahSet.has(ayah.num);
+
+                      return (
+                        <div 
+                          key={ayah.num}
+                          className={`p-4 rounded-2xl transition-all duration-200 border ${
+                            activeRepeatAyah === ayah.num 
+                              ? 'bg-emerald-900/5 border-gold-400 shadow-sm ring-1 ring-gold-400/40' 
+                              : 'bg-white/60 border-slate-200 hover:bg-white'
+                          }`}
+                        >
+                          {/* Ayah Header with Actions */}
+                          <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100 text-xs">
+                            <div className="flex items-center gap-2">
+                              <span className="w-6 h-6 rounded-full bg-emerald-900 text-gold-300 font-bold flex items-center justify-center text-xs">
+                                {ayah.num}
+                              </span>
+                              <span className="text-slate-500 font-semibold">
+                                {isRtl ? 'الآية رقم ' + ayah.num : 'Ayah ' + ayah.num}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              {/* Set as Active Repeat Target */}
+                              <button
+                                type="button"
+                                onClick={() => { setActiveRepeatAyah(ayah.num); setRepeatCount(0); }}
+                                className={`text-[11px] px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${
+                                  activeRepeatAyah === ayah.num 
+                                    ? 'bg-gold-500 text-emerald-950 font-black' 
+                                    : 'text-slate-600 hover:bg-slate-100 border border-slate-200'
+                                }`}
+                              >
+                                <span>🔁</span>
+                                <span>{isRtl ? 'تركيز التكرار' : 'Focus Loop'}</span>
+                              </button>
+
+                              {/* Blind Mode Toggle Reveal */}
+                              {isFullMasked && (
+                                <button
+                                  type="button"
+                                  onClick={() => toggleRevealAyah(ayah.num)}
+                                  className={`text-[11px] px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${
+                                    isRevealed 
+                                      ? 'bg-emerald-100 text-emerald-900' 
+                                      : 'bg-emerald-900 text-gold-300 font-black shadow'
+                                  }`}
+                                >
+                                  <span>{isRevealed ? '🙈 إخفاء' : '👁️ كشف للطالب'}</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Ayah Words Display */}
+                          {!isRevealed ? (
+                            <div className="py-6 text-center text-slate-400 font-amiri text-lg border-2 border-dashed border-emerald-900/20 rounded-xl bg-emerald-950/5 select-none">
+                              🔒 {isRtl ? 'الآية مخفية للتسميع الغيبي — اضغط "كشف للطالب" عند إتمام القراءة' : 'Ayah hidden for blind recitation'}
+                            </div>
+                          ) : (
+                            <div className="font-quran text-2xl sm:text-3xl leading-[2.5] text-emerald-950 text-right flex flex-wrap gap-x-2 gap-y-3 items-baseline select-none">
+                              {words.map((word, wIdx) => {
+                                const isEndingWord = isEndingsMasked && (wIdx >= words.length - 2);
+                                const isCustomMasked = customMaskedWords.has(ayah.num + '-' + wIdx);
+                                const isMasked = isEndingWord || isCustomMasked;
+
+                                return (
+                                  <span
+                                    key={wIdx}
+                                    onClick={() => toggleWordMask(ayah.num, wIdx)}
+                                    className={`px-1.5 py-0.5 rounded-lg cursor-pointer transition-all ${
+                                      isMasked 
+                                        ? 'bg-amber-200/90 text-amber-900 border-b-2 border-dashed border-amber-600 px-3 font-sans text-base select-none shadow-xs' 
+                                        : 'hover:bg-gold-300/40 hover:text-emerald-900'
+                                    }`}
+                                    title={isMasked ? (isRtl ? 'انقر لكشف الكلمة' : 'Click to reveal') : (isRtl ? 'انقر لطمس الكلمة أثناء التسميع' : 'Click to mask')}
+                                  >
+                                    {isMasked ? '[ ... ]' : word}
+                                  </span>
+                                );
+                              })}
+                              {/* Ayah End Sign */}
+                              <span className="text-gold-600 font-amiri text-2xl font-bold select-none pr-1">
+                                ﴿{ayah.num}﴾
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Interactive Board Footer Toolbar */}
+                  <div className="mt-8 pt-5 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                    <div className="text-xs text-slate-600 font-medium flex items-center gap-2">
+                      <span className="text-emerald-800 font-bold">✨ {isRtl ? 'مجموع الآيات:' : 'Total Ayahs:'} {hifzAyahs.length}</span>
+                      <span>•</span>
+                      <span>{isRtl ? 'الكلمات المطموسة حالياً:' : 'Masked Words:'} {customMaskedWords.size}</span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* 1-Click WhatsApp Broadcast */}
+                      <button
+                        type="button"
+                        onClick={handleCopyHifzWhatsApp}
+                        className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 text-xs font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5"
+                      >
+                        <span>📱</span>
+                        <span>{isRtl ? 'نسخ وِرد الواتساب للدارسين' : 'Copy WhatsApp Broadcaster'}</span>
+                      </button>
+
+                      {/* Jump to Worksheets */}
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('worksheet')}
+                        className="bg-gold-500 hover:bg-gold-400 text-emerald-950 text-xs font-black px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5"
+                      >
+                        <span>🖨️</span>
+                        <span>{isRtl ? 'طباعة ورقة تسميع A4' : 'Print A4 Sheet'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* MUTASHABIHAT CROSS-REFERENCE TOOL */}
+                <div className="card-islamic-sage rounded-3xl p-6 shadow-sm border border-emerald-300/80">
+                  <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-emerald-900/10">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">🔍</span>
+                      <div>
+                        <h3 className="text-lg font-bold text-emerald-950 font-cairo">
+                          {isRtl ? 'كاشف المتشابهات اللفظية وتنبيهات الحفظ' : 'Mutashabihat Cross-Reference Analyzer'}
+                        </h3>
+                        <p className="text-xs text-emerald-900/80">
+                          {isRtl ? 'تنبيهات فورية للمحفظ بمواضع التشابه مع سور أخرى لتجنيب الدارسين الخطأ في التسميع' : 'Cross-references to alert students against common confusion'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {hifzMutashabihat && hifzMutashabihat.length > 0 ? (
+                    <div className="space-y-4">
+                      {hifzMutashabihat.map((m, mIdx) => (
+                        <div key={mIdx} className="bg-white/80 rounded-2xl p-4 border border-emerald-200/80 shadow-xs">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2.5">
+                            <div className="bg-emerald-900/5 p-3 rounded-xl border-r-4 border-emerald-700">
+                              <span className="text-[11px] font-bold text-emerald-800 block mb-1">
+                                {isRtl ? 'الموضع في هذا المقطع المقرر:' : 'In Current Passage:'}
+                              </span>
+                              <p className="font-quran text-lg text-emerald-950 leading-relaxed" dir="rtl">
+                                {m.ayah}
+                              </p>
+                            </div>
+
+                            <div className="bg-amber-900/5 p-3 rounded-xl border-r-4 border-amber-500">
+                              <span className="text-[11px] font-bold text-amber-800 block mb-1">
+                                {isRtl ? 'الموضع المتشابه في سورة أخرى:' : 'Similar Passage Elsewhere:'}
+                              </span>
+                              <p className="font-quran text-lg text-amber-950 leading-relaxed" dir="rtl">
+                                {m.similar}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="bg-emerald-950/5 p-2.5 rounded-xl text-xs text-emerald-900 font-medium flex items-start gap-1.5">
+                            <span className="text-gold-600 font-bold text-sm">💡</span>
+                            <span><strong>{isRtl ? 'ضابط حفظ المتشابهة للمحفظ:' : 'Memorization Guide:'}</strong> {m.difference}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 text-slate-500 text-xs">
+                      {isRtl ? 'لا توجد متشابهات مسجلة لهذا المقطع، أو تم استخدام مقطع حر للمدرس.' : 'No cross-references registered for this section.'}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+
+
             {activeTab === 'tajweed' && (
               <div className="space-y-8 animate-fadeIn">
                 
