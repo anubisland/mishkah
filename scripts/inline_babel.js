@@ -1,0 +1,4861 @@
+
+    const { useState, useEffect, useMemo } = React;
+
+    // Default Preloaded Curriculum & Books
+    const MAKHAARIJ_GENERAL_DATA = [
+    {
+      id: 'jawf',
+      nameAr: 'الجوف',
+      nameEn: 'Al-Jawf (Oral & Throat Cavity)',
+      icon: '🌬️',
+      organAr: 'الخلاء الممتد داخل الحلق والفم',
+      organEn: 'The open internal airway of throat and mouth',
+      letters: ['ا', 'و', 'ي'],
+      lettersLabelAr: 'حروف المد الثلاثة (الألف الساكنة بعد فتح، الواو الساكنة بعد ضم، الياء الساكنة بعد كسر)',
+      lettersLabelEn: '3 Madd letters (Alif preceded by Fathah, Waw by Dammah, Yaa by Kasrah)',
+      mannerAr: 'تخرج بامتداد الصوت في الهواء دون انحباس أو احتكاك في أي نقطة من الفم، وتتبع ما قبلها تفخيماً وترقيقاً.',
+      mannerEn: 'Sound extends freely through the oral cavity without obstruction, matching adjacent vowel weight.',
+      commonMistakesAr: 'تسريب صوت الغنة من الأنف في حروف المد، أو تقصير زمن المد عن حركتين كاملتين.',
+      commonMistakesEn: 'Nasal leakage (Ghunnah) into vowels, or rushing duration under 2 full counts.',
+      badge: '3 حروف مدية',
+      colorBg: 'bg-emerald-50 border-emerald-300 text-emerald-950',
+      activeColor: 'bg-emerald-700 text-white'
+    },
+    {
+      id: 'halq',
+      nameAr: 'الحلق',
+      nameEn: 'Al-Halq (The Throat)',
+      icon: '🧣',
+      organAr: 'منطقة الحلق وتنقسم إلى 3 مخارج خاصة',
+      organEn: 'Pharyngeal throat region, divided into 3 articulation zones',
+      letters: ['ء', 'هـ', 'ع', 'ح', 'غ', 'خ'],
+      lettersLabelAr: 'أقصى الحلق (ء، هـ) | وسط الحلق (ع، ح) | أدنى الحلق (غ، خ)',
+      lettersLabelEn: 'Deep throat (Hamzah, Haa) | Mid throat (Ayn, Haa) | Upper throat (Ghayn, Khaa)',
+      mannerAr: 'تخرج حروف الإظهار الحلقي الستة بمرور الهواء في الحلق بدون غنة ولا تمطيط.',
+      mannerEn: 'Pronounced with crisp Izhar (clarity) as airstream passes through the respective throat depths.',
+      commonMistakesAr: 'نطق العين من الصدر بدل وسط الحلق، أو كتم صوت الغين والخاء، أو تفخيم الحاء.',
+      commonMistakesEn: 'Emitting Ayn from the chest instead of epiglottis, or over-constricting Haa.',
+      badge: '6 حروف إظهار حلقي',
+      colorBg: 'bg-amber-50 border-amber-300 text-amber-950',
+      activeColor: 'bg-amber-700 text-white'
+    },
+    {
+      id: 'lisan',
+      nameAr: 'اللسان',
+      nameEn: 'Al-Lisaan (The Tongue)',
+      icon: '👅',
+      organAr: 'أعظم المخارج حجماً وفيه 10 مخارج خاصة لـ 18 حرفاً',
+      organEn: 'Largest articulation organ with 10 specific zones for 18 letters',
+      letters: ['ق', 'ك', 'ج', 'ش', 'ي', 'ض', 'ل', 'ن', 'ر', 'ط', 'د', 'ت', 'ص', 'س', 'ز', 'ظ', 'ذ', 'ث'],
+      lettersLabelAr: 'أقصى اللسان (ق، ك) | وسطه (ج، ش، ي) | حافتاه (ض، ل) | طرفه ورأسه (11 حرفاً)',
+      lettersLabelEn: 'Back (Qaf, Kaf) | Middle (Jeem, Sheen, Yaa) | Edges (Dad, Lam) | Tip & Blade (11 letters)',
+      mannerAr: 'يتحرك اللسان بملامسة الحنك العظمي واللحمي أو أصول الأسنان ولثتها بدقة هندسية بالغة.',
+      mannerEn: 'Tongue interfaces against hard/soft palate, alveolar ridge, or teeth roots with micro-precision.',
+      commonMistakesAr: 'خلط الضاد بالظاء، أو همس الجيم، أو تحويل القاف إلى همزة أو كاف عامية.',
+      commonMistakesEn: 'Confusing Dad with Zaa, adding breath to Jeem, or softening Qaf to glottal stop.',
+      badge: '18 حرفاً (10 مخارج)',
+      colorBg: 'bg-teal-50 border-teal-300 text-teal-950',
+      activeColor: 'bg-teal-700 text-white'
+    },
+    {
+      id: 'shafatan',
+      nameAr: 'الشفتان',
+      nameEn: 'Ash-Shafataan (The Two Lips)',
+      icon: '👄',
+      organAr: 'مخرجان خاصان لأربعة أحرف',
+      organEn: 'Two sub-points producing 4 distinct letters',
+      letters: ['ف', 'ب', 'م', 'و'],
+      lettersLabelAr: 'بطن الشفة السفلى مع الثنايا العليا (ف) | انطباق الشفتين (ب، م) | استدارة الشفتين وضمهما (و)',
+      lettersLabelEn: 'Lower lip to upper teeth (Faa) | Lip closure (Baa, Meem) | Lip rounding (Waw)',
+      mannerAr: 'الفاء باحتكاك خفيف، والباء بانطباق قوي يتبعه قلقلة إن سكنت، والميم بانطباق لطيف مع غنة، والواو باستدارة.',
+      mannerEn: 'Faa by friction; Baa with firm closure; Meem with soft closure + Ghunnah; Waw by lip rounding.',
+      commonMistakesAr: 'كز الشفتين وضغطهما بقوة مفرطة عند نطق الميم والواو، أو قلقلة الميم الساكنة.',
+      commonMistakesEn: 'Over-tightening lips on Meem or Waw, or bouncing unvoweled Meem.',
+      badge: '4 حروف شفوية',
+      colorBg: 'bg-sky-50 border-sky-300 text-sky-950',
+      activeColor: 'bg-sky-700 text-white'
+    },
+    {
+      id: 'khayshoom',
+      nameAr: 'الخيشوم',
+      nameEn: 'Al-Khayshoom (Nasal Cavity)',
+      icon: '👃',
+      organAr: 'التجويف الأنفي الداخلي الممتد فوق سقف الحنك',
+      organEn: 'The upper nasal chamber extending above the hard palate',
+      letters: ['الغنة (ن، م)'],
+      lettersLabelAr: 'مخرج صوت الغنة الرخيم المركب في جسم حرفي النون والميم في سائر أحوالهما',
+      lettersLabelEn: 'The resonant Ghunnah sound inherent in Noon and Meem across all conditions',
+      mannerAr: 'ينسحب تيار الهواء من الرئتين ماراً بالتجويف الأنفي ليعطي رنيناً صوتياً شجياً مقداره حركتان.',
+      mannerEn: 'Air stream resonates smoothly through nasal airway producing a sweet 2-count nasalization.',
+      commonMistakesAr: 'بتر زمن الغنة قبل استيفاء الحركتين، أو تسريب الغنة لحروف المد وحروف الهجاء الأخرى.',
+      commonMistakesEn: 'Cutting Ghunnah short before 2 counts, or leaking nasality into adjacent vowels.',
+      badge: 'صوت الغنة المركب',
+      colorBg: 'bg-rose-50 border-rose-300 text-rose-950',
+      activeColor: 'bg-rose-700 text-white'
+    }
+  ];
+
+  const PRELOADED_TEXTBOOKS = [
+      { id: 'czerepinski', nameAr: 'كتاب أحكام التجويد (كريمة كزارول چيربينسكي)', nameEn: 'Tajweed Rules of the Qur\'an (Czerepinski)', note: 'الأكثر اعتماداً لتدريس غير الناطقين بالعربية' },
+      { id: 'suwayd', nameAr: 'التجويد المصور (د. أيمن رشدي سويد)', nameEn: 'Illustrated Tajweed (Dr. Ayman Suwayd)', note: 'توصيف دقيق للمخارج التشريحية وصفات الحروف' },
+      { id: 'mulakhkhas', nameAr: 'الملخص المفيد في علم التجويد', nameEn: 'Al-Mulakhkhas Al-Mufeed', note: 'موجز مدرسي عملي' },
+      { id: 'jazariyyah', nameAr: 'متن المنظومة الجزرية للإمام ابن الجزري', nameEn: 'Al-Jazariyyah Classical Matn', note: 'أبيات الاستدلال المعتمدة' }
+    ];
+
+    const TAJWEED_RULES = [
+      { id: 'ikhfaa', nameAr: 'الإخفاء الحقيقي (15 حرفاً)', nameEn: 'Al-Ikhfaa Al-Haqiqi (True Concealment)' },
+      { id: 'idgham_ghunnah', nameAr: 'الإدغام بغنة (يَنْمُو)', nameEn: 'Idgham with Ghunnah (YANMU)' },
+      { id: 'idgham_bighunnah', nameAr: 'الإدغام بغير غنة (ل، ر)', nameEn: 'Idgham without Ghunnah (Lam, Raa)' },
+      { id: 'izhar', nameAr: 'الإظهار الحلقي (حروف الحلق 6)', nameEn: 'Izhar Halqi (Throat Letters)' },
+      { id: 'iqlab', nameAr: 'الإقلاب (قلب النون ميماً عند الباء)', nameEn: 'Iqlab (Conversion to Meem at Baa)' },
+      { id: 'meem_sakinah', nameAr: 'أحكام الميم الساكنة (إخفاء، إدغام، إظهار شفوي)', nameEn: 'Rules of Meem Sakinah' },
+      { id: 'qalqalah', nameAr: 'القلقلة (قُطْبُ جَدٍّ - كبرى وصغرى)', nameEn: 'Al-Qalqalah (Echoing/Rebound)' },
+      { id: 'madd_farie', nameAr: 'أحكام المدود (المتصل، المنفصل، العارض، اللازم)', nameEn: 'Madd Rules (Connected, Detached, Compulsory)' },
+      { id: 'makharij', nameAr: 'مخارج الحروف والصفات التشريحية', nameEn: 'Makharij & Phonetic Articulation Points' }
+    ];
+
+    
+    // ================= BRANCH 1: HIFZ & RECITATION DATA & MUTASHABIHAT =================
+    
+    // 114 Verified Quran Surahs with exact metadata
+    
+    // 114 Quran Surahs Page Mapping for Real Madinah Mushaf (King Fahd Complex)
+    const MUSHAF_SURAHS_PAGE_MAP = [{"id":1,"name":"الفاتحة","startPage":1,"endPage":1,"totalAyahs":7},{"id":2,"name":"البقرة","startPage":2,"endPage":49,"totalAyahs":286},{"id":3,"name":"آل عمران","startPage":50,"endPage":76,"totalAyahs":200},{"id":4,"name":"النساء","startPage":77,"endPage":106,"totalAyahs":176},{"id":5,"name":"المائدة","startPage":106,"endPage":127,"totalAyahs":120},{"id":6,"name":"الأنعام","startPage":128,"endPage":150,"totalAyahs":165},{"id":7,"name":"الأعراف","startPage":151,"endPage":176,"totalAyahs":206},{"id":8,"name":"الأنفال","startPage":177,"endPage":186,"totalAyahs":75},{"id":9,"name":"التوبة","startPage":187,"endPage":207,"totalAyahs":129},{"id":10,"name":"يونس","startPage":208,"endPage":221,"totalAyahs":109},{"id":11,"name":"هود","startPage":221,"endPage":235,"totalAyahs":123},{"id":12,"name":"يوسف","startPage":235,"endPage":248,"totalAyahs":111},{"id":13,"name":"الرعد","startPage":249,"endPage":255,"totalAyahs":43},{"id":14,"name":"ابراهيم","startPage":255,"endPage":261,"totalAyahs":52},{"id":15,"name":"الحجر","startPage":262,"endPage":267,"totalAyahs":99},{"id":16,"name":"النحل","startPage":267,"endPage":281,"totalAyahs":128},{"id":17,"name":"الإسراء","startPage":282,"endPage":293,"totalAyahs":111},{"id":18,"name":"الكهف","startPage":293,"endPage":304,"totalAyahs":110},{"id":19,"name":"مريم","startPage":305,"endPage":312,"totalAyahs":98},{"id":20,"name":"طه","startPage":312,"endPage":321,"totalAyahs":135},{"id":21,"name":"الأنبياء","startPage":322,"endPage":331,"totalAyahs":112},{"id":22,"name":"الحج","startPage":332,"endPage":341,"totalAyahs":78},{"id":23,"name":"المؤمنون","startPage":342,"endPage":349,"totalAyahs":118},{"id":24,"name":"النور","startPage":350,"endPage":359,"totalAyahs":64},{"id":25,"name":"الفرقان","startPage":359,"endPage":366,"totalAyahs":77},{"id":26,"name":"الشعراء","startPage":367,"endPage":376,"totalAyahs":227},{"id":27,"name":"النمل","startPage":377,"endPage":385,"totalAyahs":93},{"id":28,"name":"القصص","startPage":385,"endPage":396,"totalAyahs":88},{"id":29,"name":"العنكبوت","startPage":396,"endPage":404,"totalAyahs":69},{"id":30,"name":"الروم","startPage":404,"endPage":410,"totalAyahs":60},{"id":31,"name":"لقمان","startPage":411,"endPage":414,"totalAyahs":34},{"id":32,"name":"السجدة","startPage":415,"endPage":417,"totalAyahs":30},{"id":33,"name":"الأحزاب","startPage":418,"endPage":427,"totalAyahs":73},{"id":34,"name":"سبإ","startPage":428,"endPage":434,"totalAyahs":54},{"id":35,"name":"فاطر","startPage":434,"endPage":440,"totalAyahs":45},{"id":36,"name":"يس","startPage":440,"endPage":445,"totalAyahs":83},{"id":37,"name":"الصافات","startPage":446,"endPage":452,"totalAyahs":182},{"id":38,"name":"ص","startPage":453,"endPage":458,"totalAyahs":88},{"id":39,"name":"الزمر","startPage":458,"endPage":467,"totalAyahs":75},{"id":40,"name":"غافر","startPage":467,"endPage":476,"totalAyahs":85},{"id":41,"name":"فصلت","startPage":477,"endPage":482,"totalAyahs":54},{"id":42,"name":"الشورى","startPage":483,"endPage":489,"totalAyahs":53},{"id":43,"name":"الزخرف","startPage":489,"endPage":495,"totalAyahs":89},{"id":44,"name":"الدخان","startPage":496,"endPage":498,"totalAyahs":59},{"id":45,"name":"الجاثية","startPage":499,"endPage":502,"totalAyahs":37},{"id":46,"name":"الأحقاف","startPage":502,"endPage":506,"totalAyahs":35},{"id":47,"name":"محمد","startPage":507,"endPage":510,"totalAyahs":38},{"id":48,"name":"الفتح","startPage":511,"endPage":515,"totalAyahs":29},{"id":49,"name":"الحجرات","startPage":515,"endPage":517,"totalAyahs":18},{"id":50,"name":"ق","startPage":518,"endPage":520,"totalAyahs":45},{"id":51,"name":"الذاريات","startPage":520,"endPage":523,"totalAyahs":60},{"id":52,"name":"الطور","startPage":523,"endPage":525,"totalAyahs":49},{"id":53,"name":"النجم","startPage":526,"endPage":528,"totalAyahs":62},{"id":54,"name":"القمر","startPage":528,"endPage":531,"totalAyahs":55},{"id":55,"name":"الرحمن","startPage":531,"endPage":534,"totalAyahs":78},{"id":56,"name":"الواقعة","startPage":534,"endPage":537,"totalAyahs":96},{"id":57,"name":"الحديد","startPage":537,"endPage":541,"totalAyahs":29},{"id":58,"name":"المجادلة","startPage":542,"endPage":545,"totalAyahs":22},{"id":59,"name":"الحشر","startPage":545,"endPage":548,"totalAyahs":24},{"id":60,"name":"الممتحنة","startPage":549,"endPage":551,"totalAyahs":13},{"id":61,"name":"الصف","startPage":551,"endPage":552,"totalAyahs":14},{"id":62,"name":"الجمعة","startPage":553,"endPage":554,"totalAyahs":11},{"id":63,"name":"المنافقون","startPage":554,"endPage":555,"totalAyahs":11},{"id":64,"name":"التغابن","startPage":556,"endPage":557,"totalAyahs":18},{"id":65,"name":"الطلاق","startPage":558,"endPage":559,"totalAyahs":12},{"id":66,"name":"التحريم","startPage":560,"endPage":561,"totalAyahs":12},{"id":67,"name":"الملك","startPage":562,"endPage":564,"totalAyahs":30},{"id":68,"name":"القلم","startPage":564,"endPage":566,"totalAyahs":52},{"id":69,"name":"الحاقة","startPage":566,"endPage":568,"totalAyahs":52},{"id":70,"name":"المعارج","startPage":568,"endPage":570,"totalAyahs":44},{"id":71,"name":"نوح","startPage":570,"endPage":571,"totalAyahs":28},{"id":72,"name":"الجن","startPage":572,"endPage":573,"totalAyahs":28},{"id":73,"name":"المزمل","startPage":574,"endPage":575,"totalAyahs":20},{"id":74,"name":"المدثر","startPage":575,"endPage":577,"totalAyahs":56},{"id":75,"name":"القيامة","startPage":577,"endPage":578,"totalAyahs":40},{"id":76,"name":"الانسان","startPage":578,"endPage":580,"totalAyahs":31},{"id":77,"name":"المرسلات","startPage":580,"endPage":581,"totalAyahs":50},{"id":78,"name":"النبإ","startPage":582,"endPage":583,"totalAyahs":40},{"id":79,"name":"النازعات","startPage":583,"endPage":584,"totalAyahs":46},{"id":80,"name":"عبس","startPage":585,"endPage":585,"totalAyahs":42},{"id":81,"name":"التكوير","startPage":586,"endPage":586,"totalAyahs":29},{"id":82,"name":"الإنفطار","startPage":587,"endPage":587,"totalAyahs":19},{"id":83,"name":"المطففين","startPage":587,"endPage":589,"totalAyahs":36},{"id":84,"name":"الإنشقاق","startPage":589,"endPage":589,"totalAyahs":25},{"id":85,"name":"البروج","startPage":590,"endPage":590,"totalAyahs":22},{"id":86,"name":"الطارق","startPage":591,"endPage":591,"totalAyahs":17},{"id":87,"name":"الأعلى","startPage":591,"endPage":592,"totalAyahs":19},{"id":88,"name":"الغاشية","startPage":592,"endPage":592,"totalAyahs":26},{"id":89,"name":"الفجر","startPage":593,"endPage":594,"totalAyahs":30},{"id":90,"name":"البلد","startPage":594,"endPage":594,"totalAyahs":20},{"id":91,"name":"الشمس","startPage":595,"endPage":595,"totalAyahs":15},{"id":92,"name":"الليل","startPage":595,"endPage":596,"totalAyahs":21},{"id":93,"name":"الضحى","startPage":596,"endPage":596,"totalAyahs":11},{"id":94,"name":"الشرح","startPage":596,"endPage":596,"totalAyahs":8},{"id":95,"name":"التين","startPage":597,"endPage":597,"totalAyahs":8},{"id":96,"name":"العلق","startPage":597,"endPage":597,"totalAyahs":19},{"id":97,"name":"القدر","startPage":598,"endPage":598,"totalAyahs":5},{"id":98,"name":"البينة","startPage":598,"endPage":599,"totalAyahs":8},{"id":99,"name":"الزلزلة","startPage":599,"endPage":599,"totalAyahs":8},{"id":100,"name":"العاديات","startPage":599,"endPage":600,"totalAyahs":11},{"id":101,"name":"القارعة","startPage":600,"endPage":600,"totalAyahs":11},{"id":102,"name":"التكاثر","startPage":600,"endPage":600,"totalAyahs":8},{"id":103,"name":"العصر","startPage":601,"endPage":601,"totalAyahs":3},{"id":104,"name":"الهمزة","startPage":601,"endPage":601,"totalAyahs":9},{"id":105,"name":"الفيل","startPage":601,"endPage":601,"totalAyahs":5},{"id":106,"name":"قريش","startPage":602,"endPage":602,"totalAyahs":4},{"id":107,"name":"الماعون","startPage":602,"endPage":602,"totalAyahs":7},{"id":108,"name":"الكوثر","startPage":602,"endPage":602,"totalAyahs":3},{"id":109,"name":"الكافرون","startPage":603,"endPage":603,"totalAyahs":6},{"id":110,"name":"النصر","startPage":603,"endPage":603,"totalAyahs":3},{"id":111,"name":"المسد","startPage":603,"endPage":603,"totalAyahs":5},{"id":112,"name":"الإخلاص","startPage":604,"endPage":604,"totalAyahs":4},{"id":113,"name":"الفلق","startPage":604,"endPage":604,"totalAyahs":5},{"id":114,"name":"الناس","startPage":604,"endPage":604,"totalAyahs":6}];
+
+    const ALL_QURAN_SURAHS = [{"id":1,"name":"الفاتحة","en":"Al-Faatiha","ayahs":7},{"id":2,"name":"البقرة","en":"Al-Baqara","ayahs":286},{"id":3,"name":"ال عمران","en":"Aal-i-Imraan","ayahs":200},{"id":4,"name":"النساء","en":"An-Nisaa","ayahs":176},{"id":5,"name":"المائـدة","en":"Al-Maaida","ayahs":120},{"id":6,"name":"الأنعام","en":"Al-An'aam","ayahs":165},{"id":7,"name":"الأعراف","en":"Al-A'raaf","ayahs":206},{"id":8,"name":"الأنفال","en":"Al-Anfaal","ayahs":75},{"id":9,"name":"التوبة","en":"At-Tawba","ayahs":129},{"id":10,"name":"يونس","en":"Yunus","ayahs":109},{"id":11,"name":"هود","en":"Hud","ayahs":123},{"id":12,"name":"يوسف","en":"Yusuf","ayahs":111},{"id":13,"name":"الرعد","en":"Ar-Ra'd","ayahs":43},{"id":14,"name":"إبراهيم","en":"Ibrahim","ayahs":52},{"id":15,"name":"الحجر","en":"Al-Hijr","ayahs":99},{"id":16,"name":"النحل","en":"An-Nahl","ayahs":128},{"id":17,"name":"الإسراء","en":"Al-Israa","ayahs":111},{"id":18,"name":"الكهف","en":"Al-Kahf","ayahs":110},{"id":19,"name":"مريم","en":"Maryam","ayahs":98},{"id":20,"name":"طه","en":"Taa-Haa","ayahs":135},{"id":21,"name":"الأنبياء","en":"Al-Anbiyaa","ayahs":112},{"id":22,"name":"الحج","en":"Al-Hajj","ayahs":78},{"id":23,"name":"المؤمنون","en":"Al-Muminoon","ayahs":118},{"id":24,"name":"النور","en":"An-Noor","ayahs":64},{"id":25,"name":"الفرقان","en":"Al-Furqaan","ayahs":77},{"id":26,"name":"الشعراء","en":"Ash-Shu'araa","ayahs":227},{"id":27,"name":"النمل","en":"An-Naml","ayahs":93},{"id":28,"name":"القصص","en":"Al-Qasas","ayahs":88},{"id":29,"name":"العنكبوت","en":"Al-Ankaboot","ayahs":69},{"id":30,"name":"الروم","en":"Ar-Room","ayahs":60},{"id":31,"name":"لقمان","en":"Luqman","ayahs":34},{"id":32,"name":"السجدة","en":"As-Sajda","ayahs":30},{"id":33,"name":"الأحزاب","en":"Al-Ahzaab","ayahs":73},{"id":34,"name":"سبإ","en":"Saba","ayahs":54},{"id":35,"name":"فاطر","en":"Faatir","ayahs":45},{"id":36,"name":"يس","en":"Yaseen","ayahs":83},{"id":37,"name":"الصافات","en":"As-Saaffaat","ayahs":182},{"id":38,"name":"ص","en":"Saad","ayahs":88},{"id":39,"name":"الزمر","en":"Az-Zumar","ayahs":75},{"id":40,"name":"غافر","en":"Ghafir","ayahs":85},{"id":41,"name":"فصلت","en":"Fussilat","ayahs":54},{"id":42,"name":"الشورى","en":"Ash-Shura","ayahs":53},{"id":43,"name":"الزخرف","en":"Az-Zukhruf","ayahs":89},{"id":44,"name":"الدخان","en":"Ad-Dukhaan","ayahs":59},{"id":45,"name":"الجاثية","en":"Al-Jaathiya","ayahs":37},{"id":46,"name":"الأحقاف","en":"Al-Ahqaf","ayahs":35},{"id":47,"name":"محمد","en":"Muhammad","ayahs":38},{"id":48,"name":"الفتح","en":"Al-Fath","ayahs":29},{"id":49,"name":"الحجرات","en":"Al-Hujuraat","ayahs":18},{"id":50,"name":"ق","en":"Qaaf","ayahs":45},{"id":51,"name":"الذاريات","en":"Adh-Dhaariyat","ayahs":60},{"id":52,"name":"الطور","en":"At-Tur","ayahs":49},{"id":53,"name":"النجم","en":"An-Najm","ayahs":62},{"id":54,"name":"القمر","en":"Al-Qamar","ayahs":55},{"id":55,"name":"الرحمن","en":"Ar-Rahmaan","ayahs":78},{"id":56,"name":"الواقعة","en":"Al-Waaqia","ayahs":96},{"id":57,"name":"الحديد","en":"Al-Hadid","ayahs":29},{"id":58,"name":"المجادلة","en":"Al-Mujaadila","ayahs":22},{"id":59,"name":"الحشر","en":"Al-Hashr","ayahs":24},{"id":60,"name":"الممتحنة","en":"Al-Mumtahana","ayahs":13},{"id":61,"name":"الصف","en":"As-Saff","ayahs":14},{"id":62,"name":"الجمعة","en":"Al-Jumu'a","ayahs":11},{"id":63,"name":"المنافقون","en":"Al-Munaafiqoon","ayahs":11},{"id":64,"name":"التغابن","en":"At-Taghaabun","ayahs":18},{"id":65,"name":"الطلاق","en":"At-Talaaq","ayahs":12},{"id":66,"name":"التحريم","en":"At-Tahrim","ayahs":12},{"id":67,"name":"الملك","en":"Al-Mulk","ayahs":30},{"id":68,"name":"القلم","en":"Al-Qalam","ayahs":52},{"id":69,"name":"الحاقة","en":"Al-Haaqqa","ayahs":52},{"id":70,"name":"المعارج","en":"Al-Ma'aarij","ayahs":44},{"id":71,"name":"نوح","en":"Nooh","ayahs":28},{"id":72,"name":"الجن","en":"Al-Jinn","ayahs":28},{"id":73,"name":"المزمل","en":"Al-Muzzammil","ayahs":20},{"id":74,"name":"المدثر","en":"Al-Muddaththir","ayahs":56},{"id":75,"name":"القيامة","en":"Al-Qiyaama","ayahs":40},{"id":76,"name":"الإنسان","en":"Al-Insaan","ayahs":31},{"id":77,"name":"المرسلات","en":"Al-Mursalaat","ayahs":50},{"id":78,"name":"النبإ","en":"An-Naba","ayahs":40},{"id":79,"name":"النازعات","en":"An-Naazi'aat","ayahs":46},{"id":80,"name":"عبس","en":"Abasa","ayahs":42},{"id":81,"name":"التكوير","en":"At-Takwir","ayahs":29},{"id":82,"name":"الانفطار","en":"Al-Infitaar","ayahs":19},{"id":83,"name":"المطففين","en":"Al-Mutaffifin","ayahs":36},{"id":84,"name":"الانشقاق","en":"Al-Inshiqaaq","ayahs":25},{"id":85,"name":"البروج","en":"Al-Burooj","ayahs":22},{"id":86,"name":"الطارق","en":"At-Taariq","ayahs":17},{"id":87,"name":"الأعلى","en":"Al-A'laa","ayahs":19},{"id":88,"name":"الغاشية","en":"Al-Ghaashiya","ayahs":26},{"id":89,"name":"الفجر","en":"Al-Fajr","ayahs":30},{"id":90,"name":"البلد","en":"Al-Balad","ayahs":20},{"id":91,"name":"الشمس","en":"Ash-Shams","ayahs":15},{"id":92,"name":"الليل","en":"Al-Lail","ayahs":21},{"id":93,"name":"الضحى","en":"Ad-Dhuhaa","ayahs":11},{"id":94,"name":"الشرح","en":"Ash-Sharh","ayahs":8},{"id":95,"name":"التين","en":"At-Tin","ayahs":8},{"id":96,"name":"العلق","en":"Al-Alaq","ayahs":19},{"id":97,"name":"القدر","en":"Al-Qadr","ayahs":5},{"id":98,"name":"البينة","en":"Al-Bayyina","ayahs":8},{"id":99,"name":"الزلزلة","en":"Az-Zalzala","ayahs":8},{"id":100,"name":"العاديات","en":"Al-Aadiyaat","ayahs":11},{"id":101,"name":"القارعة","en":"Al-Qaari'a","ayahs":11},{"id":102,"name":"التكاثر","en":"At-Takaathur","ayahs":8},{"id":103,"name":"العصر","en":"Al-Asr","ayahs":3},{"id":104,"name":"الهمزة","en":"Al-Humaza","ayahs":9},{"id":105,"name":"الفيل","en":"Al-Fil","ayahs":5},{"id":106,"name":"قريش","en":"Quraish","ayahs":4},{"id":107,"name":"الماعون","en":"Al-Maa'un","ayahs":7},{"id":108,"name":"الكوثر","en":"Al-Kawthar","ayahs":3},{"id":109,"name":"الكافرون","en":"Al-Kaafiroon","ayahs":6},{"id":110,"name":"النصر","en":"An-Nasr","ayahs":3},{"id":111,"name":"المسد","en":"Al-Masad","ayahs":5},{"id":112,"name":"الإخلاص","en":"Al-Ikhlaas","ayahs":4},{"id":113,"name":"الفلق","en":"Al-Falaq","ayahs":5},{"id":114,"name":"الناس","en":"An-Naas","ayahs":6}];
+
+    
+    // ================= BRANCH 3: ISLAMIC STUDIES WORKSHEETS (DATA) =================
+    const ISLAMIC_BRANCH_WORKSHEETS = {
+  "aqeedah": {
+    "id": "aqeedah",
+    "categoryAr": "العقيدة الإسلامية",
+    "categoryEn": "Islamic Creed (Aqeedah)",
+    "titleAr": "ورقة عمل وتطبيق: أركان الإيمان الستة وأثرها في السكينة النفسية",
+    "titleEn": "Worksheet: The Six Pillars of Faith & Psychological Peace",
+    "targetAudience": "اليافعين والطالبات والمهتدين الجدد",
+    "quranRef": "سورة البقرة: الآية 285 — ﴿ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إِلَيْهِ مِن رَّبِّهِۦ وَٱلْمُؤْمِنُونَ﴾",
+    "hadithRef": "حديث جبريل الطويل (صحيح مسلم #8): «أَنْ تُؤْمِنَ بِاللَّهِ، وَمَلَائِكَتِهِ، وَكُتُبِهِ، وَرُسُلِهِ، وَالْيَوْمِ الْآخِرِ، وَتُؤْمِنَ بِالْقَدَرِ خَيْرِهِ وَشَرِّهِ»",
+    "items": [
+      {
+        "num": 1,
+        "topic": "مراتب الدين الثلاث والفرق بينها",
+        "scripture": "حديث جبريل (صحيح مسلم 8)",
+        "studentQuestion": "اذكر مراتب الدين الثلاث بالترتيب التصاعدي مع بيان أعلى مرتبة وضابطها الشرعي.",
+        "teacherAnswer": "مراتب الدين: 1. الإسلام (الاستسلام الظاهر بالجوارح والأركان الخمسة)، 2. الإيمان (التصديق الباطن بالقلب بالأركان الستة)، 3. الإحسان (أعلى المراتب: أن تعبد الله كأنك تراه فإن لم تكن تراه فإنه يراك).",
+        "practicalImpact": "استشعار مراقبة الله في السر والعلن وإخلاص النية في كل عمل خفي."
+      },
+      {
+        "num": 2,
+        "topic": "الإيمان بالقضاء والقدر وعلاج القلق والندم",
+        "scripture": "﴿إِنَّا كُلَّ شَيْءٍ خَلَقْنَاهُ بِقَدَرٍ﴾ [القمر: 49] وحديث مسلم 2664",
+        "studentQuestion": "ما هو الهدي النبوي المأثور عند وقوع المكروه؟ وما أثر الإيمان بالقدر في محو كلمة \"لو\" المحبطة؟",
+        "teacherAnswer": "الهدي النبوي: قول: «قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ». أثره: يورث التسليم التام لحكمة الله بعد بذل الأسباب المشروعة، ويقطع تسلط الشيطان وباب الحسرة والندم لأن ما أصابك لم يكن ليخطئك.",
+        "practicalImpact": "استبدال الجزع والتسخط بالرضا والسكينة النفسية والبدء من جديد."
+      },
+      {
+        "num": 3,
+        "topic": "الإيمان بالملائكة الكرام وأثرها في الورع",
+        "scripture": "﴿وَإِنَّ عَلَيْكُمْ لَحَافِظِينَ كِرَامًا كَاتِبِينَ﴾ [الانفطار: 10-11]",
+        "studentQuestion": "وضح وظائف كل من: (جبريل، ميكائيل، إسرافيل، ملك الموت)، وبيّن كيف يثمر الإيمان بالحفظة رقابة ذاتية؟",
+        "teacherAnswer": "جبريل موكل بالوحي، ميكائيل بالقطر والنبات، إسرافيل بالنفخ في الصور، ملك الموت بقبض الأرواح. والإيمان بالكرام الكاتبين يثمر حياءً مستمراً من المعصية ومراقبة ذاتية بلا حاجة لكاميرات أرضية.",
+        "practicalImpact": "عفة الجوارح واللسان عن الحرام في الخلوات والعوالم الرقمية."
+      },
+      {
+        "num": 4,
+        "topic": "مقتضى الشهادتين ونفي الشرك",
+        "scripture": "﴿فَاعْلَمْ أَنَّهُ لَا إِلَٰهَ إِلَّا اللَّهُ وَاسْتَغْفِرْ لِذَنبِكَ﴾ [محمد: 19]",
+        "studentQuestion": "ما هو مقتضى شهادة أن لا إله إلا الله من حيث النفي والإثبات؟ مع ذكر مثال للشرك الأصغر.",
+        "teacherAnswer": "النفي: (لا إله) نفي استحقاق العبادة عن كل ما سوى الله، الإثبات: (إلا الله) إثبات العبادة بجميع أنواعها لله وحده لا شريك له. والشرك الأصغر كالرياء الخفي (تحسين العمل لأجل نظر الناس).",
+        "practicalImpact": "تجريد القصد لله وحده وعدم انتظار ثناء الناس أو مدحهم."
+      },
+      {
+        "num": 5,
+        "topic": "الإيمان باليوم الآخر واليقين بالجزاء",
+        "scripture": "﴿فَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُ ۝ وَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ شَرًّا يَرَهُ﴾ [الزلزلة]",
+        "studentQuestion": "كيف يحقق الإيمان باليوم الآخر والحساب العدالة النفسية التامة للمظلوم والزاهد في الدنيا؟",
+        "teacherAnswer": "اليقين بأن الدنيا دار ابتلاء وفناء، وأن الحقوق المهدورة ستستوفى كاملة بميزان القسط يوم القيامة، مما يزيل الحقد واليأس ويجعل المسلم يستعلي بإيمانه على مغريات الحرام الفانية.",
+        "practicalImpact": "العفو والصفح عند المقدرة والاطمئنان إلى عدالة الله المطلقة."
+      }
+    ]
+  },
+  "fiqh": {
+    "id": "fiqh",
+    "categoryAr": "الفقه وأحكام العبادات",
+    "categoryEn": "Fiqh & Acts of Worship",
+    "titleAr": "ورقة عمل وتطبيق: فقه الطهارة والصلاة وسجود السهو",
+    "titleEn": "Worksheet: Purification, Prayer & Sujood As-Sahw",
+    "targetAudience": "طلاب الحلقات والدارسين في فقه العبادات",
+    "quranRef": "﴿حَافِظُوا عَلَى الصَّلَوَاتِ وَالصَّلَاةِ الْوُسْطَىٰ وَقُومُوا لِلَّهِ قَانِتِينَ﴾ [البقرة: 238]",
+    "hadithRef": "حديث المسيء صلاته (صحيح البخاري #757): «ارْجِعْ فَصَلِّ فَإِنَّكَ لَمْ تُصَلِّ»",
+    "items": [
+      {
+        "num": 1,
+        "topic": "الفرق الفقهي بين شرط الصلاة وركنها",
+        "scripture": "حديث: «لا يقبل الله صلاة بغير طهور» (مسلم)",
+        "studentQuestion": "بيّن الفرق الجوهري بين شروط الصلاة وأركانها مع ذكر مثالين لكل منهما.",
+        "teacherAnswer": "الشرط يسبق الدخول في الصلاة ويستمر معها (كالطهارة، ستر العورة، دخول الوقت، استقبال القبلة). الركن هو جزء من ماهية الصلاة وحقيقتها لا يسقط عمداً ولا سهواً (كتكبيرة الإحرام، الفاتحة، الركوع، السجود).",
+        "practicalImpact": "التثبت من صحة الوضوء وستر العورة قبل تكبيرة الإحرام."
+      },
+      {
+        "num": 2,
+        "topic": "أحكام سجود السهو ومواضعه",
+        "scripture": "حديث ابن مسعود وحديث ذي اليدين (صحيح مسلم 571 و 573)",
+        "studentQuestion": "متى يكون سجود السهو قبل السلام؟ ومتى يكون بعد السلام؟ وما ضابط الشك؟",
+        "teacherAnswer": "يسجد قبل السلام عند: 1. النقص (كنسيان التشهد الأول)، 2. الشك إذا بنى على الأقل (اليقين). ويسجد بعد السلام عند: 1. الزيادة (كركعة خامسة)، 2. الشك إذا ترجح لديه أحد الأمرين بالتحري.",
+        "practicalImpact": "إدراك مرونة الشريعة وعدم بطلان الصلاة بالنسيان العارض وجبر الخلل."
+      },
+      {
+        "num": 3,
+        "topic": "نواقض الوضوء وما لا ينقضه",
+        "scripture": "حديث أبي هريرة: «لا ينصرف حتى يسمع صوتاً أو يجد ريحاً» (البخاري 137)",
+        "studentQuestion": "اذكر ثلاثة نواقض مجمع عليها للوضوء، ومسألتين شائعتين لا ينقض فيهما الوضوء.",
+        "teacherAnswer": "النواقض: الخارج من السبيلين، زوال العقل بسكر أو إغماء، مس الفرج بشهوة (عند الجمهور). ولا ينقض: الشك الطارئ دون يقين، والنوم الخفيف المستقر الذي لا يزيل الإدراك كالنوم جالساً.",
+        "practicalImpact": "قطع الوساوس الشيطانية في الطهارة والتمسك باليقين الثابت."
+      },
+      {
+        "num": 4,
+        "topic": "استدراك المسبوق في صلاة الجماعة",
+        "scripture": "حديث: «ما أدركتم فصلوا وما فاتكم فأتموا» (متفق عليه)",
+        "studentQuestion": "بم تدرك الركعة مع الإمام؟ وكيف يقضي المسبوق ما فاته بعد تسليم الإمام؟",
+        "teacherAnswer": "تدرك الركعة بإدراك الركوع التام مع الإمام باطمئنان قبل رفعه. ويقوم المسبوق بعد تسليم الإمام دون تكبير ثانٍ ليتم ما فاته جاعلاً ما أدركه مع الإمام أول صلاته وما يقضيه آخرها على الراجح.",
+        "practicalImpact": "السكينة والوقار عند القدوم للمسجد وعدم الجري السريع لإدراك الركوع."
+      }
+    ]
+  },
+  "seerah": {
+    "id": "seerah",
+    "categoryAr": "السيرة النبوية والتاريخ",
+    "categoryEn": "Prophetic Biography (Seerah)",
+    "titleAr": "ورقة عمل وتطبيق: معالم الهجرة النبوية وبناء مجتمع الأخوة",
+    "titleEn": "Worksheet: Milestones of the Hijrah & Building Society",
+    "targetAudience": "المستوى المتوسط والمتقدم في السيرة النبوية",
+    "quranRef": "﴿إِلَّا تَنصُرُوهُ فَقَدْ نَصَرَهُ اللَّهُ إِذْ أَخْرَجَهُ الَّذِينَ كَفَرُوا ثَانِيَ اثْنَيْنِ إِذْ هُمَا فِي الْغَارِ﴾ [التوبة: 40]",
+    "hadithRef": "حديث الغار (صحيح البخاري #3653): «يَا أَبَا بَكْرٍ، مَا ظَنُّكَ بِاثْنَيْنِ اللَّهُ ثَالِثُهُمَا؟»",
+    "items": [
+      {
+        "num": 1,
+        "topic": "التخطيط المحكم والأخذ بالأسباب في الهجرة",
+        "scripture": "صحيح البخاري — كتاب مناقب الأنصار (باب هجرة النبي ﷺ)",
+        "studentQuestion": "استخرج ثلاثة تدابير نبوية محكمة اتخذها النبي ﷺ في رحلة الهجرة تؤكد وجوب الأخذ بالأسباب.",
+        "teacherAnswer": "1. استئجار دليل خبير بالطريق (عبد الله بن أريقط ولو كان غير مسلم للأمانة والخبرة)، 2. السير في طريق الساحل الوعر خلافاً للمألوف، 3. توزيع الأدوار بدقة: مبيت علي للتمويه، أسماء للتموين، عبد الله بن أبي بكر للأخبار، عامر بن فهيرة لتعفية الآثار.",
+        "practicalImpact": "الجمع بين التخطيط الاستراتيجي الدقيق والتوكل القلبي المطلق على الله."
+      },
+      {
+        "num": 2,
+        "topic": "وثيقة المدينة وتأسيس المواطنة العادلة",
+        "scripture": "سيرة ابن هشام ومصنف ابن أبي شيبة (كتاب المغازي)",
+        "studentQuestion": "ما هي أهم المبادئ الدستورية التي رسختها وثيقة المدينة بين المسلمين وسائر أطياف المجتمع؟",
+        "teacherAnswer": "رسخت: 1. حرمة الدماء والأموال، 2. حرية الاعتقاد والتدين (لليهود دينهم وللمسلمين دينهم)، 3. الدفاع المشترك عن المدينة ضد أي عدوان خارجي، 4. مرجعية العدل والاحتكام لله ورسوله لردع الظالم.",
+        "practicalImpact": "ترسيخ العدالة والتعايش السلمي والوفاء بالعهود والمواثيق مع الجميع."
+      },
+      {
+        "num": 3,
+        "topic": "أخلاق القيادة والعفو عند المقدرة",
+        "scripture": "سنن البيهقي الكبرى ودلائل النبوة (فتح مكة)",
+        "studentQuestion": "كيف تجلى كمال الخلق النبوي يوم فتح مكة تجاه أهل قريش الذين آذوه وأخرجوه؟",
+        "teacherAnswer": "دخل مكة خافضاً رأسه تواضعاً لله حتى كادت لحيته تمس رحله، وخاطبهم قائلاً: «ما تظنون أني فاعل بكم؟ قالوا: أخ كريم وابن أخ كريم، فقال: لا تثريب عليكم اليوم، اذهبوا فأنتم الطلقاء».",
+        "practicalImpact": "العفو عند المقدرة وعدم الانتقام للنفس وتغليب التسامح النبوي."
+      }
+    ]
+  },
+  "tazkiyah": {
+    "id": "tazkiyah",
+    "categoryAr": "الآداب والتزكية والأخلاق",
+    "categoryEn": "Ethics, Etiquette & Purification (Tazkiyah)",
+    "titleAr": "ورقة عمل وتطبيق: حفظ اللسان وبر الوالدين وطهارة السريرة",
+    "titleEn": "Worksheet: Guarding the Tongue & Honoring Parents",
+    "targetAudience": "كافة المستويات — بناء الشخصية المسلمة المتزنة",
+    "quranRef": "﴿وَقَضَىٰ رَبُّكَ أَلَّا تَعْبُدُوا إِلَّا إِيَّاهُ وَبِالْوَالِدَيْنِ إِحْسَانًا﴾ [الإسراء: 23]",
+    "hadithRef": "حديث معاذ (سنن الترمذي #2616): «وَهَلْ يَكُبُّ النَّاسَ فِي النَّارِ عَلَى وُجُوهِهِمْ إِلَّا حَصَائِدُ أَلْسِنَتِهِمْ؟»",
+    "items": [
+      {
+        "num": 1,
+        "topic": "حفظ اللسان والتحذير من الغيبة والنميمة",
+        "scripture": "﴿وَلَا يَغْتَب بَّعْضُكُم بَعْضًا﴾ [الحجرات: 12] وحديث مسلم 2584",
+        "studentQuestion": "عرّف الغيبة والبهتان كما بيّنهما النبي ﷺ، واذكر كفارة الغيبة المشروعة.",
+        "teacherAnswer": "الغيبة: ذكرك أخاك بما يكره وهو فيه، والبهتان: أن تذكر ما ليس فيه كذباً. وكفارتها: التوبة الصادقة، والدعاء والاستغفار للمغتاب في المجالس التي اغتيب فيها وذكره بمحاسنه التي تعرفها.",
+        "practicalImpact": "الإمساك عن الخوض في أعراض الناس وتطهير المجموعات الرقمية من السخرية."
+      },
+      {
+        "num": 2,
+        "topic": "بر الوالدين في حياتهما وبعد مماتهما",
+        "scripture": "حديث: «رغم أنفه من أدرك أبويه عند الكبر أحدهما أو كليهما ثم لم يدخل الجنة» (مسلم 2551)",
+        "studentQuestion": "ما هي أوجه الإحسان للوالدين بعد وفاتهما بصريح النصوص النبوية الشريفة؟",
+        "teacherAnswer": "1. الدعاء والاستغفار الدائم لهما، 2. إنفاذ عهدهما ووصاياهما المشروعة، 3. إكرام صديقهما وصلة الرحم التي لا توصل إلا بهما، 4. الصدقة الجارية وإهداء ثواب الحج والعمرة عنهما.",
+        "practicalImpact": "خفض جناح الذل من الرحمة والمسارعة لإدخال السرور على قلوب الآباء والأمهات."
+      },
+      {
+        "num": 3,
+        "topic": "تحويل العادات اليومية إلى عبادات بالنية الصالحة",
+        "scripture": "أثر معاذ بن جبل: «أما أنا فأنام وأقوم، فأحتسب نومتي كما أحتسب قومتي» (البخاري 4344)",
+        "studentQuestion": "كيف يستطيع المسلم تحويل نومه وأكله ورياضته وساعات عمله إلى عبادات مأجورة يثاب عليها؟",
+        "teacherAnswer": "باستحضار النية الصالحة القلبية؛ فينوي بنومه وأكله التقوي على طاعة الله ونفع المسلمين، وبدراسته وعمله عفة نفسه وأهله وخدمة دينه وأمته، فتصير العادات المباحة طاعات وعبادات.",
+        "practicalImpact": "حضور النية في مطلع كل يوم وتجديد الإخلاص في تفاصيل الروتين اليومي."
+      }
+    ]
+  }
+};
+
+    // ================= BRANCH 1: HIFZ TRACKING WORKSHEET (DATA) =================
+    const HIFZ_BRANCH_WORKSHEET = {
+  "titleAr": "سجل المتابعة والتقييم الأسبوعي لحلقة التحفيظ وضبط المتشابهات",
+  "titleEn": "Weekly Quran Memorization & Mutashabihat Evaluation Sheet",
+  "criteria": [
+    {
+      "num": 1,
+      "domain": "الحفظ الجديد (New Memorization)",
+      "description": "طلاقة الاسترسال وسرعة الاستحضار دون تردد أو تعتعة أو وقفات طويلة.",
+      "maxScore": 25
+    },
+    {
+      "num": 2,
+      "domain": "أحكام التجويد ومخارج الحروف (Tajweed Accuracy)",
+      "description": "تطبيق أحكام النون والميم الساكنتين، والمدود بأزمنتها، وإخراج الحروف من مخارجها الصحيحة.",
+      "maxScore": 25
+    },
+    {
+      "num": 3,
+      "domain": "ضبط المتشابهات وفواصل الآيات (Mutashabihat Precision)",
+      "description": "التمييز الدقيق بين الآيات المتطابقة مع السور الأخرى وعدم الخلط بين بدايات ونهايات الآيات.",
+      "maxScore": 25
+    },
+    {
+      "num": 4,
+      "domain": "الوقف والابتداء والوقوف الحسن (Waqf & Ibtida)",
+      "description": "الوقف على المعاني التامة وتجنب الوقف القبيح الذي يغير المعنى القرآني الجليل.",
+      "maxScore": 15
+    },
+    {
+      "num": 5,
+      "domain": "الخشوع وحسن السمت والتأدب مع المصحف (Adab & Decorum)",
+      "description": "التلاوة بوقار وسكينة ومراعاة آداب تلاوة كلام رب العالمين.",
+      "maxScore": 10
+    }
+  ]
+};
+
+    // ================= INTERACTIVE QUIZZES DATA (BRANCH 3 & BRANCH 1) =================
+    const ISLAMIC_BRANCH_QUIZZES = {
+  "aqeedah": [
+    {
+      "id": "aq_1",
+      "questionAr": "ما هو الركن السادس من أركان الإيمان الستة المذكورة في حديث جبريل المشهور؟",
+      "questionEn": "What is the 6th pillar of faith mentioned in the Hadith of Jibreel?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "إيتاء الزكاة المفروضة",
+          "textEn": "Paying Zakat"
+        },
+        {
+          "id": "b",
+          "textAr": "الإيمان بالقضاء والقدر خيره وشره",
+          "textEn": "Belief in Divine Destiny (Qadar) good and bad"
+        },
+        {
+          "id": "c",
+          "textAr": "صيام شهر رمضان المبارك",
+          "textEn": "Fasting Ramadan"
+        },
+        {
+          "id": "d",
+          "textAr": "الجهاد في سبيل الله",
+          "textEn": "Jihad for the sake of Allah"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "أركان الإيمان ستة كما بين النبي ﷺ: أن تؤمن بالله، وملائكته، وكتبه، ورسله، واليوم الآخر، وتؤمن بالقدر خيره وشره (صحيح مسلم #8)."
+    },
+    {
+      "id": "aq_2",
+      "questionAr": "من هو الصحابي الجليل راوي حديث جبريل الطويل في بيان مراتب الدين (الإسلام، الإيمان، الإحسان)؟",
+      "questionEn": "Which companion narrated the renowned Hadith of Jibreel detailing Islam, Iman and Ihsan?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "أبو بكر الصديق رضي الله عنه",
+          "textEn": "Abu Bakr As-Siddiq"
+        },
+        {
+          "id": "b",
+          "textAr": "عمر بن الخطاب رضي الله عنه",
+          "textEn": "Umar ibn Al-Khattab"
+        },
+        {
+          "id": "c",
+          "textAr": "أبو هريرة رضي الله عنه",
+          "textEn": "Abu Hurairah"
+        },
+        {
+          "id": "d",
+          "textAr": "عبد الله بن مسعود رضي الله عنه",
+          "textEn": "Abdullah ibn Masood"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "رواه أمير المؤمنين عمر بن الخطاب رضي الله عنه قائلاً: «بينما نحن عند رسول الله ﷺ ذات يوم إذ طلع علينا رجل شديد بياض الثياب...» (صحيح مسلم)."
+    },
+    {
+      "id": "aq_3",
+      "questionAr": "ما هو الهدي النبوي المأثور عند وقوع مكروه لطرد الحزن ودفع وسوسة كلمة \"لو\"؟",
+      "questionEn": "What is the prophetic guidance when facing hardship to dispel regret and 'if only'?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "اللوم والشكوى للناس",
+          "textEn": "Complaining to people"
+        },
+        {
+          "id": "b",
+          "textAr": "قول: «قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ»",
+          "textEn": "Saying: Qaddar Allahu wa maa shaa faala"
+        },
+        {
+          "id": "c",
+          "textAr": "التمني وتكرار لو فعلت كذا",
+          "textEn": "Repeating if only I did that"
+        },
+        {
+          "id": "d",
+          "textAr": "ترك العمل والقعود",
+          "textEn": "Abandoning work"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "قال النبي ﷺ: «وَإِنْ أَصَابَكَ شَيْءٌ فَلَا تَقُلْ لَوْ أَنِّي فَعَلْتُ كَانَ كَذَا وَكَذَا، وَلَكِنْ قُلْ: قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ، فَإِنَّ لَوْ تَفْتَحُ عَمَلَ الشَّيْطَانِ» (صحيح مسلم 2664)."
+    },
+    {
+      "id": "aq_4",
+      "questionAr": "ما هي أعلى وأشرف مراتب الدين الثلاث بعد مرتبتي الإسلام والإيمان؟",
+      "questionEn": "What is the highest and noblest station among the three tiers of religion?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "مرتبة الاستحسان",
+          "textEn": "Station of preference"
+        },
+        {
+          "id": "b",
+          "textAr": "مرتبة الإحسان: أن تعبد الله كأنك تراه",
+          "textEn": "Station of Ihsan: to worship Allah as if you see Him"
+        },
+        {
+          "id": "c",
+          "textAr": "مرتبة المجادلة والكلام",
+          "textEn": "Station of argumentation"
+        },
+        {
+          "id": "d",
+          "textAr": "مرتبة الشكوى",
+          "textEn": "Station of complaint"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "الإحسان هو قمة الدين وأعلاه: «أَنْ تَعْبُدَ اللَّهَ كَأَنَّكَ تَرَاهُ، فَإِنْ لَمْ تَكُنْ تَرَاهُ فَإِنَّهُ يَرَاكَ»."
+    },
+    {
+      "id": "aq_5",
+      "questionAr": "أي من الكتب السماوية التالية أنزله الله تعالى على نبيه داود عليه السلام؟",
+      "questionEn": "Which divine book did Allah reveal to Prophet Dawud (David) peace be upon him?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "التوراة",
+          "textEn": "The Torah"
+        },
+        {
+          "id": "b",
+          "textAr": "الإنجيل",
+          "textEn": "The Gospel"
+        },
+        {
+          "id": "c",
+          "textAr": "الزبور",
+          "textEn": "The Zabur (Psalms)"
+        },
+        {
+          "id": "d",
+          "textAr": "صحف موسى",
+          "textEn": "Scrolls of Moses"
+        }
+      ],
+      "correctOptionId": "c",
+      "explanationAr": "قال الله تعالى في سورة الإسراء والنساء: ﴿وَآتَيْنَا دَاوُودَ زَبُورًا﴾."
+    }
+  ],
+  "fiqh": [
+    {
+      "id": "fq_1",
+      "questionAr": "ما الفرق الجوهري بين \"شرط الصلاة\" و\"ركن الصلاة\" في الفقه الإسلامي؟",
+      "questionEn": "What is the essential difference between a condition (Shart) and an integral pillar (Rukn) of prayer?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "كلاهما يصح تركه عمداً وسهواً",
+          "textEn": "Both can be skipped"
+        },
+        {
+          "id": "b",
+          "textAr": "الشرط يسبق الصلاة ويستمر معها، والركن جزء من حقيقة الصلاة وماهيتها",
+          "textEn": "Shart precedes prayer and continues; Rukn is an integral part of prayer"
+        },
+        {
+          "id": "c",
+          "textAr": "الركن خارج الصلاة والشرط داخلها",
+          "textEn": "Rukn is outside and Shart is inside"
+        },
+        {
+          "id": "d",
+          "textAr": "لا يوجد أي فرق بينهما",
+          "textEn": "There is no difference"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "الشرط يكون قبل الدخول في الصلاة كالطهارة والوقت وستر العورة، بينما الركن جزء من صلب الصلاة كالركوع والسجود وتبطل الصلاة بتركه عمداً وسهواً إلا بالإتيان به."
+    },
+    {
+      "id": "fq_2",
+      "questionAr": "إذا شك المصلي في صلاته الرباعية هل صلى ثلاثاً أم أربعاً ولم يترجح لديه شيء، فماذا يفعل؟",
+      "questionEn": "If a worshipper doubts whether they prayed 3 or 4 units with no preponderance, what should they do?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "يقطع الصلاة ويعيدها من جديد",
+          "textEn": "Cut the prayer and restart"
+        },
+        {
+          "id": "b",
+          "textAr": "يبني على اليقين وهو الأقل (ثلاثاً) ويتم ثم يسجد للسهو قبل السلام",
+          "textEn": "Build on certainty (the lesser: 3), finish and perform Sujood As-Sahw before Tasleem"
+        },
+        {
+          "id": "c",
+          "textAr": "يسلم فوراً دون ركعة رابعة",
+          "textEn": "Immediately make Tasleem"
+        },
+        {
+          "id": "d",
+          "textAr": "يبني على الأكثر (أربعاً) ولا يسجد للسهو",
+          "textEn": "Build on the greater (4)"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "لقول النبي ﷺ: «إذا شك أحدكم في صلاته فلم يدر كم صلى ثلاثاً أم أربعاً، فليطرح الشك وليبن على ما استيقن ثم يسجد سجدتين قبل أن يسلم» (صحيح مسلم 571)."
+    },
+    {
+      "id": "fq_3",
+      "questionAr": "ما حكم قراءة سورة الفاتحة في كل ركعة للإمام والمنفرد؟",
+      "questionEn": "What is the ruling of reciting Surah Al-Fatihah in every rakah for imam and solitary prayer?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "سنة مستحبة تجبر بسجود السهو",
+          "textEn": "Recommended Sunnah"
+        },
+        {
+          "id": "b",
+          "textAr": "ركن لا تصح الصلاة إلا به",
+          "textEn": "An essential pillar without which prayer is invalid"
+        },
+        {
+          "id": "c",
+          "textAr": "مستحب يثاب فاعله ولا إثم على تاركه",
+          "textEn": "Supererogatory"
+        },
+        {
+          "id": "d",
+          "textAr": "واجب يسقط بالنسيان",
+          "textEn": "Obligation waived by forgetfulness"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "لقول النبي ﷺ في الحديث المتفق عليه: «لَا صَلَاةَ لِمَنْ لَمْ يَقْرَأْ بِفَاتِحَةِ الْكِتَابِ» (صحيح البخاري #756)."
+    },
+    {
+      "id": "fq_4",
+      "questionAr": "أي من الأمور التالية لا ينقض الوضوء شرعاً؟",
+      "questionEn": "Which of the following does NOT invalidate ablution (Wudu)?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "النوم الخفيف المستقر الذي لا يزول معه الإدراك كالنوم جالساً",
+          "textEn": "Light stable dozing sitting down where consciousness remains"
+        },
+        {
+          "id": "b",
+          "textAr": "الخارج من السبيلين من بول أو غائط أو ريح",
+          "textEn": "Discharges from private parts"
+        },
+        {
+          "id": "c",
+          "textAr": "زوال العقل بسكر أو إغماء",
+          "textEn": "Loss of intellect"
+        },
+        {
+          "id": "d",
+          "textAr": "أكل لحم الإبل على الصحيح",
+          "textEn": "Eating camel meat"
+        }
+      ],
+      "correctOptionId": "a",
+      "explanationAr": "النوم الخفيف الذي يشعر صاحبه بمن حوله لا ينقض الوضوء؛ لأن صحابة رسول الله ﷺ كانوا ينتظرون الصلاة حتى تخفق رؤوسهم ثم يصلون ولا يتوضؤون (مسلم)."
+    }
+  ],
+  "seerah": [
+    {
+      "id": "sr_1",
+      "questionAr": "من هو الصحابي الجليل الذي فدى النبي ﷺ وبات في فراشه ليلة الهجرة لرد الأمانات لأهل مكة؟",
+      "questionEn": "Which companion sacrificed himself sleeping in the Prophet bed during Hijrah to return trusts?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "أبو بكر الصديق رضي الله عنه",
+          "textEn": "Abu Bakr As-Siddiq"
+        },
+        {
+          "id": "b",
+          "textAr": "علي بن أبي طالب رضي الله عنه",
+          "textEn": "Ali ibn Abi Talib"
+        },
+        {
+          "id": "c",
+          "textAr": "عمر بن الخطاب رضي الله عنه",
+          "textEn": "Umar ibn Al-Khattab"
+        },
+        {
+          "id": "d",
+          "textAr": "عثمان بن عفان رضي الله عنه",
+          "textEn": "Uthman ibn Affan"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "كلف النبي ﷺ علي بن أبي طالب رضي الله عنه بالمبيت في فراشه متلففاً ببرده الأخضر للتمويه على المشركين ورد أمانات قريش المودعة عنده ﷺ."
+    },
+    {
+      "id": "sr_2",
+      "questionAr": "في أي عام هجري وقعت غزوة بدر الكبرى (يوم الفرقان)؟",
+      "questionEn": "In which Hijri year did the major Battle of Badr (Yawm Al-Furqan) take place?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "العام الأول للهجرة",
+          "textEn": "1st year AH"
+        },
+        {
+          "id": "b",
+          "textAr": "العام الثاني للهجرة (17 رمضان)",
+          "textEn": "2nd year AH (17 Ramadan)"
+        },
+        {
+          "id": "c",
+          "textAr": "العام الثالث للهجرة",
+          "textEn": "3rd year AH"
+        },
+        {
+          "id": "d",
+          "textAr": "العام الخامس للهجرة",
+          "textEn": "5th year AH"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "وقعت غزوة بدر الكبرى في السابع عشر من شهر رمضان في السنة الثانية من الهجرة النبوية الشريفة."
+    },
+    {
+      "id": "sr_3",
+      "questionAr": "ما هو الدليل النبوي على كمال حسن تعامله ﷺ ورفقه بالخدم في بيته؟",
+      "questionEn": "What is the prophetic evidence of his gentle exemplary treatment of household helpers?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "حديث أنس: «خدمت النبي ﷺ عشر سنين فما قال لي أف قط»",
+          "textEn": "Anas said: I served the Prophet 10 years, he never said Uff to me"
+        },
+        {
+          "id": "b",
+          "textAr": "حديث تبسمك في وجه أخيك صدقة",
+          "textEn": "Smiling in your brother face is charity"
+        },
+        {
+          "id": "c",
+          "textAr": "حديث اتقوا النار ولو بشق تمرة",
+          "textEn": "Guard against fire with half a date"
+        },
+        {
+          "id": "d",
+          "textAr": "حديث لا تغضب",
+          "textEn": "Do not become angry"
+        }
+      ],
+      "correctOptionId": "a",
+      "explanationAr": "رواه البخاري ومسلم عن أنس بن مالك رضي الله عنه: «خدمت رسول الله ﷺ عشر سنين، والله ما قال لي: أفاً قط، ولا قال لشيء فعلته: لم فعلت كذا؟ ولا لشيء لم أفعله: ألا فعلت كذا؟»."
+    }
+  ],
+  "tazkiyah": [
+    {
+      "id": "tz_1",
+      "questionAr": "ما هو الضابط النبوي الفاصل بين \"الغيبة\" المحرمة و\"البهتان\"؟",
+      "questionEn": "What is the exact prophetic criterion distinguishing backbiting (Gheebah) from slander (Buhtan)?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "لا فرق بينهما في المعنى واللغة",
+          "textEn": "No difference"
+        },
+        {
+          "id": "b",
+          "textAr": "الغيبة ذكرك أخاك بما يكره وهو فيه، والبهتان ذكرك ما ليس فيه كذباً",
+          "textEn": "Gheebah is mentioning what he dislikes while true; Buhtan is falsely stating what is not in him"
+        },
+        {
+          "id": "c",
+          "textAr": "البهتان يكون أمام الشخص والغيبة خلفه",
+          "textEn": "Buhtan is to his face and Gheebah behind him"
+        },
+        {
+          "id": "d",
+          "textAr": "الغيبة بالقلب والبهتان باللسان",
+          "textEn": "Gheebah is heart and Buhtan tongue"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "قال النبي ﷺ: «قيل: أفرأيت إن كان في أخي ما أقول؟ قال: إن كان فيه ما تقول فقد اغتبته، وإن لم يكن فيه فقد بهته» (صحيح مسلم #2584)."
+    },
+    {
+      "id": "tz_2",
+      "questionAr": "أي الأعمال الصالحة الآتية يصل ثوابها وأجرها للوالدين بعد وفاتهما بنص الحديث الشريف؟",
+      "questionEn": "Which of the following actions reaches parents with reward after their death per the Hadith?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "كثرة البكاء والنياحة",
+          "textEn": "Wailing and lamenting"
+        },
+        {
+          "id": "b",
+          "textAr": "الولد الصالح الذي يدعو لهما، والصدقة الجارية عنهما",
+          "textEn": "Righteous child supplicating for them, and ongoing charity"
+        },
+        {
+          "id": "c",
+          "textAr": "ترك العمل والقعود في البيت",
+          "textEn": "Abandoning work"
+        },
+        {
+          "id": "d",
+          "textAr": "استئجار من يقرأ القرآن بأجر",
+          "textEn": "Hiring paid reciters"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "قال النبي ﷺ: «إِذَا مَاتَ الْإِنْسَانُ انْقَطَعَ عَنْهُ عَمَلُهُ إِلَّا مِنْ ثَلَاثَةٍ: إِلَّا مِنْ صَدَقَةٍ جَارِيَةٍ، أَوْ عِلْمٍ يُنْتَفَعُ بِهِ، أَوْ وَلَدٍ صَالِحٍ يَدْعُو لَهُ» (صحيح مسلم 1631)."
+    },
+    {
+      "id": "tz_3",
+      "questionAr": "تحويل العادات اليومية (كالنوم والرياضة والأكل) إلى عبادات مأجورة يرتكز بالأساس على:",
+      "questionEn": "Transforming daily habits (sleep, exercise, eating) into rewarded acts of worship relies on:",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "كثرة التحدث عنها أمام الناس",
+          "textEn": "Talking about them in public"
+        },
+        {
+          "id": "b",
+          "textAr": "استحضار النية الصالحة واحتساب الأجر للتقوي على طاعة الله",
+          "textEn": "Cultivating sincere intention and seeking Allah pleasure to strengthen for worship"
+        },
+        {
+          "id": "c",
+          "textAr": "طول مدتها وضخامتها فقط",
+          "textEn": "Their long duration"
+        },
+        {
+          "id": "d",
+          "textAr": "إنفاق المال عليها",
+          "textEn": "Spending money on them"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "قال معاذ بن جبل رضي الله عنه: «أَمَّا أَنَا فَأَنَامُ وَأَقُومُ، فَأَحْتَسِبُ نَوْمَتِي كَمَا أَحْتَسِبُ قَوْمَتِي» (صحيح البخاري #4344)؛ فالنية الصالحة تقلب المباحات إلى طاعات."
+    }
+  ]
+};
+
+    // ================= BRANCH 1: HIFZ MUTASHABIHAT QUIZ (DATA) =================
+    const HIFZ_BRANCH_QUIZ = [
+  {
+    "id": "hifz_1",
+    "questionAr": "في قوله تعالى في سورة الملك: ﴿ٱلَّذِى خَلَقَ ٱلْمَوْتَ وَٱلْحَيَوٰةَ لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًۭا ۚ وَهُوَ ٱلْعَزِيزُ ...﴾ ما هو الختام الصحيح؟",
+    "questionEn": "In Surah Al-Mulk: (Who created death and life to test which of you is best in deed - and He is the Exalted in Might, ...)?",
+    "options": [
+      {
+        "id": "a",
+        "textAr": "ٱلْغَفُورُ (معرّفة بأل)",
+        "textEn": "Al-Ghafoor (with definite article Al)"
+      },
+      {
+        "id": "b",
+        "textAr": "عَزِيزٌ غَفُورٌ (منكّرة)",
+        "textEn": "Azeezun Ghafoor (indefinite)"
+      },
+      {
+        "id": "c",
+        "textAr": "ٱلرَّحِيمُ",
+        "textEn": "Ar-Raheem"
+      },
+      {
+        "id": "d",
+        "textAr": "ٱلْحَكِيمُ",
+        "textEn": "Al-Hakeem"
+      }
+    ],
+    "correctOptionId": "a",
+    "explanationAr": "في سورة الملك الآية 2: ﴿وَهُوَ ٱلْعَزِيزُ ٱلْغَفُورُ﴾ بالتعريف، بينما في سورة فاطر (الآية 28): ﴿إِنَّ ٱللَّهَ عَزِيزٌ غَفُورٌ﴾ بالتنكير."
+  },
+  {
+    "id": "hifz_2",
+    "questionAr": "في الآية 5 من سورة الملك: ﴿وَلَقَدْ زَيَّنَّا ٱلسَّمَآءَ ٱلدُّنْيَا بِمَصَـٰبِيحَ وَجَعَلْنَـٰهَا رُجُومًۭا لِّلشَّيَـٰطِينِ وَأَعْتَدْنَا لَهُمْ...﴾:",
+    "questionEn": "In Ayah 5 of Surah Al-Mulk: (...and We have prepared for them...) what follows?",
+    "options": [
+      {
+        "id": "a",
+        "textAr": "عَذَابَ ٱلسَّعِيرِ",
+        "textEn": "Adhaab As-Saeer"
+      },
+      {
+        "id": "b",
+        "textAr": "سَعِيرًا (دون كلمة عذاب)",
+        "textEn": "Saeera (without the word Adhaab)"
+      },
+      {
+        "id": "c",
+        "textAr": "عَذَابَ ٱلْجَحِيمِ",
+        "textEn": "Adhaab Al-Jaheem"
+      },
+      {
+        "id": "d",
+        "textAr": "عَذَابَ ٱلْحَرِيقِ",
+        "textEn": "Adhaab Al-Hareeq"
+      }
+    ],
+    "correctOptionId": "a",
+    "explanationAr": "في الملك أضيفت كلمة ﴿عَذَابَ﴾: ﴿وَأَعْتَدْنَا لَهُمْ عَذَابَ ٱلسَّعِيرِ﴾، بينما في سورة الفرقان (11): ﴿وَأَعْتَدْنَا لِمَن كَذَّبَ بِٱلسَّاعَةِ سَعِيرًا﴾ دون كلمة عذاب."
+  },
+  {
+    "id": "hifz_3",
+    "questionAr": "بداية الوجه الثاني من سورة الملك (الآية 12) تبدأ بقوله تعالى:",
+    "questionEn": "The beginning of the second page of Surah Al-Mulk (Ayah 12) starts with:",
+    "options": [
+      {
+        "id": "a",
+        "textAr": "﴿إِنَّ ٱلَّذِينَ يَخْشَوْنَ رَبَّهُم بِٱلْغَيْبِ لَهُم مَّغْفِرَةٌ وَأَجْرٌ كَبِيرٌ﴾",
+        "textEn": "Inna allatheena yakhshawna rabbahum bil-ghaybi..."
+      },
+      {
+        "id": "b",
+        "textAr": "﴿إِنَّ ٱلَّذِينَ كَفَرُوا لَهُمْ عَذَابٌ شَدِيدٌ﴾",
+        "textEn": "Inna allatheena kafaroo..."
+      },
+      {
+        "id": "c",
+        "textAr": "﴿أَفَمَن يَمْشِى مُكِبًّا عَلَىٰ وَجْهِهِۦٓ أَهْدَىٰ﴾",
+        "textEn": "Afaman yamshee mukibban..."
+      },
+      {
+        "id": "d",
+        "textAr": "﴿قُلْ هُوَ ٱلَّذِىٓ أَنشَأَكُمْ وَجَعَلَ لَكُمُ ٱلسَّمْعَ﴾",
+        "textEn": "Qul huwa allathee anshaakum..."
+      }
+    ],
+    "correctOptionId": "a",
+    "explanationAr": "الآية 12 هي مطلع الوجه 563 في مصحف المدينة المنورة: ﴿إِنَّ ٱلَّذِينَ يَخْشَوْنَ رَبَّهُم بِٱلْغَيْبِ لَهُم مَّغْفِرَةٌ وَأَجْرٌ كَبِيرٌ﴾."
+  },
+  {
+    "id": "hifz_4",
+    "questionAr": "خاتمة سورة الملك الشريفة (الآية 30) تختم بلفظ:",
+    "questionEn": "The final word of Surah Al-Mulk (Ayah 30) concludes with:",
+    "options": [
+      {
+        "id": "a",
+        "textAr": "مَّعِينٍۢ",
+        "textEn": "Maeen"
+      },
+      {
+        "id": "b",
+        "textAr": "فُرَاتٍ",
+        "textEn": "Furaat"
+      },
+      {
+        "id": "c",
+        "textAr": "طَهُورٍ",
+        "textEn": "Tahoor"
+      },
+      {
+        "id": "d",
+        "textAr": "غَدَقٍ",
+        "textEn": "Ghadaq"
+      }
+    ],
+    "correctOptionId": "a",
+    "explanationAr": "تختم سورة الملك بقوله تعالى: ﴿قُلْ أَرَءَيْتُمْ إِنْ أَصْبَحَ مَآؤُكُمْ غَوْرًۭا فَمَن يَأْتِيكُم بِمَآءٍۢ مَّعِينٍۭ﴾، ويستحب أن يقال بعدها: الله رب العالمين."
+  }
+];
+    
+    const PRELOADED_HIFZ_PASSAGES = [
+      {
+        id: 'mulk_page_562',
+        surahAr: 'سورة الملك',
+        surahEn: 'Surah Al-Mulk',
+        pageNumber: 562,
+        ayahRange: '1–12 (الوجه الأول كاملاً)',
+        ayahs: [
+          {
+                    "num": 1,
+                    "text": "تَبَٰرَكَ ٱلَّذِى بِيَدِهِ ٱلْمُلْكُ وَهُوَ عَلَىٰ كُلِّ شَىْءٍۢ قَدِيرٌ"
+          },
+          {
+                    "num": 2,
+                    "text": "ٱلَّذِى خَلَقَ ٱلْمَوْتَ وَٱلْحَيَوٰةَ لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًۭا ۚ وَهُوَ ٱلْعَزِيزُ ٱلْغَفُورُ"
+          },
+          {
+                    "num": 3,
+                    "text": "ٱلَّذِى خَلَقَ سَبْعَ سَمَٰوَٰتٍۢ طِبَاقًۭا ۖ مَّا تَرَىٰ فِى خَلْقِ ٱلرَّحْمَٰنِ مِن تَفَٰوُتٍۢ ۖ فَٱرْجِعِ ٱلْبَصَرَ هَلْ تَرَىٰ مِن فُطُورٍۢ"
+          },
+          {
+                    "num": 4,
+                    "text": "ثُمَّ ٱرْجِعِ ٱلْبَصَرَ كَرَّتَيْنِ يَنقَلِبْ إِلَيْكَ ٱلْبَصَرُ خَاسِئًۭا وَهُوَ حَسِيرٌۭ"
+          },
+          {
+                    "num": 5,
+                    "text": "وَلَقَدْ زَيَّنَّا ٱلسَّمَآءَ ٱلدُّنْيَا بِمَصَٰبِيحَ وَجَعَلْنَٰهَا رُجُومًۭا لِّلشَّيَٰطِينِ ۖ وَأَعْتَدْنَا لَهُمْ عَذَابَ ٱلسَّعِيرِ"
+          },
+          {
+                    "num": 6,
+                    "text": "وَلِلَّذِينَ كَفَرُوا۟ بِرَبِّهِمْ عَذَابُ جَهَنَّمَ ۖ وَبِئْسَ ٱلْمَصِيرُ"
+          },
+          {
+                    "num": 7,
+                    "text": "إِذَآ أُلْقُوا۟ فِيهَا سَمِعُوا۟ لَهَا شَهِيقًۭا وَهِىَ تَفُورُ"
+          },
+          {
+                    "num": 8,
+                    "text": "تَكَادُ تَمَيَّزُ مِنَ ٱلْغَيْظِ ۖ كُلَّمَآ أُلْقِىَ فِيهَا فَوْجٌۭ سَأَلَهُمْ خَزَنَتُهَآ أَلَمْ يَأْتِكُمْ نَذِيرٌۭ"
+          },
+          {
+                    "num": 9,
+                    "text": "قَالُوا۟ بَلَىٰ قَدْ جَآءَنَا نَذِيرٌۭ فَكَذَّبْنَا وَقُلْنَا مَا نَزَّلَ ٱللَّهُ مِن شَىْءٍ إِنْ أَنتُمْ إِلَّا فِى ضَلَٰلٍۢ كَبِيرٍۢ"
+          },
+          {
+                    "num": 10,
+                    "text": "وَقَالُوا۟ لَوْ كُنَّا نَسْمَعُ أَوْ نَعْقِلُ مَا كُنَّا فِىٓ أَصْحَٰبِ ٱلسَّعِيرِ"
+          },
+          {
+                    "num": 11,
+                    "text": "فَٱعْتَرَفُوا۟ بِذَنۢبِهِمْ فَسُحْقًۭا لِّأَصْحَٰبِ ٱلسَّعِيرِ"
+          },
+          {
+                    "num": 12,
+                    "text": "إِنَّ ٱلَّذِينَ يَخْشَوْنَ رَبَّهُم بِٱلْغَيْبِ لَهُم مَّغْفِرَةٌۭ وَأَجْرٌۭ كَبِيرٌۭ"
+          }
+],
+        mutashabihat: [
+          {
+            ayah: 'الَّذِي خَلَقَ الْمَوْتَ وَالْحَيَاةَ ... وَهُوَ الْعَزِيزُ الْغَفُورُ (الملك: 2)',
+            similar: '... إِنَّمَا يَخْشَى اللَّهَ مِنْ عِبَادِهِ الْعُلَمَاءُ إِنَّ اللَّهَ عَزِيزٌ غَفُورٌ (فاطر: 28)',
+            difference: 'في الملك معرّفة باللام (الْعَزِيزُ الْغَفُورُ)، وفي فاطر منكرة (عَزِيزٌ غَفُورٌ).'
+          },
+          {
+            ayah: 'وَأَعْتَدْنَا لَهُمْ عَذَابَ السَّعِيرِ (الملك: 5)',
+            similar: '... وَأَعْتَدْنَا لِمَن كَذَّبَ بِالسَّاعَةِ سَعِيرًا (الفرقان: 11)',
+            difference: 'في الملك أضيفت كلمة (عذاب) قبل (السعير) لبيان العقوبة المعدة للشياطين.'
+          }
+        ]
+      },
+      {
+        id: 'mulk_page_563',
+        surahAr: 'سورة الملك',
+        surahEn: 'Surah Al-Mulk',
+        pageNumber: 563,
+        ayahRange: '13–26 (الوجه الثاني كاملاً)',
+        ayahs: [
+          {
+                    "num": 13,
+                    "text": "وَأَسِرُّوا۟ قَوْلَكُمْ أَوِ ٱجْهَرُوا۟ بِهِۦٓ ۖ إِنَّهُۥ عَلِيمٌۢ بِذَاتِ ٱلصُّدُورِ"
+          },
+          {
+                    "num": 14,
+                    "text": "أَلَا يَعْلَمُ مَنْ خَلَقَ وَهُوَ ٱللَّطِيفُ ٱلْخَبِيرُ"
+          },
+          {
+                    "num": 15,
+                    "text": "هُوَ ٱلَّذِى جَعَلَ لَكُمُ ٱلْأَرْضَ ذَلُولًۭا فَٱمْشُوا۟ فِى مَنَاكِبِهَا وَكُلُوا۟ مِن رِّزْقِهِۦ ۖ وَإِلَيْهِ ٱلنُّشُورُ"
+          },
+          {
+                    "num": 16,
+                    "text": "ءَأَمِنتُم مَّن فِى ٱلسَّمَآءِ أَن يَخْسِفَ بِكُمُ ٱلْأَرْضَ فَإِذَا هِىَ تَمُورُ"
+          },
+          {
+                    "num": 17,
+                    "text": "أَمْ أَمِنتُم مَّن فِى ٱلسَّمَآءِ أَن يُرْسِلَ عَلَيْكُمْ حَاصِبًۭا ۖ فَسَتَعْلَمُونَ كَيْفَ نَذِيرِ"
+          },
+          {
+                    "num": 18,
+                    "text": "وَلَقَدْ كَذَّبَ ٱلَّذِينَ مِن قَبْلِهِمْ فَكَيْفَ كَانَ نَكِيرِ"
+          },
+          {
+                    "num": 19,
+                    "text": "أَوَلَمْ يَرَوْا۟ إِلَى ٱلطَّيْرِ فَوْقَهُمْ صَٰٓفَّٰتٍۢ وَيَقْبِضْنَ ۚ مَا يُمْسِكُهُنَّ إِلَّا ٱلرَّحْمَٰنُ ۚ إِنَّهُۥ بِكُلِّ شَىْءٍۭ بَصِيرٌ"
+          },
+          {
+                    "num": 20,
+                    "text": "أَمَّنْ هَٰذَا ٱلَّذِى هُوَ جُندٌۭ لَّكُمْ يَنصُرُكُم مِّن دُونِ ٱلرَّحْمَٰنِ ۚ إِنِ ٱلْكَٰفِرُونَ إِلَّا فِى غُرُورٍ"
+          },
+          {
+                    "num": 21,
+                    "text": "أَمَّنْ هَٰذَا ٱلَّذِى يَرْزُقُكُمْ إِنْ أَمْسَكَ رِزْقَهُۥ ۚ بَل لَّجُّوا۟ فِى عُتُوٍّۢ وَنُفُورٍ"
+          },
+          {
+                    "num": 22,
+                    "text": "أَفَمَن يَمْشِى مُكِبًّا عَلَىٰ وَجْهِهِۦٓ أَهْدَىٰٓ أَمَّن يَمْشِى سَوِيًّا عَلَىٰ صِرَٰطٍۢ مُّسْتَقِيمٍۢ"
+          },
+          {
+                    "num": 23,
+                    "text": "قُلْ هُوَ ٱلَّذِىٓ أَنشَأَكُمْ وَجَعَلَ لَكُمُ ٱلسَّمْعَ وَٱلْأَبْصَٰرَ وَٱلْأَفْـِٔدَةَ ۖ قَلِيلًۭا مَّا تَشْكُرُونَ"
+          },
+          {
+                    "num": 24,
+                    "text": "قُلْ هُوَ ٱلَّذِى ذَرَأَكُمْ فِى ٱلْأَرْضِ وَإِلَيْهِ تُحْشَرُونَ"
+          },
+          {
+                    "num": 25,
+                    "text": "وَيَقُولُونَ مَتَىٰ هَٰذَا ٱلْوَعْدُ إِن كُنتُمْ صَٰدِقِينَ"
+          },
+          {
+                    "num": 26,
+                    "text": "قُلْ إِنَّمَا ٱلْعِلْمُ عِندَ ٱللَّهِ وَإِنَّمَآ أَنَا۠ نَذِيرٌۭ مُّبِينٌۭ"
+          }
+],
+        mutashabihat: [
+          {
+            ayah: 'وَأَسِرُّوا قَوْلَكُمْ أَوِ اجْهَرُوا بِهِ إِنَّهُ عَلِيمٌ بِذَاتِ الصُّدُورِ (الملك: 13)',
+            similar: 'وَإِن تَجْهَرْ بِالْقَوْلِ فَإِنَّهُ يَعْلَمُ السِّرَّ وَأَخْفَى (طه: 7)',
+            difference: 'في الملك تقديم الإسرار على الجهر، وفي طه ذكر الجهر أولاً.'
+          }
+        ]
+      },
+      {
+        id: 'mulk_page_564',
+        surahAr: 'سورة الملك',
+        surahEn: 'Surah Al-Mulk',
+        pageNumber: 564,
+        ayahRange: '27–30 (الوجه الثالث ختام السورة)',
+        ayahs: [
+          {
+                    "num": 27,
+                    "text": "فَلَمَّا رَأَوْهُ زُلْفَةًۭ سِيٓـَٔتْ وُجُوهُ ٱلَّذِينَ كَفَرُوا۟ وَقِيلَ هَٰذَا ٱلَّذِى كُنتُم بِهِۦ تَدَّعُونَ"
+          },
+          {
+                    "num": 28,
+                    "text": "قُلْ أَرَءَيْتُمْ إِنْ أَهْلَكَنِىَ ٱللَّهُ وَمَن مَّعِىَ أَوْ رَحِمَنَا فَمَن يُجِيرُ ٱلْكَٰفِرِينَ مِنْ عَذَابٍ أَلِيمٍۢ"
+          },
+          {
+                    "num": 29,
+                    "text": "قُلْ هُوَ ٱلرَّحْمَٰنُ ءَامَنَّا بِهِۦ وَعَلَيْهِ تَوَكَّلْنَا ۖ فَسَتَعْلَمُونَ مَنْ هُوَ فِى ضَلَٰلٍۢ مُّبِينٍۢ"
+          },
+          {
+                    "num": 30,
+                    "text": "قُلْ أَرَءَيْتُمْ إِنْ أَصْبَحَ مَآؤُكُمْ غَوْرًۭا فَمَن يَأْتِيكُم بِمَآءٍۢ مَّعِينٍۭ"
+          }
+],
+        mutashabihat: []
+      }
+    ];
+
+    // Main Application Component
+    function App() {
+      // Language & Direction state
+      const [lang, setLang] = useState('ar');
+      const isRtl = lang === 'ar';
+      
+      // 3-Level Simple Ergonomic Font Scale: صغير (14px) | متوسط (16px - الافتراضي) | كبير (18px - مريح لكبار السن)
+      const FONT_SIZE_LEVELS = {
+        small: { px: 14, labelAr: 'صغير', labelEn: 'Small', tipAr: 'خط صغير مدمج', tipEn: 'Compact font (14px)' },
+        medium: { px: 16, labelAr: 'متوسط', labelEn: 'Medium', tipAr: 'خط متوسط متزن (الافتراضي)', tipEn: 'Balanced font (Default 16px)' },
+        large: { px: 18, labelAr: 'كبير', labelEn: 'Large', tipAr: 'خط كبير ومريح للعين وكبار السن بدون الإخلال بتوازن الصفحة', tipEn: 'Comfortable large font for seniors (18px)' }
+      };
+      const [fontSizeLevel, setFontSizeLevel] = useState(localStorage.getItem('mishkah_font_level') || 'medium');
+      
+      // Font Family Switcher (Cairo, Amiri, Tajawal, Almarai, Noto Naskh)
+      const [appFont, setAppFont] = useState(localStorage.getItem('mishkah_font') || 'cairo');
+
+      const FONT_MAP = {
+        cairo: { nameAr: 'خط كايرو', nameEn: 'Cairo', css: "'Cairo', sans-serif" },
+        amiri: { nameAr: 'خط أميري', nameEn: 'Amiri', css: "'Amiri', serif" },
+        tajawal: { nameAr: 'خط تجوال', nameEn: 'Tajawal', css: "'Tajawal', sans-serif" },
+        almarai: { nameAr: 'خط المراعي', nameEn: 'Almarai', css: "'Almarai', sans-serif" },
+        naskh: { nameAr: 'خط النسخ', nameEn: 'Noto Naskh', css: "'Noto Naskh Arabic', serif" }
+      };
+
+      useEffect(() => {
+        const currentLevel = FONT_SIZE_LEVELS[fontSizeLevel] || FONT_SIZE_LEVELS.medium;
+        document.documentElement.style.setProperty('--lesson-content-font-size', `${currentLevel.px}px`);
+        document.documentElement.style.fontSize = '16px';
+        document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+        document.documentElement.lang = lang;
+        const fontConfig = FONT_MAP[appFont] || FONT_MAP.cairo;
+        document.documentElement.style.setProperty('--active-app-font', fontConfig.css);
+        document.body.style.fontFamily = fontConfig.css;
+        localStorage.setItem('mishkah_font', appFont);
+        localStorage.setItem('mishkah_font_level', fontSizeLevel);
+      }, [fontSizeLevel, isRtl, lang, appFont]);
+
+      // Active View
+      const [activeTab, setActiveTab] = useState('dashboard');
+
+      // ================= BRANCH 1: HIFZ & RECITATION STATE =================
+      const [hifzPassageId, setHifzPassageId] = useState('mulk_page_562');
+      const [hifzAyahs, setHifzAyahs] = useState(PRELOADED_HIFZ_PASSAGES[0].ayahs);
+      const [hifzMutashabihat, setHifzMutashabihat] = useState(PRELOADED_HIFZ_PASSAGES[0].mutashabihat);
+      const [hifzSurahName, setHifzSurahName] = useState(PRELOADED_HIFZ_PASSAGES[0].surahAr);
+      const [hifzAyahRange, setHifzAyahRange] = useState(PRELOADED_HIFZ_PASSAGES[0].ayahRange);
+      
+      // Teacher Live Masking Controls
+      const [quranFontSize, setQuranFontSize] = useState('medium'); // 'small', 'medium', 'large'
+      const [isEndingsMasked, setIsEndingsMasked] = useState(false);
+      const [mushafOverlayMode, setMushafOverlayMode] = useState('none'); // 'none', 'ruler', 'mask_bottom', 'mask_top', 'spotlight'
+      const [activeRulerLine, setActiveRulerLine] = useState(1); // 1 to 15
+      
+      // Passage-Based Testing System (Start, Middle, End, Custom)
+      const [passageTestSection, setPassageTestSection] = useState('none'); // 'none', 'start', 'middle', 'end', 'custom'
+      const [passageMaskedAyahs, setPassageMaskedAyahs] = useState(new Set());
+      const [passageStatus, setPassageStatus] = useState('reciting'); // 'reciting', 'correct', 'error_retry', 'revealed_for_review'
+      const [passageRetryCount, setPassageRetryCount] = useState(0);
+      const [isStartersMasked, setIsStartersMasked] = useState(false);
+      const [isDivineNamesMasked, setIsDivineNamesMasked] = useState(false);
+      const [isAlternatingMasked, setIsAlternatingMasked] = useState(false);
+      const [isReverseOrder, setIsReverseOrder] = useState(false);
+      const [isFullMasked, setIsFullMasked] = useState(false);
+      const [revealedAyahSet, setRevealedAyahSet] = useState(new Set([1]));
+      const [customMaskedWords, setCustomMaskedWords] = useState(new Set());
+      
+      // Repetition Loop State
+      const [repeatTarget, setRepeatTarget] = useState(3);
+      const [repeatCount, setRepeatCount] = useState(0);
+      const [activeRepeatAyah, setActiveRepeatAyah] = useState(1);
+      
+      // Mutashabihat live search
+      const [mutashabihSearch, setMutashabihSearch] = useState('');
+      
+      // Custom Text Input Box
+      // Mutashabihat interactive linking workbench states
+      const [isAddMutaOpen, setIsAddMutaOpen] = useState(false);
+      const [mutaCurrentAyahNum, setMutaCurrentAyahNum] = useState(1);
+      const [mutaTargetSurahId, setMutaTargetSurahId] = useState(35); // Default: Fatir
+      const [mutaTargetAyahNum, setMutaTargetAyahNum] = useState(28);
+      const [mutaTargetText, setMutaTargetText] = useState('');
+      const [mutaSearchQuery, setMutaSearchQuery] = useState('');
+      const [mutaSearchResults, setMutaSearchResults] = useState([]);
+      const [isSearchingMuta, setIsSearchingMuta] = useState(false);
+      const [mutaGuideNote, setMutaGuideNote] = useState('');
+      const [hifzViewMode, setHifzViewMode] = useState('mushaf_page'); // 'mushaf_page' | 'interactive_test'
+      const [mushafPageNumber, setMushafPageNumber] = useState(562); // Default: Surah Al-Mulk Page 562
+      const [mushafCurrentSurahId, setMushafCurrentSurahId] = useState(67);
+      const [selectedSurahNumber, setSelectedSurahNumber] = useState(67);
+      const [selectedAyahFrom, setSelectedAyahFrom] = useState(1);
+      const [selectedAyahTo, setSelectedAyahTo] = useState(5);
+      const [isFetchingQuran, setIsFetchingQuran] = useState(false);
+      const [showCustomInput, setShowCustomInput] = useState(false);
+
+      // Helper function to switch passages
+      // Unified Synchronized Mushaf & Testing Board Navigator (All 604 Pages)
+      async function handleNavigateMushafPage(targetPage, switchMode = null) {
+        const p = Math.max(1, Math.min(604, parseInt(targetPage) || 1));
+        setMushafPageNumber(p);
+        const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage);
+        if (sMatch) setMushafCurrentSurahId(sMatch.id);
+        
+        if (switchMode) setHifzViewMode(switchMode);
+
+        // 1. Check if in preloaded passages
+        const preloaded = PRELOADED_HIFZ_PASSAGES.find(item => item.pageNumber === p);
+        if (preloaded) {
+          setHifzPassageId(preloaded.id);
+          setHifzAyahs(preloaded.ayahs);
+          setHifzMutashabihat(preloaded.mutashabihat || []);
+          setHifzSurahName(preloaded.surahAr);
+          setHifzAyahRange(preloaded.ayahRange);
+          setPassageTestSection('none');
+          setPassageMaskedAyahs(new Set());
+          setCustomMaskedWords(new Set());
+          setRevealedAyahSet(new Set([preloaded.ayahs[0]?.num || 1]));
+          showToast(isRtl ? 'عرض ' + preloaded.surahAr + ' (' + preloaded.ayahRange + ') ۞' : 'Loaded ' + preloaded.surahEn);
+          return;
+        }
+
+        // 2. Check localStorage cache
+        const cacheKey = 'mishkah_mushaf_page_' + p;
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            if (parsed && parsed.ayahs && parsed.ayahs.length > 0) {
+              setHifzAyahs(parsed.ayahs);
+              setHifzSurahName(parsed.surahName);
+              setHifzAyahRange(parsed.ayahRange);
+              setHifzMutashabihat(parsed.mutashabihat || []);
+              setHifzPassageId('page_' + p);
+              setPassageTestSection('none');
+              setPassageMaskedAyahs(new Set());
+              setCustomMaskedWords(new Set());
+              setRevealedAyahSet(new Set([parsed.ayahs[0]?.num || 1]));
+              showToast(isRtl ? 'عرض ' + parsed.surahName + ' (' + parsed.ayahRange + ') ۞' : 'Loaded page ' + p);
+              return;
+            }
+          } catch(e) {}
+        }
+
+        // 3. Fetch from verified Quran API
+        setIsFetchingQuran(true);
+        try {
+          const res = await fetch('https://api.alquran.cloud/v1/page/' + p + '/quran-uthmani');
+          if (!res.ok) throw new Error('API returned ' + res.status);
+          const json = await res.json();
+          const rawAyahs = json.data?.ayahs || [];
+          if (rawAyahs.length === 0) throw new Error('No ayahs found');
+
+          const basmalah = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ';
+          const mappedAyahs = rawAyahs.map(a => {
+            let t = a.text || '';
+            if (a.numberInSurah === 1 && a.surah.number !== 1 && a.surah.number !== 9 && t.startsWith(basmalah)) {
+              t = t.substring(basmalah.length);
+            }
+            return {
+              num: a.numberInSurah,
+              text: t,
+              surahName: a.surah.name,
+              surahNumber: a.surah.number
+            };
+          });
+
+          const primarySurah = rawAyahs[0]?.surah?.name || 'القرآن الكريم';
+          const firstAyah = rawAyahs[0]?.numberInSurah || 1;
+          const lastAyah = rawAyahs[rawAyahs.length - 1]?.numberInSurah || rawAyahs.length;
+          const rangeStr = firstAyah + '–' + lastAyah + ' (صفحة ' + p + ')';
+
+          const pageData = {
+            ayahs: mappedAyahs,
+            surahName: primarySurah.startsWith('سُورَةُ') ? primarySurah : 'سورة ' + primarySurah,
+            ayahRange: rangeStr,
+            mutashabihat: []
+          };
+
+          try { localStorage.setItem(cacheKey, JSON.stringify(pageData)); } catch(e) {}
+
+          setHifzAyahs(mappedAyahs);
+          setHifzSurahName(pageData.surahName);
+          setHifzAyahRange(rangeStr);
+          setHifzMutashabihat([]);
+          setHifzPassageId('page_' + p);
+          setPassageTestSection('none');
+          setPassageMaskedAyahs(new Set());
+          setCustomMaskedWords(new Set());
+          setRevealedAyahSet(new Set([mappedAyahs[0]?.num || 1]));
+          showToast(isRtl ? 'تم تحميل ' + pageData.surahName + ' (صفحة ' + p + ') بالرسم العثماني المعتمد ۞' : 'Loaded page ' + p + ' in Uthmani Script ۞');
+        } catch(err) {
+          console.warn('Could not fetch page ' + p + ':', err);
+          showToast(isRtl ? 'تعذر جلب نص الصفحة، يُرجى التحقق من الاتصال' : 'Could not fetch page text');
+        } finally {
+          setIsFetchingQuran(false);
+        }
+      }
+      function handleSelectHifzPassage(pId) {
+        const p = PRELOADED_HIFZ_PASSAGES.find(item => item.id === pId);
+        if (p) {
+          setHifzPassageId(p.id);
+          setHifzAyahs(p.ayahs);
+          setHifzMutashabihat(p.mutashabihat);
+          setHifzSurahName(p.surahAr);
+          setHifzAyahRange(p.ayahRange);
+          setIsEndingsMasked(false);
+          setIsFullMasked(false);
+          setRevealedAyahSet(new Set([1]));
+          setCustomMaskedWords(new Set());
+          setRepeatCount(0);
+          setActiveRepeatAyah(1);
+          showToast(isRtl ? 'تم تحميل ' + p.surahAr + ' (' + p.ayahRange + ') في لوحة التحفيظ ✨' : 'Loaded ' + p.surahEn + ' in Hifz Board ✨');
+        }
+      }
+
+      // Search Quran for similar verses without diacritics
+      async function handleSearchMutaAyahs() {
+        if (!mutaSearchQuery.trim()) return;
+        setIsSearchingMuta(true);
+        try {
+          const res = await fetch('https://api.alquran.cloud/v1/search/' + encodeURIComponent(mutaSearchQuery.trim()) + '/all/quran-simple-clean');
+          if (!res.ok) throw new Error('Search failed');
+          const data = await res.json();
+          const matches = data.data?.matches || [];
+          setMutaSearchResults(matches.slice(0, 8)); // Top 8 matches
+          if (matches.length === 0) {
+            showToast(isRtl ? 'لم يتم العثور على مواضع مطابقة في القرآن' : 'No matching ayahs found');
+          }
+        } catch(e) {
+          console.error('Muta search error:', e);
+          showToast(isRtl ? 'تعذر البحث، يرجى التأكد من الاتصال' : 'Search failed, check connection');
+        } finally {
+          setIsSearchingMuta(false);
+        }
+      }
+
+      // Select a search match and fetch its exact Uthmani text
+      async function handleSelectMutaMatch(match) {
+        setMutaTargetSurahId(match.surah.number);
+        setMutaTargetAyahNum(match.numberInSurah);
+        try {
+          const res = await fetch('https://api.alquran.cloud/v1/ayah/' + match.number + '/quran-uthmani');
+          const data = await res.json();
+          setMutaTargetText(data.data?.text || match.text);
+        } catch(e) {
+          setMutaTargetText(match.text);
+        }
+        setMutaSearchResults([]);
+      }
+
+      // Fetch target ayah text when manual surah/ayah number changed
+      async function handleFetchTargetMutaAyah(surahId, ayahNum) {
+        try {
+          const res = await fetch('https://api.alquran.cloud/v1/ayah/' + surahId + ':' + ayahNum + '/quran-uthmani');
+          const data = await res.json();
+          if (data.data?.text) {
+            setMutaTargetText(data.data.text);
+          }
+        } catch(e) {
+          console.error(e);
+        }
+      }
+
+      // Save new Mutashabiha into current lesson
+      function handleSaveNewMutashabiha() {
+        const curAyah = hifzAyahs.find(a => a.num === mutaCurrentAyahNum) || hifzAyahs[0];
+        const targetSurahObj = ALL_QURAN_SURAHS.find(s => s.id === mutaTargetSurahId) || ALL_QURAN_SURAHS[0];
+        
+        const currentText = (curAyah ? curAyah.text : '') + ' (' + hifzSurahName + ': ' + mutaCurrentAyahNum + ')';
+        const targetText = (mutaTargetText || 'آية ' + mutaTargetAyahNum) + ' (سورة ' + targetSurahObj.name + ': ' + mutaTargetAyahNum + ')';
+        const guide = mutaGuideNote.trim() || (isRtl ? 'انتبه للفارق اللفظي بين الموضعين لتثبيت الحفظ.' : 'Notice the verbal difference to secure memorization.');
+
+        const newEntry = {
+          ayah: currentText,
+          similar: targetText,
+          difference: guide
+        };
+
+        const updated = [...(hifzMutashabihat || []), newEntry];
+        setHifzMutashabihat(updated);
+        setIsAddMutaOpen(false);
+        setMutaGuideNote('');
+        setMutaTargetText('');
+        setMutaSearchResults([]);
+        showToast(isRtl ? 'تم حفظ المتشابهة وإدراجها في خطة المدارسة بنجاح ✨' : 'Mutashabiha added to lesson plan ✨');
+      }
+
+      // Delete Mutashabiha
+      function handleDeleteMutashabiha(idx) {
+        const updated = (hifzMutashabihat || []).filter((_, i) => i !== idx);
+        setHifzMutashabihat(updated);
+        showToast(isRtl ? 'تم حذف المتشابهة' : 'Mutashabiha removed');
+      }
+
+      // Fetch verified Uthmani Ayahs from cache or API directly
+      async function handleFetchQuranPassage() {
+        const surah = ALL_QURAN_SURAHS.find(s => s.id === selectedSurahNumber) || ALL_QURAN_SURAHS[66];
+        const from = Math.max(1, selectedAyahFrom);
+        const to = Math.min(surah.ayahs, Math.max(from, selectedAyahTo));
+        
+        setIsFetchingQuran(true);
+        try {
+          const cacheKey = 'mishkah_quran_surah_' + surah.id;
+          let allAyahs = null;
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            try { allAyahs = JSON.parse(cached); } catch(e) {}
+          }
+          
+          if (!allAyahs) {
+            const res = await fetch('https://api.alquran.cloud/v1/surah/' + surah.id + '/quran-uthmani');
+            if (!res.ok) throw new Error('Network error: ' + res.status);
+            const data = await res.json();
+            allAyahs = data.data?.ayahs || [];
+            try { localStorage.setItem(cacheKey, JSON.stringify(allAyahs)); } catch(e) {}
+          }
+
+          if (!allAyahs || allAyahs.length === 0) throw new Error('No ayahs found');
+
+          // Slice requested range
+          const sliced = allAyahs.slice(from - 1, to);
+          const basmalah = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ';
+          const mappedAyahs = sliced.map(a => {
+            let t = a.text || '';
+            // Strip basmalah prefix on ayah 1 if not Al-Fatihah and not At-Tawbah
+            if (a.numberInSurah === 1 && surah.id !== 1 && surah.id !== 9 && t.startsWith(basmalah)) {
+              t = t.substring(basmalah.length);
+            }
+            return {
+              num: a.numberInSurah,
+              text: t
+            };
+          });
+
+          setHifzAyahs(mappedAyahs);
+          setHifzSurahName('سورة ' + surah.name);
+          setHifzAyahRange(from + '–' + to);
+          setHifzMutashabihat([]);
+          setHifzPassageId('custom_quran_' + surah.id);
+          setShowCustomInput(false);
+          setIsEndingsMasked(false);
+          setIsFullMasked(false);
+          setRevealedAyahSet(new Set([from]));
+          setCustomMaskedWords(new Set());
+          setRepeatCount(0);
+          showToast(isRtl ? 'تم جلب آيات سورة ' + surah.name + ' (' + from + '–' + to + ') بالرسم العثماني المعتمد ۞' : 'Loaded Surah ' + surah.en + ' (' + from + '–' + to + ') in Uthmani Script ۞');
+        } catch (err) {
+          console.error('Quran fetch error:', err);
+          showToast(isRtl ? 'تعذر جلب الآيات عبر الإنترنت، يُرجى التحقق من الاتصال ⚠️' : 'Could not fetch ayahs, check connection ⚠️');
+        } finally {
+          setIsFetchingQuran(false);
+        }
+      }
+
+      // Word click to mask/unmask
+      function toggleWordMask(ayahNum, wordIdx) {
+        const key = ayahNum + '-' + wordIdx;
+        setCustomMaskedWords(prev => {
+          const next = new Set(prev);
+          if (next.has(key)) {
+            next.delete(key);
+          } else {
+            next.add(key);
+          }
+          return next;
+        });
+      }
+
+      // Reveal specific ayah in blind recitation mode
+      function toggleRevealAyah(num) {
+        setRevealedAyahSet(prev => {
+          const next = new Set(prev);
+          if (next.has(num)) {
+            next.delete(num);
+          } else {
+            next.add(num);
+          }
+          return next;
+        });
+      }
+
+      // Copy WhatsApp Hifz Broadcast
+      function handleCopyHifzWhatsApp() {
+        const ayahsText = hifzAyahs.map(a => '﴿' + a.num + '﴾ ' + a.text).join(' ');
+        const mutaText = hifzMutashabihat.length > 0 
+          ? '\n\n🔍 *تنبيه المتشابهات للحفظ:*\n' + hifzMutashabihat.map(m => '• ' + m.ayah + '\n  فارق الحفظ: ' + m.difference).join('\n')
+          : '';
+        const msg = '🕌 *حلقة القرآن الكريم — وِرد التحفيظ والمراجعة*\n' +
+          '📖 *المقطع المقرر:* ' + hifzSurahName + ' (الآيات ' + hifzAyahRange + ')\n\n' +
+          ayahsText +
+          mutaText + '\n\n' +
+          '🔁 *توجيه المحفظ:* يُرجى تكرار المقطع 5 مرات غيباً قبل الحلقة القادمة.\n' +
+          '✨ *منظومة مِشكاة — AnubisLand*';
+        navigator.clipboard.writeText(msg);
+        showToast(isRtl ? 'تم نسخ رسالة وِرد التحفيظ للواتساب بنجاح 📋' : 'Hifz Broadcast Copied to Clipboard 📋');
+      }
+
+      // Passage-Based Testing Handlers (Start, Middle, End, Custom)
+      function handleActivatePassageTest(sectionType) {
+        if (!hifzAyahs || hifzAyahs.length === 0) return;
+        const total = hifzAyahs.length;
+        let selectedAyahs = [];
+        
+        if (sectionType === 'start') {
+          const count = Math.max(1, Math.ceil(total / 3));
+          selectedAyahs = hifzAyahs.slice(0, count).map(a => a.num);
+        } else if (sectionType === 'middle') {
+          const startIdx = Math.max(0, Math.floor(total / 3));
+          const endIdx = Math.max(startIdx + 1, Math.ceil((2 * total) / 3));
+          selectedAyahs = hifzAyahs.slice(startIdx, endIdx).map(a => a.num);
+        } else if (sectionType === 'end') {
+          const startIdx = Math.max(0, Math.floor((2 * total) / 3));
+          selectedAyahs = hifzAyahs.slice(startIdx).map(a => a.num);
+        }
+
+        setPassageTestSection(sectionType);
+        setPassageMaskedAyahs(new Set(selectedAyahs));
+        setPassageStatus('reciting');
+        setPassageRetryCount(0);
+        showToast(isRtl ? 'تم تفعيل اختبار المقطع — استمع لتسميع الطالب 🎧' : 'Passage test activated 🎧');
+      }
+
+      function handlePassageVerdict(verdict) {
+        if (verdict === 'correct') {
+          setPassageStatus('correct');
+          showToast(isRtl ? '✨ أحسنت! تم إظهار المقطع بعد الإتقان' : 'Correct! Passage revealed');
+        } else if (verdict === 'error') {
+          const nextRetries = passageRetryCount + 1;
+          setPassageRetryCount(nextRetries);
+          setPassageStatus('error_retry');
+          showToast(isRtl ? '⚠️ تم رصد خطأ (محاولة ' + nextRetries + ') — أعد التسميع مرة أخرى' : 'Mistake detected — retry');
+        } else if (verdict === 'reveal_review') {
+          setPassageStatus('revealed_for_review');
+          showToast(isRtl ? '📖 تم إظهار المقطع للتصحيح والمراجعة' : 'Passage revealed for review');
+        } else if (verdict === 'reset') {
+          setPassageTestSection('none');
+          setPassageMaskedAyahs(new Set());
+          setPassageStatus('reciting');
+          setPassageRetryCount(0);
+        }
+      }
+ // 'dashboard' | 'tajweed' | 'islamic' | 'worksheet' | 'quiz'
+      
+      // Teacher Security Passcode PIN Gate
+      const [teacherPin, setTeacherPin] = useState(localStorage.getItem('mishkah_pin') || 'MISHKAH2026');
+      const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+      const [tempPin, setTempPin] = useState(teacherPin);
+      const [pinStatus, setPinStatus] = useState('verified'); // 'idle' | 'verifying' | 'verified' | 'error'
+
+      // Module A: Tajweed Generator State
+      const [surahName, setSurahName] = useState('سورة الملك');
+      const [ayahRange, setAyahRange] = useState('1–10');
+      const [selectedRule, setSelectedRule] = useState('ikhfaa');
+      const [tajweedMode, setTajweedMode] = useState('bilingual');
+      const [selectedTextbook, setSelectedTextbook] = useState('czerepinski');
+      const [customContext, setCustomContext] = useState('');
+      const [tajweedData, setTajweedData] = useState(null);
+      const [isGeneratingTajweed, setIsGeneratingTajweed] = useState(false);
+      const [tajweedSubTab, setTajweedSubTab] = useState('generator'); // 'generator', 'makhaarij', 'metronome'
+      const [activeMakhrajId, setActiveMakhrajId] = useState('lisan');
+      const [metronomeCount, setMetronomeCount] = useState(2); // 2, 4, 5, 6
+      const [metronomePlaying, setMetronomePlaying] = useState(false);
+      const [metronomeBeat, setMetronomeBeat] = useState(1);
+      
+      // Multi-Branch Worksheets & Quizzes Control States
+      const [worksheetBranch, setWorksheetBranch] = useState('islamic'); // 'islamic', 'tajweed', 'hifz'
+      const [worksheetIslamicCategory, setWorksheetIslamicCategory] = useState('aqeedah'); // 'aqeedah', 'fiqh', 'seerah', 'tazkiyah'
+      const [quizBranch, setQuizBranch] = useState('islamic'); // 'islamic', 'tajweed', 'hifz'
+      const [quizIslamicCategory, setQuizIslamicCategory] = useState('aqeedah'); // 'aqeedah', 'fiqh', 'seerah', 'tazkiyah'
+
+      // Module B: Islamic Studies State
+      const [subjectCategory, setSubjectCategory] = useState('العقيدة (Aqeedah)');
+      const [lessonTopic, setLessonTopic] = useState('أركان الإيمان الستة والسكينة النفسية');
+      const [lessonDuration, setLessonDuration] = useState(45);
+      const [audienceLevel, setAudienceLevel] = useState('اليافعين والمهتدين الجدد (Bilingual Youth)');
+      const [islamicData, setIslamicData] = useState(null);
+      const [isGeneratingIslamic, setIsGeneratingIslamic] = useState(false);
+
+      // Presentation & Slide State
+      const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+      const [isFullscreenZoom, setIsFullscreenZoom] = useState(false);
+
+      // Interactive Student Quiz State
+      const [quizAnswers, setQuizAnswers] = useState({});
+      const [quizSubmitted, setQuizSubmitted] = useState(false);
+
+      // Toast notification
+      const [toast, setToast] = useState(null);
+      const showToast = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 3000);
+      };
+
+      // Load initial pre-loaded demo lessons
+      useEffect(() => {
+        handleLoadDemoTajweed();
+        handleLoadDemoIslamic();
+      }, []);
+
+      // Handlers to load Pre-loaded Demo Lessons instantly
+      function handleLoadDemoTajweed() {
+        setTajweedData(getFallbackTajweed());
+        setQuizAnswers({});
+        setQuizSubmitted(false);
+        showToast(isRtl ? 'تم تحميل درس التجويد التجريبي الجاهز (سورة الملك) ⚡' : 'Pre-loaded Tajweed Demo Lesson Loaded (Al-Mulk) ⚡');
+      }
+
+      function handleLoadDemoIslamic() {
+        setIslamicData(getFallbackIslamic());
+        showToast(isRtl ? 'تم تحميل درس العقيدة التجريبي الجاهز (أركان الإيمان) ⚡' : 'Pre-loaded Aqeedah Demo Lesson Loaded (Six Pillars) ⚡');
+      }
+
+      // Generator Handlers via /api/generate
+      async function handleGenerateTajweed(isInitial = false) {
+        setIsGeneratingTajweed(true);
+        try {
+          const ruleObj = TAJWEED_RULES.find(r => r.id === selectedRule) || TAJWEED_RULES[0];
+          const textbookObj = PRELOADED_TEXTBOOKS.find(b => b.id === selectedTextbook);
+
+          const res = await fetch('/api/generate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-mishkah-pin': teacherPin
+            },
+            body: JSON.stringify({
+              type: 'tajweed',
+              surah: surahName,
+              ayahRange: ayahRange,
+              rule: ruleObj.nameAr,
+              languageMode: tajweedMode,
+              textbookContext: customContext || textbookObj?.nameAr,
+              isDemo: isInitial
+            })
+          });
+
+          if (res.ok) {
+            const json = await res.json();
+            setTajweedData(json.data);
+            setQuizAnswers({});
+            setQuizSubmitted(false);
+            if (!isInitial) showToast(isRtl ? 'تم توليد خطة درس التجويد بنجاح ✨' : 'Tajweed Lesson Generated Successfully ✨');
+          } else {
+            throw new Error('Server returned ' + res.status);
+          }
+        } catch (err) {
+          console.warn('Using client fallback:', err.message);
+          setTajweedData(getFallbackTajweed());
+          if (!isInitial) showToast(isRtl ? 'تم التحميل من قاعدة البيانات الموثقة 💡' : 'Loaded from Verified Local Curriculum 💡');
+        } finally {
+          setIsGeneratingTajweed(false);
+        }
+      }
+
+      async function handleGenerateIslamic(isInitial = false) {
+        setIsGeneratingIslamic(true);
+        try {
+          const res = await fetch('/api/generate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-mishkah-pin': teacherPin
+            },
+            body: JSON.stringify({
+              type: 'islamic',
+              category: subjectCategory,
+              topic: lessonTopic,
+              duration: lessonDuration,
+              audienceLevel: audienceLevel,
+              languageMode: 'bilingual',
+              isDemo: isInitial
+            })
+          });
+
+          if (res.ok) {
+            const json = await res.json();
+            setIslamicData(json.data);
+            if (!isInitial) showToast(isRtl ? 'تم توليد مخطط الحلقة والملخص المعتمد بنجاح 🌿' : 'Islamic Studies Blueprint Generated 🌿');
+          } else {
+            throw new Error('Server returned ' + res.status);
+          }
+        } catch (err) {
+          console.warn('Using client fallback:', err.message);
+          setIslamicData(getFallbackIslamic());
+        } finally {
+          setIsGeneratingIslamic(false);
+        }
+      }
+
+      function getFallbackTajweed() {
+        return {
+          metadata: {
+            surah: surahName || 'سورة الملك (Al-Mulk)',
+            ayahRange: ayahRange || '1–10',
+            ruleNameAr: 'الإخفاء الحقيقي (Al-Ikhfaa Al-Haqiqi)',
+            ruleNameEn: 'True Concealment (Ikhfaa)',
+            languageMode: tajweedMode,
+            textbookSource: 'Czerepinski & Dr. Ayman Suwayd Certified Standard'
+          },
+          ruleDefinition: {
+            arabic: 'الإخفاء لغةً: الستر. واصطلاحاً: النطق بالنون الساكنة أو التنوين بصفة بين الإظهار والإدغام عارٍ عن التشديد مع بقاء الغنة بمقدار حركتين.',
+            english: 'Linguistically: Concealment. Technically: Pronouncing the Noon Sakinah or Tanween in a state between clear Izhar and merged Idgham, without shaddah, while retaining nasalization (Ghunnah) for 2 counts.',
+            anatomicalMakhrajAr: 'يخرج صوت الغنة من الخيشوم (تجويف الأنف) مع إبعاد طرف اللسان قليلاً عن لثة الأسنان العليا وتهيئة الفم لمخرج حرف الإخفاء التالي.',
+            anatomicalMakhrajEn: 'The sound of Ghunnah emits from the Khayshoom (nasal cavity). The tip of the tongue is kept slightly distant from the upper gums, preparing the mouth directly for the articulation point of the following letter.',
+            timingOrHarakat: 'حركتان (2 counts)',
+            commonMistakes: [
+              'إلصاق اللسان بالحنك الأعلى مما يحول الإخفاء إلى إظهار (Pressing the tongue against the palate)',
+              'المبالغة في إشباع الحركة قبل النون حتى يتولد منها حرف مد (Stretching vowels into extra letters)',
+              'تفخيم الغنة عند الحروف المرققة أو ترقيقها عند الحروف المفخمة (Incorrect Ghunnah heaviness/lightness)'
+            ]
+          },
+          presentationCards: [
+            {
+              cardIndex: 1,
+              titleAr: 'تطبيق الإخفاء بغنة مفخمة',
+              titleEn: 'Ikhfaa with Heavy Ghunnah',
+              ayahTextUthmani: 'تَبَـٰرَكَ ٱلَّذِى بِيَدِهِ ٱلْمُلْكُ وَهُوَ عَلَىٰ كُلِّ شَىْءٍۢ قَدِيرٌ',
+              highlightedPortion: 'شَىْءٍۢ قَدِيرٌ',
+              tajweedColor: 'emerald',
+              explanationAr: 'تنوين بالكسر بعده حرف القاف (من حروف الاستعلاء المفخمة). ينطق بإخفاء التنوين وتفخيم الغنة.',
+              explanationEn: 'Tanween followed by heavy letter Qaf. Pronounce with concealed Tanween and deep, heavy Ghunnah.',
+              teacherPrompt: 'Check student\'s back of tongue elevation; ensure lips do not round prematurely.'
+            },
+            {
+              cardIndex: 2,
+              titleAr: 'تطبيق الإخفاء بغنة مرققة رقيقة',
+              titleEn: 'Ikhfaa with Light Ghunnah',
+              ayahTextUthmani: 'مَّا تَرَىٰ فِى خَلْقِ ٱلرَّحْمَـٰنِ مِن تَفَـٰوُتٍۢ',
+              highlightedPortion: 'مِن تَفَـٰوُتٍۢ',
+              tajweedColor: 'emerald',
+              explanationAr: 'نون ساكنة بعدها حرف التاء (حرف مرقق). ترقق الغنة وتتهيأ الأسنان لنطق التاء.',
+              explanationEn: 'Noon Sakinah followed by light letter Taa. Produce a delicate light nasal Ghunnah.',
+              teacherPrompt: 'Ensure teeth are gently close together without tongue pressing firmly against incisors.'
+            },
+            {
+              cardIndex: 3,
+              titleAr: 'تطبيق الإخفاء في كلمة واحدة',
+              titleEn: 'Ikhfaa Within a Single Word',
+              ayahTextUthmani: 'ثُمَّ ٱرْجِعِ ٱلْبَصَرَ كَرَّتَيْنِ يَنقَلِبْ إِلَيْكَ ٱلْبَصَرُ خَاسِئًۭا',
+              highlightedPortion: 'يَنقَلِبْ',
+              tajweedColor: 'amber',
+              explanationAr: 'نون ساكنة بعدها قاف في كلمة واحدة، مع قلقلة الباء المتطرفة عند الوقف.',
+              explanationEn: 'Noon Sakinah followed by Qaf in one word, followed by Qalqalah in letter Baa upon stopping.',
+              teacherPrompt: 'Notice the transition from heavy nasal Ghunnah directly to Qaf then Baa Qalqalah.'
+            }
+          ],
+          worksheet: [
+            { itemNumber: 1, wordUthmani: 'شَىْءٍۢ قَدِيرٌ', ruleApplied: 'إخفاء حقيقي بغنة مفخمة (Heavy Ikhfaa)', reasonAr: 'تنوين بعده قاف (حرف مفخم)', reasonEn: 'Tanween followed by Qaf', ayahReference: 'الملك: 1' },
+            { itemNumber: 2, wordUthmani: 'مِن تَفَـٰوُتٍۢ', ruleApplied: 'إخفاء حقيقي بغنة مرققة (Light Ikhfaa)', reasonAr: 'نون ساكنة بعدها تاء (حرف مرقق)', reasonEn: 'Noon Sakinah followed by Taa', ayahReference: 'الملك: 3' },
+            { itemNumber: 3, wordUthmani: 'مِن فُطُورٍۢ', ruleApplied: 'إخفاء حقيقي بغنة مرققة (Light Ikhfaa)', reasonAr: 'نون ساكنة بعدها فاء', reasonEn: 'Noon Sakinah followed by Faa', ayahReference: 'الملك: 3' },
+            { itemNumber: 4, wordUthmani: 'يَنقَلِبْ', ruleApplied: 'إخفاء حقيقي في كلمة واحدة (Ikhfaa in one word)', reasonAr: 'نون ساكنة بعدها قاف', reasonEn: 'Noon Sakinah followed by Qaf', ayahReference: 'الملك: 4' }
+          ],
+          quiz: [
+            {
+              id: 1,
+              questionAr: 'كم عدد حروف الإخفاء الحقيقي في أحكام النون الساكنة والتنوين؟',
+              questionEn: 'How many letters cause True Concealment (Ikhfaa)?',
+              type: 'mcq',
+              options: [
+                { id: 'a', textAr: '6 أحرف', textEn: '6 letters' },
+                { id: 'b', textAr: '15 حرفاً', textEn: '15 letters' },
+                { id: 'c', textAr: '4 أحرف', textEn: '4 letters' },
+                { id: 'd', textAr: '8 أحرف', textEn: '8 letters' }
+              ],
+              correctOptionId: 'b',
+              explanationAr: 'حروف الإخفاء 15 حرفاً مجموعة في أوائل كلمات: صف ذا ثنا كم جاد شخص قد سما دم طيبا زد في تقى ضع ظالما.',
+              explanationEn: '15 letters assembled in the famous mnemonic opening verse.'
+            },
+            {
+              id: 2,
+              questionAr: 'ما هو المخرج الدقيق لصوت الغنة أثناء الإخفاء؟',
+              questionEn: 'What is the precise anatomical articulation point of the Ghunnah?',
+              type: 'mcq',
+              options: [
+                { id: 'a', textAr: 'الجوف (Oral Cavity)', textEn: 'Al-Jawf' },
+                { id: 'b', textAr: 'الحلق (Throat)', textEn: 'Al-Halq' },
+                { id: 'c', textAr: 'الخيشوم (تجويف الأنف)', textEn: 'Al-Khayshoom (Nasal Cavity)' },
+                { id: 'd', textAr: 'الشفتان (Lips)', textEn: 'The Lips' }
+              ],
+              correctOptionId: 'c',
+              explanationAr: 'الغنة تخرج فقط من الخيشوم وهو أقصى الأنف.',
+              explanationEn: 'Ghunnah strictly resonates from the Khayshoom (nasal passage).'
+            },
+            {
+              id: 3,
+              questionAr: 'تكون غنة الإخفاء مفخمة إذا جاء بعد النون الساكنة حرف استعلاء كحرف القاف.',
+              questionEn: 'The Ghunnah of Ikhfaa is pronounced heavy when followed by an elevated letter like Qaf.',
+              type: 'true_false',
+              options: [
+                { id: 'true', textAr: 'صحيح (True)', textEn: 'True' },
+                { id: 'false', textAr: 'خطأ (False)', textEn: 'False' }
+              ],
+              correctOptionId: 'true',
+              explanationAr: 'نعم، الغنة تتبع الحرف الذي يليها تفخيماً وترقيقاً.',
+              explanationEn: 'Correct! The Ghunnah follows the succeeding letter in heavy/light characteristics.'
+            }
+          ]
+        };
+      }
+
+      function getFallbackIslamic() {
+        return {
+          metadata: {
+            category: subjectCategory,
+            topic: lessonTopic,
+            durationMinutes: lessonDuration,
+            audienceLevel: audienceLevel,
+            languageMode: 'bilingual'
+          },
+          blueprint: [
+            {
+              phaseNumber: 1,
+              phaseNameAr: 'المقدمة وعنصر التشويق (The Hook)',
+              phaseNameEn: 'Hook & Interactive Question',
+              allocatedMinutes: 5,
+              teacherGuidanceAr: 'اطرح سؤالاً تفاعلياً على الدارسين: ما الفرق بين مجرد العلم الذهني بوجود الله وبين اليقين الذي يزيل الهم في الأزمات؟',
+              teacherGuidanceEn: 'Ask the students: How does knowing Allah is Al-Aleem and Al-Khabeer give us personal peace during exams and trials?',
+              talkingPoints: [
+                'الافتتاح بالحمد والصلاة والسلام على رسول الله',
+                'ربط موضوع الإيمان بالسكينة والطمأنينة القلبية'
+              ]
+            },
+            {
+              phaseNumber: 2,
+              phaseNameAr: 'التأصيل الشرعي والأدلة الموثقة',
+              phaseNameEn: 'Core Evidences & Hadith of Jibreel',
+              allocatedMinutes: 20,
+              teacherGuidanceAr: 'عرض حديث جبريل عليه السلام وتفصيل الأركان الستة مع التركيز على ركن الإيمان بالقضاء والقدر.',
+              teacherGuidanceEn: 'Walk through the 6 pillars with emphasis on Qadar (Destiny: the antidote to anxiety and regret).',
+              talkingPoints: [
+                'الإيمان بالله وملائكته وكتبه ورسله واليوم الآخر والقدر خيره وشره',
+                'التمييز بين مراتب الدين: الإسلام، الإيمان، الإحسان'
+              ]
+            },
+            {
+              phaseNumber: 3,
+              phaseNameAr: 'التطبيق العملي في واقع الدارس المعاصر',
+              phaseNameEn: 'Real-Life Application & Emotional Resilience',
+              allocatedMinutes: 15,
+              teacherGuidanceAr: 'تدريب الدارسين على التخلص من كلمة "لو" المحبطة واستبدالها بالرضا: "قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ".',
+              teacherGuidanceEn: 'Equipping youth with the prophetic mindset: replacing paralyzing regret with proactive contentment.',
+              talkingPoints: [
+                'استشعار معية الله في السراء والضراء',
+                'تحويل العادات اليومية إلى عبادات بالنية الصادقة'
+              ]
+            },
+            {
+              phaseNumber: 4,
+              phaseNameAr: 'الخاتمة والواجب المنزلي وملخص الواتساب',
+              phaseNameEn: 'Wrap-up, Reflection & WhatsApp Summary',
+              allocatedMinutes: 5,
+              teacherGuidanceAr: 'توزيع ملخص الواتساب المعد مسبقاً بنقرة واحدة، وحث كل دارس على تطبيق ذكر اليوم.',
+              teacherGuidanceEn: 'Copy and share the WhatsApp summary and launch the interactive 5-question review.',
+              talkingPoints: [
+                'دعاء كفارة المجلس: سبحانك اللهم وبحمدك...',
+                'تذكير بالاختبار الذاتي القصير'
+              ]
+            }
+          ],
+          evidences: [
+            {
+              type: 'hadith',
+              arabicText: 'قَالَ: فَأَخْبِرْنِي عَنِ الإِيمَانِ، قَالَ: «أَنْ تُؤْمِنَ بِاللَّهِ، وَمَلاَئِكَتِهِ، وَكُتُبِهِ، وَرُسُلِهِ، وَاليَوْمِ الآخِرِ، وَتُؤْمِنَ بِالقَدَرِ خَيْرِهِ وَشَرِّهِ».',
+              englishTranslation: 'He said: "Inform me about Faith." The Prophet ﷺ said: "That you believe in Allah, His Angels, His Books, His Messengers, the Last Day, and that you believe in Divine Destiny, its good and bad."',
+              citation: 'صحيح مسلم (Sahih Muslim #8)',
+              narrator: 'أمير المؤمنين عمر بن الخطاب رضي الله عنه',
+              grading: 'صحيح (Sahih - Highest Authenticity)',
+              authenticityBadge: true
+            },
+            {
+              type: 'quran',
+              arabicText: 'ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إِلَيْهِ مِن رَّبِّهِۦ وَٱلْمُؤْمِنُونَ ۚ كُلٌّ ءَامَنَ بِٱللَّهِ وَمَلَـٰٓئِكَتِهِۦ وَكُتُبِهِۦ وَرُسُلِهِۦ لَا نُفَرِّقُ بَيْنَ أَحَدٍۢ مِّن رُّسُلِهِۦ',
+              englishTranslation: 'The Messenger has believed in what was revealed to him from his Lord, and [so have] the believers. All of them have believed in Allah and His angels and His books and His messengers...',
+              citation: 'سورة البقرة (Surah Al-Baqarah 2:285)',
+              narrator: '—',
+              grading: 'متواتر قطعي الثبوت (Quranic Revelation)',
+              authenticityBadge: true
+            }
+          ],
+          zoomCards: [
+            {
+              slideNumber: 1,
+              titleAr: 'ما هو جوهر الإيمان؟',
+              titleEn: 'What is the Essence of Iman?',
+              bodyAr: 'الإيمان ليس مجرد كلمات تردد، بل هو ما استقر في أعماق القلب وصدقته الأعمال الصالحة وأخلاق المسلم.',
+              bodyEn: 'Iman is not a ritual statement; it is that which settles deep in the heart and reflects in noble character and righteous action.',
+              practicalAction: 'جددي نيتك الصادقة اليومية قبل فتح أي كتاب أو درس.'
+            },
+            {
+              slideNumber: 2,
+              titleAr: 'الإيمان بالقدر دواء القلق والتوتر',
+              titleEn: 'Belief in Qadar: The Antidote to Anxiety',
+              bodyAr: '«مَا أَصَابَكَ لَمْ يَكُنْ لِيُخْطِئَكَ، وَمَا أَخْطَأَكَ لَمْ يَكُنْ لِيُصِيبَكَ». لن يضيع عبد علم أن ربه حكيم رحيم.',
+              bodyEn: 'What has reached you was never meant to miss you, and what missed you was never meant to reach you.',
+              practicalAction: 'استبدلي كلمة "لو" بذكر "قدر الله وما شاء فعل" عند أي عارض.'
+            }
+          ],
+          whatsAppKit: {
+            headline: '🌿 خلاصة درس اليوم: أركان الإيمان الستة وسكينة القلب 🌿',
+            formattedText: `السلام عليكم ورحمة الله وبركاته يا غاليات 🌸\n\n📌 *موضوع حلقتنا اليوم:* أركان الإيمان وثمارها العملية في حياتنا اليومية\n\n✨ *أهم الفوائد المستفادة:*\n1️⃣ الإيمان ستة أركان: بالله، وملائكته، وكتبه، ورسله، واليوم الآخر، والقدر خيره وشره.\n2️⃣ من عرف ربه باسمائه الحسنى استراح قلبه من الخوف والهم.\n3️⃣ الإيمان بالقضاء والقدر يمحو كلمة "لو" المحبطة ويملأ الروح باليقين والرضا.\n\n📖 *آية الأسبوع للتأمل:* ﴿ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إِلَيْهِ مِن رَّبِّهِۦ وَٱلْمُؤْمِنُونَ﴾ [البقرة: 285]\n\n🎯 *الواجب العملي:* ترديد ذكر "رضيت بالله رباً وبالإسلام ديناً وبمحمد ﷺ نبياً" صباحاً ومساءً بحضور قلب.\n\n🔗 رابط الاختبار القصير للمراجعة الذاتية في منصة مشكاة. حفظكم الله جميعاً! 🤍`,
+            actionItem: 'شاركونا عبر المجموعة تطبيقكم العملي لذكر اليوم!'
+          },
+          reviewQuiz: [
+            {
+              id: 1,
+              questionAr: 'أي من الأركان التالية يدخل ضمن أركان الإيمان الستة وليس من أركان الإسلام الخمسة؟',
+              questionEn: 'Which is one of the 6 Pillars of Iman and NOT of the 5 Pillars of Islam?',
+              options: [
+                { id: 'a', textAr: 'إيتاء الزكاة', textEn: 'Giving Zakah' },
+                { id: 'b', textAr: 'الإيمان بالقضاء والقدر', textEn: 'Belief in Divine Destiny (Qadar)' },
+                { id: 'c', textAr: 'صوم شهر رمضان', textEn: 'Fasting Ramadan' },
+                { id: 'd', textAr: 'حج البيت لمن استطاع', textEn: 'Performing Hajj' }
+              ],
+              correctOptionId: 'b',
+              reflectionPrompt: 'الإيمان بالقدر يورث الطمأنينة والرضا عن الله في السراء والضراء.'
+            },
+            {
+              id: 2,
+              questionAr: 'من هو الصحابي الجليل راوي حديث جبريل المشهور في بيان أركان الإيمان والإسلام؟',
+              questionEn: 'Who narrated the renowned Hadith of Jibreel explaining Islam, Iman, and Ihsan?',
+              options: [
+                { id: 'a', textAr: 'أبو بكر الصديق رضي الله عنه', textEn: 'Abu Bakr As-Siddiq' },
+                { id: 'b', textAr: 'عمر بن الخطاب رضي الله عنه', textEn: 'Umar ibn Al-Khattab' },
+                { id: 'c', textAr: 'أبو هريرة رضي الله عنه', textEn: 'Abu Hurairah' },
+                { id: 'd', textAr: 'أنس بن مالك رضي الله عنه', textEn: 'Anas ibn Malik' }
+              ],
+              correctOptionId: 'b',
+              reflectionPrompt: 'قال عمر: بينما نحن عند رسول الله ﷺ إذ طلع علينا رجل شديد بياض الثياب...'
+            }
+          ]
+        };
+      }
+
+      // Dynamic Multi-Branch Quiz Selection
+      const activeQuizQuestions = useMemo(() => {
+        if (quizBranch === 'islamic') {
+          return ISLAMIC_BRANCH_QUIZZES[quizIslamicCategory] || ISLAMIC_BRANCH_QUIZZES.aqeedah;
+        } else if (quizBranch === 'tajweed') {
+          return tajweedData?.quiz || [];
+        } else if (quizBranch === 'hifz') {
+          return HIFZ_BRANCH_QUIZ;
+        }
+        return [];
+      }, [quizBranch, quizIslamicCategory, tajweedData]);
+
+      // Dynamic Quiz Score Calculation
+      const quizScore = useMemo(() => {
+        if (!activeQuizQuestions.length) return 0;
+        let correct = 0;
+        activeQuizQuestions.forEach(q => {
+          if (quizAnswers[q.id] === q.correctOptionId) correct++;
+        });
+        return Math.round((correct / activeQuizQuestions.length) * 100);
+      }, [quizAnswers, activeQuizQuestions]);
+
+      // Switch quiz branch and clear previous answers for clean test
+      const handleSwitchQuizBranch = (branch, category = null) => {
+        setQuizBranch(branch);
+        if (category) setQuizIslamicCategory(category);
+        setQuizAnswers({});
+        setQuizSubmitted(false);
+      };
+
+      // Copy WhatsApp text to clipboard
+      const handleCopyWhatsApp = () => {
+        if (islamicData?.whatsAppKit?.formattedText) {
+          navigator.clipboard.writeText(islamicData.whatsAppKit.formattedText);
+          showToast(isRtl ? 'تم نسخ ملخص الواتساب بنجاح 📋' : 'WhatsApp Summary Copied to Clipboard 📋');
+        }
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col islamic-screen-pattern">
+          
+          {/* TOAST ALERT: Floating Bottom Snackbar so it never blocks header controls */}
+          {toast && (
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-950/95 border-2 border-gold-400 text-gold-200 px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 font-bold text-sm backdrop-blur-md transition-all">
+              <span>✨</span>
+              <span>{toast}</span>
+            </div>
+          )}
+
+          {/* TOP GRAND EMERALD HEADER */}
+          <header className="emerald-pattern text-white relative border-b-4 border-gold-400 shadow-xl overflow-hidden no-print">
+            {/* Islamic Corner Rosette Accents */}
+            <div className="absolute top-2 right-4 text-gold-300/40 text-lg font-amiri pointer-events-none select-none">۞</div>
+            <div className="absolute top-2 left-4 text-gold-300/40 text-lg font-amiri pointer-events-none select-none">۞</div>
+            {/* 8-pointed star watermark background */}
+            <div className="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center">
+              <svg className="w-[600px] h-[600px] text-gold-300" viewBox="0 0 100 100" fill="currentColor">
+                <polygon points="50,0 64,28 95,21 80,50 95,79 64,72 50,100 36,72 5,79 20,50 5,21 36,28" />
+              </svg>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 relative z-10 flex flex-wrap items-center justify-between gap-4">
+              
+              {/* Brand Logo & Title */}
+              <div className="flex items-center gap-4 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-950 border-2 border-gold-400 p-0.5 shadow-2xl flex items-center justify-center transform hover:scale-105 transition overflow-hidden flex-shrink-0">
+                  <img src="icons/mishkah-app-icon.jpg" alt="Mishkah Logo" className="w-full h-full object-cover rounded-xl drop-shadow" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-wide text-gold-200 font-amiri">
+                      {isRtl ? 'مِشكاة' : 'Mishkah'}
+                    </h1>
+                    <span className="bg-gold-500/20 text-gold-300 border border-gold-400/40 text-xs px-2.5 py-0.5 rounded-full font-semibold">
+                      v1.0 MVP
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-100/90 font-medium mt-0.5">
+                    {isRtl ? 'نظام التشغيل الشامل للداعية والمعلم الشرعي' : 'Comprehensive Operating System for Da\'wah & Islamic Educators'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Controls Strip: PIN Gate, BiDi switcher, Font scaler */}
+              <div className="flex items-center gap-2.5 flex-wrap">
+                
+                {/* Security PIN Gate Button */}
+                <button 
+                  onClick={() => setIsPinModalOpen(true)}
+                  className="bg-emerald-800/80 hover:bg-emerald-700/80 border border-gold-400/50 text-gold-200 text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow-sm"
+                  title={isRtl ? 'رمز أمان المعلم' : 'Teacher Security PIN'}
+                >
+                  <span>🔒</span>
+                  <span className="hidden sm:inline">{isRtl ? 'أمان المعلم' : 'Teacher PIN'}</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+                </button>
+
+                {/* Font Family Switcher */}
+                <div className="flex items-center gap-1.5 bg-emerald-950/80 border border-gold-400/60 rounded-xl px-2.5 py-1.5 text-xs text-gold-200 shadow-sm">
+                  <span className="text-gold-300">🔤</span>
+                  <select 
+                    value={appFont} 
+                    onChange={(e) => {
+                      const newF = e.target.value;
+                      setAppFont(newF);
+                      const fCfg = FONT_MAP[newF] || FONT_MAP.cairo;
+                      showToast(isRtl ? `تم تفعيل ${fCfg.nameAr} ✨` : `Font set to ${fCfg.nameEn} ✨`);
+                    }}
+                    className="bg-transparent text-gold-100 font-bold text-xs focus:outline-none cursor-pointer pr-1"
+                    title={isRtl ? 'اختيار خط واجهة التطبيق' : 'Choose Interface Font'}
+                  >
+                    <option value="cairo" className="bg-emerald-950 text-gold-100">خط كايرو (Cairo)</option>
+                    <option value="amiri" className="bg-emerald-950 text-gold-100">خط أميري (Amiri)</option>
+                    <option value="tajawal" className="bg-emerald-950 text-gold-100">خط تجوال (Tajawal)</option>
+                    <option value="almarai" className="bg-emerald-950 text-gold-100">خط المراعي (Almarai)</option>
+                    <option value="naskh" className="bg-emerald-950 text-gold-100">خط النسخ (Noto Naskh)</option>
+                  </select>
+                </div>
+
+                {/* 3-Level Simple Font Selector: صغير | متوسط | كبير */}
+                <div className="flex items-center gap-1.5 bg-emerald-950/80 border border-gold-400/60 rounded-xl px-2 py-1 text-xs text-gold-200 shadow-sm" title={isRtl ? 'حجم الخط: صغير، متوسط، كبير (مريح لكبار السن بدون الإخلال بتوازن الصفحة)' : 'Font Size: Small, Medium, Large'}>
+                  <span className="text-gold-300 font-bold text-xs select-none pl-1 hidden sm:inline">
+                    {isRtl ? 'حجم الخط:' : 'Font:'}
+                  </span>
+                  <div className="flex items-center bg-emerald-900/80 rounded-lg p-0.5 gap-1 border border-emerald-700/60">
+                    {Object.entries(FONT_SIZE_LEVELS).map(([key, config]) => {
+                      const isActive = fontSizeLevel === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            setFontSizeLevel(key);
+                            showToast(isRtl ? `حجم الخط: ${config.labelAr}` : `Font size: ${config.labelEn}`);
+                          }}
+                          className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all duration-150 ${
+                            isActive 
+                              ? 'bg-gold-500 text-emerald-950 shadow-md font-black ring-1 ring-gold-300 scale-[1.02]' 
+                              : 'text-emerald-100 hover:text-gold-200 hover:bg-emerald-800/60'
+                          }`}
+                          title={isRtl ? config.tipAr : config.tipEn}
+                        >
+                          {isRtl ? config.labelAr : config.labelEn}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Language Switcher Button */}
+                <button 
+                  onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
+                  className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold text-xs px-3.5 py-1.5 rounded-lg transition shadow-md flex items-center gap-1.5"
+                >
+                  <span>🌐</span>
+                  <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Navigation Tabs Bar */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-emerald-800/80 flex overflow-x-auto py-2.5 gap-2 scrollbar-none">
+              {[
+                { id: 'dashboard', icon: '📊', labelAr: 'لوحة المعلم', labelEn: 'Dashboard' },
+                { id: 'hifz', icon: '🕋', labelAr: 'أدوات التحفيظ (Branch 1)', labelEn: 'Memorization Tools' },
+                { id: 'tajweed', icon: '📖', labelAr: 'أدوات التجويد (Branch 2)', labelEn: 'Tajweed Tools' },
+                { id: 'islamic', icon: '🕌', labelAr: 'العلوم الشرعية (Branch 3)', labelEn: 'Islamic Studies' },
+                                { id: 'worksheet', icon: '📝', labelAr: 'أوراق العمل والطباعة', labelEn: 'Print Worksheets' },
+                { id: 'quiz', icon: '🎯', labelAr: 'الاختبار الذاتي التفاعلي', labelEn: 'Interactive Quiz' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
+                    activeTab === tab.id 
+                      ? 'bg-gold-400 text-emerald-950 shadow-md transform scale-105' 
+                      : 'text-emerald-100/90 hover:bg-emerald-800/60 hover:text-white'
+                  }`}
+                >
+                  <span className="text-base">{tab.icon}</span>
+                  <span>{isRtl ? tab.labelAr : tab.labelEn}</span>
+                </button>
+              ))}
+            </div>
+          </header>
+
+          {/* MAIN WORKSPACE BODY */}
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+
+            {/* ================= VIEW: DASHBOARD ================= */}
+            {activeTab === 'dashboard' && (
+              <div className="space-y-8 animate-fadeIn">
+                
+                {/* Welcome Hero Banner with Rich Islamic Tapestry */}
+                <div className="islamic-hero-banner rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                  {/* Islamic Corner Rosette Accents */}
+                  <div className="absolute top-2.5 right-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
+                  <div className="absolute top-2.5 left-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
+                  <div className="absolute bottom-2.5 right-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
+                  <div className="absolute bottom-2.5 left-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
+                  <div className="relative z-10 max-w-2xl">
+                    <div className="inline-flex items-center gap-2 bg-gold-400/20 text-gold-200 border border-gold-400/40 text-xs px-3 py-1 rounded-full mb-3">
+                      <span>✨</span>
+                      <span>{isRtl ? 'نظام التشغيل الشامل للداعية والمعلم الشرعي' : 'Comprehensive OS for Da\'wah & Islamic Educators'}</span>
+                    </div>
+                    <h2 className="text-2xl sm:text-4xl font-extrabold font-amiri text-gold-200 mb-3">
+                      {isRtl ? 'منظومة متكاملة لحلقات القرآن، التجويد، ومتابعة الأداء الشرعي' : 'Integrated OS for Quran, Tajweed, Islamic Studies & Performance Tracking'}
+                    </h2>
+                    <p className="text-emerald-100/90 text-sm sm:text-base leading-relaxed mb-6">
+                      {isRtl 
+                        ? 'مِشكاة — يجمع بين دقة استخراج الأحكام التجويدية بالرسم العثماني، وبطاقات زوم الملونة، والتوثيق الشرعي الصارم لأحاديث صحيح البخاري ومسلم، مع منظومة المتابعة وتقييم الجودة وإصدار التقارير.'
+                        : 'Mishkah integrates Uthmani script Tajweed extraction, Zoom presentation cards, rigorous Hadith authentication, performance tracking, and printable student worksheets in one cohesive platform.'}
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <button 
+                        onClick={() => setActiveTab('hifz')}
+                        className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-black px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2 text-sm"
+                      >
+                        <span>🕋</span>
+                        <span>{isRtl ? 'أدوات التحفيظ والتسميع' : 'Memorization Tools'}</span>
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab('tajweed')}
+                        className="bg-emerald-900/90 hover:bg-emerald-800 text-gold-200 border border-gold-400/60 font-bold px-5 py-2.5 rounded-xl shadow transition flex items-center gap-2 text-sm"
+                      >
+                        <span>📖</span>
+                        <span>{isRtl ? 'أدوات التجويد والتحليل' : 'Tajweed Tools'}</span>
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab('islamic')}
+                        className="bg-emerald-950/80 hover:bg-emerald-950 border border-gold-400/60 text-gold-200 font-bold px-5 py-2.5 rounded-xl shadow transition flex items-center gap-2 text-sm"
+                      >
+                        <span>🕌</span>
+                        <span>{isRtl ? 'تخطيط حلقة علوم شرعية' : 'Plan Islamic Studies Lesson'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Official Emblem Display */}
+                  <div className="relative z-10 flex-shrink-0">
+                    <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl p-1 bg-gradient-to-b from-gold-300 via-gold-500 to-emerald-950 shadow-2xl border-2 border-gold-300/80 transform hover:scale-105 transition flex items-center justify-center overflow-hidden">
+                      <img src="icons/mishkah-app-icon.jpg" alt="Mishkah Official App Icon" className="w-full h-full object-cover rounded-2xl" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Core Feature Highlights (Cards) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                  {[
+                    {
+                      titleAr: 'بطاقات شرح زوم التفاعلية',
+                      titleEn: 'Zoom Teaching Cards',
+                      descAr: 'عرض عالي التباين بخط عثماني وتلوين تلقائي لحكم التجويد ومخارج الحروف التشريحية.',
+                      descEn: 'High-contrast presentation mode with color-coded Uthmani script and anatomical articulation notes.',
+                      icon: '🖥️',
+                      tag: 'Module A'
+                    },
+                    {
+                      titleAr: 'أوراق عمل قابلة للطباعة (PDF)',
+                      titleEn: 'Printable Worksheets',
+                      descAr: 'جدول منظم: الكلمة القرآنية | الحكم | العلة والسبب، مع نموذج إجابة خاص بالمعلم.',
+                      descEn: 'Clean structured tables with dual versions: student blank sheet and teacher answer key.',
+                      icon: '🖨️',
+                      tag: 'Print Ready'
+                    },
+                    {
+                      titleAr: 'حقيبة الواتساب بنقرة واحدة',
+                      titleEn: '1-Click WhatsApp Kit',
+                      descAr: 'ملخص موجز من 10 أسطر منسق بالإيموجي والآيات جاهز للنسخ المباشر لمجموعات أولياء الأمور.',
+                      descEn: '10-line emoji-formatted executive summary ready for instant broadcast to parent/student groups.',
+                      icon: '📱',
+                      tag: 'Module B'
+                    },
+                    {
+                      titleAr: 'سياج التوثيق الشرعي الصارم',
+                      titleEn: 'Authenticity Guardrails',
+                      descAr: 'عزو صريح للأحاديث (الراوي + مصدر صحيح البخاري/مسلم + درجة الصحة) وعزو الآيات بالاسم والرقم.',
+                      descEn: 'Strict verification badges: exact Surah/Ayah references, primary Hadith sources, and Sahih status.',
+                      icon: '🛡️',
+                      tag: 'Zero Weak Hadith'
+                    }
+                  ].map((card, idx) => {
+                    const themeClass = [
+                      'card-islamic-sage',
+                      'card-islamic-amber',
+                      'card-islamic-sky',
+                      'card-islamic-lavender'
+                    ][idx % 4];
+                    return (
+                      <div key={idx} className={`${themeClass} rounded-2xl p-5 shadow-sm hover:shadow-md transition relative overflow-hidden`}>
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="text-2xl">{card.icon}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-white/85 text-emerald-900 border border-emerald-900/15 px-2.5 py-0.5 rounded-full shadow-xs">
+                            {card.tag}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-emerald-950 text-base mb-1.5 font-cairo">
+                          {isRtl ? card.titleAr : card.titleEn}
+                        </h3>
+                        <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                          {isRtl ? card.descAr : card.descEn}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Quick Inspection of Active Prepared Lesson */}
+                {tajweedData && (
+                  <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/10 shadow-md">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+                      <div>
+                        <span className="text-xs text-emerald-700 font-bold uppercase tracking-wider">
+                          {isRtl ? 'الدرس النشط حالياً في الذاكرة' : 'Currently Active Prepared Lesson'}
+                        </span>
+                        <h3 className="text-xl font-extrabold text-emerald-950 font-amiri mt-0.5">
+                          {tajweedData.metadata.surah} ({tajweedData.metadata.ayahRange}) — {tajweedData.metadata.ruleNameAr}
+                        </h3>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => setActiveTab('tajweed')}
+                          className="bg-emerald-700 text-white hover:bg-emerald-800 text-xs px-3.5 py-1.5 rounded-lg font-bold transition"
+                        >
+                          {isRtl ? 'عرض بطاقات الشرح' : 'View Presentation'}
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('worksheet')}
+                          className="bg-gold-50 text-gold-700 border border-gold-300 hover:bg-gold-100 text-xs px-3.5 py-1.5 rounded-lg font-bold transition"
+                        >
+                          {isRtl ? 'طباعة ورقة العمل' : 'Print Worksheet'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                      <div className="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-100">
+                        <span className="text-emerald-800 font-bold block mb-1">
+                          {isRtl ? 'المخرج الصوتي التشريحي:' : 'Anatomical Articulation:'}
+                        </span>
+                        <p className="text-slate-700 leading-relaxed font-amiri text-sm">
+                          {isRtl ? tajweedData.ruleDefinition.anatomicalMakhrajAr : tajweedData.ruleDefinition.anatomicalMakhrajEn}
+                        </p>
+                      </div>
+                      <div className="bg-gold-50/70 p-3.5 rounded-xl border border-gold-200">
+                        <span className="text-gold-800 font-bold block mb-1">
+                          {isRtl ? 'المقدار والزمن:' : 'Timing & Counts:'}
+                        </span>
+                        <p className="text-slate-700 font-bold text-sm">
+                          {tajweedData.ruleDefinition.timingOrHarakat}
+                        </p>
+                      </div>
+                      <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <span className="text-slate-700 font-bold block mb-1">
+                          {isRtl ? 'المرجع المعتمد:' : 'Textbook Reference:'}
+                        </span>
+                        <p className="text-slate-600">
+                          {tajweedData.metadata.textbookSource}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ================= VIEW: MODULE A (TAJWEED COPILOT) ================= */}
+                        {/* ================= VIEW: HIFZ & RECITATION WORKBENCH (BRANCH 1) ================= */}
+            {activeTab === 'hifz' && (
+              <div className="space-y-6 animate-fadeIn">
+                
+                {/* Header Banner */}
+                <div className="emerald-pattern rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden border-2 border-gold-400 shadow-xl">
+                  <div className="absolute top-2.5 right-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
+                  <div className="absolute top-2.5 left-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
+                  <div className="relative z-10 max-w-4xl">
+                    <div className="inline-flex items-center gap-2 bg-gold-400/20 text-gold-200 border border-gold-400/40 text-xs px-3 py-1 rounded-full mb-3 font-bold">
+                      <span>🕋</span>
+                      <span>{isRtl ? 'الفرع الأول: منظومة التحفيظ المتكاملة (المصحف الورقي + اختبار الإتقان)' : 'Branch 1: Complete Quran Memorization System'}</span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold font-amiri text-gold-200 mb-2">
+                      {isRtl ? 'مدارسة مصحف المدينة واختبارات الإتقان التفاعلية' : 'Madinah Mushaf Visuals & Interactive Testing'}
+                    </h2>
+                    <p className="text-emerald-100/90 text-xs sm:text-sm leading-relaxed mb-4">
+                      {isRtl 
+                        ? 'يجمع بين صفحة المصحف الورقي المطبوع الحقيقي (15 سطراً) لترسيخ الذاكرة البصرية، وبين أدوات اختبار الإتقان الفورية (طمس فواصل الآيات، التسميع الغيبي، إخفاء الكلمات، وكاشف المتشابهات).'
+                        : 'Combines authentic 15-line Madinah Mushaf visual page with live mastery testing tools: mask endings, blind recitation, word-masking, and mutashabihat.'}
+                    </p>
+
+                    {/* Mode Toggle Switch (Mushaf Page vs Interactive Testing) */}
+                    <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-emerald-800/80">
+                      <div className="inline-flex bg-emerald-950/90 p-1.5 rounded-2xl border border-gold-400/60 shadow-md">
+                        <button
+                          type="button"
+                          onClick={() => setHifzViewMode('mushaf_page')}
+                          className={`px-4 sm:px-5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition ${
+                            hifzViewMode === 'mushaf_page'
+                              ? 'bg-gold-500 text-emerald-950 font-black shadow-md ring-2 ring-gold-300'
+                              : 'text-gold-200 hover:text-white'
+                          }`}
+                        >
+                          <span>📖</span>
+                          <span>{isRtl ? '1. وجه المصحف الورقي (15 سطراً)' : '1. Real Mushaf Page'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleNavigateMushafPage(mushafPageNumber, 'interactive_test')}
+                          className={`px-4 sm:px-5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition ${
+                            hifzViewMode === 'interactive_test'
+                              ? 'bg-gold-500 text-emerald-950 font-black shadow-md ring-2 ring-gold-300'
+                              : 'text-gold-200 hover:text-white'
+                          }`}
+                        >
+                          <span>🎯</span>
+                          <span>{isRtl ? '2. لوحة التسميع واختبار الإتقان' : '2. Recitation & Testing Board'}</span>
+                        </button>
+                      </div>
+
+                      {/* Quick Shortcut Buttons in Header (Synchronized across both modes) */}
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                        <span className="text-gold-300 font-bold ml-1">{isRtl ? 'انتقال سريع:' : 'Quick:'}</span>
+                        {[
+                          { name: 'الفاتحة', p: 1 },
+                          { name: 'البقرة', p: 2 },
+                          { name: 'الكهف', p: 293 },
+                          { name: 'يس', p: 440 },
+                          { name: 'الملك', p: 562 },
+                          { name: 'جزء عم', p: 582 }
+                        ].map(lm => (
+                          <button
+                            key={lm.p}
+                            type="button"
+                            onClick={() => handleNavigateMushafPage(lm.p)}
+                            className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition ${
+                              mushafPageNumber === lm.p
+                                ? 'bg-gold-500 text-emerald-950 border-gold-300 font-black ring-1 ring-gold-400'
+                                : 'bg-emerald-900/80 hover:bg-emerald-800 text-gold-200 border-emerald-700'
+                            }`}
+                          >
+                            {lm.name} ({lm.p})
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ================= MODE A: THE REAL PRINTED MADINAH MUSHAF PAGE ================= */}
+                {hifzViewMode === 'mushaf_page' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    
+                    {/* Navigation Bar for Mushaf Page (Mode 1 - Fully Synchronized) */}
+                    <div className="card-islamic-pearl rounded-2xl p-4 shadow-sm border border-emerald-800/15 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex flex-wrap items-center gap-3">
+                        {/* Surah Dropdown */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-emerald-950">{isRtl ? 'السورة المباركة:' : 'Surah:'}</span>
+                          <select
+                            value={mushafCurrentSurahId}
+                            onChange={(e) => {
+                              const sid = parseInt(e.target.value);
+                              const surahItem = MUSHAF_SURAHS_PAGE_MAP.find(s => s.id === sid);
+                              if (surahItem) {
+                                handleNavigateMushafPage(surahItem.startPage);
+                              }
+                            }}
+                            className="bg-white border-2 border-emerald-700/40 rounded-xl px-3 py-1.5 text-xs text-emerald-950 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                          >
+                            {MUSHAF_SURAHS_PAGE_MAP.map(s => (
+                              <option key={s.id} value={s.id}>
+                                {s.id}. سورة {s.name} (صفحة {s.startPage})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Direct Page Input */}
+                        <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-300">
+                          <span className="text-xs font-bold text-slate-700">{isRtl ? 'الصفحة:' : 'Page:'}</span>
+                          <input
+                            type="number"
+                            min={1}
+                            max={604}
+                            value={mushafPageNumber}
+                            onChange={(e) => {
+                              const p = Math.max(1, Math.min(604, parseInt(e.target.value) || 1));
+                              handleNavigateMushafPage(p);
+                            }}
+                            className="w-14 bg-white text-emerald-950 border border-slate-300 rounded-lg px-2 py-0.5 text-xs font-bold text-center focus:outline-none"
+                          />
+                          <span className="text-[11px] text-slate-500">{isRtl ? 'من 604' : 'of 604'}</span>
+                        </div>
+                      </div>
+
+                      {/* Prev / Next & Action to Test */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleNavigateMushafPage(mushafPageNumber + 1)}
+                          disabled={mushafPageNumber >= 604}
+                          className="bg-white hover:bg-slate-50 disabled:opacity-40 text-emerald-950 border border-slate-300 px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
+                        >
+                          <span>➡️</span>
+                          <span>{isRtl ? 'الوجه التالي' : 'Next'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleNavigateMushafPage(mushafPageNumber - 1)}
+                          disabled={mushafPageNumber <= 1}
+                          className="bg-white hover:bg-slate-50 disabled:opacity-40 text-emerald-950 border border-slate-300 px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
+                        >
+                          <span>{isRtl ? 'الوجه السابق' : 'Prev'}</span>
+                          <span>⬅️</span>
+                        </button>
+
+                        {/* Switch to Testing for this page (Twin Sync) */}
+                        <button
+                          type="button"
+                          onClick={() => handleNavigateMushafPage(mushafPageNumber, 'interactive_test')}
+                          className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-4 py-1.5 rounded-xl text-xs font-black shadow transition flex items-center gap-1.5"
+                        >
+                          <span>🎯</span>
+                          <span>{isRtl ? 'اختبار إتقان هذا الوجه ⬅' : 'Test This Page ⬅'}</span>
+                        </button>
+                      </div>
+                    </div>
+                    {/* The Authentic 15-Line Printed Madinah Mushaf Page */}
+                    <div className="flex justify-center">
+                      <div className="bg-white rounded-3xl p-4 sm:p-8 shadow-2xl border-4 border-emerald-950/20 max-w-4xl w-full relative">
+                        {/* Top Mushaf Header */}
+                        <div className="flex justify-between items-center pb-3 mb-4 border-b-2 border-gold-500/70 text-emerald-950 font-bold font-cairo text-sm sm:text-base">
+                          <div className="flex items-center gap-2 text-emerald-900">
+                            <span>📖</span>
+                            <span>
+                              {isRtl 
+                                ? 'سورة ' + ((MUSHAF_SURAHS_PAGE_MAP.find(s => mushafPageNumber >= s.startPage && mushafPageNumber <= s.endPage))?.name || 'الملك')
+                                : 'Surah ' + ((MUSHAF_SURAHS_PAGE_MAP.find(s => mushafPageNumber >= s.startPage && mushafPageNumber <= s.endPage))?.name || 'Al-Mulk')}
+                            </span>
+                          </div>
+
+                          <div className="text-gold-700 font-extrabold text-xs sm:text-sm">
+                            {isRtl ? 'مصحف المدينة النبوية — مجمع الملك فهد لطباعة المصحف الشريف' : 'King Fahd Complex Madinah Mushaf'}
+                          </div>
+
+                          <div className="text-emerald-900">
+                            <span>{isRtl ? 'الجزء ' + Math.ceil(mushafPageNumber / 20) : 'Juz ' + Math.ceil(mushafPageNumber / 20)}</span>
+                          </div>
+                        </div>
+
+                        {/* Interactive Testing Toolbar Directly on Printed Mushaf Page */}
+                        <div className="mb-4 bg-emerald-950/5 border border-gold-400/50 rounded-2xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base sm:text-lg">🛠️</span>
+                            <div>
+                              <span className="text-xs sm:text-sm font-bold text-emerald-950 font-cairo block">
+                                {isRtl ? 'أدوات اختبار الحفظ المباشرة على وجه المصحف:' : 'Mushaf Testing Tools:'}
+                              </span>
+                              <span className="text-[11px] text-slate-500 hidden sm:block">
+                                {isRtl ? 'أقنعة ومساطر تفاعلية لتسميع الوجه سطراً بسطر أو حجب أجزاء منه' : 'Interactive masks and rulers directly on page'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                            {/* 1. Ruler mode */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMushafOverlayMode(mushafOverlayMode === 'ruler' ? 'none' : 'ruler');
+                                setActiveRulerLine(1);
+                              }}
+                              className={'px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1 border ' + (mushafOverlayMode === 'ruler' ? 'bg-amber-600 text-white border-amber-700 shadow-sm' : 'bg-white text-emerald-950 border-slate-300 hover:bg-slate-50')}
+                            >
+                              <span>📏</span>
+                              <span>{isRtl ? 'المسطرة الكاشفة (سطراً بسطر)' : 'Line Ruler'}</span>
+                            </button>
+
+                            {/* 2. Mask bottom half */}
+                            <button
+                              type="button"
+                              onClick={() => setMushafOverlayMode(mushafOverlayMode === 'mask_bottom' ? 'none' : 'mask_bottom')}
+                              className={'px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1 border ' + (mushafOverlayMode === 'mask_bottom' ? 'bg-amber-600 text-white border-amber-700 shadow-sm' : 'bg-white text-emerald-950 border-slate-300 hover:bg-slate-50')}
+                            >
+                              <span>🔻</span>
+                              <span>{isRtl ? 'حجب النصف الأسفل (8-15)' : 'Mask Bottom'}</span>
+                            </button>
+
+                            {/* 3. Mask top half */}
+                            <button
+                              type="button"
+                              onClick={() => setMushafOverlayMode(mushafOverlayMode === 'mask_top' ? 'none' : 'mask_top')}
+                              className={'px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1 border ' + (mushafOverlayMode === 'mask_top' ? 'bg-amber-600 text-white border-amber-700 shadow-sm' : 'bg-white text-emerald-950 border-slate-300 hover:bg-slate-50')}
+                            >
+                              <span>🔺</span>
+                              <span>{isRtl ? 'حجب النصف الأعلى (1-7)' : 'Mask Top'}</span>
+                            </button>
+
+                            {/* 4. Spotlight */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMushafOverlayMode(mushafOverlayMode === 'spotlight' ? 'none' : 'spotlight');
+                                setActiveRulerLine(1);
+                              }}
+                              className={'px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1 border ' + (mushafOverlayMode === 'spotlight' ? 'bg-amber-600 text-white border-amber-700 shadow-sm' : 'bg-white text-emerald-950 border-slate-300 hover:bg-slate-50')}
+                            >
+                              <span>💡</span>
+                              <span>{isRtl ? 'كشاف تركيز السطر' : 'Spotlight'}</span>
+                            </button>
+
+                            {/* Reset Button */}
+                            {mushafOverlayMode !== 'none' && (
+                              <button
+                                type="button"
+                                onClick={() => setMushafOverlayMode('none')}
+                                className="px-2.5 py-1.5 rounded-xl font-bold bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200 transition flex items-center gap-1"
+                              >
+                                <span>✕</span>
+                                <span>{isRtl ? 'عرض المصحف كاملاً' : 'Full Page'}</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Interactive Ruler Controls (When ruler or spotlight active) */}
+                        {(mushafOverlayMode === 'ruler' || mushafOverlayMode === 'spotlight') && (
+                          <div className="mb-3 bg-amber-50/90 border border-gold-400 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 shadow-xs animate-fadeIn">
+                            <div className="flex items-center gap-2">
+                              <span className="text-amber-900 font-bold text-xs sm:text-sm">
+                                📌 {isRtl ? 'السطر النشط:' : 'Active Line:'}
+                              </span>
+                              <span className="bg-emerald-900 text-gold-200 px-3 py-1 rounded-xl text-xs sm:text-sm font-black shadow-xs">
+                                {isRtl ? 'السطر ' + activeRulerLine + ' من 15' : 'Line ' + activeRulerLine + ' of 15'}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                disabled={activeRulerLine >= 15}
+                                onClick={() => setActiveRulerLine(Math.min(15, activeRulerLine + 1))}
+                                className="px-3.5 py-1.5 bg-emerald-900 hover:bg-emerald-800 disabled:opacity-40 text-gold-200 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
+                              >
+                                <span>⬇️</span>
+                                <span>{isRtl ? 'كشف السطر التالي' : 'Next Line'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={activeRulerLine <= 1}
+                                onClick={() => setActiveRulerLine(Math.max(1, activeRulerLine - 1))}
+                                className="px-3.5 py-1.5 bg-white hover:bg-slate-50 disabled:opacity-40 text-emerald-950 border border-slate-300 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
+                              >
+                                <span>⬆️</span>
+                                <span>{isRtl ? 'حجب السطر السابق' : 'Prev Line'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setActiveRulerLine(1)}
+                                className="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-bold transition"
+                                title="إعادة من أول سطر"
+                              >
+                                🔁 {isRtl ? 'البداية' : 'Start'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* The High-Resolution 15-Line Page Image with Authentic Overlays */}
+                        <div className="bg-[#FFFDF9] border-2 border-emerald-900/10 rounded-2xl p-2 sm:p-6 shadow-inner flex justify-center items-center relative overflow-hidden select-none">
+                          <div className="relative inline-block w-full max-w-3xl">
+                            <img
+                              key={mushafPageNumber}
+                              src={'https://android.quran.com/data/width_1260/page' + String(mushafPageNumber).padStart(3, '0') + '.png'}
+                              alt={'مصحف المدينة النبوية — صفحة ' + mushafPageNumber}
+                              className="w-full h-auto block mx-auto bg-white filter contrast-110 drop-shadow-sm select-none"
+                              loading="eager"
+                              style={{ minHeight: '500px' }}
+                            />
+
+                            {/* OVERLAY: Ruler Mode (masks everything below activeRulerLine) */}
+                            {mushafOverlayMode === 'ruler' && (
+                              <div
+                                className="absolute left-0 right-0 bottom-0 bg-gradient-to-b from-[#FAF7EE] to-[#EAE4D2] border-t-4 border-amber-600 shadow-2xl flex flex-col items-center justify-center p-4 transition-all duration-300 ease-out select-none"
+                                style={{
+                                  top: (activeRulerLine * 6.55) + '%',
+                                  zIndex: 10
+                                }}
+                              >
+                                <div className="text-center bg-white/95 backdrop-blur-xs border border-amber-600/40 rounded-2xl p-4 sm:p-6 shadow-lg max-w-md mx-auto">
+                                  <span className="text-2xl sm:text-3xl block mb-1">📜</span>
+                                  <p className="text-xs sm:text-sm font-black text-emerald-950 font-cairo">
+                                    {isRtl ? 'مسطرة التحفيظ: بقية الصفحة محجوبة' : 'Blind Ruler Active'}
+                                  </p>
+                                  <p className="text-[11px] sm:text-xs text-slate-600 mt-1 font-medium">
+                                    {isRtl ? 'اقرأ السطر المكشوف أعلاه، ثم اضغط [⬇️ كشف السطر التالي] لمتابعة التسميع' : 'Recite revealed line, then advance'}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* OVERLAY: Mask Bottom Half (Lines 8-15) */}
+                            {mushafOverlayMode === 'mask_bottom' && (
+                              <div 
+                                className="absolute left-0 right-0 bottom-0 top-[52%] bg-gradient-to-b from-[#FAF7EE] to-[#EAE4D2] border-t-4 border-amber-700 shadow-2xl flex items-center justify-center p-4 select-none transition-all duration-300"
+                                style={{ zIndex: 10 }}
+                              >
+                                <div className="text-center bg-white/95 border border-amber-600/40 rounded-2xl p-4 sm:p-6 shadow-xl max-w-sm mx-auto">
+                                  <span className="text-3xl block mb-1">🔒</span>
+                                  <p className="text-xs sm:text-sm font-black text-emerald-950 font-cairo">
+                                    {isRtl ? 'النصف الأسفل محجوب (الأسطر 8 - 15)' : 'Bottom Half Masked'}
+                                  </p>
+                                  <p className="text-[11px] text-slate-600 mt-1">
+                                    {isRtl ? 'اختبار استحضار بقية الوجه غيباً دون الاعتماد على الذاكرة البصرية' : 'Recite remaining lines from pure memory'}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* OVERLAY: Mask Top Half (Lines 1-7) */}
+                            {mushafOverlayMode === 'mask_top' && (
+                              <div 
+                                className="absolute left-0 right-0 top-0 bottom-[48%] bg-gradient-to-b from-[#FAF7EE] to-[#EAE4D2] border-b-4 border-amber-700 shadow-2xl flex items-center justify-center p-4 select-none transition-all duration-300"
+                                style={{ zIndex: 10 }}
+                              >
+                                <div className="text-center bg-white/95 border border-amber-600/40 rounded-2xl p-4 sm:p-6 shadow-xl max-w-sm mx-auto">
+                                  <span className="text-3xl block mb-1">🔒</span>
+                                  <p className="text-xs sm:text-sm font-black text-emerald-950 font-cairo">
+                                    {isRtl ? 'النصف الأعلى محجوب (الأسطر 1 - 7)' : 'Top Half Masked'}
+                                  </p>
+                                  <p className="text-[11px] text-slate-600 mt-1">
+                                    {isRtl ? 'اختبار البدء من منتصف الوجه الشريف وتمكن الحفظ دون السرد التلقائي' : 'Start recitation from middle of page'}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* OVERLAY: Spotlight Mode */}
+                            {mushafOverlayMode === 'spotlight' && (
+                              <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 10 }}>
+                                <div 
+                                  className="absolute left-0 right-0 top-0 bg-slate-900/65 backdrop-blur-[1px] transition-all duration-300"
+                                  style={{ height: Math.max(0, (activeRulerLine - 1) * 6.55) + '%' }}
+                                />
+                                <div 
+                                  className="absolute left-0 right-0 border-y-2 border-gold-400 bg-amber-300/10 shadow-[0_0_20px_rgba(234,179,8,0.4)] transition-all duration-300"
+                                  style={{
+                                    top: ((activeRulerLine - 1) * 6.55) + '%',
+                                    height: '6.55%'
+                                  }}
+                                />
+                                <div 
+                                  className="absolute left-0 right-0 bottom-0 bg-slate-900/65 backdrop-blur-[1px] transition-all duration-300"
+                                  style={{ top: (activeRulerLine * 6.55) + '%' }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Bottom Mushaf Footer */}
+                        <div className="flex justify-between items-center pt-3 mt-4 border-t-2 border-gold-500/70 text-xs sm:text-sm font-bold text-emerald-950">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const p = Math.min(604, mushafPageNumber + 1);
+                              setMushafPageNumber(p);
+                              const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage);
+                              if (sMatch) setMushafCurrentSurahId(sMatch.id);
+                            }}
+                            disabled={mushafPageNumber >= 604}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 disabled:opacity-40 transition flex items-center gap-1 font-bold"
+                          >
+                            <span>➡️</span>
+                            <span>{isRtl ? 'الوجه التالي' : 'Next'}</span>
+                          </button>
+
+                          <div className="text-center">
+                            <span className="text-base sm:text-xl font-extrabold text-gold-600 font-amiri block">
+                              — {mushafPageNumber} —
+                            </span>
+                            <span className="text-[11px] text-slate-500 font-medium">
+                              {isRtl ? 'الحزب ' + Math.ceil(mushafPageNumber / 10) : 'Hizb ' + Math.ceil(mushafPageNumber / 10)}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const p = Math.max(1, mushafPageNumber - 1);
+                              setMushafPageNumber(p);
+                              const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage);
+                              if (sMatch) setMushafCurrentSurahId(sMatch.id);
+                            }}
+                            disabled={mushafPageNumber <= 1}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 disabled:opacity-40 transition flex items-center gap-1 font-bold"
+                          >
+                            <span>{isRtl ? 'الوجه السابق' : 'Prev'}</span>
+                            <span>⬅️</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ================= MODE B: INTERACTIVE RECITATION & MASTERY TESTING ================= */}
+                {hifzViewMode === 'interactive_test' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    
+                    {/* Live Recitation Controls Ribbon */}
+                    <div className="card-islamic-amber rounded-3xl p-5 shadow-sm border border-gold-400/60">
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-amber-900/10">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">🎛️</span>
+                          <div>
+                            <h3 className="text-sm font-extrabold text-emerald-950 font-cairo">
+                              {isRtl ? 'حقيبة اختبارات الإتقان المبتكرة للمحفظ (اختر نوع الاختبار التفاعلي):' : 'Creative Mastery Testing Suite:'}
+                            </h3>
+                            <p className="text-[11px] text-slate-600">
+                              {isRtl ? 'طرق اختبار ذكية وغير مسبوقة لقياس قوة الحفظ، ترابط الآيات، وفواصل الأسماء الحسنى' : 'Unprecedented tests: endings, starters, divine attributes, cloze, and reverse order'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setHifzViewMode('mushaf_page')}
+                          className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 border border-gold-400/40 text-xs px-4 py-2 rounded-xl font-bold transition flex items-center gap-1.5 shadow-sm"
+                        >
+                          <span>📖</span>
+                          <span>{isRtl ? 'الرجوع للمصحف الورقي' : 'View Mushaf'}</span>
+                        </button>
+                      </div>
+
+                      {/* Six Creative Testing Modes Buttons */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                        
+                        {/* 1. Mask Endings */}
+                        <button
+                          type="button"
+                          onClick={() => setIsEndingsMasked(!isEndingsMasked)}
+                          className={`p-2.5 rounded-xl font-bold text-xs transition flex flex-col items-center justify-center text-center gap-1 border shadow-xs ${
+                            isEndingsMasked
+                              ? 'bg-amber-600 text-white border-amber-700 ring-2 ring-amber-400 font-black'
+                              : 'bg-white hover:bg-amber-50 text-emerald-950 border-amber-300'
+                          }`}
+                          title={isRtl ? 'طمس آخر كلمتين لاختبار حفظ فواصل الآيات' : 'Mask Endings'}
+                        >
+                          <span className="text-base">{isEndingsMasked ? '🙈' : '👁️'}</span>
+                          <span>{isRtl ? (isEndingsMasked ? 'إلغاء طمس الفواصل' : 'طمس فواصل الآيات') : 'Mask Endings'}</span>
+                        </button>
+
+                        {/* 2. Mask Starters (Innovative) */}
+                        <button
+                          type="button"
+                          onClick={() => setIsStartersMasked(!isStartersMasked)}
+                          className={`p-2.5 rounded-xl font-bold text-xs transition flex flex-col items-center justify-center text-center gap-1 border shadow-xs ${
+                            isStartersMasked
+                              ? 'bg-amber-600 text-white border-amber-700 ring-2 ring-amber-400 font-black'
+                              : 'bg-white hover:bg-amber-50 text-emerald-950 border-amber-300'
+                          }`}
+                          title={isRtl ? 'طمس أول كلمتين لاختبار استحضار مطالع الآيات وترابطها' : 'Mask Starters'}
+                        >
+                          <span className="text-base">🔀</span>
+                          <span>{isRtl ? (isStartersMasked ? 'إلغاء طمس المطالع' : 'طمس مطالع الآيات') : 'Mask Starters'}</span>
+                        </button>
+
+                        {/* 3. Mask Divine Attributes (Innovative) */}
+                        <button
+                          type="button"
+                          onClick={() => setIsDivineNamesMasked(!isDivineNamesMasked)}
+                          className={`p-2.5 rounded-xl font-bold text-xs transition flex flex-col items-center justify-center text-center gap-1 border shadow-xs ${
+                            isDivineNamesMasked
+                              ? 'bg-amber-600 text-white border-amber-700 ring-2 ring-amber-400 font-black'
+                              : 'bg-white hover:bg-amber-50 text-emerald-950 border-amber-300'
+                          }`}
+                          title={isRtl ? 'طمس أسماء الله وصفاته في الفواصل لمنع الخلط الشائع' : 'Mask Divine Attributes'}
+                        >
+                          <span className="text-base">👑</span>
+                          <span>{isRtl ? (isDivineNamesMasked ? 'إلغاء طمس الصفات' : 'طمس الأسماء الحسنى') : 'Divine Names'}</span>
+                        </button>
+
+                        {/* 4. Alternating 50% Cloze (Innovative) */}
+                        <button
+                          type="button"
+                          onClick={() => setIsAlternatingMasked(!isAlternatingMasked)}
+                          className={`p-2.5 rounded-xl font-bold text-xs transition flex flex-col items-center justify-center text-center gap-1 border shadow-xs ${
+                            isAlternatingMasked
+                              ? 'bg-amber-600 text-white border-amber-700 ring-2 ring-amber-400 font-black'
+                              : 'bg-white hover:bg-amber-50 text-emerald-950 border-amber-300'
+                          }`}
+                          title={isRtl ? 'إخفاء كلمة وترك كلمة لتحفيز اليقظة العقلية الفائقة' : 'Alternating 50% Cloze'}
+                        >
+                          <span className="text-base">🏁</span>
+                          <span>{isRtl ? (isAlternatingMasked ? 'إلغاء التظليل' : 'تظليل تبادلي 50%') : 'Cloze 50%'}</span>
+                        </button>
+
+                        {/* 5. Reverse Order Recitation (Innovative) */}
+                        <button
+                          type="button"
+                          onClick={() => setIsReverseOrder(!isReverseOrder)}
+                          className={`p-2.5 rounded-xl font-bold text-xs transition flex flex-col items-center justify-center text-center gap-1 border shadow-xs ${
+                            isReverseOrder
+                              ? 'bg-emerald-800 text-gold-300 border-emerald-900 ring-2 ring-emerald-500 font-black'
+                              : 'bg-white hover:bg-emerald-50 text-emerald-950 border-emerald-300'
+                          }`}
+                          title={isRtl ? 'عرض الآيات من الأسفل للأعلى لاختبار الحفظ الصارم' : 'Reverse Order Test'}
+                        >
+                          <span className="text-base">🔄</span>
+                          <span>{isRtl ? (isReverseOrder ? 'الترتيب الأصلي' : 'تسميع عكسي صاعد') : 'Reverse Order'}</span>
+                        </button>
+
+                        {/* 6. Full Blind Recitation */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsFullMasked(!isFullMasked);
+                            setRevealedAyahSet(new Set([1]));
+                          }}
+                          className={`p-2.5 rounded-xl font-bold text-xs transition flex flex-col items-center justify-center text-center gap-1 border shadow-xs ${
+                            isFullMasked
+                              ? 'bg-emerald-800 text-gold-300 border-emerald-900 ring-2 ring-emerald-500 font-black'
+                              : 'bg-white hover:bg-emerald-50 text-emerald-950 border-emerald-300'
+                          }`}
+                          title={isRtl ? 'إخفاء كامل للآيات مع النقر لكشف أي كلمة أو آية' : 'Full Blind Recitation'}
+                        >
+                          <span className="text-base">{isFullMasked ? '📖' : '🔒'}</span>
+                          <span>{isRtl ? (isFullMasked ? 'كشف الكل' : 'تسميع غيبي كامل') : 'Blind Mode'}</span>
+                        </button>
+
+                      </div>
+
+                      
+                      {/* Passage-Based Testing Ribbon (Start, Middle, End) */}
+                      <div className="mt-4 pt-3.5 border-t border-amber-900/15">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-950">
+                            <span className="text-base">📑</span>
+                            <span>{isRtl ? 'اختبار المقاطع القرآنية بالصفحة (حجب مقطع وتسميعه مع تحكيم المعلم):' : 'Passage-Based Recitation Tests:'}</span>
+                          </div>
+                          <span className="text-[11px] text-slate-500 hidden sm:inline">
+                            {isRtl ? 'يتم حجب المقطع، فإن أتقنه تنقر [✅ قالها صح] ليظهر، وإن أخطأ تنقر [⚠️ قالها غلط] ليعيده' : 'Hide passage, verify, and reveal'}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                          {/* 1. Start Passage */}
+                          <button
+                            type="button"
+                            onClick={() => handleActivatePassageTest('start')}
+                            className={'p-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 border shadow-xs ' + (
+                              passageTestSection === 'start'
+                                ? 'bg-amber-700 text-white border-amber-800 ring-2 ring-amber-400 font-black'
+                                : 'bg-white hover:bg-amber-50 text-emerald-950 border-amber-300'
+                            )}
+                          >
+                            <span>🟢</span>
+                            <span>{isRtl ? 'مقطع بداية الصفحة' : 'Start Passage'}</span>
+                          </button>
+
+                          {/* 2. Middle Passage */}
+                          <button
+                            type="button"
+                            onClick={() => handleActivatePassageTest('middle')}
+                            className={'p-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 border shadow-xs ' + (
+                              passageTestSection === 'middle'
+                                ? 'bg-amber-700 text-white border-amber-800 ring-2 ring-amber-400 font-black'
+                                : 'bg-white hover:bg-amber-50 text-emerald-950 border-amber-300'
+                            )}
+                          >
+                            <span>🟡</span>
+                            <span>{isRtl ? 'مقطع وسط الصفحة' : 'Middle Passage'}</span>
+                          </button>
+
+                          {/* 3. End Passage */}
+                          <button
+                            type="button"
+                            onClick={() => handleActivatePassageTest('end')}
+                            className={'p-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 border shadow-xs ' + (
+                              passageTestSection === 'end'
+                                ? 'bg-amber-700 text-white border-amber-800 ring-2 ring-amber-400 font-black'
+                                : 'bg-white hover:bg-amber-50 text-emerald-950 border-amber-300'
+                            )}
+                          >
+                            <span>🔴</span>
+                            <span>{isRtl ? 'مقطع ختام الصفحة' : 'End Passage'}</span>
+                          </button>
+
+                          {/* Reset / Status */}
+                          {passageTestSection !== 'none' ? (
+                            <button
+                              type="button"
+                              onClick={() => handlePassageVerdict('reset')}
+                              className="p-2.5 rounded-xl font-bold bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 transition flex items-center justify-center gap-1"
+                            >
+                              <span>✕</span>
+                              <span>{isRtl ? 'إلغاء اختبار المقاطع' : 'Cancel Test'}</span>
+                            </button>
+                          ) : (
+                            <div className="text-[11px] text-slate-500 flex items-center justify-center text-center p-1 font-medium bg-amber-50/50 rounded-xl border border-dashed border-amber-300">
+                              {isRtl ? '💡 اختر مقطعاً لبدء التسميع' : 'Select a passage to test'}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+{/* Reset custom masks button if any active */}
+                      {customMaskedWords.size > 0 && (
+                        <div className="mt-3 pt-2 border-t border-amber-900/10 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => setCustomMaskedWords(new Set())}
+                            className="bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 text-xs px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1"
+                          >
+                            <span>🔄</span>
+                            <span>{isRtl ? 'إلغاء طمس الكلمات اليدوية (' + customMaskedWords.size + ')' : 'Reset Manual Masks'}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Quranic Ayahs Board with Clickable Words */}
+                    <div className="card-islamic-pearl rounded-3xl p-6 sm:p-8 shadow-md border-2 border-emerald-900/20 relative">
+                      
+                      {/* Mode 2 Synchronized Quran Page Navigator (Full 604-Page Freedom & Twin Sync) */}
+                      <div className="w-full bg-emerald-950/5 border-2 border-gold-400/60 rounded-2xl p-3.5 mb-5 space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div className="flex flex-wrap items-center gap-3">
+                            {/* Surah Dropdown in Mode 2 */}
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-emerald-950">{isRtl ? 'السورة المباركة:' : 'Surah:'}</span>
+                              <select
+                                value={mushafCurrentSurahId}
+                                onChange={(e) => {
+                                  const sid = parseInt(e.target.value);
+                                  const surahItem = MUSHAF_SURAHS_PAGE_MAP.find(s => s.id === sid);
+                                  if (surahItem) {
+                                    handleNavigateMushafPage(surahItem.startPage);
+                                  }
+                                }}
+                                className="bg-white border-2 border-emerald-700/40 rounded-xl px-3 py-1.5 text-xs text-emerald-950 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                              >
+                                {MUSHAF_SURAHS_PAGE_MAP.map(s => (
+                                  <option key={s.id} value={s.id}>
+                                    {s.id}. سورة {s.name} (صفحة {s.startPage})
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Direct Page Input in Mode 2 */}
+                            <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-300 shadow-xs">
+                              <span className="text-xs font-bold text-slate-700">{isRtl ? 'الصفحة:' : 'Page:'}</span>
+                              <input
+                                type="number"
+                                min={1}
+                                max={604}
+                                value={mushafPageNumber}
+                                onChange={(e) => {
+                                  const p = Math.max(1, Math.min(604, parseInt(e.target.value) || 1));
+                                  handleNavigateMushafPage(p);
+                                }}
+                                className="w-14 bg-slate-50 text-emerald-950 border border-slate-300 rounded-lg px-2 py-0.5 text-xs font-bold text-center focus:outline-none"
+                              />
+                              <span className="text-[11px] text-slate-500">{isRtl ? 'من 604' : 'of 604'}</span>
+                            </div>
+                          </div>
+
+                          {/* Navigation Buttons + Return to Mushaf Mode + Font Scale */}
+                          <div className="flex flex-wrap items-center gap-2">
+                            {/* Next Page */}
+                            <button
+                              type="button"
+                              onClick={() => handleNavigateMushafPage(mushafPageNumber + 1)}
+                              disabled={mushafPageNumber >= 604}
+                              className="bg-white hover:bg-slate-50 disabled:opacity-40 text-emerald-950 border border-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
+                            >
+                              <span>➡️</span>
+                              <span>{isRtl ? 'الوجه التالي' : 'Next'}</span>
+                            </button>
+
+                            {/* Prev Page */}
+                            <button
+                              type="button"
+                              onClick={() => handleNavigateMushafPage(mushafPageNumber - 1)}
+                              disabled={mushafPageNumber <= 1}
+                              className="bg-white hover:bg-slate-50 disabled:opacity-40 text-emerald-950 border border-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
+                            >
+                              <span>{isRtl ? 'الوجه السابق' : 'Prev'}</span>
+                              <span>⬅️</span>
+                            </button>
+
+                            {/* Button to toggle back to Printed Mushaf Page Mode */}
+                            <button
+                              type="button"
+                              onClick={() => setHifzViewMode('mushaf_page')}
+                              className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 border border-gold-400/50 px-3.5 py-1.5 rounded-xl text-xs font-black shadow transition flex items-center gap-1.5"
+                            >
+                              <span>📖</span>
+                              <span>{isRtl ? 'عرض وجه المصحف الورقي' : 'View Mushaf Page'}</span>
+                            </button>
+
+                            {/* Font Size Toggle */}
+                            <div className="flex items-center gap-1 bg-white border border-slate-300 rounded-xl px-2 py-1 text-xs shadow-xs">
+                              <span className="text-[11px] font-bold text-slate-500">{isRtl ? 'الخط:' : 'Font:'}</span>
+                              {['small', 'medium', 'large'].map(sz => (
+                                <button
+                                  key={sz}
+                                  type="button"
+                                  onClick={() => setQuranFontSize(sz)}
+                                  className={'px-2 py-0.5 rounded-lg text-xs font-bold transition ' + (
+                                    quranFontSize === sz ? 'bg-emerald-900 text-gold-200 font-black' : 'text-slate-600 hover:text-emerald-950'
+                                  )}
+                                >
+                                  {sz === 'small' ? (isRtl ? 'صغير' : 'S') : sz === 'medium' ? (isRtl ? 'متوسط' : 'M') : (isRtl ? 'كبير' : 'L')}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Surah Title & Range Header Banner */}
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-emerald-900/10">
+                          <div className="flex items-center gap-2">
+                            <span className="w-8 h-8 rounded-xl bg-emerald-900 text-gold-300 font-amiri font-bold flex items-center justify-center text-sm shadow-sm">
+                              ۞
+                            </span>
+                            <div>
+                              <h3 className="text-base font-extrabold text-emerald-950 font-amiri">
+                                {hifzSurahName} — {isRtl ? 'الآيات (' + hifzAyahRange + ')' : 'Ayahs (' + hifzAyahRange + ')'}
+                              </h3>
+                              <p className="text-[11px] text-slate-500">
+                                {isRtl ? 'لوحة التسميع متزامنة تماماً مع وجه المصحف الورقي (صفحة ' + mushafPageNumber + ')' : 'Recitation board synchronized with Mushaf page ' + mushafPageNumber}
+                              </p>
+                            </div>
+                          </div>
+
+                          {isFetchingQuran && (
+                            <span className="text-xs bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1 rounded-full font-bold animate-pulse">
+                              ⏳ {isRtl ? 'جارٍ جلب الآيات بالرسم العثماني...' : 'Fetching Uthmani text...'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {/* Active Passage Arbitration Panel */}
+                      {passageTestSection !== 'none' && (
+                        <div className="w-full mb-6 p-4 sm:p-5 rounded-2xl border-2 shadow-md bg-gradient-to-r from-amber-50 via-emerald-50 to-amber-50 border-gold-400/80 animate-fadeIn">
+                          <div className="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-amber-900/15">
+                            <div className="flex items-center gap-2.5">
+                              <span className="text-2xl sm:text-3xl">🎙️</span>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-cairo font-black text-sm sm:text-base text-emerald-950">
+                                    {isRtl ? 'مقطع التسميع النشط: ' : 'Active Passage: '}
+                                    {passageTestSection === 'start' && (isRtl ? 'بداية الصفحة' : 'Start of Page')}
+                                    {passageTestSection === 'middle' && (isRtl ? 'وسط الصفحة' : 'Middle of Page')}
+                                    {passageTestSection === 'end' && (isRtl ? 'ختام الصفحة' : 'End of Page')}
+                                  </span>
+                                  <span className="bg-emerald-900 text-gold-300 text-xs font-bold px-2.5 py-0.5 rounded-lg shadow-xs">
+                                    {isRtl ? 'الآيات (' + Array.from(passageMaskedAyahs).join(', ') + ')' : 'Ayahs (' + Array.from(passageMaskedAyahs).join(', ') + ')'}
+                                  </span>
+                                </div>
+                                
+                                {/* Dynamic Status Text */}
+                                <div className="text-xs mt-1 font-bold">
+                                  {passageStatus === 'reciting' && (
+                                    <span className="text-amber-800 animate-pulse flex items-center gap-1">
+                                      <span>🎧</span>
+                                      <span>{isRtl ? 'الشيخ يستمع لتسميع الطالب... اضغط [قالها صح] لإظهارها أو [قالها غلط] لإعادتها' : 'Listening to student...'}</span>
+                                    </span>
+                                  )}
+                                  {passageStatus === 'correct' && (
+                                    <span className="text-emerald-800 flex items-center gap-1">
+                                      <span>✨</span>
+                                      <span>{isRtl ? 'ما شاء الله! قراءة صحيحة ومتقنة — تم إظهار المقطع بنجاح' : 'Mastered! Revealed'}</span>
+                                    </span>
+                                  )}
+                                  {passageStatus === 'error_retry' && (
+                                    <span className="text-rose-800 flex items-center gap-1">
+                                      <span>⚠️</span>
+                                      <span>{isRtl ? 'وقع خطأ أثناء التسميع (المحاولة ' + passageRetryCount + ') — على الطالب إعادة المقطع مرة أخرى لتثبيته!' : 'Mistake! Student must retry'}</span>
+                                    </span>
+                                  )}
+                                  {passageStatus === 'revealed_for_review' && (
+                                    <span className="text-blue-800 flex items-center gap-1">
+                                      <span>📖</span>
+                                      <span>{isRtl ? 'تم إظهار المقطع لتصحيح الخطأ والمراجعة في المصحف' : 'Revealed for review'}</span>
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Status Tag */}
+                            <div className="flex items-center gap-1.5 text-xs">
+                              {passageStatus === 'reciting' && (
+                                <span className="px-3 py-1 rounded-full bg-amber-200 text-amber-900 font-bold shadow-xs">
+                                  🔒 {isRtl ? 'محجوب للتسميع' : 'Masked'}
+                                </span>
+                              )}
+                              {passageStatus === 'correct' && (
+                                <span className="px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 font-black shadow-xs flex items-center gap-1">
+                                  ✅ {isRtl ? 'متقن ومُظهر' : 'Mastered'}
+                                </span>
+                              )}
+                              {passageStatus === 'error_retry' && (
+                                <span className="px-3 py-1 rounded-full bg-rose-200 text-rose-900 font-black shadow-xs flex items-center gap-1 animate-bounce">
+                                  ⚠️ {isRtl ? 'مطلوب الإعادة' : 'Retry'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Teacher Live Verdict Buttons (Exact User Feature) */}
+                          <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {/* 1. Said Correctly Button */}
+                              <button
+                                type="button"
+                                onClick={() => handlePassageVerdict('correct')}
+                                className="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 active:scale-95 text-white rounded-xl text-xs sm:text-sm font-black shadow-md transition flex items-center gap-1.5 border border-emerald-800 cursor-pointer"
+                              >
+                                <span>✅</span>
+                                <span>{isRtl ? 'قالها صح (إظهار المقطع)' : 'Correct (Reveal)'}</span>
+                              </button>
+
+                              {/* 2. Said with Mistake Button */}
+                              <button
+                                type="button"
+                                onClick={() => handlePassageVerdict('error')}
+                                className="px-4 py-2 bg-rose-700 hover:bg-rose-600 active:scale-95 text-white rounded-xl text-xs sm:text-sm font-black shadow-md transition flex items-center gap-1.5 border border-rose-800 cursor-pointer"
+                              >
+                                <span>⚠️</span>
+                                <span>{isRtl ? 'قالها غلط (إعادة المقطع)' : 'Mistake (Retry)'}</span>
+                              </button>
+
+                              {/* 3. If in Retry mode: reveal for review or confirm correct after retry */}
+                              {passageStatus === 'error_retry' && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePassageVerdict('correct')}
+                                    className="px-3.5 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-400 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <span>🔁</span>
+                                    <span>{isRtl ? 'أتقن بعد الإعادة (إظهار)' : 'Mastered after Retry'}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePassageVerdict('reveal_review')}
+                                    className="px-3.5 py-2 bg-blue-100 hover:bg-blue-200 text-blue-900 border border-blue-400 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <span>👁️</span>
+                                    <span>{isRtl ? 'إظهار للتصحيح والمراجعة' : 'Reveal for Review'}</span>
+                                  </button>
+                                </>
+                              )}
+                            </div>
+
+                            {/* Reset Button */}
+                            <button
+                              type="button"
+                              onClick={() => handlePassageVerdict('reset')}
+                              className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition cursor-pointer"
+                            >
+                              ✕ {isRtl ? 'إنهاء اختبار المقطع' : 'Close'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+{/* Repetition Loop Counter */}
+                        <div className="flex items-center gap-2 bg-emerald-950 text-gold-200 rounded-xl px-3 py-1.5 border border-gold-400/40 text-xs shadow-sm">
+                          <span>🔁 {isRtl ? 'عداد التكرار:' : 'Loop:'}</span>
+                          <div className="flex items-center gap-1">
+                            {[3, 5, 7].map(num => (
+                              <button
+                                key={num}
+                                type="button"
+                                onClick={() => { setRepeatTarget(num); setRepeatCount(0); }}
+                                className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                                  repeatTarget === num ? 'bg-gold-500 text-emerald-950 font-black' : 'text-emerald-300 hover:text-white'
+                                }`}
+                              >
+                                {num}x
+                              </button>
+                            ))}
+                          </div>
+                          <span className="text-gold-400 font-bold px-1">({repeatCount}/{repeatTarget})</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = repeatCount + 1;
+                              setRepeatCount(next > repeatTarget ? 1 : next);
+                              if (next === repeatTarget) {
+                                showToast(isRtl ? '🎉 ما شاء الله! اكتمل نصاب التكرار المطلوب' : 'Target reached! 🎉');
+                              }
+                            }}
+                            className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-black px-2.5 py-0.5 rounded shadow text-xs transition"
+                          >
+                            +1
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Basmalah */}
+                      <div className="text-center font-quran text-2xl text-emerald-900 mb-8 py-2 select-none border-b border-gold-400/20 max-w-md mx-auto">
+                        بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                      </div>
+
+                      {/* Ayahs List */}
+                      <div className="space-y-3 sm:space-y-4">
+                        {(isReverseOrder ? [...hifzAyahs].reverse() : hifzAyahs).map((ayah) => {
+                          const words = ayah.text.split(' ');
+                          const isPassageMasked = passageMaskedAyahs.has(ayah.num);
+                          const isPassageHidden = isPassageMasked && (passageStatus === 'reciting' || passageStatus === 'error_retry');
+                          const isRevealed = (!isFullMasked || revealedAyahSet.has(ayah.num)) && !isPassageHidden;
+
+                          // Common Quranic divine names & attributes in endings
+                          const divineEndingsList = ['ٱلْعَزِيزُ', 'الْعَزِيزُ', 'ٱلْعَزِيزِ', 'ٱلْغَفُورُ', 'الْغَفُورُ', 'ٱلرَّحِيمُ', 'الرَّحِيمُ', 'ٱلسَّمِيعُ', 'السَّمِيعُ', 'ٱلْعَلِيمُ', 'الْعَلِيمُ', 'قَدِيرٌ', 'عَلِيمٌ', 'حَكِيمٌ', 'غَفُورٌ', 'رَّحِيمٌ', 'خَبِيرٌ', 'بَصِيرٌ', 'ٱلتَّوَّابُ', 'التَّوَّابُ', 'ٱلْحَمِيدُ'];
+
+                          return (
+                            <div 
+                              key={ayah.num}
+                              className={`p-3.5 sm:p-4 rounded-2xl transition-all duration-200 bg-white border-2 border-emerald-900/15 shadow-sm hover:border-gold-500/50 ${
+                                activeRepeatAyah === ayah.num 
+                                  ? 'ring-2 ring-gold-400' 
+                                  : ''
+                              }`}
+                            >
+                              <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100 text-xs">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-6 h-6 rounded-full bg-emerald-900 text-gold-300 font-bold flex items-center justify-center text-xs">
+                                    {ayah.num}
+                                  </span>
+                                  <span className="text-slate-600 font-bold">
+                                    {isRtl ? 'الآية رقم ' + ayah.num : 'Ayah ' + ayah.num}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => { setActiveRepeatAyah(ayah.num); setRepeatCount(0); }}
+                                    className={`text-[11px] px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${
+                                      activeRepeatAyah === ayah.num 
+                                        ? 'bg-gold-500 text-emerald-950 font-black' 
+                                        : 'text-slate-600 hover:bg-slate-100 border border-slate-200'
+                                    }`}
+                                  >
+                                    <span>🔁</span>
+                                    <span>{isRtl ? 'تركيز التكرار' : 'Focus'}</span>
+                                  </button>
+
+                                  {isFullMasked && (
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleRevealAyah(ayah.num)}
+                                      className={`text-[11px] px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${
+                                        isRevealed 
+                                          ? 'bg-emerald-100 text-emerald-900' 
+                                          : 'bg-emerald-900 text-gold-300 font-black shadow'
+                                      }`}
+                                    >
+                                      <span>{isRevealed ? '🙈 إخفاء' : '👁️ كشف للطالب'}</span>
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {!isRevealed ? (
+                                isPassageHidden ? (
+                                  <div className={'p-6 sm:p-8 rounded-2xl text-center border-2 transition-all select-none ' + (
+                                    passageStatus === 'error_retry'
+                                      ? 'bg-rose-50 border-rose-400 text-rose-950 shadow-md ring-2 ring-rose-300'
+                                      : 'bg-amber-50/90 border-amber-300 text-amber-950 shadow-inner'
+                                  )}>
+                                    <span className="text-3xl sm:text-4xl block mb-2">
+                                      {passageStatus === 'error_retry' ? '⚠️' : '🔒'}
+                                    </span>
+                                    <div className="font-cairo font-black text-sm sm:text-base">
+                                      {passageStatus === 'error_retry'
+                                        ? (isRtl ? 'وقع خطأ في الآية (' + ayah.num + ') — أعد قراءتها الآن مرة أخرى!' : 'Mistake in Ayah (' + ayah.num + ') — Recite again!')
+                                        : (isRtl ? 'الآية (' + ayah.num + ') محجوبة ضمن مقطع التسميع والاختبار' : 'Ayah (' + ayah.num + ') Masked in Passage')}
+                                    </div>
+                                    <p className="text-xs text-slate-600 mt-1 font-medium">
+                                      {passageStatus === 'error_retry'
+                                        ? (isRtl ? 'لا يتم إظهار الآية حتى يعيد الطالب تلاوتها وتصحيح الخطأ' : 'Student must re-recite before reveal')
+                                        : (isRtl ? 'يقرأها الطالب غيباً — انقر زر [✅ قالها صح] بالأعلى لإظهارها أو [⚠️ قالها غلط] لإعادتها' : 'Recited from memory')}
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <div className="py-6 text-center text-slate-400 font-amiri text-lg border-2 border-dashed border-emerald-900/20 rounded-xl bg-emerald-950/5 select-none">
+                                    🔒 {isRtl ? 'الآية مخفية للتسميع الغيبي — اضغط "كشف للطالب" عند إتمام القراءة' : 'Ayah hidden for blind recitation'}
+                                  </div>
+                                )
+                              ) : (
+                                <div className={'font-quran font-bold text-black text-right flex flex-wrap gap-x-2 gap-y-2 items-baseline select-none ' + (
+                                  quranFontSize === 'small' 
+                                    ? 'text-lg sm:text-xl leading-[2.0]' 
+                                    : quranFontSize === 'large' 
+                                      ? 'text-2xl sm:text-3xl leading-[2.4]' 
+                                      : 'text-xl sm:text-2xl leading-[2.2]'
+                                )}>
+                                  {words.map((word, wIdx) => {
+                                    const isEndingWord = isEndingsMasked && (wIdx >= words.length - 2);
+                                    const isStarterWord = isStartersMasked && (wIdx < 2);
+                                    const isDivineNameWord = isDivineNamesMasked && (wIdx >= words.length - 3) && divineEndingsList.some(d => word.includes(d) || d.includes(word));
+                                    const isAlternatingWord = isAlternatingMasked && (wIdx % 2 === 1);
+                                    const isCustomMasked = customMaskedWords.has(ayah.num + '-' + wIdx);
+                                    const isMasked = isEndingWord || isStarterWord || isDivineNameWord || isAlternatingWord || isCustomMasked;
+
+                                    return (
+                                      <span
+                                        key={wIdx}
+                                        onClick={() => toggleWordMask(ayah.num, wIdx)}
+                                        className={`px-1.5 py-0.5 rounded-lg cursor-pointer transition-all ${
+                                          isMasked 
+                                            ? 'bg-amber-200 text-amber-950 border-b-2 border-dashed border-amber-600 px-3 font-sans text-base select-none shadow-xs font-bold' 
+                                            : 'hover:bg-gold-200 hover:text-emerald-950'
+                                        }`}
+                                        title={isMasked ? (isRtl ? 'انقر لكشف الكلمة' : 'Click to reveal') : (isRtl ? 'انقر لطمس الكلمة' : 'Click to mask')}
+                                      >
+                                        {isMasked ? '[ ... ]' : word}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                )}
+
+                {/* POST-RECITATION WHATSAPP BROADCAST TOOL */}
+                <div className="card-islamic-amber rounded-2xl p-4 sm:p-5 shadow-sm border border-gold-300/80 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🎛️</span>
+                    <div>
+                      <h3 className="text-sm font-bold text-emerald-950 font-cairo">
+                        {isRtl ? 'وِرد المدارسة والتذكرة بعد الحلقة' : 'Post-Session Student Broadcast'}
+                      </h3>
+                      <p className="text-[11px] text-slate-600">
+                        {isRtl ? 'أرسل لطلابك وِرد الوجه ومتشابهاته وتوجيهاتك بضغطة واحدة عبر الواتساب' : 'Send WhatsApp broadcast to students'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const curSurah = (MUSHAF_SURAHS_PAGE_MAP.find(s => mushafPageNumber >= s.startPage && mushafPageNumber <= s.endPage))?.name || 'الملك';
+                        const msg = '🕌 *حلقة القرآن الكريم — وِرد مدارسة ومراجعة الوجه*\n' +
+                          '📖 *المقرر:* سورة ' + curSurah + ' (صفحة ' + mushafPageNumber + ' من مصحف المدينة)\n\n' +
+                          '🔁 *توجيه الشيخ:* يُرجى تكرار هذا الوجه 5 مرات غيباً وتثبيت فواصل الآيات ومواضع المتشابهات قبل الحلقة القادمة.\n\n' +
+                          '✨ *منظومة مِشكاة — AnubisLand*';
+                        navigator.clipboard.writeText(msg);
+                        showToast(isRtl ? 'تم نسخ رسالة وِرد الوجه للواتساب بنجاح 📋' : 'WhatsApp broadcast copied to clipboard 📋');
+                      }}
+                      className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 text-xs font-black px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5"
+                    >
+                      <span>📱</span>
+                      <span>{isRtl ? 'نسخ وِرد الوجه للدارسين (واتساب)' : 'Copy WhatsApp Broadcast'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* MUTASHABIHAT CROSS-REFERENCE ANALYZER */}
+                <div className="card-islamic-sage rounded-3xl p-6 shadow-sm border border-emerald-300/80">
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-emerald-900/10">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">🔍</span>
+                      <div>
+                        <h3 className="text-lg font-bold text-emerald-950 font-cairo">
+                          {isRtl ? 'كاشف المتشابهات اللفظية وتنبيهات الحفظ' : 'Mutashabihat Cross-Reference Analyzer'}
+                        </h3>
+                        <p className="text-xs text-emerald-900/80">
+                          {isRtl ? 'تنبيهات فورية للمحفظ بمواضع التشابه مع سور أخرى لتجنيب الدارسين الخطأ في التسميع' : 'Cross-references to alert students against common confusion'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAddMutaOpen(!isAddMutaOpen);
+                        if (!mutaTargetText) {
+                          handleFetchTargetMutaAyah(mutaTargetSurahId, mutaTargetAyahNum);
+                        }
+                      }}
+                      className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition border border-gold-400/40"
+                    >
+                      <span>{isAddMutaOpen ? '✕' : '➕'}</span>
+                      <span>{isRtl ? (isAddMutaOpen ? 'إغلاق نافذة الإضافة' : 'إضافة أو ربط متشابهة جديدة') : (isAddMutaOpen ? 'Close' : 'Link New Mutashabiha')}</span>
+                    </button>
+                  </div>
+
+                  {/* Add Mutashabiha Drawer */}
+                  {isAddMutaOpen && (
+                    <div className="mb-6 bg-white/95 border-2 border-emerald-700/40 rounded-2xl p-5 shadow-lg animate-fadeIn text-slate-800">
+                      <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
+                        <div className="flex items-center gap-2 font-bold text-emerald-900 text-sm">
+                          <span>🔗</span>
+                          <span>{isRtl ? 'إدراج متشابهة لفظية خاصة وتوجيه المعلم للدارس' : 'Add Custom Mutashabiha & Guidance Note'}</span>
+                        </div>
+                        <span className="text-[11px] text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 font-bold">
+                          {isRtl ? 'بالرسم العثماني المعتمد' : 'Verified Uthmani'}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        {/* Search Query */}
+                        <div className="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200">
+                          <label className="block text-xs font-bold text-emerald-900 mb-1.5">
+                            {isRtl ? '1. ابحث بكلمة من الآية المتشابهة في القرآن:' : '1. Search phrase in Quran:'}
+                          </label>
+                          <div className="flex gap-1.5 mb-2">
+                            <input
+                              type="text"
+                              value={mutaSearchQuery}
+                              onChange={(e) => setMutaSearchQuery(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === 'Enter') handleSearchMutaAyahs(); }}
+                              placeholder={isRtl ? 'ابحث بكلمة (مثال: عزيز غفور)...' : 'Search phrase...'}
+                              className="flex-1 bg-white border border-emerald-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-600"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleSearchMutaAyahs}
+                              disabled={isSearchingMuta}
+                              className="bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1"
+                            >
+                              <span>{isSearchingMuta ? '⏳' : '🔍'}</span>
+                              <span>{isRtl ? 'بحث' : 'Search'}</span>
+                            </button>
+                          </div>
+
+                          {mutaSearchResults.length > 0 && (
+                            <div className="mb-2 bg-white border border-emerald-300 rounded-lg max-h-36 overflow-y-auto divide-y divide-emerald-100 shadow-sm">
+                              {mutaSearchResults.map((m, idx) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => handleSelectMutaMatch(m)}
+                                  className="w-full text-right p-2 hover:bg-emerald-50 transition block text-[11px] leading-snug"
+                                  dir="rtl"
+                                >
+                                  <span className="font-bold text-emerald-900 block">
+                                    📖 {m.surah.name} (آية {m.numberInSurah}):
+                                  </span>
+                                  <span className="text-slate-700 font-quran">{m.text}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Target Ayah Display */}
+                        <div className="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200">
+                          <label className="block text-xs font-bold text-amber-900 mb-1.5">
+                            {isRtl ? '2. الموضع المتشابه المختار بالرسم العثماني:' : '2. Selected similar ayah:'}
+                          </label>
+                          <div className="p-2.5 bg-white rounded-lg border border-amber-200/80 font-quran text-sm text-amber-950 leading-relaxed min-h-[60px]" dir="rtl">
+                            {mutaTargetText || (isRtl ? 'ابحث عن الآية لتظهر هنا بالرسم العثماني المشكول...' : 'Search ayah...')}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Teacher Guidance Note */}
+                      <div className="mb-4">
+                        <label className="block text-xs font-bold text-slate-800 mb-1">
+                          {isRtl ? '3. توجيه الشيخ والمعلم / ضابط الفارق اللفظي لتثبيت الحفظ:' : '3. Memorization Tip & Distinguishing Rule:'}
+                        </label>
+                        <input
+                          type="text"
+                          value={mutaGuideNote}
+                          onChange={(e) => setMutaGuideNote(e.target.value)}
+                          placeholder={isRtl ? 'مثال: في سورة فاطر جاءت بغير لام التعريف (عَزِيزٌ غَفُورٌ)، بينما في الملك معرّفة (ٱلْعَزِيزُ ٱلْغَفُورُ).' : 'E.g., Notice indefinite form vs definite form.'}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-600"
+                        />
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+                        <button
+                          type="button"
+                          onClick={() => setIsAddMutaOpen(false)}
+                          className="text-xs px-3.5 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100"
+                        >
+                          {isRtl ? 'إلغاء' : 'Cancel'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveNewMutashabiha}
+                          className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 text-xs font-black px-4 py-2 rounded-xl shadow-md flex items-center gap-1.5"
+                        >
+                          <span>💾</span>
+                          <span>{isRtl ? 'حفظ المتشابهة وإدراجها في خطة الدرس والواتساب' : 'Save Mutashabiha to Lesson & WhatsApp'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Mutashabihat Cards List */}
+                  {hifzMutashabihat && hifzMutashabihat.length > 0 ? (
+                    <div className="space-y-4">
+                      {hifzMutashabihat.map((m, mIdx) => (
+                        <div key={mIdx} className="bg-white/90 rounded-2xl p-4 border border-emerald-200/80 shadow-xs">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2.5">
+                            <div className="bg-emerald-900/5 p-3 rounded-xl border-r-4 border-emerald-700">
+                              <span className="text-[11px] font-bold text-emerald-800 block mb-1">
+                                {isRtl ? 'الموضع في هذا الوجه المقرر:' : 'In Current Page:'}
+                              </span>
+                              <p className="font-quran text-lg text-emerald-950 leading-relaxed" dir="rtl">
+                                {m.ayah}
+                              </p>
+                            </div>
+
+                            <div className="bg-amber-900/5 p-3 rounded-xl border-r-4 border-amber-500">
+                              <span className="text-[11px] font-bold text-amber-800 block mb-1">
+                                {isRtl ? 'الموضع المتشابه في سورة أخرى:' : 'Similar Passage Elsewhere:'}
+                              </span>
+                              <p className="font-quran text-lg text-amber-950 leading-relaxed" dir="rtl">
+                                {m.similar}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap items-center justify-between gap-2 bg-emerald-950/5 p-2.5 rounded-xl text-xs text-emerald-900 font-medium">
+                            <div className="flex items-start gap-1.5 flex-1">
+                              <span className="text-gold-600 font-bold text-sm">💡</span>
+                              <span><strong>{isRtl ? 'ضابط حفظ المتشابهة للمحفظ:' : 'Memorization Guide:'}</strong> {m.difference}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMutashabiha(mIdx)}
+                              className="text-slate-400 hover:text-red-600 text-[11px] px-2 py-0.5 rounded hover:bg-red-50 transition"
+                              title={isRtl ? 'حذف هذه المتشابهة' : 'Delete'}
+                            >
+                              🗑️ {isRtl ? 'حذف' : 'Remove'}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 text-slate-500 text-xs">
+                      {isRtl ? 'لا توجد متشابهات مسجلة لهذا الوجه بعد. اضغط "إضافة أو ربط متشابهة جديدة" لإدراج تنبيهات الحفظ.' : 'No cross-references registered yet.'}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+            {activeTab === 'tajweed' && (
+              <div className="space-y-8 animate-fadeIn">
+
+                {/* Branch 2 Sub-Navigation Bar */}
+                <div className="card-islamic-amber rounded-2xl p-2.5 sm:p-3 border border-gold-400/60 shadow-sm flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-xl bg-emerald-900 text-gold-300 flex items-center justify-center text-base font-bold shadow-xs">
+                      📖
+                    </span>
+                    <div>
+                      <h2 className="text-sm font-extrabold text-emerald-950 font-cairo">
+                        {isRtl ? 'حقيبة أدوات التجويد والتحليل الصوتي (Branch 2):' : 'Tajweed & Phonetics Workbench:'}
+                      </h2>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Tab 1: Lesson & Slides Generator */}
+                    <button
+                      type="button"
+                      onClick={() => setTajweedSubTab('generator')}
+                      className={'px-3.5 py-1.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-xs border ' + (
+                        tajweedSubTab === 'generator'
+                          ? 'bg-emerald-900 text-gold-200 border-gold-400 ring-2 ring-gold-400 font-black'
+                          : 'bg-white hover:bg-slate-50 text-emerald-950 border-slate-300'
+                      )}
+                    >
+                      <span>📑</span>
+                      <span>{isRtl ? '1. مُولّد الدروس وبطاقات زوم' : '1. Lesson & Slides'}</span>
+                    </button>
+
+                    {/* Tab 2: Interactive Makhaarij Atlas */}
+                    <button
+                      type="button"
+                      onClick={() => setTajweedSubTab('makhaarij')}
+                      className={'px-3.5 py-1.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-xs border ' + (
+                        tajweedSubTab === 'makhaarij'
+                          ? 'bg-emerald-900 text-gold-200 border-gold-400 ring-2 ring-gold-400 font-black'
+                          : 'bg-white hover:bg-slate-50 text-emerald-950 border-slate-300'
+                      )}
+                    >
+                      <span>🗣️</span>
+                      <span>{isRtl ? '2. أطلس مخارج الحروف الخمسة' : '2. Articulation Atlas'}</span>
+                    </button>
+
+                    {/* Tab 3: Visual Timing Metronome */}
+                    <button
+                      type="button"
+                      onClick={() => setTajweedSubTab('metronome')}
+                      className={'px-3.5 py-1.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-xs border ' + (
+                        tajweedSubTab === 'metronome'
+                          ? 'bg-emerald-900 text-gold-200 border-gold-400 ring-2 ring-gold-400 font-black'
+                          : 'bg-white hover:bg-slate-50 text-emerald-950 border-slate-300'
+                      )}
+                    >
+                      <span>⏱️</span>
+                      <span>{isRtl ? '3. ميزان الأزمنة والحركات الإيقاعي' : '3. Timing Metronome'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* ================= SUB-TAB 1: LESSON & SLIDES GENERATOR ================= */}
+                {tajweedSubTab === 'generator' && (
+                  <div className="space-y-8 animate-fadeIn">
+                    
+                  </div>
+                )}
+
+                {/* ================= SUB-TAB 2: INTERACTIVE ARTICULATION ATLAS ================= */}
+                {tajweedSubTab === 'makhaarij' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    {/* Header Banner */}
+                    <div className="card-islamic-pearl rounded-3xl p-6 border-2 border-emerald-900/15 shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-emerald-900/10">
+                        <div className="flex items-center gap-3">
+                          <span className="text-3xl">🗣️</span>
+                          <div>
+                            <h3 className="text-lg font-black text-emerald-950 font-cairo">
+                              {isRtl ? 'أطلس مخارج الحروف العامة والخاصة (Anatomical Phonetics Atlas)' : 'Comprehensive Makhaarij Articulation Atlas'}
+                            </h3>
+                            <p className="text-xs text-slate-600 font-medium">
+                              {isRtl ? 'دراسة تشريحية بصرية تفاعلية للأعضاء الخمسة الرئيسة، حروفها، وآلية توليد الصوت ومواضع الأخطاء الشائعة' : 'Interactive visual study of the 5 general articulation organs and letters'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <span className="bg-emerald-900 text-gold-300 px-3 py-1 rounded-xl text-xs font-bold shadow-xs">
+                          {isRtl ? 'منظومة الجزرية — 17 مخرجاً خاصاً' : 'Al-Jazariyyah: 17 Sub-Points'}
+                        </span>
+                      </div>
+
+                      {/* The 5 General Makhaarij Selector Pills */}
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-6">
+                        {MAKHAARIJ_GENERAL_DATA.map((org) => {
+                          const isActive = activeMakhrajId === org.id;
+                          return (
+                            <button
+                              key={org.id}
+                              type="button"
+                              onClick={() => setActiveMakhrajId(org.id)}
+                              className={'p-3 rounded-2xl border transition text-center flex flex-col items-center justify-center gap-1.5 ' + (
+                                isActive
+                                  ? 'bg-emerald-900 text-white border-gold-400 ring-2 ring-gold-400 shadow-md font-black'
+                                  : 'bg-white hover:bg-slate-50 text-emerald-950 border-slate-300'
+                              )}
+                            >
+                              <span className="text-2xl">{org.icon}</span>
+                              <span className="text-xs font-bold font-cairo">{isRtl ? org.nameAr : org.nameEn}</span>
+                              <span className={'text-[10px] px-2 py-0.5 rounded-full font-bold ' + (isActive ? 'bg-gold-500 text-emerald-950 font-black' : 'bg-slate-100 text-slate-600')}>
+                                {org.badge}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Active Makhraj Comprehensive Card */}
+                      {(() => {
+                        const makhraj = MAKHAARIJ_GENERAL_DATA.find(m => m.id === activeMakhrajId) || MAKHAARIJ_GENERAL_DATA[2];
+                        return (
+                          <div className="bg-gradient-to-br from-white to-slate-50 border-2 border-emerald-900/20 rounded-3xl p-6 sm:p-8 shadow-md animate-fadeIn">
+                            {/* Card Title & Organ Anatomy */}
+                            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-200">
+                              <div className="flex items-center gap-3">
+                                <span className="text-4xl">{makhraj.icon}</span>
+                                <div>
+                                  <h4 className="text-xl sm:text-2xl font-black text-emerald-950 font-amiri">
+                                    {isRtl ? 'المخرج العام: ' + makhraj.nameAr : makhraj.nameEn}
+                                  </h4>
+                                  <p className="text-xs sm:text-sm font-bold text-gold-700 mt-0.5">
+                                    {isRtl ? makhraj.organAr : makhraj.organEn}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <span className="bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold px-3 py-1 rounded-xl text-xs">
+                                {makhraj.badge}
+                              </span>
+                            </div>
+
+                            {/* Letters Array Display in Uthmani Boxes */}
+                            <div className="mb-6 bg-emerald-950 text-white rounded-2xl p-5 shadow-inner border border-gold-500/40">
+                              <div className="text-xs font-bold text-gold-300 mb-3 flex items-center justify-between">
+                                <span>{isRtl ? 'حروف هذا المخرج بالرسم العثماني:' : 'Letters produced from this organ:'}</span>
+                                <span className="text-[11px] text-slate-300">{isRtl ? makhraj.lettersLabelAr : makhraj.lettersLabelEn}</span>
+                              </div>
+
+                              <div className="flex flex-wrap gap-2.5 items-center justify-center sm:justify-start">
+                                {makhraj.letters.map((lettr, lIdx) => (
+                                  <div 
+                                    key={lIdx}
+                                    className="w-14 h-14 rounded-2xl bg-white/10 border-2 border-gold-400/60 hover:bg-gold-500 hover:text-emerald-950 text-gold-300 flex items-center justify-center font-quran text-2xl font-bold shadow transition cursor-default"
+                                    title={'حرف ' + lettr}
+                                  >
+                                    {lettr}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Two-Column Deep-Dive: Sound Generation vs Common Mistakes */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Left: How sound is produced */}
+                              <div className="bg-emerald-50/80 border border-emerald-300 rounded-2xl p-5">
+                                <div className="flex items-center gap-2 mb-2 font-bold text-emerald-900 text-sm">
+                                  <span>⚙️</span>
+                                  <span>{isRtl ? 'آلية توليد الحرف وخروج الصوت:' : 'Biomechanical Articulation:'}</span>
+                                </div>
+                                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-cairo">
+                                  {isRtl ? makhraj.mannerAr : makhraj.mannerEn}
+                                </p>
+                              </div>
+
+                              {/* Right: Common Mistakes & Correction */}
+                              <div className="bg-rose-50/80 border border-rose-300 rounded-2xl p-5">
+                                <div className="flex items-center gap-2 mb-2 font-bold text-rose-900 text-sm">
+                                  <span>⚠️</span>
+                                  <span>{isRtl ? 'أبرز الأخطاء الشائعة وطرق تقويم اللسان:' : 'Common Mistakes & Corrections:'}</span>
+                                </div>
+                                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-cairo">
+                                  {isRtl ? makhraj.commonMistakesAr : makhraj.commonMistakesEn}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
+
+                {/* ================= SUB-TAB 3: TIMING & HARAKAT METRONOME ================= */}
+                {tajweedSubTab === 'metronome' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    <div className="card-islamic-pearl rounded-3xl p-6 sm:p-8 border-2 border-emerald-900/15 shadow-sm text-center">
+                      <div className="max-w-xl mx-auto">
+                        <span className="text-4xl block mb-2">⏱️</span>
+                        <h3 className="text-xl sm:text-2xl font-black text-emerald-950 font-cairo">
+                          {isRtl ? 'ميزان ضبط الأزمنة والحركات الإيقاعي' : 'Quranic Timing & Harakat Metronome'}
+                        </h3>
+                        <p className="text-xs text-slate-600 mt-1 mb-6 font-medium">
+                          {isRtl ? 'أداة تدريب بصرية إيقاعية لضبط أزمنة المدود والغُنَن بدقة تامة ومنع السرعة أو التمطيط' : 'Visual metronome to calibrate exact durations of Madd and Ghunnah'}
+                        </p>
+
+                        {/* Harakat Target Selector */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+                          {[
+                            { count: 2, labelAr: 'حركتان (2)', subAr: 'طبيعي / غنة / بدل', color: 'border-emerald-400' },
+                            { count: 4, labelAr: '4 حركات', subAr: 'منفصل / متصل وسط', color: 'border-amber-400' },
+                            { count: 5, labelAr: '5 حركات', subAr: 'متصل / منفصل أقصى', color: 'border-orange-400' },
+                            { count: 6, labelAr: '6 حركات', subAr: 'مد لازم كلمي وحرفي', color: 'border-rose-400' }
+                          ].map(item => (
+                            <button
+                              key={item.count}
+                              type="button"
+                              onClick={() => {
+                                setMetronomeCount(item.count);
+                                setMetronomeBeat(1);
+                              }}
+                              className={'p-3 rounded-2xl border-2 transition ' + (
+                                metronomeCount === item.count
+                                  ? 'bg-emerald-900 text-white border-gold-400 ring-2 ring-gold-400 shadow-md font-black'
+                                  : 'bg-white hover:bg-slate-50 text-emerald-950 border-slate-300'
+                              )}
+                            >
+                              <span className="text-sm font-extrabold block font-cairo">{item.labelAr}</span>
+                              <span className="text-[10px] text-gold-300 block mt-0.5 opacity-90">{item.subAr}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Interactive Visual Pulse Rings */}
+                        <div className="bg-emerald-950 text-white rounded-3xl p-8 mb-6 border-2 border-gold-400/50 shadow-xl relative overflow-hidden flex flex-col items-center justify-center">
+                          {/* Animated Pulse Beat Circles */}
+                          <div className="flex items-center justify-center gap-3 mb-6">
+                            {Array.from({ length: metronomeCount }).map((_, idx) => {
+                              const step = idx + 1;
+                              const isCurrentBeat = metronomePlaying && metronomeBeat === step;
+                              return (
+                                <div
+                                  key={step}
+                                  className={'w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-lg sm:text-xl font-black transition-all duration-200 border-2 ' + (
+                                    isCurrentBeat
+                                      ? 'bg-gold-500 text-emerald-950 border-white scale-125 shadow-[0_0_25px_rgba(234,179,8,0.8)]'
+                                      : 'bg-white/10 text-gold-300 border-gold-400/40'
+                                  )}
+                                >
+                                  {step}
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <div className="text-gold-300 font-bold text-sm mb-4 font-cairo">
+                            {metronomePlaying 
+                              ? (isRtl ? 'الحركة النشطة الآن: ' + metronomeBeat + ' من ' + metronomeCount : 'Active Beat: ' + metronomeBeat + ' of ' + metronomeCount)
+                              : (isRtl ? 'الميزان متوقف — اضغط "بدء النبض الإيقاعي"' : 'Metronome stopped')}
+                          </div>
+
+                          {/* Play / Stop Button */}
+                          <button
+                            type="button"
+                            onClick={() => setMetronomePlaying(!metronomePlaying)}
+                            className={'px-8 py-3 rounded-2xl font-black text-sm transition flex items-center gap-2 shadow-lg ' + (
+                              metronomePlaying
+                                ? 'bg-rose-600 hover:bg-rose-500 text-white'
+                                : 'bg-gold-500 hover:bg-gold-400 text-emerald-950'
+                            )}
+                          >
+                            <span>{metronomePlaying ? '⏹️' : '▶️'}</span>
+                            <span>{isRtl ? (metronomePlaying ? 'إيقاف الميزان' : 'بدء النبض الإيقاعي البصري') : (metronomePlaying ? 'Stop' : 'Start Metronome')}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            )}
+
+            {/* ================= VIEW: MODULE B (ISLAMIC STUDIES) ================= */}
+            {activeTab === 'islamic' && (
+              <div className="space-y-8 animate-fadeIn">
+                
+                {/* Control Generator Panel */}
+                <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
+                  <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <span className="w-10 h-10 rounded-xl bg-gold-100 text-gold-800 flex items-center justify-center text-xl font-bold">
+                        🕌
+                      </span>
+                      <div>
+                        <h2 className="text-xl font-extrabold text-emerald-950 font-cairo">
+                          {isRtl ? 'مُحضّر الحلقات الشرعية المؤصّلة' : 'Islamic Studies Lesson Planner'}
+                        </h2>
+                        <p className="text-xs text-slate-500">
+                          {isRtl ? 'مخططات زمنية دقيقة، أحاديث معتمدة بأرقامها ورواتها، وملخصات جاهزة لمجموعات الواتساب' : 'Time-boxed Zoom blueprint, authenticated Hadith citations, and 1-click WhatsApp parent kits'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="bg-gold-50 text-gold-800 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
+                      Zero Hallucinated Hadith
+                    </span>
+                  </div>
+
+                  {/* Form Fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    
+                    {/* Subject Category */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'المجال الشرعي' : 'Subject Category'}
+                      </label>
+                      <select 
+                        value={subjectCategory} 
+                        onChange={(e) => setSubjectCategory(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 font-bold"
+                      >
+                        <option value="العقيدة (Aqeedah)">العقيدة (Aqeedah)</option>
+                        <option value="الفقه وأحكام العبادات (Fiqh)">الفقه وأحكام العبادات (Fiqh)</option>
+                        <option value="السيرة النبوية والتاريخ (Seerah)">السيرة النبوية والتاريخ (Seerah)</option>
+                        <option value="التزكية والأخلاق (Tazkiyah)">التزكية والأخلاق (Tazkiyah)</option>
+                      </select>
+                    </div>
+
+                    {/* Lesson Topic */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'عنوان أو موضوع الدرس' : 'Lesson Topic'}
+                      </label>
+                      <input 
+                        type="text" 
+                        value={lessonTopic} 
+                        onChange={(e) => setLessonTopic(e.target.value)}
+                        placeholder="أركان الإيمان الستة / أحكام الطهارة"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                      />
+                    </div>
+
+                    {/* Target Duration */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'مدة الحلقة في زوم' : 'Zoom Duration'}
+                      </label>
+                      <select 
+                        value={lessonDuration} 
+                        onChange={(e) => setLessonDuration(Number(e.target.value))}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                      >
+                        <option value="30">30 {isRtl ? 'دقيقة (حصة سريعة)' : 'Minutes (Fast)'}</option>
+                        <option value="45">45 {isRtl ? 'دقيقة (حصة نموذجية)' : 'Minutes (Standard)'}</option>
+                        <option value="60">60 {isRtl ? 'دقيقة (حلقة شاملة)' : 'Minutes (Deep Dive)'}</option>
+                      </select>
+                    </div>
+
+                    {/* Audience Level */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {isRtl ? 'الفئة المستهدفة' : 'Target Audience'}
+                      </label>
+                      <select 
+                        value={audienceLevel} 
+                        onChange={(e) => setAudienceLevel(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                      >
+                        <option value="الأطفال (Kids 7–12)">الأطفال (Kids 7–12)</option>
+                        <option value="اليافعين والمهتدين الجدد (Bilingual Youth)">اليافعين والمهتدين الجدد (Bilingual Youth)</option>
+                        <option value="الأمهات والبالغات (Adult Women)">الأمهات والبالغات (Adult Women)</option>
+                        <option value="المستوى المتقدم (Advanced Students)">المستوى المتقدم (Advanced Students)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Trigger Buttons */}
+                  <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
+                    <button 
+                      onClick={() => handleLoadDemoIslamic()}
+                      disabled={isGeneratingIslamic}
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold px-4 py-3 rounded-xl transition flex items-center gap-2 text-xs"
+                      title="تحميل الدرس التجريبي الجاهز فوراً"
+                    >
+                      <span>⚡</span>
+                      <span>{isRtl ? 'تحميل الدرس التجريبي (أركان الإيمان)' : 'Load Demo Lesson (Six Pillars)'}</span>
+                    </button>
+                    <button 
+                      onClick={() => handleGenerateIslamic(false)}
+                      disabled={isGeneratingIslamic}
+                      className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-extrabold px-6 py-3 rounded-xl shadow-lg transition flex items-center gap-2 disabled:opacity-50 text-sm"
+                    >
+                      <span>{isGeneratingIslamic ? '⏳' : '🕌'}</span>
+                      <span>
+                        {isGeneratingIslamic 
+                          ? (isRtl ? 'جارٍ التحضير والتوثيق الشرعي...' : 'Authenticating Evidences...') 
+                          : (isRtl ? 'توليد المخطط الزمني وحقيبة الواتساب' : 'Generate Blueprint & WhatsApp Kit')}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Display Generated Islamic Studies Package */}
+                {islamicData && (
+                  <div className="space-y-6">
+
+                    {/* 1. Time-Boxed Lesson Blueprint */}
+                    <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-6 border-b border-slate-100">
+                        <div>
+                          <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                            {isRtl ? 'المخطط الزمني المنضبط بالدقائق' : 'Minute-by-Minute Time-Boxed Blueprint'}
+                          </span>
+                          <h3 className="text-xl font-extrabold text-emerald-950 font-amiri">
+                            {islamicData.metadata.topic} — ({islamicData.metadata.durationMinutes} {isRtl ? 'دقيقة' : 'Minutes'})
+                          </h3>
+                        </div>
+                        <span className="bg-emerald-100 text-emerald-900 font-bold text-xs px-3 py-1 rounded-full">
+                          {islamicData.metadata.category}
+                        </span>
+                      </div>
+
+                      {/* Timeline Phases */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {islamicData.blueprint.map((phase, idx) => (
+                          <div key={idx} className="bg-slate-50 rounded-2xl p-4 border border-slate-200 hover:border-emerald-400 transition flex flex-col justify-between">
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="w-6 h-6 rounded-full bg-emerald-800 text-gold-200 text-xs font-bold flex items-center justify-center">
+                                  {phase.phaseNumber || idx + 1}
+                                </span>
+                                <span className="bg-gold-100 text-gold-800 font-bold text-xs px-2.5 py-0.5 rounded-full">
+                                  ⏱️ {phase.allocatedMinutes} {isRtl ? 'د' : 'min'}
+                                </span>
+                              </div>
+                              <h4 className="font-bold text-emerald-950 text-sm mb-2 font-cairo">
+                                {isRtl ? phase.phaseNameAr : phase.phaseNameEn}
+                              </h4>
+                              <p className="text-xs text-slate-700 leading-relaxed font-amiri mb-3">
+                                {isRtl ? phase.teacherGuidanceAr : phase.teacherGuidanceEn}
+                              </p>
+                            </div>
+
+                            {/* Talking Points */}
+                            {phase.talkingPoints && (
+                              <ul className="text-[11px] text-slate-600 space-y-1 border-t border-slate-200 pt-2">
+                                {phase.talkingPoints.map((tp, i) => (
+                                  <li key={i} className="flex items-start gap-2">
+                                    <span className="text-emerald-600 font-bold">•</span>
+                                    <span>{tp}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 2. Authenticated Evidences & Guardrails */}
+                    <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
+                      <div className="flex items-center justify-between pb-3 mb-5 border-b border-slate-100">
+                        <h3 className="text-lg font-bold text-emerald-950 font-cairo flex items-center gap-2">
+                          <span>🛡️</span>
+                          <span>{isRtl ? 'الأدلة الشرعية الموثقة وسياج التحقق' : 'Authenticated Quran & Hadith Evidences'}</span>
+                        </h3>
+                        <span className="text-xs text-emerald-800 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full font-bold">
+                          ✓ Verified Source Citation
+                        </span>
+                      </div>
+
+                      <div className="space-y-4">
+                        {islamicData.evidences.map((ev, i) => (
+                          <div key={i} className="bg-emerald-50/50 rounded-2xl p-5 border border-emerald-200 relative overflow-hidden">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                              <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider bg-white px-2.5 py-0.5 rounded-md border border-emerald-200">
+                                {ev.type === 'quran' ? '📖 آية قرآنية' : '📜 حديث نبوي شريف'}
+                              </span>
+                              <div className="flex items-center gap-2 text-xs">
+                                <span className="bg-gold-100 text-gold-900 border border-gold-300 font-bold px-2.5 py-0.5 rounded-full">
+                                  {ev.grading}
+                                </span>
+                                <span className="text-slate-600 font-medium">
+                                  {ev.citation}
+                                </span>
+                              </div>
+                            </div>
+
+                            <p className="font-quran text-lg sm:text-xl text-emerald-950 leading-loose mb-2">
+                              {ev.arabicText}
+                            </p>
+                            <p className="text-xs text-slate-600 italic border-t border-emerald-100 pt-2">
+                              {ev.englishTranslation}
+                            </p>
+                            {ev.narrator && ev.narrator !== '—' && (
+                              <div className="text-[11px] text-slate-500 mt-1 font-bold">
+                                {isRtl ? `الراوي: ${ev.narrator}` : `Narrator: ${ev.narrator}`}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 3. WhatsApp Ready Kit with Islamic Chat Wallpaper */}
+                    <div className="card-islamic-pearl rounded-3xl p-6 border-2 border-emerald-900/15 shadow-xl overflow-hidden">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-200">
+                        <div className="flex items-center gap-2">
+                          <span className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl shadow-inner">
+                            💬
+                          </span>
+                          <div>
+                            <h3 className="text-lg font-bold text-emerald-950 font-cairo">
+                              {isRtl ? 'حقيبة الواتساب الجاهزة للإرسال الفوري' : '1-Click WhatsApp Parent/Student Broadcast Kit'}
+                            </h3>
+                            <p className="text-xs text-slate-500 font-medium">
+                              {isRtl ? 'خلفية إسلامية مخصصة لمعاينة رسائل الحلقات وأولياء الأمور' : 'Simulated chat preview with authentic Islamic background'}
+                            </p>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={handleCopyWhatsApp}
+                          className="bg-emerald-700 hover:bg-emerald-800 text-gold-100 font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md transition flex items-center gap-2"
+                        >
+                          <span>📋</span>
+                          <span>{isRtl ? 'نسخ الرسالة كاملة' : 'Copy Formatted Text'}</span>
+                        </button>
+                      </div>
+
+                      {/* Simulated Islamic WhatsApp Chat Interface */}
+                      <div className="islamic-chat-wallpaper rounded-2xl p-4 sm:p-6 border border-emerald-800/15 shadow-inner">
+                        <div className="max-w-2xl mx-auto bg-white/95 backdrop-blur-md rounded-2xl p-5 shadow-md border border-emerald-900/10 relative">
+                          {/* Chat sender header */}
+                          <div className="flex items-center justify-between pb-2 mb-3 border-b border-emerald-50 text-xs">
+                            <span className="font-bold text-emerald-900 flex items-center gap-2">
+                              <span>🕌</span>
+                              <span>{isRtl ? 'رسالة حلقة اليوم المعتمدة' : 'Official Lesson Broadcast'}</span>
+                            </span>
+                            <span className="text-[11px] text-slate-400">اليوم • 5:00 م</span>
+                          </div>
+
+                          {/* Message Body */}
+                          <div className="font-amiri text-sm sm:text-base leading-relaxed text-slate-800 whitespace-pre-wrap select-all">
+                            {islamicData.whatsAppKit.formattedText}
+                          </div>
+
+                          {/* Chat message footer with blue checks */}
+                          <div className="flex items-center justify-end gap-2 text-[11px] text-slate-400 pt-3 border-t border-slate-100 mt-3">
+                            <span>جاهزة للنسخ</span>
+                            <span className="text-sky-500 font-bold">✓✓</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Cross-Link to Printable Worksheets & Interactive Quiz for Islamic Studies */}
+                    <div className="card-islamic-amber rounded-3xl p-6 border-2 border-gold-400/50 shadow-xl flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5">
+                        <span className="w-12 h-12 rounded-2xl bg-gold-400 text-emerald-950 flex items-center justify-center text-2xl font-bold shadow-md">
+                          📝
+                        </span>
+                        <div>
+                          <h4 className="font-extrabold text-emerald-950 font-cairo text-base sm:text-lg">
+                            {isRtl ? 'أدوات التقييم والواجبات للدرس الشرعي' : 'Assessments & Worksheets for this Lesson'}
+                          </h4>
+                          <p className="text-xs text-slate-600 font-medium">
+                            {isRtl ? 'اطبع ورقة العمل بنسختي الطالب والمعلم، أو وجّه الدارسين للاختبار الذاتي الفوري' : 'Printable dual-format worksheet and self-grading interactive quiz'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button
+                          onClick={() => {
+                            setWorksheetBranch('islamic');
+                            if (subjectCategory.includes('Aqeedah') || subjectCategory.includes('العقيدة')) setWorksheetIslamicCategory('aqeedah');
+                            else if (subjectCategory.includes('Fiqh') || subjectCategory.includes('الفقه')) setWorksheetIslamicCategory('fiqh');
+                            else if (subjectCategory.includes('Seerah') || subjectCategory.includes('السيرة')) setWorksheetIslamicCategory('seerah');
+                            else setWorksheetIslamicCategory('tazkiyah');
+                            setActiveTab('worksheet');
+                          }}
+                          className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-extrabold px-5 py-3 rounded-xl text-xs shadow-md transition flex items-center gap-2"
+                        >
+                          <span>📄</span>
+                          <span>{isRtl ? 'ورقة عمل الدرس (طباعة PDF)' : 'Print Lesson Worksheet'}</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setQuizBranch('islamic');
+                            if (subjectCategory.includes('Aqeedah') || subjectCategory.includes('العقيدة')) setQuizIslamicCategory('aqeedah');
+                            else if (subjectCategory.includes('Fiqh') || subjectCategory.includes('الفقه')) setQuizIslamicCategory('fiqh');
+                            else if (subjectCategory.includes('Seerah') || subjectCategory.includes('السيرة')) setQuizIslamicCategory('seerah');
+                            else setQuizIslamicCategory('tazkiyah');
+                            setQuizAnswers({});
+                            setQuizSubmitted(false);
+                            setActiveTab('quiz');
+                          }}
+                          className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-extrabold px-5 py-3 rounded-xl text-xs shadow-md transition flex items-center gap-2"
+                        >
+                          <span>🎯</span>
+                          <span>{isRtl ? 'اختبار الدرس التفاعلي الفوري' : 'Launch Interactive Quiz'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ================= VIEW: PRINTABLE MULTI-BRANCH WORKSHEETS ================= */}
+            {activeTab === 'worksheet' && (
+              <div className="space-y-6 animate-fadeIn">
+                
+                {/* Print Control Toolbar & Branch Switcher */}
+                <div className="card-islamic-pearl rounded-2xl p-4 sm:p-5 border border-emerald-800/15 shadow-sm no-print">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                      <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                        {isRtl ? 'منظومة أوراق العمل والتقييم للطباعة (Printable PDF)' : 'Printable Worksheets & Evaluation System'}
+                      </span>
+                      <h3 className="text-base sm:text-lg font-extrabold text-emerald-950 font-cairo">
+                        {isRtl ? 'اختر مجال ورقة العمل المطلوبة:' : 'Select Worksheet Branch:'}
+                      </h3>
+                    </div>
+
+                    {/* Branch Switcher Tabs */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => setWorksheetBranch('islamic')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          worksheetBranch === 'islamic'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>🕌</span>
+                        <span>{isRtl ? 'أوراق عمل العلوم الشرعية (Branch 3)' : 'Islamic Studies Worksheets'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => setWorksheetBranch('tajweed')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          worksheetBranch === 'tajweed'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>📖</span>
+                        <span>{isRtl ? 'ورقة عمل أحكام التجويد (Branch 2)' : 'Tajweed Worksheet'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => setWorksheetBranch('hifz')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          worksheetBranch === 'hifz'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>🕋</span>
+                        <span>{isRtl ? 'سجل متابعة التحفيظ (Branch 1)' : 'Hifz Evaluation Sheet'}</span>
+                      </button>
+                    </div>
+
+                    {/* Print Button */}
+                    <button 
+                      onClick={() => window.print()}
+                      className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-extrabold px-5 py-2.5 rounded-xl text-xs shadow transition flex items-center gap-2 ml-auto"
+                    >
+                      <span>🖨️</span>
+                      <span>{isRtl ? 'طباعة / تصدير PDF' : 'Print / Export to PDF'}</span>
+                    </button>
+                  </div>
+
+                  {/* Sub-Category Filter for Islamic Studies */}
+                  {worksheetBranch === 'islamic' && (
+                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-slate-200">
+                      <span className="text-xs font-bold text-slate-500">{isRtl ? 'التخصص الشرعي:' : 'Discipline:'}</span>
+                      {[
+                        { id: 'aqeedah', icon: '🌟', labelAr: 'العقيدة وأركان الإيمان', labelEn: 'Aqeedah' },
+                        { id: 'fiqh', icon: '⚖️', labelAr: 'الفقه والعبادات', labelEn: 'Fiqh' },
+                        { id: 'seerah', icon: '📜', labelAr: 'السيرة النبوية', labelEn: 'Seerah' },
+                        { id: 'tazkiyah', icon: '💎', labelAr: 'الآداب والتزكية', labelEn: 'Tazkiyah' }
+                      ].map(cat => (
+                        <button
+                          key={cat.id}
+                          onClick={() => setWorksheetIslamicCategory(cat.id)}
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                            worksheetIslamicCategory === cat.id
+                              ? 'bg-gold-400 text-emerald-950 shadow font-extrabold'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          <span>{cat.icon}</span>
+                          <span>{isRtl ? cat.labelAr : cat.labelEn}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* --- BRANCH 3: ISLAMIC STUDIES WORKSHEET DUAL FORMAT --- */}
+                {worksheetBranch === 'islamic' && (() => {
+                  const ws = ISLAMIC_BRANCH_WORKSHEETS[worksheetIslamicCategory] || ISLAMIC_BRANCH_WORKSHEETS.aqeedah;
+                  return (
+                    <div className="space-y-8">
+                      {/* Printable Sheet 1: Student Version */}
+                      <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                        <div className="text-center border-b-2 border-emerald-900 pb-4 mb-6">
+                          <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
+                            {isRtl ? 'مِشكاة — نظام التشغيل الشامل للداعية والمعلم الشرعي | AnubisLand' : 'Mishkah Platform — AnubisLand'}
+                          </div>
+                          <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
+                            {isRtl ? ws.titleAr : ws.titleEn}
+                          </h2>
+                          <div className="inline-block bg-emerald-50 text-emerald-900 text-xs px-3 py-1 rounded-full font-bold border border-emerald-200 mt-1">
+                            {isRtl ? 'نسخة الطالب للمدارسة والتطبيق' : 'Student Study & Application Copy'}
+                          </div>
+                          <div className="flex flex-wrap justify-between items-center text-xs text-slate-600 mt-4 px-2">
+                            <span>{isRtl ? 'اسم الطالب / الدارس:' : 'Student Name:'} ____________________</span>
+                            <span>{isRtl ? 'المجال الشرعي:' : 'Discipline:'} {isRtl ? ws.categoryAr : ws.categoryEn}</span>
+                            <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
+                          </div>
+                        </div>
+
+                        {/* Core Scriptural Reference Box */}
+                        <div className="bg-emerald-50/70 rounded-2xl p-4 border border-emerald-200 mb-6 text-xs">
+                          <div className="font-bold text-emerald-900 mb-1">{isRtl ? '📖 الشاهد المعتمد من الكتاب والسنة:' : 'Core Scriptural Evidence:'}</div>
+                          <div className="font-quran text-base text-emerald-950 leading-relaxed mb-1">{ws.quranRef}</div>
+                          <div className="font-amiri text-xs text-slate-700">{ws.hadithRef}</div>
+                        </div>
+
+                        {/* Student Questions Table */}
+                        <div className="overflow-x-auto mb-6">
+                          <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                            <thead className="bg-emerald-800 text-white text-xs">
+                              <tr>
+                                <th className="p-3 w-10 text-center">#</th>
+                                <th className="p-3 w-44">{isRtl ? 'المسألة الشرعية' : 'Topic'}</th>
+                                <th className="p-3 w-48">{isRtl ? 'الدليل والتخريج' : 'Scripture / Source'}</th>
+                                <th className="p-3">{isRtl ? 'إجابة الطالب والتأصيل المستفاد' : 'Student Answer & Deductions'}</th>
+                                <th className="p-3 w-20 text-center">{isRtl ? 'الدرجة' : 'Grade'}</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200 text-xs">
+                              {ws.items.map((it, idx) => (
+                                <tr key={idx} className="hover:bg-slate-50">
+                                  <td className="p-3 text-center font-bold text-slate-500">{it.num}</td>
+                                  <td className="p-3 font-bold text-emerald-950 font-cairo">{it.topic}</td>
+                                  <td className="p-3 text-slate-600 font-amiri text-xs leading-relaxed">{it.scripture}</td>
+                                  <td className="p-3 space-y-2">
+                                    <div className="font-bold text-slate-800 font-amiri text-xs">{it.studentQuestion}</div>
+                                    <div className="text-slate-400 italic pt-1 border-b border-dashed border-slate-200">الإجابة: ____________________________________________________________________</div>
+                                    <div className="text-slate-400 italic border-b border-dashed border-slate-200">التطبيق العملي: ___________________________________________________________</div>
+                                  </td>
+                                  <td className="p-3 text-center text-slate-400">/ 5</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Student Version Footer */}
+                        <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
+                          <span>{isRtl ? 'تقييم وتوقيع المعلم:' : 'Teacher Signature & Grade:'} _______________</span>
+                          <span>Mishkah Operating System — AnubisLand</span>
+                        </div>
+                      </div>
+
+                      {/* Print Page Break */}
+                      <div className="page-break my-8 no-print border-t-2 border-dashed border-slate-300 text-center py-2 text-xs text-slate-400 font-bold">
+                        ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلم المعتمد' : 'Page Break — Teacher Answer Key Follows'}
+                      </div>
+
+                      {/* Printable Sheet 2: Teacher Answer Key */}
+                      <div className="bg-white rounded-3xl p-8 border-2 border-gold-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                        <div className="text-center border-b-2 border-gold-600 pb-4 mb-6">
+                          <span className="bg-gold-100 text-gold-900 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
+                            {isRtl ? 'خاص بالمعلم والشيخ — نموذج الإجابة المعتمد والتوجيهات التربوية' : 'Confidential Teacher Answer Key & Guidance'}
+                          </span>
+                          <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-2">
+                            {isRtl ? ws.titleAr : ws.titleEn}
+                          </h2>
+                          <div className="text-xs text-slate-500 mt-1">
+                            {isRtl ? 'دليل التصحيح النموذجي والتأصيل الشرعي المحكم' : 'Official Answer Key with Authentic Citations'}
+                          </div>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                            <thead className="bg-emerald-950 text-gold-300 text-xs">
+                              <tr>
+                                <th className="p-3 w-10 text-center">#</th>
+                                <th className="p-3 w-40">{isRtl ? 'المسألة الشرعية' : 'Topic'}</th>
+                                <th className="p-3">{isRtl ? 'نموذج الإجابة والتأصيل الشرعي المعتمد' : 'Official Teacher Answer Key'}</th>
+                                <th className="p-3 w-64">{isRtl ? 'الأثر السلوكي والتربوي المستهدف' : 'Behavioral & Spiritual Impact'}</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200 text-xs">
+                              {ws.items.map((it, idx) => (
+                                <tr key={idx} className="hover:bg-gold-50/40">
+                                  <td className="p-3 text-center font-bold text-slate-500">{it.num}</td>
+                                  <td className="p-3 font-bold text-emerald-950 font-cairo">{it.topic}</td>
+                                  <td className="p-3 font-amiri text-xs text-slate-800 leading-relaxed">
+                                    <div className="font-bold text-emerald-900 mb-1">السؤال: {it.studentQuestion}</div>
+                                    <div className="text-emerald-950 font-medium bg-emerald-50/50 p-2.5 rounded-lg border border-emerald-100">{it.teacherAnswer}</div>
+                                  </td>
+                                  <td className="p-3 text-slate-700 text-xs font-amiri leading-relaxed bg-amber-50/30">
+                                    {it.practicalImpact}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* --- BRANCH 2: TAJWEED WORKSHEET --- */}
+                {worksheetBranch === 'tajweed' && (
+                  <div className="space-y-8">
+                    {/* Printable Document Sheet 1: Student Version */}
+                    <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                      <div className="text-center border-b-2 border-emerald-900 pb-4 mb-6">
+                        <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
+                          {isRtl ? 'منصة مِشكاة لتعليم القرآن الكريم والتجويد — AnubisLand' : 'Mishkah Platform — AnubisLand'}
+                        </div>
+                        <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
+                          {isRtl ? 'ورقة مدارسة وتطبيق في أحكام التجويد (نسخة الطالب)' : 'Tajweed Student Worksheet'}
+                        </h2>
+                        <div className="flex justify-between items-center text-xs text-slate-600 mt-4 px-2">
+                          <span>{isRtl ? 'اسم الطالب / الدارس:' : 'Student Name:'} ____________________</span>
+                          <span>{isRtl ? 'السورة والآيات:' : 'Surah:'} {tajweedData?.metadata?.surah} ({tajweedData?.metadata?.ayahRange})</span>
+                          <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto mb-8">
+                        <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                          <thead className="bg-emerald-800 text-white text-xs">
+                            <tr>
+                              <th className="p-3 w-12 text-center">#</th>
+                              <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية (رسم عثماني)' : 'Quranic Word'}</th>
+                              <th className="p-3">{isRtl ? 'الحكم التجويدي المطبق' : 'Tajweed Rule'}</th>
+                              <th className="p-3">{isRtl ? 'العلة وسبب الحكم' : 'Reason / Articulation Rule'}</th>
+                              <th className="p-3 w-28 text-center">{isRtl ? 'الدرجة' : 'Grade'}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200 text-sm">
+                            {(tajweedData?.worksheet || []).map((row, i) => (
+                              <tr key={i} className="hover:bg-slate-50">
+                                <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
+                                <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
+                                <td className="p-3 text-slate-400 italic">____________________</td>
+                                <td className="p-3 text-slate-400 italic">________________________________________</td>
+                                <td className="p-3 text-center text-slate-400">/ 5</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
+                        <span>{isRtl ? 'ملاحظات المعلم / التقييم:' : 'Teacher Signature & Final Grade:'} _______________</span>
+                        <span>Mishkah PWA — AnubisLand</span>
+                      </div>
+                    </div>
+
+                    {/* Page Break for Print */}
+                    <div className="page-break my-8 no-print border-t-2 border-dashed border-slate-300 text-center py-2 text-xs text-slate-400 font-bold">
+                      ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلم' : 'Page Break — Teacher Answer Key Follows'}
+                    </div>
+
+                    {/* Printable Document Sheet 2: Teacher Answer Key */}
+                    <div className="bg-white rounded-3xl p-8 border-2 border-gold-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                      <div className="text-center border-b-2 border-gold-600 pb-4 mb-6">
+                        <span className="bg-gold-100 text-gold-900 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
+                          {isRtl ? 'خاص بالمعلم فقط — نموذج الإجابة المعتمد' : 'Teacher Answer Key (Confidential)'}
+                        </span>
+                        <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-2">
+                          {isRtl ? 'دليل تصحيح ورقة العمل والعلل الصوتية' : 'Teacher Correction Guide & Phonetic Explanations'}
+                        </h2>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                          <thead className="bg-emerald-950 text-gold-300 text-xs">
+                            <tr>
+                              <th className="p-3 w-12 text-center">#</th>
+                              <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية' : 'Quranic Word'}</th>
+                              <th className="p-3">{isRtl ? 'الحكم الصحيح' : 'Correct Rule'}</th>
+                              <th className="p-3">{isRtl ? 'التوجيه والعلة الصوتية' : 'Phonetic Explanation'}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200 text-sm">
+                            {(tajweedData?.worksheet || []).map((row, i) => (
+                              <tr key={i} className="hover:bg-gold-50/40">
+                                <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
+                                <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
+                                <td className="p-3 font-bold text-emerald-800">{row.ruleApplied}</td>
+                                <td className="p-3 text-slate-700 text-xs leading-relaxed font-amiri">
+                                  {isRtl ? row.reasonAr : row.reasonEn}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* --- BRANCH 1: HIFZ EVALUATION SHEET --- */}
+                {worksheetBranch === 'hifz' && (
+                  <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0 space-y-6">
+                    <div className="text-center border-b-2 border-emerald-900 pb-4 mb-4">
+                      <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
+                        {isRtl ? 'مِشكاة — سجل المتابعة القرآني المتكامل | AnubisLand' : 'Mishkah Platform — AnubisLand'}
+                      </div>
+                      <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
+                        {isRtl ? HIFZ_BRANCH_WORKSHEET.titleAr : HIFZ_BRANCH_WORKSHEET.titleEn}
+                      </h2>
+                      <div className="flex flex-wrap justify-between items-center text-xs text-slate-600 mt-4 px-2">
+                        <span>{isRtl ? 'اسم الطالب:' : 'Student Name:'} ____________________</span>
+                        <span>{isRtl ? 'السورة والآيات المقررة:' : 'Surah / Passage:'} {hifzSurahName} ({hifzAyahRange})</span>
+                        <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
+                      </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                        <thead className="bg-emerald-800 text-white text-xs">
+                          <tr>
+                            <th className="p-3 w-12 text-center">#</th>
+                            <th className="p-3 w-56">{isRtl ? 'معيار التقييم' : 'Criterion'}</th>
+                            <th className="p-3">{isRtl ? 'الوصف التوجيهي والملاحظات' : 'Description & Teacher Notes'}</th>
+                            <th className="p-3 w-32 text-center">{isRtl ? 'الدرجة المستحقة' : 'Score'}</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200 text-sm">
+                          {HIFZ_BRANCH_WORKSHEET.criteria.map((cr, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50">
+                              <td className="p-3 text-center font-bold text-slate-500">{cr.num}</td>
+                              <td className="p-3 font-bold text-emerald-950 font-cairo">{cr.domain}</td>
+                              <td className="p-3 text-slate-600 font-amiri text-xs leading-relaxed">
+                                <div>{cr.description}</div>
+                                <div className="text-slate-400 italic mt-2 border-b border-dashed border-slate-200 pb-1">ملاحظة المحفظ: __________________________________________________</div>
+                              </td>
+                              <td className="p-3 text-center font-bold text-emerald-900">
+                                <span className="text-slate-400 font-normal">___ / </span>{cr.maxScore}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot className="bg-emerald-50 text-emerald-950 font-bold text-sm">
+                          <tr>
+                            <td colSpan="3" className="p-3 text-left pl-6">{isRtl ? 'المجموع النهائي للتقييم:' : 'Total Final Score:'}</td>
+                            <td className="p-3 text-center text-emerald-900 font-extrabold">_____ / 100</td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
+                      <span>{isRtl ? 'توقيع الشيخ المحفظ واعتماد الورد القادم:' : 'Teacher Signature & Next Assignment:'} _______________</span>
+                      <span>Mishkah PWA — AnubisLand</span>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            )}
+
+            {/* ================= VIEW: INTERACTIVE SELF-GRADING QUIZ (MULTI-BRANCH) ================= */}
+            {activeTab === 'quiz' && (
+              <div className="space-y-6 animate-fadeIn max-w-4xl mx-auto">
+                <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
+                  
+                  {/* Quiz Branch Switcher & Header */}
+                  <div className="pb-4 mb-6 border-b border-slate-200">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                      <div>
+                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                          {isRtl ? 'منظومة المراجعة الذاتية التفاعلية للدارسين' : 'Interactive Self-Grading Student Quizzes'}
+                        </span>
+                        <h2 className="text-xl sm:text-2xl font-extrabold font-cairo text-emerald-950 mt-0.5">
+                          {isRtl ? 'اختبر معلوماتكِ التفاعلية في علوم الشريعة والقرآن' : 'Test Your Knowledge Across All Disciplines'}
+                        </h2>
+                      </div>
+                      {quizSubmitted && (
+                        <div className="bg-emerald-900 text-gold-300 px-4 py-2 rounded-2xl border border-gold-400 font-bold text-sm shadow">
+                          {isRtl ? `النتيجة النهائية: ${quizScore}%` : `Score: ${quizScore}%`}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Quiz Branch Selector Pills */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => handleSwitchQuizBranch('islamic', 'aqeedah')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          quizBranch === 'islamic'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>🕌</span>
+                        <span>{isRtl ? 'اختبار العلوم الشرعية (Branch 3)' : 'Islamic Studies Quiz'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleSwitchQuizBranch('tajweed')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          quizBranch === 'tajweed'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>📖</span>
+                        <span>{isRtl ? 'اختبار أحكام التجويد (Branch 2)' : 'Tajweed Quiz'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleSwitchQuizBranch('hifz')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          quizBranch === 'hifz'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>🕋</span>
+                        <span>{isRtl ? 'اختبار المتشابهات وضبط الحفظ (Branch 1)' : 'Hifz Mutashabihat Quiz'}</span>
+                      </button>
+                    </div>
+
+                    {/* Sub-Discipline Pills for Islamic Studies Quiz */}
+                    {quizBranch === 'islamic' && (
+                      <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-200/80">
+                        <span className="text-xs font-bold text-slate-500">{isRtl ? 'المجال:' : 'Subject:'}</span>
+                        {[
+                          { id: 'aqeedah', icon: '🌟', labelAr: 'العقيدة وأركان الإيمان', labelEn: 'Aqeedah' },
+                          { id: 'fiqh', icon: '⚖️', labelAr: 'الفقه والعبادات', labelEn: 'Fiqh' },
+                          { id: 'seerah', icon: '📜', labelAr: 'السيرة النبوية', labelEn: 'Seerah' },
+                          { id: 'tazkiyah', icon: '💎', labelAr: 'الآداب والتزكية', labelEn: 'Tazkiyah' }
+                        ].map(cat => (
+                          <button
+                            key={cat.id}
+                            onClick={() => handleSwitchQuizBranch('islamic', cat.id)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                              quizIslamicCategory === cat.id
+                                ? 'bg-gold-400 text-emerald-950 font-extrabold shadow'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            <span>{cat.icon}</span>
+                            <span>{isRtl ? cat.labelAr : cat.labelEn}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Questions List */}
+                  <div className="space-y-6">
+                    {activeQuizQuestions.map((q, qIndex) => {
+                      const selected = quizAnswers[q.id];
+                      const isCorrect = selected === q.correctOptionId;
+                      
+                      return (
+                        <div key={q.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                          <div className="flex items-start gap-2.5 mb-3">
+                            <span className="w-7 h-7 rounded-full bg-emerald-800 text-gold-200 font-bold text-xs flex items-center justify-center shrink-0">
+                              {qIndex + 1}
+                            </span>
+                            <h3 className="font-bold text-emerald-950 text-base leading-snug font-cairo">
+                              {isRtl ? q.questionAr : q.questionEn}
+                            </h3>
+                          </div>
+
+                          {/* Options */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-3">
+                            {q.options.map(opt => {
+                              const isThisSelected = selected === opt.id;
+                              let btnClass = 'bg-white border-slate-200 text-slate-800 hover:border-emerald-300';
+                              
+                              if (quizSubmitted) {
+                                if (opt.id === q.correctOptionId) {
+                                  btnClass = 'bg-emerald-100 border-emerald-600 text-emerald-900 font-bold';
+                                } else if (isThisSelected && !isCorrect) {
+                                  btnClass = 'bg-red-100 border-red-500 text-red-900';
+                                }
+                              } else if (isThisSelected) {
+                                btnClass = 'bg-emerald-800 text-gold-200 border-emerald-900 font-bold shadow';
+                              }
+
+                              return (
+                                <button
+                                  key={opt.id}
+                                  disabled={quizSubmitted}
+                                  onClick={() => setQuizAnswers(prev => ({ ...prev, [q.id]: opt.id }))}
+                                  className={`p-3 rounded-xl border text-right text-xs transition flex items-center justify-between ${btnClass}`}
+                                >
+                                  <span>{isRtl ? opt.textAr : opt.textEn}</span>
+                                  {quizSubmitted && opt.id === q.correctOptionId && <span>✓</span>}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Explanations shown after submit */}
+                          {quizSubmitted && (
+                            <div className={`mt-3 p-3.5 rounded-xl text-xs font-amiri leading-relaxed ${
+                              isCorrect ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-red-50 text-red-900 border border-red-200'
+                            }`}>
+                              <strong>{isCorrect ? '✓ إجابة صحيحة بارك الله فيكِ:' : '✗ توضيح الإجابة الصحيحة والتأصيل الشرعي:'}</strong> {isRtl ? q.explanationAr : q.explanationEn}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Submit / Reset Actions */}
+                  <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
+                    {quizSubmitted ? (
+                      <button 
+                        onClick={() => {
+                          setQuizAnswers({});
+                          setQuizSubmitted(false);
+                        }}
+                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition"
+                      >
+                        {isRtl ? 'إعادة الاختبار من جديد' : 'Retake Quiz'}
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => setQuizSubmitted(true)}
+                        disabled={Object.keys(quizAnswers).length === 0}
+                        className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-xs shadow-lg transition disabled:opacity-40"
+                      >
+                        {isRtl ? 'تسليم الإجابات والتقييم الفوري' : 'Submit Answers'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* ================= FULLSCREEN ZOOM PRESENTATION OVERLAY ================= */}
+          {isFullscreenZoom && tajweedData && (
+            <div className="zoom-slide-fullscreen">
+              <button 
+                onClick={() => setIsFullscreenZoom(false)}
+                className="absolute top-6 left-6 bg-red-600/80 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-xl font-bold transition shadow-2xl z-50"
+              >
+                ✕ {isRtl ? 'إنهاء وضع العرض' : 'Exit Presentation'}
+              </button>
+
+              {(() => {
+                const cardsList = tajweedData.presentationCards || [];
+                const card = cardsList[activeSlideIndex] || cardsList[0] || { ayahTextUthmani: '', highlightedPortion: '', titleAr: '', titleEn: '', explanationAr: '', explanationEn: '' };
+                return (
+                  <div className="w-full max-w-5xl flex flex-col justify-between items-center text-center text-white space-y-6">
+                    <div className="text-gold-300 text-sm font-bold tracking-widest uppercase">
+                      {isRtl ? card.titleAr : card.titleEn}
+                    </div>
+
+                    <div className="my-8 px-6">
+                      <p className="font-quran text-3xl sm:text-6xl text-amber-100 leading-relaxed drop-shadow-md">
+                        {(() => {
+                          const text = card.ayahTextUthmani || '';
+                          const target = card.highlightedPortion || '';
+                          if (!target || !text.includes(target)) {
+                            return <span>{text}</span>;
+                          }
+                          return text.split(target).map((part, i, arr) => (
+                            <React.Fragment key={i}>
+                              {part}
+                              {i < arr.length - 1 && (
+                                <span className="bg-emerald-600/80 text-gold-200 font-bold border-b-8 border-gold-400 px-4 py-1 rounded-2xl shadow-2xl">
+                                  {target}
+                                </span>
+                              )}
+                            </React.Fragment>
+                          ));
+                        })()}
+                      </p>
+                    </div>
+
+                    <div className="bg-emerald-950/90 rounded-2xl p-6 border-2 border-gold-400/50 max-w-3xl text-right font-amiri text-lg sm:text-xl text-slate-100 leading-relaxed shadow-2xl">
+                      <p>{isRtl ? card.explanationAr : card.explanationEn}</p>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-4">
+                      <button 
+                        disabled={activeSlideIndex === 0}
+                        onClick={() => setActiveSlideIndex(prev => prev - 1)}
+                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-sm"
+                      >
+                        {isRtl ? 'السابق' : 'Previous'}
+                      </button>
+                      <span className="text-gold-300 font-bold text-base px-3">
+                        {activeSlideIndex + 1} / {(tajweedData.presentationCards || []).length}
+                      </span>
+                      <button 
+                        disabled={activeSlideIndex === (tajweedData.presentationCards || []).length - 1}
+                        onClick={() => setActiveSlideIndex(prev => prev + 1)}
+                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-sm"
+                      >
+                        {isRtl ? 'التالي' : 'Next'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* ================= SECURITY PIN GATE MODAL ================= */}
+          {isPinModalOpen && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white rounded-3xl p-6 max-w-md w-full border-2 border-emerald-900 shadow-2xl text-right">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-3xl">🔒</span>
+                  <div>
+                    <h3 className="text-lg font-bold text-emerald-950 font-cairo">
+                      {isRtl ? 'بوابة أمان المعلم (Teacher PIN Access)' : 'Teacher Security Gate'}
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      {isRtl ? 'حماية مفاتيح الذكاء الاصطناعي على الخادم ومنع الاستخدام غير المصرح به' : 'Serverless proxy security gate preventing unauthorized AI calls'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="my-4">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    {isRtl ? 'رمز المرور المعتمد (PIN):' : 'Enter Teacher Passcode / PIN:'}
+                  </label>
+                  <input 
+                    type="password" 
+                    value={tempPin} 
+                    onChange={(e) => setTempPin(e.target.value)}
+                    placeholder="MISHKAH2026"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-center font-mono text-base tracking-widest focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1.5">
+                    {isRtl ? 'الرمز الافتراضي المعتمد للنسخة: MISHKAH2026' : 'Default sandbox PIN: MISHKAH2026'}
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button 
+                    onClick={() => setIsPinModalOpen(false)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs"
+                  >
+                    {isRtl ? 'إلغاء' : 'Cancel'}
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setTeacherPin(tempPin);
+                      localStorage.setItem('mishkah_pin', tempPin);
+                      setIsPinModalOpen(false);
+                      showToast(isRtl ? 'تم تحديث وحفظ رمز المعلم بنجاح 🔒' : 'Teacher PIN Saved Successfully 🔒');
+                    }}
+                    className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2 rounded-xl text-xs shadow"
+                  >
+                    {isRtl ? 'حفظ وتأكيد' : 'Confirm PIN'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* APPLICATION FOOTER */}
+          <footer className="bg-emerald-950 text-emerald-200/80 border-t border-emerald-900 py-6 text-center text-xs no-print">
+            <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-gold-300 font-amiri text-base">مِشكاة | Mishkah</span>
+                <span>—</span>
+                <span>{isRtl ? 'منصة الداعية والمعلم الأولى لتعليم القرآن والعلوم الشرعية' : 'Empowering Quran & Islamic Studies Educators'}</span>
+              </div>
+              <div className="text-[11px] text-emerald-400/80">
+                <span>Designed with ADR-0006 Grand Emerald & Soft Gold Motif • Gemini Flash Architecture</span>
+              </div>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  
