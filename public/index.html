@@ -66,9 +66,23 @@
   <style>
     :root {
       --app-font-size: 16px;
+      --active-app-font: 'Cairo', sans-serif;
     }
+
+    html {
+      font-size: var(--app-font-size) !important;
+      transition: font-size 0.15s ease;
+    }
+
+    /* Universal interface typography enforcement excluding sacred Quran verses */
+    body, #root, .islamic-screen-pattern, 
+    h1:not(.font-quran), h2:not(.font-quran), h3:not(.font-quran), h4:not(.font-quran), 
+    p:not(.font-quran), span:not(.font-quran), div:not(.font-quran), 
+    button:not(.font-quran), select, input, textarea, label, td:not(.font-quran), th {
+      font-family: var(--active-app-font) !important;
+    }
+
     body, #root, .islamic-screen-pattern {
-      font-size: var(--app-font-size);
       background-color: #F3EFE6 !important;
       /* Clearly visible ornate Islamic Geometric star & interlaced arabesque pattern */
       background-image: 
@@ -76,12 +90,11 @@
         url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23064E3B' stroke-width='1.4' stroke-opacity='0.22'%3E%3Cpath d='M40 0L48 24L72 32L48 40L40 64L32 40L8 32L32 24Z' fill='%23064E3B' fill-opacity='0.05'/%3E%3Cpath d='M0 40L24 48L32 72L40 48L64 40L40 32L32 8L24 32Z' fill='%23064E3B' fill-opacity='0.05'/%3E%3Ccircle cx='40' cy='40' r='6' stroke='%23C59B27' stroke-opacity='0.35' stroke-width='1.5' fill='%23C59B27' fill-opacity='0.12'/%3E%3Ccircle cx='0' cy='0' r='6' stroke='%23C59B27' stroke-opacity='0.35' stroke-width='1.5' fill='%23C59B27' fill-opacity='0.12'/%3E%3Ccircle cx='80' cy='0' r='6' stroke='%23C59B27' stroke-opacity='0.35' stroke-width='1.5' fill='%23C59B27' fill-opacity='0.12'/%3E%3Ccircle cx='0' cy='80' r='6' stroke='%23C59B27' stroke-opacity='0.35' stroke-width='1.5' fill='%23C59B27' fill-opacity='0.12'/%3E%3Ccircle cx='80' cy='80' r='6' stroke='%23C59B27' stroke-opacity='0.35' stroke-width='1.5' fill='%23C59B27' fill-opacity='0.12'/%3E%3C/g%3E%3C/svg%3E") !important;
       background-attachment: fixed !important;
       color: #1E293B;
-      font-family: 'Cairo', sans-serif;
-      transition: font-family 0.2s ease, font-size 0.2s ease;
+      transition: font-size 0.15s ease;
     }
 
     /* Sacred Quranic Text strictly locked to Uthmani font */
-    .font-quran {
+    .font-quran, .font-quran * {
       font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif !important;
       line-height: 2.3 !important;
       letter-spacing: 0.02em;
@@ -265,9 +278,11 @@
 
       useEffect(() => {
         document.documentElement.style.setProperty('--app-font-size', `${fontSize}px`);
+        document.documentElement.style.fontSize = `${fontSize}px`;
         document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
         document.documentElement.lang = lang;
         const fontConfig = FONT_MAP[appFont] || FONT_MAP.cairo;
+        document.documentElement.style.setProperty('--active-app-font', fontConfig.css);
         document.body.style.fontFamily = fontConfig.css;
         localStorage.setItem('mishkah_font', appFont);
       }, [fontSize, isRtl, lang, appFont]);
@@ -733,12 +748,17 @@
                 </button>
 
                 {/* Font Family Switcher */}
-                <div className="flex items-center space-x-1.5 space-x-reverse bg-emerald-950/70 border border-gold-400/50 rounded-lg px-2 py-1 text-xs text-gold-200">
+                <div className="flex items-center space-x-1.5 space-x-reverse bg-emerald-950/80 border border-gold-400/60 rounded-xl px-2.5 py-1.5 text-xs text-gold-200 shadow-sm">
                   <span className="text-gold-300">🔤</span>
                   <select 
                     value={appFont} 
-                    onChange={(e) => setAppFont(e.target.value)}
-                    className="bg-transparent text-gold-100 font-semibold text-xs focus:outline-none cursor-pointer pr-1"
+                    onChange={(e) => {
+                      const newF = e.target.value;
+                      setAppFont(newF);
+                      const fCfg = FONT_MAP[newF] || FONT_MAP.cairo;
+                      showToast(isRtl ? `تم تفعيل ${fCfg.nameAr} ✨` : `Font set to ${fCfg.nameEn} ✨`);
+                    }}
+                    className="bg-transparent text-gold-100 font-bold text-xs focus:outline-none cursor-pointer pr-1"
                     title={isRtl ? 'اختيار خط واجهة التطبيق' : 'Choose Interface Font'}
                   >
                     <option value="cairo" className="bg-emerald-950 text-gold-100">خط كايرو (Cairo)</option>
@@ -750,17 +770,23 @@
                 </div>
 
                 {/* Font Size Scaler */}
-                <div className="hidden md:flex items-center space-x-2 space-x-reverse bg-emerald-950/60 border border-emerald-700/60 rounded-lg px-2.5 py-1 text-xs text-emerald-100">
-                  <span>Aa</span>
+                <div className="flex items-center space-x-2 space-x-reverse bg-emerald-950/80 border border-emerald-700/80 rounded-xl px-2.5 py-1.5 text-xs text-emerald-100 shadow-sm">
+                  <span className="font-bold text-gold-300">Aa</span>
                   <input 
                     type="range" 
-                    min="14" 
-                    max="20" 
+                    min="13" 
+                    max="22" 
+                    step="1"
                     value={fontSize} 
-                    onChange={(e) => setFontSize(Number(e.target.value))} 
-                    className="w-16 h-1.5 accent-gold-400 cursor-pointer"
+                    onChange={(e) => {
+                      const newSz = Number(e.target.value);
+                      setFontSize(newSz);
+                      document.documentElement.style.fontSize = newSz + 'px';
+                    }} 
+                    className="w-16 sm:w-20 h-1.5 accent-gold-400 cursor-pointer"
+                    title={isRtl ? 'تكبير وتصغير حجم الخط' : 'Scale Font Size'}
                   />
-                  <span className="text-[10px] text-gold-300">{fontSize}px</span>
+                  <span className="text-[11px] font-bold text-gold-300 min-w-[28px]">{fontSize}px</span>
                 </div>
 
                 {/* Language Switcher Button */}
