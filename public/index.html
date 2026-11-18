@@ -306,8 +306,13 @@
       const [lang, setLang] = useState('ar');
       const isRtl = lang === 'ar';
       
-      // Font Scale (14px - 20px)
-      const [fontSize, setFontSize] = useState(16);
+      // 3-Level Simple Ergonomic Font Scale: صغير (14px) | متوسط (16px - الافتراضي) | كبير (18px - مريح لكبار السن)
+      const FONT_SIZE_LEVELS = {
+        small: { px: 14, labelAr: 'صغير', labelEn: 'Small', tipAr: 'خط صغير مدمج', tipEn: 'Compact font (14px)' },
+        medium: { px: 16, labelAr: 'متوسط', labelEn: 'Medium', tipAr: 'خط متوسط متزن (الافتراضي)', tipEn: 'Balanced font (Default 16px)' },
+        large: { px: 18, labelAr: 'كبير', labelEn: 'Large', tipAr: 'خط كبير ومريح للعين وكبار السن بدون الإخلال بتوازن الصفحة', tipEn: 'Comfortable large font for seniors (18px)' }
+      };
+      const [fontSizeLevel, setFontSizeLevel] = useState(localStorage.getItem('mishkah_font_level') || 'medium');
       
       // Font Family Switcher (Cairo, Amiri, Tajawal, Almarai, Noto Naskh)
       const [appFont, setAppFont] = useState(localStorage.getItem('mishkah_font') || 'cairo');
@@ -321,7 +326,8 @@
       };
 
       useEffect(() => {
-        document.documentElement.style.setProperty('--lesson-content-font-size', `${fontSize}px`);
+        const currentLevel = FONT_SIZE_LEVELS[fontSizeLevel] || FONT_SIZE_LEVELS.medium;
+        document.documentElement.style.setProperty('--lesson-content-font-size', `${currentLevel.px}px`);
         document.documentElement.style.fontSize = '16px';
         document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
         document.documentElement.lang = lang;
@@ -329,7 +335,8 @@
         document.documentElement.style.setProperty('--active-app-font', fontConfig.css);
         document.body.style.fontFamily = fontConfig.css;
         localStorage.setItem('mishkah_font', appFont);
-      }, [fontSize, isRtl, lang, appFont]);
+        localStorage.setItem('mishkah_font_level', fontSizeLevel);
+      }, [fontSizeLevel, isRtl, lang, appFont]);
 
       // Active View
       const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'tajweed' | 'islamic' | 'worksheet' | 'quiz'
@@ -813,22 +820,34 @@
                   </select>
                 </div>
 
-                {/* Font Size Scaler */}
-                <div className="flex items-center space-x-2 space-x-reverse bg-emerald-950/80 border border-emerald-700/80 rounded-xl px-2.5 py-1.5 text-xs text-emerald-100 shadow-sm">
-                  <span className="font-bold text-gold-300">Aa</span>
-                  <input 
-                    type="range" 
-                    min="13" 
-                    max="22" 
-                    step="1"
-                    value={fontSize} 
-                    onChange={(e) => {
-                      setFontSize(Number(e.target.value));
-                    }} 
-                    className="w-16 sm:w-20 h-1.5 accent-gold-400 cursor-pointer"
-                    title={isRtl ? 'تكبير وتصغير حجم خط المحتوى التعليمي والدروس' : 'Scale Lesson Content Font Size'}
-                  />
-                  <span className="text-[11px] font-bold text-gold-300 min-w-[28px]">{fontSize}px</span>
+                {/* 3-Level Simple Font Selector: صغير | متوسط | كبير */}
+                <div className="flex items-center space-x-1.5 space-x-reverse bg-emerald-950/80 border border-gold-400/60 rounded-xl px-2 py-1 text-xs text-gold-200 shadow-sm" title={isRtl ? 'حجم الخط: صغير، متوسط، كبير (مريح لكبار السن بدون الإخلال بتوازن الصفحة)' : 'Font Size: Small, Medium, Large'}>
+                  <span className="text-gold-300 font-bold text-xs select-none pl-1 hidden sm:inline">
+                    {isRtl ? 'حجم الخط:' : 'Font:'}
+                  </span>
+                  <div className="flex items-center bg-emerald-900/80 rounded-lg p-0.5 gap-1 border border-emerald-700/60">
+                    {Object.entries(FONT_SIZE_LEVELS).map(([key, config]) => {
+                      const isActive = fontSizeLevel === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            setFontSizeLevel(key);
+                            showToast(isRtl ? `حجم الخط: ${config.labelAr}` : `Font size: ${config.labelEn}`);
+                          }}
+                          className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all duration-150 ${
+                            isActive 
+                              ? 'bg-gold-500 text-emerald-950 shadow-md font-black ring-1 ring-gold-300 scale-[1.02]' 
+                              : 'text-emerald-100 hover:text-gold-200 hover:bg-emerald-800/60'
+                          }`}
+                          title={isRtl ? config.tipAr : config.tipEn}
+                        >
+                          {isRtl ? config.labelAr : config.labelEn}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Language Switcher Button */}
