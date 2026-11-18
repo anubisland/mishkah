@@ -2412,43 +2412,46 @@
               <div className="space-y-8 animate-fadeIn">
                 
                 {/* Welcome Hero Banner with Rich Islamic Tapestry */}
-                <div className="islamic-hero-banner rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="islamic-hero-banner rounded-3xl p-4 sm:p-5 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg border-2 border-gold-400/30 mb-6">
                   {/* Islamic Corner Rosette Accents */}
-                  <div className="absolute top-2.5 right-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
-                  <div className="absolute top-2.5 left-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
-                  <div className="absolute bottom-2.5 right-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
-                  <div className="absolute bottom-2.5 left-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
-                  <div className="relative z-10 max-w-2xl">
-                    <div className="inline-flex items-center gap-2 bg-gold-400/20 text-gold-200 border border-gold-400/40 text-xs px-3 py-1 rounded-full mb-3">
-                      <span>✨</span>
-                      <span>{isRtl ? 'نظام التشغيل الشامل للداعية والمعلم الشرعي' : 'Comprehensive OS for Da\'wah & Islamic Educators'}</span>
+                  <div className="absolute top-2 right-3 text-gold-300/30 text-lg font-amiri pointer-events-none select-none">۞</div>
+                  <div className="absolute top-2 left-3 text-gold-300/30 text-lg font-amiri pointer-events-none select-none">۞</div>
+
+                  {/* Main Content (Title, Subtitle & 3 Buttons in Single Row) */}
+                  <div className="relative z-10 flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                      <span className="inline-flex items-center gap-1.5 bg-gold-400/20 text-gold-200 border border-gold-400/40 text-[11px] px-2.5 py-0.5 rounded-full font-bold">
+                        <span>✨</span>
+                        <span>{isRtl ? 'نظام التشغيل الشامل للداعية والمعلم الشرعي' : "Comprehensive OS for Da'wah & Islamic Educators"}</span>
+                      </span>
+                      <span className="text-[11px] text-emerald-200/80 font-medium hidden sm:inline">
+                        {isRtl ? 'منصة مِشكاة الرسمية المعتمدة — AnubisLand' : 'Official AnubisLand Platform'}
+                      </span>
                     </div>
-                    <h2 className="text-2xl sm:text-4xl font-extrabold font-amiri text-gold-200 mb-3">
+
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold font-amiri text-gold-200 leading-tight mb-2">
                       {isRtl ? 'منظومة متكاملة لحلقات القرآن، التجويد، ومتابعة الأداء الشرعي' : 'Integrated OS for Quran, Tajweed, Islamic Studies & Performance Tracking'}
                     </h2>
-                    <p className="text-emerald-100/90 text-sm sm:text-base leading-relaxed mb-6">
-                      {isRtl 
-                        ? 'مِشكاة — يجمع بين دقة استخراج الأحكام التجويدية بالرسم العثماني، وبطاقات زوم الملونة، والتوثيق الشرعي الصارم لأحاديث صحيح البخاري ومسلم، مع منظومة المتابعة وتقييم الجودة وإصدار التقارير.'
-                        : 'Mishkah integrates Uthmani script Tajweed extraction, Zoom presentation cards, rigorous Hadith authentication, performance tracking, and printable student worksheets in one cohesive platform.'}
-                    </p>
-                    <div className="flex flex-wrap gap-3">
+
+                    {/* The 3 Buttons Exactly in One Single Horizontal Row */}
+                    <div className="flex flex-row items-center gap-2 sm:gap-3 flex-wrap lg:flex-nowrap pt-1">
                       <button 
                         onClick={() => setActiveTab('hifz')}
-                        className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-black px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2 text-sm"
+                        className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-black px-4 py-2 rounded-xl shadow-md transition flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap"
                       >
                         <span>🕋</span>
                         <span>{isRtl ? 'أدوات التحفيظ والتسميع' : 'Memorization Tools'}</span>
                       </button>
                       <button 
                         onClick={() => setActiveTab('tajweed')}
-                        className="bg-emerald-900/90 hover:bg-emerald-800 text-gold-200 border border-gold-400/60 font-bold px-5 py-2.5 rounded-xl shadow transition flex items-center gap-2 text-sm"
+                        className="bg-emerald-900/90 hover:bg-emerald-800 text-gold-200 border border-gold-400/60 font-bold px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap"
                       >
                         <span>📖</span>
                         <span>{isRtl ? 'أدوات التجويد والتحليل' : 'Tajweed Tools'}</span>
                       </button>
                       <button 
                         onClick={() => setActiveTab('islamic')}
-                        className="bg-emerald-950/80 hover:bg-emerald-950 border border-gold-400/60 text-gold-200 font-bold px-5 py-2.5 rounded-xl shadow transition flex items-center gap-2 text-sm"
+                        className="bg-emerald-950/80 hover:bg-emerald-950 border border-gold-400/60 text-gold-200 font-bold px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5 text-xs sm:text-sm whitespace-nowrap"
                       >
                         <span>🕌</span>
                         <span>{isRtl ? 'تخطيط حلقة علوم شرعية' : 'Plan Islamic Studies Lesson'}</span>
@@ -2456,10 +2459,10 @@
                     </div>
                   </div>
 
-                  {/* Official Emblem Display */}
-                  <div className="relative z-10 flex-shrink-0">
-                    <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl p-1 bg-gradient-to-b from-gold-300 via-gold-500 to-emerald-950 shadow-2xl border-2 border-gold-300/80 transform hover:scale-105 transition flex items-center justify-center overflow-hidden">
-                      <img src="icons/mishkah-app-icon.jpg" alt="Mishkah Official App Icon" className="w-full h-full object-cover rounded-2xl" />
+                  {/* Official Emblem Display Raised to Top / Side */}
+                  <div className="relative z-10 flex-shrink-0 self-center md:self-start">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl p-1 bg-gradient-to-b from-gold-300 via-gold-500 to-emerald-950 shadow-xl border-2 border-gold-300/80 transform hover:scale-105 transition flex items-center justify-center overflow-hidden">
+                      <img src="icons/mishkah-app-icon.jpg" alt="Mishkah Official App Icon" className="w-full h-full object-cover rounded-xl" />
                     </div>
                   </div>
                 </div>
@@ -4207,24 +4210,26 @@
                         </div>
                       </div>
 
-                      {/* Active Slide Card Display */}
+                      {/* Active Slide Card Display (Illuminated Parchment, Zero Pitch-Black!) */}
                       {(() => {
                         const cardsList = tajweedData.presentationCards || [];
                         const card = cardsList[activeSlideIndex] || cardsList[0] || { ayahTextUthmani: '', highlightedPortion: '', titleAr: '', titleEn: '', explanationAr: '', explanationEn: '' };
                         return (
-                          <div className="bg-gradient-to-b from-slate-900 to-emerald-950 text-white rounded-3xl p-8 border-4 border-gold-400/70 shadow-2xl relative overflow-hidden text-center min-h-[380px] flex flex-col justify-between">
+                          <div className="card-islamic-pearl rounded-3xl p-6 sm:p-8 border-4 border-gold-500/70 shadow-2xl relative overflow-hidden text-center min-h-[380px] flex flex-col justify-between">
                             
                             {/* Slide Header */}
-                            <div className="flex justify-between items-center text-xs text-gold-300 border-b border-emerald-800/60 pb-3">
-                              <span className="font-bold tracking-wider uppercase">Mishkah Slide {card.cardIndex || activeSlideIndex + 1}</span>
-                              <span className="bg-gold-500/20 px-3 py-1 rounded-full border border-gold-400/40 font-bold">
+                            <div className="flex justify-between items-center text-xs text-emerald-950 border-b border-emerald-900/10 pb-3">
+                              <span className="font-black tracking-wider uppercase bg-emerald-100/90 text-emerald-950 border border-emerald-300 px-3 py-1 rounded-full shadow-2xs">
+                                Mishkah Slide {card.cardIndex || activeSlideIndex + 1}
+                              </span>
+                              <span className="bg-gold-500/20 text-emerald-950 px-3 py-1 rounded-full border border-gold-500/60 font-black shadow-2xs">
                                 {isRtl ? card.titleAr : card.titleEn}
                               </span>
                             </div>
 
                             {/* Uthmani Ayah Display with Highlighting */}
                             <div className="my-8 px-4">
-                              <p className="font-quran text-2xl sm:text-4xl text-amber-100 leading-loose">
+                              <p className="font-quran text-2xl sm:text-4xl text-emerald-950 leading-loose font-bold">
                                 {(() => {
                                   const text = card.ayahTextUthmani || '';
                                   const target = card.highlightedPortion || '';
@@ -4235,7 +4240,7 @@
                                     <React.Fragment key={i}>
                                       {part}
                                       {i < arr.length - 1 && (
-                                        <span className="bg-emerald-500/40 text-gold-300 font-bold border-b-4 border-gold-400 px-2 py-0.5 rounded-lg shadow-inner">
+                                        <span className="bg-amber-200/90 text-emerald-950 font-black border-2 border-gold-600 px-3 py-1 rounded-xl shadow-xs inline-block mx-1">
                                           {target}
                                         </span>
                                       )}
@@ -4243,18 +4248,18 @@
                                   ));
                                 })()}
                               </p>
-                              <div className="text-xs text-gold-300/80 mt-2 font-cairo">
+                              <div className="text-xs text-gold-900 font-bold mt-3 font-cairo">
                                 {isRtl ? `الموضع المستهدف بالتلوين: [ ${card.highlightedPortion} ]` : `Target Word: [ ${card.highlightedPortion} ]`}
                               </div>
                             </div>
 
-                            {/* Pedagogical Explanation & Teacher Prompt */}
-                            <div className="bg-emerald-950/90 rounded-2xl p-4 border border-emerald-700/60 text-right text-xs space-y-2">
-                              <div className="text-slate-100 font-amiri text-base leading-relaxed">
-                                <strong>{isRtl ? 'الشرح والعلة:' : 'Explanation:'}</strong> {isRtl ? card.explanationAr : card.explanationEn}
+                            {/* Pedagogical Explanation & Teacher Prompt (High contrast card-islamic-sage, zero dark-on-dark!) */}
+                            <div className="card-islamic-sage rounded-2xl p-4 sm:p-5 border-2 border-emerald-700/30 text-right text-xs space-y-2.5 shadow-sm">
+                              <div className="text-emerald-950 font-amiri text-base sm:text-lg leading-relaxed font-bold">
+                                <strong className="text-emerald-900">{isRtl ? 'الشرح والعلة:' : 'Explanation:'}</strong> {isRtl ? card.explanationAr : card.explanationEn}
                               </div>
-                              <div className="text-gold-200/90 italic flex items-center gap-2 pt-2 border-t border-emerald-800/60">
-                                <span>💡</span>
+                              <div className="text-emerald-900 font-bold italic flex items-center gap-2 pt-2 border-t border-emerald-700/20 text-xs sm:text-sm">
+                                <span className="text-base">💡</span>
                                 <span><strong>{isRtl ? 'إرشاد المعلم للدارسين:' : 'Teacher Prompt:'}</strong> {card.teacherPrompt}</span>
                               </div>
                             </div>
@@ -4267,7 +4272,7 @@
                   </div>
                 )}
 
-                {/* ================= SUB-TAB 2: INTERACTIVE ARTICULATION ATLAS ================= */}
+{/* ================= SUB-TAB 2: INTERACTIVE ARTICULATION ATLAS ================= */}
                 {tajweedSubTab === 'makhaarij' && (
                   <div className="space-y-6 animate-fadeIn">
                     {/* Header Banner */}
@@ -4355,10 +4360,12 @@
                                 {makhraj.letters.map((lettr, lIdx) => (
                                   <div 
                                     key={lIdx}
-                                    className="w-14 h-14 rounded-2xl bg-white hover:bg-emerald-50 text-emerald-950 font-quran text-3xl font-black border-2 border-emerald-700/35 hover:border-gold-500 shadow-sm hover:shadow-md hover:scale-110 transition-all flex items-center justify-center cursor-pointer select-none"
+                                    className="w-14 h-14 rounded-2xl bg-white hover:bg-emerald-50 text-emerald-950 border-2 border-emerald-700/35 hover:border-gold-500 shadow-sm hover:shadow-md hover:scale-110 transition-all flex items-center justify-center cursor-pointer select-none"
                                     title={'حرف ' + lettr}
                                   >
-                                    {lettr}
+                                    <span className="font-cairo font-black text-2xl leading-none text-center flex items-center justify-center w-full h-full select-none">
+                                      {lettr}
+                                    </span>
                                   </div>
                                 ))}
                               </div>
