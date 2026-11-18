@@ -399,6 +399,784 @@
 
     const ALL_QURAN_SURAHS = [{"id":1,"name":"الفاتحة","en":"Al-Faatiha","ayahs":7},{"id":2,"name":"البقرة","en":"Al-Baqara","ayahs":286},{"id":3,"name":"ال عمران","en":"Aal-i-Imraan","ayahs":200},{"id":4,"name":"النساء","en":"An-Nisaa","ayahs":176},{"id":5,"name":"المائـدة","en":"Al-Maaida","ayahs":120},{"id":6,"name":"الأنعام","en":"Al-An'aam","ayahs":165},{"id":7,"name":"الأعراف","en":"Al-A'raaf","ayahs":206},{"id":8,"name":"الأنفال","en":"Al-Anfaal","ayahs":75},{"id":9,"name":"التوبة","en":"At-Tawba","ayahs":129},{"id":10,"name":"يونس","en":"Yunus","ayahs":109},{"id":11,"name":"هود","en":"Hud","ayahs":123},{"id":12,"name":"يوسف","en":"Yusuf","ayahs":111},{"id":13,"name":"الرعد","en":"Ar-Ra'd","ayahs":43},{"id":14,"name":"إبراهيم","en":"Ibrahim","ayahs":52},{"id":15,"name":"الحجر","en":"Al-Hijr","ayahs":99},{"id":16,"name":"النحل","en":"An-Nahl","ayahs":128},{"id":17,"name":"الإسراء","en":"Al-Israa","ayahs":111},{"id":18,"name":"الكهف","en":"Al-Kahf","ayahs":110},{"id":19,"name":"مريم","en":"Maryam","ayahs":98},{"id":20,"name":"طه","en":"Taa-Haa","ayahs":135},{"id":21,"name":"الأنبياء","en":"Al-Anbiyaa","ayahs":112},{"id":22,"name":"الحج","en":"Al-Hajj","ayahs":78},{"id":23,"name":"المؤمنون","en":"Al-Muminoon","ayahs":118},{"id":24,"name":"النور","en":"An-Noor","ayahs":64},{"id":25,"name":"الفرقان","en":"Al-Furqaan","ayahs":77},{"id":26,"name":"الشعراء","en":"Ash-Shu'araa","ayahs":227},{"id":27,"name":"النمل","en":"An-Naml","ayahs":93},{"id":28,"name":"القصص","en":"Al-Qasas","ayahs":88},{"id":29,"name":"العنكبوت","en":"Al-Ankaboot","ayahs":69},{"id":30,"name":"الروم","en":"Ar-Room","ayahs":60},{"id":31,"name":"لقمان","en":"Luqman","ayahs":34},{"id":32,"name":"السجدة","en":"As-Sajda","ayahs":30},{"id":33,"name":"الأحزاب","en":"Al-Ahzaab","ayahs":73},{"id":34,"name":"سبإ","en":"Saba","ayahs":54},{"id":35,"name":"فاطر","en":"Faatir","ayahs":45},{"id":36,"name":"يس","en":"Yaseen","ayahs":83},{"id":37,"name":"الصافات","en":"As-Saaffaat","ayahs":182},{"id":38,"name":"ص","en":"Saad","ayahs":88},{"id":39,"name":"الزمر","en":"Az-Zumar","ayahs":75},{"id":40,"name":"غافر","en":"Ghafir","ayahs":85},{"id":41,"name":"فصلت","en":"Fussilat","ayahs":54},{"id":42,"name":"الشورى","en":"Ash-Shura","ayahs":53},{"id":43,"name":"الزخرف","en":"Az-Zukhruf","ayahs":89},{"id":44,"name":"الدخان","en":"Ad-Dukhaan","ayahs":59},{"id":45,"name":"الجاثية","en":"Al-Jaathiya","ayahs":37},{"id":46,"name":"الأحقاف","en":"Al-Ahqaf","ayahs":35},{"id":47,"name":"محمد","en":"Muhammad","ayahs":38},{"id":48,"name":"الفتح","en":"Al-Fath","ayahs":29},{"id":49,"name":"الحجرات","en":"Al-Hujuraat","ayahs":18},{"id":50,"name":"ق","en":"Qaaf","ayahs":45},{"id":51,"name":"الذاريات","en":"Adh-Dhaariyat","ayahs":60},{"id":52,"name":"الطور","en":"At-Tur","ayahs":49},{"id":53,"name":"النجم","en":"An-Najm","ayahs":62},{"id":54,"name":"القمر","en":"Al-Qamar","ayahs":55},{"id":55,"name":"الرحمن","en":"Ar-Rahmaan","ayahs":78},{"id":56,"name":"الواقعة","en":"Al-Waaqia","ayahs":96},{"id":57,"name":"الحديد","en":"Al-Hadid","ayahs":29},{"id":58,"name":"المجادلة","en":"Al-Mujaadila","ayahs":22},{"id":59,"name":"الحشر","en":"Al-Hashr","ayahs":24},{"id":60,"name":"الممتحنة","en":"Al-Mumtahana","ayahs":13},{"id":61,"name":"الصف","en":"As-Saff","ayahs":14},{"id":62,"name":"الجمعة","en":"Al-Jumu'a","ayahs":11},{"id":63,"name":"المنافقون","en":"Al-Munaafiqoon","ayahs":11},{"id":64,"name":"التغابن","en":"At-Taghaabun","ayahs":18},{"id":65,"name":"الطلاق","en":"At-Talaaq","ayahs":12},{"id":66,"name":"التحريم","en":"At-Tahrim","ayahs":12},{"id":67,"name":"الملك","en":"Al-Mulk","ayahs":30},{"id":68,"name":"القلم","en":"Al-Qalam","ayahs":52},{"id":69,"name":"الحاقة","en":"Al-Haaqqa","ayahs":52},{"id":70,"name":"المعارج","en":"Al-Ma'aarij","ayahs":44},{"id":71,"name":"نوح","en":"Nooh","ayahs":28},{"id":72,"name":"الجن","en":"Al-Jinn","ayahs":28},{"id":73,"name":"المزمل","en":"Al-Muzzammil","ayahs":20},{"id":74,"name":"المدثر","en":"Al-Muddaththir","ayahs":56},{"id":75,"name":"القيامة","en":"Al-Qiyaama","ayahs":40},{"id":76,"name":"الإنسان","en":"Al-Insaan","ayahs":31},{"id":77,"name":"المرسلات","en":"Al-Mursalaat","ayahs":50},{"id":78,"name":"النبإ","en":"An-Naba","ayahs":40},{"id":79,"name":"النازعات","en":"An-Naazi'aat","ayahs":46},{"id":80,"name":"عبس","en":"Abasa","ayahs":42},{"id":81,"name":"التكوير","en":"At-Takwir","ayahs":29},{"id":82,"name":"الانفطار","en":"Al-Infitaar","ayahs":19},{"id":83,"name":"المطففين","en":"Al-Mutaffifin","ayahs":36},{"id":84,"name":"الانشقاق","en":"Al-Inshiqaaq","ayahs":25},{"id":85,"name":"البروج","en":"Al-Burooj","ayahs":22},{"id":86,"name":"الطارق","en":"At-Taariq","ayahs":17},{"id":87,"name":"الأعلى","en":"Al-A'laa","ayahs":19},{"id":88,"name":"الغاشية","en":"Al-Ghaashiya","ayahs":26},{"id":89,"name":"الفجر","en":"Al-Fajr","ayahs":30},{"id":90,"name":"البلد","en":"Al-Balad","ayahs":20},{"id":91,"name":"الشمس","en":"Ash-Shams","ayahs":15},{"id":92,"name":"الليل","en":"Al-Lail","ayahs":21},{"id":93,"name":"الضحى","en":"Ad-Dhuhaa","ayahs":11},{"id":94,"name":"الشرح","en":"Ash-Sharh","ayahs":8},{"id":95,"name":"التين","en":"At-Tin","ayahs":8},{"id":96,"name":"العلق","en":"Al-Alaq","ayahs":19},{"id":97,"name":"القدر","en":"Al-Qadr","ayahs":5},{"id":98,"name":"البينة","en":"Al-Bayyina","ayahs":8},{"id":99,"name":"الزلزلة","en":"Az-Zalzala","ayahs":8},{"id":100,"name":"العاديات","en":"Al-Aadiyaat","ayahs":11},{"id":101,"name":"القارعة","en":"Al-Qaari'a","ayahs":11},{"id":102,"name":"التكاثر","en":"At-Takaathur","ayahs":8},{"id":103,"name":"العصر","en":"Al-Asr","ayahs":3},{"id":104,"name":"الهمزة","en":"Al-Humaza","ayahs":9},{"id":105,"name":"الفيل","en":"Al-Fil","ayahs":5},{"id":106,"name":"قريش","en":"Quraish","ayahs":4},{"id":107,"name":"الماعون","en":"Al-Maa'un","ayahs":7},{"id":108,"name":"الكوثر","en":"Al-Kawthar","ayahs":3},{"id":109,"name":"الكافرون","en":"Al-Kaafiroon","ayahs":6},{"id":110,"name":"النصر","en":"An-Nasr","ayahs":3},{"id":111,"name":"المسد","en":"Al-Masad","ayahs":5},{"id":112,"name":"الإخلاص","en":"Al-Ikhlaas","ayahs":4},{"id":113,"name":"الفلق","en":"Al-Falaq","ayahs":5},{"id":114,"name":"الناس","en":"An-Naas","ayahs":6}];
 
+    
+    // ================= BRANCH 3: ISLAMIC STUDIES WORKSHEETS (DATA) =================
+    const ISLAMIC_BRANCH_WORKSHEETS = {
+  "aqeedah": {
+    "id": "aqeedah",
+    "categoryAr": "العقيدة الإسلامية",
+    "categoryEn": "Islamic Creed (Aqeedah)",
+    "titleAr": "ورقة عمل وتطبيق: أركان الإيمان الستة وأثرها في السكينة النفسية",
+    "titleEn": "Worksheet: The Six Pillars of Faith & Psychological Peace",
+    "targetAudience": "اليافعين والطالبات والمهتدين الجدد",
+    "quranRef": "سورة البقرة: الآية 285 — ﴿ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إِلَيْهِ مِن رَّبِّهِۦ وَٱلْمُؤْمِنُونَ﴾",
+    "hadithRef": "حديث جبريل الطويل (صحيح مسلم #8): «أَنْ تُؤْمِنَ بِاللَّهِ، وَمَلَائِكَتِهِ، وَكُتُبِهِ، وَرُسُلِهِ، وَالْيَوْمِ الْآخِرِ، وَتُؤْمِنَ بِالْقَدَرِ خَيْرِهِ وَشَرِّهِ»",
+    "items": [
+      {
+        "num": 1,
+        "topic": "مراتب الدين الثلاث والفرق بينها",
+        "scripture": "حديث جبريل (صحيح مسلم 8)",
+        "studentQuestion": "اذكر مراتب الدين الثلاث بالترتيب التصاعدي مع بيان أعلى مرتبة وضابطها الشرعي.",
+        "teacherAnswer": "مراتب الدين: 1. الإسلام (الاستسلام الظاهر بالجوارح والأركان الخمسة)، 2. الإيمان (التصديق الباطن بالقلب بالأركان الستة)، 3. الإحسان (أعلى المراتب: أن تعبد الله كأنك تراه فإن لم تكن تراه فإنه يراك).",
+        "practicalImpact": "استشعار مراقبة الله في السر والعلن وإخلاص النية في كل عمل خفي."
+      },
+      {
+        "num": 2,
+        "topic": "الإيمان بالقضاء والقدر وعلاج القلق والندم",
+        "scripture": "﴿إِنَّا كُلَّ شَيْءٍ خَلَقْنَاهُ بِقَدَرٍ﴾ [القمر: 49] وحديث مسلم 2664",
+        "studentQuestion": "ما هو الهدي النبوي المأثور عند وقوع المكروه؟ وما أثر الإيمان بالقدر في محو كلمة \"لو\" المحبطة؟",
+        "teacherAnswer": "الهدي النبوي: قول: «قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ». أثره: يورث التسليم التام لحكمة الله بعد بذل الأسباب المشروعة، ويقطع تسلط الشيطان وباب الحسرة والندم لأن ما أصابك لم يكن ليخطئك.",
+        "practicalImpact": "استبدال الجزع والتسخط بالرضا والسكينة النفسية والبدء من جديد."
+      },
+      {
+        "num": 3,
+        "topic": "الإيمان بالملائكة الكرام وأثرها في الورع",
+        "scripture": "﴿وَإِنَّ عَلَيْكُمْ لَحَافِظِينَ كِرَامًا كَاتِبِينَ﴾ [الانفطار: 10-11]",
+        "studentQuestion": "وضح وظائف كل من: (جبريل، ميكائيل، إسرافيل، ملك الموت)، وبيّن كيف يثمر الإيمان بالحفظة رقابة ذاتية؟",
+        "teacherAnswer": "جبريل موكل بالوحي، ميكائيل بالقطر والنبات، إسرافيل بالنفخ في الصور، ملك الموت بقبض الأرواح. والإيمان بالكرام الكاتبين يثمر حياءً مستمراً من المعصية ومراقبة ذاتية بلا حاجة لكاميرات أرضية.",
+        "practicalImpact": "عفة الجوارح واللسان عن الحرام في الخلوات والعوالم الرقمية."
+      },
+      {
+        "num": 4,
+        "topic": "مقتضى الشهادتين ونفي الشرك",
+        "scripture": "﴿فَاعْلَمْ أَنَّهُ لَا إِلَٰهَ إِلَّا اللَّهُ وَاسْتَغْفِرْ لِذَنبِكَ﴾ [محمد: 19]",
+        "studentQuestion": "ما هو مقتضى شهادة أن لا إله إلا الله من حيث النفي والإثبات؟ مع ذكر مثال للشرك الأصغر.",
+        "teacherAnswer": "النفي: (لا إله) نفي استحقاق العبادة عن كل ما سوى الله، الإثبات: (إلا الله) إثبات العبادة بجميع أنواعها لله وحده لا شريك له. والشرك الأصغر كالرياء الخفي (تحسين العمل لأجل نظر الناس).",
+        "practicalImpact": "تجريد القصد لله وحده وعدم انتظار ثناء الناس أو مدحهم."
+      },
+      {
+        "num": 5,
+        "topic": "الإيمان باليوم الآخر واليقين بالجزاء",
+        "scripture": "﴿فَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُ ۝ وَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ شَرًّا يَرَهُ﴾ [الزلزلة]",
+        "studentQuestion": "كيف يحقق الإيمان باليوم الآخر والحساب العدالة النفسية التامة للمظلوم والزاهد في الدنيا؟",
+        "teacherAnswer": "اليقين بأن الدنيا دار ابتلاء وفناء، وأن الحقوق المهدورة ستستوفى كاملة بميزان القسط يوم القيامة، مما يزيل الحقد واليأس ويجعل المسلم يستعلي بإيمانه على مغريات الحرام الفانية.",
+        "practicalImpact": "العفو والصفح عند المقدرة والاطمئنان إلى عدالة الله المطلقة."
+      }
+    ]
+  },
+  "fiqh": {
+    "id": "fiqh",
+    "categoryAr": "الفقه وأحكام العبادات",
+    "categoryEn": "Fiqh & Acts of Worship",
+    "titleAr": "ورقة عمل وتطبيق: فقه الطهارة والصلاة وسجود السهو",
+    "titleEn": "Worksheet: Purification, Prayer & Sujood As-Sahw",
+    "targetAudience": "طلاب الحلقات والدارسين في فقه العبادات",
+    "quranRef": "﴿حَافِظُوا عَلَى الصَّلَوَاتِ وَالصَّلَاةِ الْوُسْطَىٰ وَقُومُوا لِلَّهِ قَانِتِينَ﴾ [البقرة: 238]",
+    "hadithRef": "حديث المسيء صلاته (صحيح البخاري #757): «ارْجِعْ فَصَلِّ فَإِنَّكَ لَمْ تُصَلِّ»",
+    "items": [
+      {
+        "num": 1,
+        "topic": "الفرق الفقهي بين شرط الصلاة وركنها",
+        "scripture": "حديث: «لا يقبل الله صلاة بغير طهور» (مسلم)",
+        "studentQuestion": "بيّن الفرق الجوهري بين شروط الصلاة وأركانها مع ذكر مثالين لكل منهما.",
+        "teacherAnswer": "الشرط يسبق الدخول في الصلاة ويستمر معها (كالطهارة، ستر العورة، دخول الوقت، استقبال القبلة). الركن هو جزء من ماهية الصلاة وحقيقتها لا يسقط عمداً ولا سهواً (كتكبيرة الإحرام، الفاتحة، الركوع، السجود).",
+        "practicalImpact": "التثبت من صحة الوضوء وستر العورة قبل تكبيرة الإحرام."
+      },
+      {
+        "num": 2,
+        "topic": "أحكام سجود السهو ومواضعه",
+        "scripture": "حديث ابن مسعود وحديث ذي اليدين (صحيح مسلم 571 و 573)",
+        "studentQuestion": "متى يكون سجود السهو قبل السلام؟ ومتى يكون بعد السلام؟ وما ضابط الشك؟",
+        "teacherAnswer": "يسجد قبل السلام عند: 1. النقص (كنسيان التشهد الأول)، 2. الشك إذا بنى على الأقل (اليقين). ويسجد بعد السلام عند: 1. الزيادة (كركعة خامسة)، 2. الشك إذا ترجح لديه أحد الأمرين بالتحري.",
+        "practicalImpact": "إدراك مرونة الشريعة وعدم بطلان الصلاة بالنسيان العارض وجبر الخلل."
+      },
+      {
+        "num": 3,
+        "topic": "نواقض الوضوء وما لا ينقضه",
+        "scripture": "حديث أبي هريرة: «لا ينصرف حتى يسمع صوتاً أو يجد ريحاً» (البخاري 137)",
+        "studentQuestion": "اذكر ثلاثة نواقض مجمع عليها للوضوء، ومسألتين شائعتين لا ينقض فيهما الوضوء.",
+        "teacherAnswer": "النواقض: الخارج من السبيلين، زوال العقل بسكر أو إغماء، مس الفرج بشهوة (عند الجمهور). ولا ينقض: الشك الطارئ دون يقين، والنوم الخفيف المستقر الذي لا يزيل الإدراك كالنوم جالساً.",
+        "practicalImpact": "قطع الوساوس الشيطانية في الطهارة والتمسك باليقين الثابت."
+      },
+      {
+        "num": 4,
+        "topic": "استدراك المسبوق في صلاة الجماعة",
+        "scripture": "حديث: «ما أدركتم فصلوا وما فاتكم فأتموا» (متفق عليه)",
+        "studentQuestion": "بم تدرك الركعة مع الإمام؟ وكيف يقضي المسبوق ما فاته بعد تسليم الإمام؟",
+        "teacherAnswer": "تدرك الركعة بإدراك الركوع التام مع الإمام باطمئنان قبل رفعه. ويقوم المسبوق بعد تسليم الإمام دون تكبير ثانٍ ليتم ما فاته جاعلاً ما أدركه مع الإمام أول صلاته وما يقضيه آخرها على الراجح.",
+        "practicalImpact": "السكينة والوقار عند القدوم للمسجد وعدم الجري السريع لإدراك الركوع."
+      }
+    ]
+  },
+  "seerah": {
+    "id": "seerah",
+    "categoryAr": "السيرة النبوية والتاريخ",
+    "categoryEn": "Prophetic Biography (Seerah)",
+    "titleAr": "ورقة عمل وتطبيق: معالم الهجرة النبوية وبناء مجتمع الأخوة",
+    "titleEn": "Worksheet: Milestones of the Hijrah & Building Society",
+    "targetAudience": "المستوى المتوسط والمتقدم في السيرة النبوية",
+    "quranRef": "﴿إِلَّا تَنصُرُوهُ فَقَدْ نَصَرَهُ اللَّهُ إِذْ أَخْرَجَهُ الَّذِينَ كَفَرُوا ثَانِيَ اثْنَيْنِ إِذْ هُمَا فِي الْغَارِ﴾ [التوبة: 40]",
+    "hadithRef": "حديث الغار (صحيح البخاري #3653): «يَا أَبَا بَكْرٍ، مَا ظَنُّكَ بِاثْنَيْنِ اللَّهُ ثَالِثُهُمَا؟»",
+    "items": [
+      {
+        "num": 1,
+        "topic": "التخطيط المحكم والأخذ بالأسباب في الهجرة",
+        "scripture": "صحيح البخاري — كتاب مناقب الأنصار (باب هجرة النبي ﷺ)",
+        "studentQuestion": "استخرج ثلاثة تدابير نبوية محكمة اتخذها النبي ﷺ في رحلة الهجرة تؤكد وجوب الأخذ بالأسباب.",
+        "teacherAnswer": "1. استئجار دليل خبير بالطريق (عبد الله بن أريقط ولو كان غير مسلم للأمانة والخبرة)، 2. السير في طريق الساحل الوعر خلافاً للمألوف، 3. توزيع الأدوار بدقة: مبيت علي للتمويه، أسماء للتموين، عبد الله بن أبي بكر للأخبار، عامر بن فهيرة لتعفية الآثار.",
+        "practicalImpact": "الجمع بين التخطيط الاستراتيجي الدقيق والتوكل القلبي المطلق على الله."
+      },
+      {
+        "num": 2,
+        "topic": "وثيقة المدينة وتأسيس المواطنة العادلة",
+        "scripture": "سيرة ابن هشام ومصنف ابن أبي شيبة (كتاب المغازي)",
+        "studentQuestion": "ما هي أهم المبادئ الدستورية التي رسختها وثيقة المدينة بين المسلمين وسائر أطياف المجتمع؟",
+        "teacherAnswer": "رسخت: 1. حرمة الدماء والأموال، 2. حرية الاعتقاد والتدين (لليهود دينهم وللمسلمين دينهم)، 3. الدفاع المشترك عن المدينة ضد أي عدوان خارجي، 4. مرجعية العدل والاحتكام لله ورسوله لردع الظالم.",
+        "practicalImpact": "ترسيخ العدالة والتعايش السلمي والوفاء بالعهود والمواثيق مع الجميع."
+      },
+      {
+        "num": 3,
+        "topic": "أخلاق القيادة والعفو عند المقدرة",
+        "scripture": "سنن البيهقي الكبرى ودلائل النبوة (فتح مكة)",
+        "studentQuestion": "كيف تجلى كمال الخلق النبوي يوم فتح مكة تجاه أهل قريش الذين آذوه وأخرجوه؟",
+        "teacherAnswer": "دخل مكة خافضاً رأسه تواضعاً لله حتى كادت لحيته تمس رحله، وخاطبهم قائلاً: «ما تظنون أني فاعل بكم؟ قالوا: أخ كريم وابن أخ كريم، فقال: لا تثريب عليكم اليوم، اذهبوا فأنتم الطلقاء».",
+        "practicalImpact": "العفو عند المقدرة وعدم الانتقام للنفس وتغليب التسامح النبوي."
+      }
+    ]
+  },
+  "tazkiyah": {
+    "id": "tazkiyah",
+    "categoryAr": "الآداب والتزكية والأخلاق",
+    "categoryEn": "Ethics, Etiquette & Purification (Tazkiyah)",
+    "titleAr": "ورقة عمل وتطبيق: حفظ اللسان وبر الوالدين وطهارة السريرة",
+    "titleEn": "Worksheet: Guarding the Tongue & Honoring Parents",
+    "targetAudience": "كافة المستويات — بناء الشخصية المسلمة المتزنة",
+    "quranRef": "﴿وَقَضَىٰ رَبُّكَ أَلَّا تَعْبُدُوا إِلَّا إِيَّاهُ وَبِالْوَالِدَيْنِ إِحْسَانًا﴾ [الإسراء: 23]",
+    "hadithRef": "حديث معاذ (سنن الترمذي #2616): «وَهَلْ يَكُبُّ النَّاسَ فِي النَّارِ عَلَى وُجُوهِهِمْ إِلَّا حَصَائِدُ أَلْسِنَتِهِمْ؟»",
+    "items": [
+      {
+        "num": 1,
+        "topic": "حفظ اللسان والتحذير من الغيبة والنميمة",
+        "scripture": "﴿وَلَا يَغْتَب بَّعْضُكُم بَعْضًا﴾ [الحجرات: 12] وحديث مسلم 2584",
+        "studentQuestion": "عرّف الغيبة والبهتان كما بيّنهما النبي ﷺ، واذكر كفارة الغيبة المشروعة.",
+        "teacherAnswer": "الغيبة: ذكرك أخاك بما يكره وهو فيه، والبهتان: أن تذكر ما ليس فيه كذباً. وكفارتها: التوبة الصادقة، والدعاء والاستغفار للمغتاب في المجالس التي اغتيب فيها وذكره بمحاسنه التي تعرفها.",
+        "practicalImpact": "الإمساك عن الخوض في أعراض الناس وتطهير المجموعات الرقمية من السخرية."
+      },
+      {
+        "num": 2,
+        "topic": "بر الوالدين في حياتهما وبعد مماتهما",
+        "scripture": "حديث: «رغم أنفه من أدرك أبويه عند الكبر أحدهما أو كليهما ثم لم يدخل الجنة» (مسلم 2551)",
+        "studentQuestion": "ما هي أوجه الإحسان للوالدين بعد وفاتهما بصريح النصوص النبوية الشريفة؟",
+        "teacherAnswer": "1. الدعاء والاستغفار الدائم لهما، 2. إنفاذ عهدهما ووصاياهما المشروعة، 3. إكرام صديقهما وصلة الرحم التي لا توصل إلا بهما، 4. الصدقة الجارية وإهداء ثواب الحج والعمرة عنهما.",
+        "practicalImpact": "خفض جناح الذل من الرحمة والمسارعة لإدخال السرور على قلوب الآباء والأمهات."
+      },
+      {
+        "num": 3,
+        "topic": "تحويل العادات اليومية إلى عبادات بالنية الصالحة",
+        "scripture": "أثر معاذ بن جبل: «أما أنا فأنام وأقوم، فأحتسب نومتي كما أحتسب قومتي» (البخاري 4344)",
+        "studentQuestion": "كيف يستطيع المسلم تحويل نومه وأكله ورياضته وساعات عمله إلى عبادات مأجورة يثاب عليها؟",
+        "teacherAnswer": "باستحضار النية الصالحة القلبية؛ فينوي بنومه وأكله التقوي على طاعة الله ونفع المسلمين، وبدراسته وعمله عفة نفسه وأهله وخدمة دينه وأمته، فتصير العادات المباحة طاعات وعبادات.",
+        "practicalImpact": "حضور النية في مطلع كل يوم وتجديد الإخلاص في تفاصيل الروتين اليومي."
+      }
+    ]
+  }
+};
+
+    // ================= BRANCH 1: HIFZ TRACKING WORKSHEET (DATA) =================
+    const HIFZ_BRANCH_WORKSHEET = {
+  "titleAr": "سجل المتابعة والتقييم الأسبوعي لحلقة التحفيظ وضبط المتشابهات",
+  "titleEn": "Weekly Quran Memorization & Mutashabihat Evaluation Sheet",
+  "criteria": [
+    {
+      "num": 1,
+      "domain": "الحفظ الجديد (New Memorization)",
+      "description": "طلاقة الاسترسال وسرعة الاستحضار دون تردد أو تعتعة أو وقفات طويلة.",
+      "maxScore": 25
+    },
+    {
+      "num": 2,
+      "domain": "أحكام التجويد ومخارج الحروف (Tajweed Accuracy)",
+      "description": "تطبيق أحكام النون والميم الساكنتين، والمدود بأزمنتها، وإخراج الحروف من مخارجها الصحيحة.",
+      "maxScore": 25
+    },
+    {
+      "num": 3,
+      "domain": "ضبط المتشابهات وفواصل الآيات (Mutashabihat Precision)",
+      "description": "التمييز الدقيق بين الآيات المتطابقة مع السور الأخرى وعدم الخلط بين بدايات ونهايات الآيات.",
+      "maxScore": 25
+    },
+    {
+      "num": 4,
+      "domain": "الوقف والابتداء والوقوف الحسن (Waqf & Ibtida)",
+      "description": "الوقف على المعاني التامة وتجنب الوقف القبيح الذي يغير المعنى القرآني الجليل.",
+      "maxScore": 15
+    },
+    {
+      "num": 5,
+      "domain": "الخشوع وحسن السمت والتأدب مع المصحف (Adab & Decorum)",
+      "description": "التلاوة بوقار وسكينة ومراعاة آداب تلاوة كلام رب العالمين.",
+      "maxScore": 10
+    }
+  ]
+};
+
+    // ================= INTERACTIVE QUIZZES DATA (BRANCH 3 & BRANCH 1) =================
+    const ISLAMIC_BRANCH_QUIZZES = {
+  "aqeedah": [
+    {
+      "id": "aq_1",
+      "questionAr": "ما هو الركن السادس من أركان الإيمان الستة المذكورة في حديث جبريل المشهور؟",
+      "questionEn": "What is the 6th pillar of faith mentioned in the Hadith of Jibreel?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "إيتاء الزكاة المفروضة",
+          "textEn": "Paying Zakat"
+        },
+        {
+          "id": "b",
+          "textAr": "الإيمان بالقضاء والقدر خيره وشره",
+          "textEn": "Belief in Divine Destiny (Qadar) good and bad"
+        },
+        {
+          "id": "c",
+          "textAr": "صيام شهر رمضان المبارك",
+          "textEn": "Fasting Ramadan"
+        },
+        {
+          "id": "d",
+          "textAr": "الجهاد في سبيل الله",
+          "textEn": "Jihad for the sake of Allah"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "أركان الإيمان ستة كما بين النبي ﷺ: أن تؤمن بالله، وملائكته، وكتبه، ورسله، واليوم الآخر، وتؤمن بالقدر خيره وشره (صحيح مسلم #8)."
+    },
+    {
+      "id": "aq_2",
+      "questionAr": "من هو الصحابي الجليل راوي حديث جبريل الطويل في بيان مراتب الدين (الإسلام، الإيمان، الإحسان)؟",
+      "questionEn": "Which companion narrated the renowned Hadith of Jibreel detailing Islam, Iman and Ihsan?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "أبو بكر الصديق رضي الله عنه",
+          "textEn": "Abu Bakr As-Siddiq"
+        },
+        {
+          "id": "b",
+          "textAr": "عمر بن الخطاب رضي الله عنه",
+          "textEn": "Umar ibn Al-Khattab"
+        },
+        {
+          "id": "c",
+          "textAr": "أبو هريرة رضي الله عنه",
+          "textEn": "Abu Hurairah"
+        },
+        {
+          "id": "d",
+          "textAr": "عبد الله بن مسعود رضي الله عنه",
+          "textEn": "Abdullah ibn Masood"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "رواه أمير المؤمنين عمر بن الخطاب رضي الله عنه قائلاً: «بينما نحن عند رسول الله ﷺ ذات يوم إذ طلع علينا رجل شديد بياض الثياب...» (صحيح مسلم)."
+    },
+    {
+      "id": "aq_3",
+      "questionAr": "ما هو الهدي النبوي المأثور عند وقوع مكروه لطرد الحزن ودفع وسوسة كلمة \"لو\"؟",
+      "questionEn": "What is the prophetic guidance when facing hardship to dispel regret and 'if only'?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "اللوم والشكوى للناس",
+          "textEn": "Complaining to people"
+        },
+        {
+          "id": "b",
+          "textAr": "قول: «قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ»",
+          "textEn": "Saying: Qaddar Allahu wa maa shaa faala"
+        },
+        {
+          "id": "c",
+          "textAr": "التمني وتكرار لو فعلت كذا",
+          "textEn": "Repeating if only I did that"
+        },
+        {
+          "id": "d",
+          "textAr": "ترك العمل والقعود",
+          "textEn": "Abandoning work"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "قال النبي ﷺ: «وَإِنْ أَصَابَكَ شَيْءٌ فَلَا تَقُلْ لَوْ أَنِّي فَعَلْتُ كَانَ كَذَا وَكَذَا، وَلَكِنْ قُلْ: قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ، فَإِنَّ لَوْ تَفْتَحُ عَمَلَ الشَّيْطَانِ» (صحيح مسلم 2664)."
+    },
+    {
+      "id": "aq_4",
+      "questionAr": "ما هي أعلى وأشرف مراتب الدين الثلاث بعد مرتبتي الإسلام والإيمان؟",
+      "questionEn": "What is the highest and noblest station among the three tiers of religion?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "مرتبة الاستحسان",
+          "textEn": "Station of preference"
+        },
+        {
+          "id": "b",
+          "textAr": "مرتبة الإحسان: أن تعبد الله كأنك تراه",
+          "textEn": "Station of Ihsan: to worship Allah as if you see Him"
+        },
+        {
+          "id": "c",
+          "textAr": "مرتبة المجادلة والكلام",
+          "textEn": "Station of argumentation"
+        },
+        {
+          "id": "d",
+          "textAr": "مرتبة الشكوى",
+          "textEn": "Station of complaint"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "الإحسان هو قمة الدين وأعلاه: «أَنْ تَعْبُدَ اللَّهَ كَأَنَّكَ تَرَاهُ، فَإِنْ لَمْ تَكُنْ تَرَاهُ فَإِنَّهُ يَرَاكَ»."
+    },
+    {
+      "id": "aq_5",
+      "questionAr": "أي من الكتب السماوية التالية أنزله الله تعالى على نبيه داود عليه السلام؟",
+      "questionEn": "Which divine book did Allah reveal to Prophet Dawud (David) peace be upon him?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "التوراة",
+          "textEn": "The Torah"
+        },
+        {
+          "id": "b",
+          "textAr": "الإنجيل",
+          "textEn": "The Gospel"
+        },
+        {
+          "id": "c",
+          "textAr": "الزبور",
+          "textEn": "The Zabur (Psalms)"
+        },
+        {
+          "id": "d",
+          "textAr": "صحف موسى",
+          "textEn": "Scrolls of Moses"
+        }
+      ],
+      "correctOptionId": "c",
+      "explanationAr": "قال الله تعالى في سورة الإسراء والنساء: ﴿وَآتَيْنَا دَاوُودَ زَبُورًا﴾."
+    }
+  ],
+  "fiqh": [
+    {
+      "id": "fq_1",
+      "questionAr": "ما الفرق الجوهري بين \"شرط الصلاة\" و\"ركن الصلاة\" في الفقه الإسلامي؟",
+      "questionEn": "What is the essential difference between a condition (Shart) and an integral pillar (Rukn) of prayer?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "كلاهما يصح تركه عمداً وسهواً",
+          "textEn": "Both can be skipped"
+        },
+        {
+          "id": "b",
+          "textAr": "الشرط يسبق الصلاة ويستمر معها، والركن جزء من حقيقة الصلاة وماهيتها",
+          "textEn": "Shart precedes prayer and continues; Rukn is an integral part of prayer"
+        },
+        {
+          "id": "c",
+          "textAr": "الركن خارج الصلاة والشرط داخلها",
+          "textEn": "Rukn is outside and Shart is inside"
+        },
+        {
+          "id": "d",
+          "textAr": "لا يوجد أي فرق بينهما",
+          "textEn": "There is no difference"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "الشرط يكون قبل الدخول في الصلاة كالطهارة والوقت وستر العورة، بينما الركن جزء من صلب الصلاة كالركوع والسجود وتبطل الصلاة بتركه عمداً وسهواً إلا بالإتيان به."
+    },
+    {
+      "id": "fq_2",
+      "questionAr": "إذا شك المصلي في صلاته الرباعية هل صلى ثلاثاً أم أربعاً ولم يترجح لديه شيء، فماذا يفعل؟",
+      "questionEn": "If a worshipper doubts whether they prayed 3 or 4 units with no preponderance, what should they do?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "يقطع الصلاة ويعيدها من جديد",
+          "textEn": "Cut the prayer and restart"
+        },
+        {
+          "id": "b",
+          "textAr": "يبني على اليقين وهو الأقل (ثلاثاً) ويتم ثم يسجد للسهو قبل السلام",
+          "textEn": "Build on certainty (the lesser: 3), finish and perform Sujood As-Sahw before Tasleem"
+        },
+        {
+          "id": "c",
+          "textAr": "يسلم فوراً دون ركعة رابعة",
+          "textEn": "Immediately make Tasleem"
+        },
+        {
+          "id": "d",
+          "textAr": "يبني على الأكثر (أربعاً) ولا يسجد للسهو",
+          "textEn": "Build on the greater (4)"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "لقول النبي ﷺ: «إذا شك أحدكم في صلاته فلم يدر كم صلى ثلاثاً أم أربعاً، فليطرح الشك وليبن على ما استيقن ثم يسجد سجدتين قبل أن يسلم» (صحيح مسلم 571)."
+    },
+    {
+      "id": "fq_3",
+      "questionAr": "ما حكم قراءة سورة الفاتحة في كل ركعة للإمام والمنفرد؟",
+      "questionEn": "What is the ruling of reciting Surah Al-Fatihah in every rakah for imam and solitary prayer?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "سنة مستحبة تجبر بسجود السهو",
+          "textEn": "Recommended Sunnah"
+        },
+        {
+          "id": "b",
+          "textAr": "ركن لا تصح الصلاة إلا به",
+          "textEn": "An essential pillar without which prayer is invalid"
+        },
+        {
+          "id": "c",
+          "textAr": "مستحب يثاب فاعله ولا إثم على تاركه",
+          "textEn": "Supererogatory"
+        },
+        {
+          "id": "d",
+          "textAr": "واجب يسقط بالنسيان",
+          "textEn": "Obligation waived by forgetfulness"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "لقول النبي ﷺ في الحديث المتفق عليه: «لَا صَلَاةَ لِمَنْ لَمْ يَقْرَأْ بِفَاتِحَةِ الْكِتَابِ» (صحيح البخاري #756)."
+    },
+    {
+      "id": "fq_4",
+      "questionAr": "أي من الأمور التالية لا ينقض الوضوء شرعاً؟",
+      "questionEn": "Which of the following does NOT invalidate ablution (Wudu)?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "النوم الخفيف المستقر الذي لا يزول معه الإدراك كالنوم جالساً",
+          "textEn": "Light stable dozing sitting down where consciousness remains"
+        },
+        {
+          "id": "b",
+          "textAr": "الخارج من السبيلين من بول أو غائط أو ريح",
+          "textEn": "Discharges from private parts"
+        },
+        {
+          "id": "c",
+          "textAr": "زوال العقل بسكر أو إغماء",
+          "textEn": "Loss of intellect"
+        },
+        {
+          "id": "d",
+          "textAr": "أكل لحم الإبل على الصحيح",
+          "textEn": "Eating camel meat"
+        }
+      ],
+      "correctOptionId": "a",
+      "explanationAr": "النوم الخفيف الذي يشعر صاحبه بمن حوله لا ينقض الوضوء؛ لأن صحابة رسول الله ﷺ كانوا ينتظرون الصلاة حتى تخفق رؤوسهم ثم يصلون ولا يتوضؤون (مسلم)."
+    }
+  ],
+  "seerah": [
+    {
+      "id": "sr_1",
+      "questionAr": "من هو الصحابي الجليل الذي فدى النبي ﷺ وبات في فراشه ليلة الهجرة لرد الأمانات لأهل مكة؟",
+      "questionEn": "Which companion sacrificed himself sleeping in the Prophet bed during Hijrah to return trusts?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "أبو بكر الصديق رضي الله عنه",
+          "textEn": "Abu Bakr As-Siddiq"
+        },
+        {
+          "id": "b",
+          "textAr": "علي بن أبي طالب رضي الله عنه",
+          "textEn": "Ali ibn Abi Talib"
+        },
+        {
+          "id": "c",
+          "textAr": "عمر بن الخطاب رضي الله عنه",
+          "textEn": "Umar ibn Al-Khattab"
+        },
+        {
+          "id": "d",
+          "textAr": "عثمان بن عفان رضي الله عنه",
+          "textEn": "Uthman ibn Affan"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "كلف النبي ﷺ علي بن أبي طالب رضي الله عنه بالمبيت في فراشه متلففاً ببرده الأخضر للتمويه على المشركين ورد أمانات قريش المودعة عنده ﷺ."
+    },
+    {
+      "id": "sr_2",
+      "questionAr": "في أي عام هجري وقعت غزوة بدر الكبرى (يوم الفرقان)؟",
+      "questionEn": "In which Hijri year did the major Battle of Badr (Yawm Al-Furqan) take place?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "العام الأول للهجرة",
+          "textEn": "1st year AH"
+        },
+        {
+          "id": "b",
+          "textAr": "العام الثاني للهجرة (17 رمضان)",
+          "textEn": "2nd year AH (17 Ramadan)"
+        },
+        {
+          "id": "c",
+          "textAr": "العام الثالث للهجرة",
+          "textEn": "3rd year AH"
+        },
+        {
+          "id": "d",
+          "textAr": "العام الخامس للهجرة",
+          "textEn": "5th year AH"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "وقعت غزوة بدر الكبرى في السابع عشر من شهر رمضان في السنة الثانية من الهجرة النبوية الشريفة."
+    },
+    {
+      "id": "sr_3",
+      "questionAr": "ما هو الدليل النبوي على كمال حسن تعامله ﷺ ورفقه بالخدم في بيته؟",
+      "questionEn": "What is the prophetic evidence of his gentle exemplary treatment of household helpers?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "حديث أنس: «خدمت النبي ﷺ عشر سنين فما قال لي أف قط»",
+          "textEn": "Anas said: I served the Prophet 10 years, he never said Uff to me"
+        },
+        {
+          "id": "b",
+          "textAr": "حديث تبسمك في وجه أخيك صدقة",
+          "textEn": "Smiling in your brother face is charity"
+        },
+        {
+          "id": "c",
+          "textAr": "حديث اتقوا النار ولو بشق تمرة",
+          "textEn": "Guard against fire with half a date"
+        },
+        {
+          "id": "d",
+          "textAr": "حديث لا تغضب",
+          "textEn": "Do not become angry"
+        }
+      ],
+      "correctOptionId": "a",
+      "explanationAr": "رواه البخاري ومسلم عن أنس بن مالك رضي الله عنه: «خدمت رسول الله ﷺ عشر سنين، والله ما قال لي: أفاً قط، ولا قال لشيء فعلته: لم فعلت كذا؟ ولا لشيء لم أفعله: ألا فعلت كذا؟»."
+    }
+  ],
+  "tazkiyah": [
+    {
+      "id": "tz_1",
+      "questionAr": "ما هو الضابط النبوي الفاصل بين \"الغيبة\" المحرمة و\"البهتان\"؟",
+      "questionEn": "What is the exact prophetic criterion distinguishing backbiting (Gheebah) from slander (Buhtan)?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "لا فرق بينهما في المعنى واللغة",
+          "textEn": "No difference"
+        },
+        {
+          "id": "b",
+          "textAr": "الغيبة ذكرك أخاك بما يكره وهو فيه، والبهتان ذكرك ما ليس فيه كذباً",
+          "textEn": "Gheebah is mentioning what he dislikes while true; Buhtan is falsely stating what is not in him"
+        },
+        {
+          "id": "c",
+          "textAr": "البهتان يكون أمام الشخص والغيبة خلفه",
+          "textEn": "Buhtan is to his face and Gheebah behind him"
+        },
+        {
+          "id": "d",
+          "textAr": "الغيبة بالقلب والبهتان باللسان",
+          "textEn": "Gheebah is heart and Buhtan tongue"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "قال النبي ﷺ: «قيل: أفرأيت إن كان في أخي ما أقول؟ قال: إن كان فيه ما تقول فقد اغتبته، وإن لم يكن فيه فقد بهته» (صحيح مسلم #2584)."
+    },
+    {
+      "id": "tz_2",
+      "questionAr": "أي الأعمال الصالحة الآتية يصل ثوابها وأجرها للوالدين بعد وفاتهما بنص الحديث الشريف؟",
+      "questionEn": "Which of the following actions reaches parents with reward after their death per the Hadith?",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "كثرة البكاء والنياحة",
+          "textEn": "Wailing and lamenting"
+        },
+        {
+          "id": "b",
+          "textAr": "الولد الصالح الذي يدعو لهما، والصدقة الجارية عنهما",
+          "textEn": "Righteous child supplicating for them, and ongoing charity"
+        },
+        {
+          "id": "c",
+          "textAr": "ترك العمل والقعود في البيت",
+          "textEn": "Abandoning work"
+        },
+        {
+          "id": "d",
+          "textAr": "استئجار من يقرأ القرآن بأجر",
+          "textEn": "Hiring paid reciters"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "قال النبي ﷺ: «إِذَا مَاتَ الْإِنْسَانُ انْقَطَعَ عَنْهُ عَمَلُهُ إِلَّا مِنْ ثَلَاثَةٍ: إِلَّا مِنْ صَدَقَةٍ جَارِيَةٍ، أَوْ عِلْمٍ يُنْتَفَعُ بِهِ، أَوْ وَلَدٍ صَالِحٍ يَدْعُو لَهُ» (صحيح مسلم 1631)."
+    },
+    {
+      "id": "tz_3",
+      "questionAr": "تحويل العادات اليومية (كالنوم والرياضة والأكل) إلى عبادات مأجورة يرتكز بالأساس على:",
+      "questionEn": "Transforming daily habits (sleep, exercise, eating) into rewarded acts of worship relies on:",
+      "options": [
+        {
+          "id": "a",
+          "textAr": "كثرة التحدث عنها أمام الناس",
+          "textEn": "Talking about them in public"
+        },
+        {
+          "id": "b",
+          "textAr": "استحضار النية الصالحة واحتساب الأجر للتقوي على طاعة الله",
+          "textEn": "Cultivating sincere intention and seeking Allah pleasure to strengthen for worship"
+        },
+        {
+          "id": "c",
+          "textAr": "طول مدتها وضخامتها فقط",
+          "textEn": "Their long duration"
+        },
+        {
+          "id": "d",
+          "textAr": "إنفاق المال عليها",
+          "textEn": "Spending money on them"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanationAr": "قال معاذ بن جبل رضي الله عنه: «أَمَّا أَنَا فَأَنَامُ وَأَقُومُ، فَأَحْتَسِبُ نَوْمَتِي كَمَا أَحْتَسِبُ قَوْمَتِي» (صحيح البخاري #4344)؛ فالنية الصالحة تقلب المباحات إلى طاعات."
+    }
+  ]
+};
+
+    // ================= BRANCH 1: HIFZ MUTASHABIHAT QUIZ (DATA) =================
+    const HIFZ_BRANCH_QUIZ = [
+  {
+    "id": "hifz_1",
+    "questionAr": "في قوله تعالى في سورة الملك: ﴿ٱلَّذِى خَلَقَ ٱلْمَوْتَ وَٱلْحَيَوٰةَ لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًۭا ۚ وَهُوَ ٱلْعَزِيزُ ...﴾ ما هو الختام الصحيح؟",
+    "questionEn": "In Surah Al-Mulk: (Who created death and life to test which of you is best in deed - and He is the Exalted in Might, ...)?",
+    "options": [
+      {
+        "id": "a",
+        "textAr": "ٱلْغَفُورُ (معرّفة بأل)",
+        "textEn": "Al-Ghafoor (with definite article Al)"
+      },
+      {
+        "id": "b",
+        "textAr": "عَزِيزٌ غَفُورٌ (منكّرة)",
+        "textEn": "Azeezun Ghafoor (indefinite)"
+      },
+      {
+        "id": "c",
+        "textAr": "ٱلرَّحِيمُ",
+        "textEn": "Ar-Raheem"
+      },
+      {
+        "id": "d",
+        "textAr": "ٱلْحَكِيمُ",
+        "textEn": "Al-Hakeem"
+      }
+    ],
+    "correctOptionId": "a",
+    "explanationAr": "في سورة الملك الآية 2: ﴿وَهُوَ ٱلْعَزِيزُ ٱلْغَفُورُ﴾ بالتعريف، بينما في سورة فاطر (الآية 28): ﴿إِنَّ ٱللَّهَ عَزِيزٌ غَفُورٌ﴾ بالتنكير."
+  },
+  {
+    "id": "hifz_2",
+    "questionAr": "في الآية 5 من سورة الملك: ﴿وَلَقَدْ زَيَّنَّا ٱلسَّمَآءَ ٱلدُّنْيَا بِمَصَـٰبِيحَ وَجَعَلْنَـٰهَا رُجُومًۭا لِّلشَّيَـٰطِينِ وَأَعْتَدْنَا لَهُمْ...﴾:",
+    "questionEn": "In Ayah 5 of Surah Al-Mulk: (...and We have prepared for them...) what follows?",
+    "options": [
+      {
+        "id": "a",
+        "textAr": "عَذَابَ ٱلسَّعِيرِ",
+        "textEn": "Adhaab As-Saeer"
+      },
+      {
+        "id": "b",
+        "textAr": "سَعِيرًا (دون كلمة عذاب)",
+        "textEn": "Saeera (without the word Adhaab)"
+      },
+      {
+        "id": "c",
+        "textAr": "عَذَابَ ٱلْجَحِيمِ",
+        "textEn": "Adhaab Al-Jaheem"
+      },
+      {
+        "id": "d",
+        "textAr": "عَذَابَ ٱلْحَرِيقِ",
+        "textEn": "Adhaab Al-Hareeq"
+      }
+    ],
+    "correctOptionId": "a",
+    "explanationAr": "في الملك أضيفت كلمة ﴿عَذَابَ﴾: ﴿وَأَعْتَدْنَا لَهُمْ عَذَابَ ٱلسَّعِيرِ﴾، بينما في سورة الفرقان (11): ﴿وَأَعْتَدْنَا لِمَن كَذَّبَ بِٱلسَّاعَةِ سَعِيرًا﴾ دون كلمة عذاب."
+  },
+  {
+    "id": "hifz_3",
+    "questionAr": "بداية الوجه الثاني من سورة الملك (الآية 12) تبدأ بقوله تعالى:",
+    "questionEn": "The beginning of the second page of Surah Al-Mulk (Ayah 12) starts with:",
+    "options": [
+      {
+        "id": "a",
+        "textAr": "﴿إِنَّ ٱلَّذِينَ يَخْشَوْنَ رَبَّهُم بِٱلْغَيْبِ لَهُم مَّغْفِرَةٌ وَأَجْرٌ كَبِيرٌ﴾",
+        "textEn": "Inna allatheena yakhshawna rabbahum bil-ghaybi..."
+      },
+      {
+        "id": "b",
+        "textAr": "﴿إِنَّ ٱلَّذِينَ كَفَرُوا لَهُمْ عَذَابٌ شَدِيدٌ﴾",
+        "textEn": "Inna allatheena kafaroo..."
+      },
+      {
+        "id": "c",
+        "textAr": "﴿أَفَمَن يَمْشِى مُكِبًّا عَلَىٰ وَجْهِهِۦٓ أَهْدَىٰ﴾",
+        "textEn": "Afaman yamshee mukibban..."
+      },
+      {
+        "id": "d",
+        "textAr": "﴿قُلْ هُوَ ٱلَّذِىٓ أَنشَأَكُمْ وَجَعَلَ لَكُمُ ٱلسَّمْعَ﴾",
+        "textEn": "Qul huwa allathee anshaakum..."
+      }
+    ],
+    "correctOptionId": "a",
+    "explanationAr": "الآية 12 هي مطلع الوجه 563 في مصحف المدينة المنورة: ﴿إِنَّ ٱلَّذِينَ يَخْشَوْنَ رَبَّهُم بِٱلْغَيْبِ لَهُم مَّغْفِرَةٌ وَأَجْرٌ كَبِيرٌ﴾."
+  },
+  {
+    "id": "hifz_4",
+    "questionAr": "خاتمة سورة الملك الشريفة (الآية 30) تختم بلفظ:",
+    "questionEn": "The final word of Surah Al-Mulk (Ayah 30) concludes with:",
+    "options": [
+      {
+        "id": "a",
+        "textAr": "مَّعِينٍۢ",
+        "textEn": "Maeen"
+      },
+      {
+        "id": "b",
+        "textAr": "فُرَاتٍ",
+        "textEn": "Furaat"
+      },
+      {
+        "id": "c",
+        "textAr": "طَهُورٍ",
+        "textEn": "Tahoor"
+      },
+      {
+        "id": "d",
+        "textAr": "غَدَقٍ",
+        "textEn": "Ghadaq"
+      }
+    ],
+    "correctOptionId": "a",
+    "explanationAr": "تختم سورة الملك بقوله تعالى: ﴿قُلْ أَرَءَيْتُمْ إِنْ أَصْبَحَ مَآؤُكُمْ غَوْرًۭا فَمَن يَأْتِيكُم بِمَآءٍۢ مَّعِينٍۭ﴾، ويستحب أن يقال بعدها: الله رب العالمين."
+  }
+];
+    
     const PRELOADED_HIFZ_PASSAGES = [
       {
         id: 'mulk_page_562',
@@ -932,6 +1710,12 @@
       const [metronomePlaying, setMetronomePlaying] = useState(false);
       const [metronomeBeat, setMetronomeBeat] = useState(1);
       
+      // Multi-Branch Worksheets & Quizzes Control States
+      const [worksheetBranch, setWorksheetBranch] = useState('islamic'); // 'islamic', 'tajweed', 'hifz'
+      const [worksheetIslamicCategory, setWorksheetIslamicCategory] = useState('aqeedah'); // 'aqeedah', 'fiqh', 'seerah', 'tazkiyah'
+      const [quizBranch, setQuizBranch] = useState('islamic'); // 'islamic', 'tajweed', 'hifz'
+      const [quizIslamicCategory, setQuizIslamicCategory] = useState('aqeedah'); // 'aqeedah', 'fiqh', 'seerah', 'tazkiyah'
+
       // Module B: Islamic Studies State
       const [subjectCategory, setSubjectCategory] = useState('العقيدة (Aqeedah)');
       const [lessonTopic, setLessonTopic] = useState('أركان الإيمان الستة والسكينة النفسية');
@@ -1295,16 +2079,35 @@
         };
       }
 
-      // Quiz Score Calculation
-      const quizQuestions = tajweedData?.quiz || [];
+      // Dynamic Multi-Branch Quiz Selection
+      const activeQuizQuestions = useMemo(() => {
+        if (quizBranch === 'islamic') {
+          return ISLAMIC_BRANCH_QUIZZES[quizIslamicCategory] || ISLAMIC_BRANCH_QUIZZES.aqeedah;
+        } else if (quizBranch === 'tajweed') {
+          return tajweedData?.quiz || [];
+        } else if (quizBranch === 'hifz') {
+          return HIFZ_BRANCH_QUIZ;
+        }
+        return [];
+      }, [quizBranch, quizIslamicCategory, tajweedData]);
+
+      // Dynamic Quiz Score Calculation
       const quizScore = useMemo(() => {
-        if (!quizQuestions.length) return 0;
+        if (!activeQuizQuestions.length) return 0;
         let correct = 0;
-        quizQuestions.forEach(q => {
+        activeQuizQuestions.forEach(q => {
           if (quizAnswers[q.id] === q.correctOptionId) correct++;
         });
-        return Math.round((correct / quizQuestions.length) * 100);
-      }, [quizAnswers, quizQuestions]);
+        return Math.round((correct / activeQuizQuestions.length) * 100);
+      }, [quizAnswers, activeQuizQuestions]);
+
+      // Switch quiz branch and clear previous answers for clean test
+      const handleSwitchQuizBranch = (branch, category = null) => {
+        setQuizBranch(branch);
+        if (category) setQuizIslamicCategory(category);
+        setQuizAnswers({});
+        setQuizSubmitted(false);
+      };
 
       // Copy WhatsApp text to clipboard
       const handleCopyWhatsApp = () => {
@@ -3535,160 +4338,525 @@
                         </div>
                       </div>
                     </div>
+
+                    {/* Quick Cross-Link to Printable Worksheets & Interactive Quiz for Islamic Studies */}
+                    <div className="card-islamic-amber rounded-3xl p-6 border-2 border-gold-400/50 shadow-xl flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5">
+                        <span className="w-12 h-12 rounded-2xl bg-gold-400 text-emerald-950 flex items-center justify-center text-2xl font-bold shadow-md">
+                          📝
+                        </span>
+                        <div>
+                          <h4 className="font-extrabold text-emerald-950 font-cairo text-base sm:text-lg">
+                            {isRtl ? 'أدوات التقييم والواجبات للدرس الشرعي' : 'Assessments & Worksheets for this Lesson'}
+                          </h4>
+                          <p className="text-xs text-slate-600 font-medium">
+                            {isRtl ? 'اطبع ورقة العمل بنسختي الطالب والمعلم، أو وجّه الدارسين للاختبار الذاتي الفوري' : 'Printable dual-format worksheet and self-grading interactive quiz'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button
+                          onClick={() => {
+                            setWorksheetBranch('islamic');
+                            if (subjectCategory.includes('Aqeedah') || subjectCategory.includes('العقيدة')) setWorksheetIslamicCategory('aqeedah');
+                            else if (subjectCategory.includes('Fiqh') || subjectCategory.includes('الفقه')) setWorksheetIslamicCategory('fiqh');
+                            else if (subjectCategory.includes('Seerah') || subjectCategory.includes('السيرة')) setWorksheetIslamicCategory('seerah');
+                            else setWorksheetIslamicCategory('tazkiyah');
+                            setActiveTab('worksheet');
+                          }}
+                          className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-extrabold px-5 py-3 rounded-xl text-xs shadow-md transition flex items-center gap-2"
+                        >
+                          <span>📄</span>
+                          <span>{isRtl ? 'ورقة عمل الدرس (طباعة PDF)' : 'Print Lesson Worksheet'}</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setQuizBranch('islamic');
+                            if (subjectCategory.includes('Aqeedah') || subjectCategory.includes('العقيدة')) setQuizIslamicCategory('aqeedah');
+                            else if (subjectCategory.includes('Fiqh') || subjectCategory.includes('الفقه')) setQuizIslamicCategory('fiqh');
+                            else if (subjectCategory.includes('Seerah') || subjectCategory.includes('السيرة')) setQuizIslamicCategory('seerah');
+                            else setQuizIslamicCategory('tazkiyah');
+                            setQuizAnswers({});
+                            setQuizSubmitted(false);
+                            setActiveTab('quiz');
+                          }}
+                          className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-extrabold px-5 py-3 rounded-xl text-xs shadow-md transition flex items-center gap-2"
+                        >
+                          <span>🎯</span>
+                          <span>{isRtl ? 'اختبار الدرس التفاعلي الفوري' : 'Launch Interactive Quiz'}</span>
+                        </button>
+                      </div>
+                    </div>
+
                   </div>
                 )}
               </div>
             )}
 
-            {/* ================= VIEW: PRINTABLE WORKSHEET ================= */}
+            {/* ================= VIEW: PRINTABLE MULTI-BRANCH WORKSHEETS ================= */}
             {activeTab === 'worksheet' && (
               <div className="space-y-6 animate-fadeIn">
                 
-                {/* Print Control Toolbar */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3 no-print">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">🖨️</span>
+                {/* Print Control Toolbar & Branch Switcher */}
+                <div className="card-islamic-pearl rounded-2xl p-4 sm:p-5 border border-emerald-800/15 shadow-sm no-print">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                      <h3 className="text-base font-bold text-emerald-950">
-                        {isRtl ? 'ورقة عمل التجويد القابلة للطباعة (Printable PDF)' : 'Printable Tajweed Worksheet'}
+                      <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                        {isRtl ? 'منظومة أوراق العمل والتقييم للطباعة (Printable PDF)' : 'Printable Worksheets & Evaluation System'}
+                      </span>
+                      <h3 className="text-base sm:text-lg font-extrabold text-emerald-950 font-cairo">
+                        {isRtl ? 'اختر مجال ورقة العمل المطلوبة:' : 'Select Worksheet Branch:'}
                       </h3>
-                      <p className="text-xs text-slate-500">
-                        {isRtl ? 'نسختان متطابقتان: نسخة فارغة للطالب + نموذج إجابة المعلم' : 'Dual format: Student Blank Test & Teacher Answer Key'}
-                      </p>
                     </div>
+
+                    {/* Branch Switcher Tabs */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => setWorksheetBranch('islamic')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          worksheetBranch === 'islamic'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>🕌</span>
+                        <span>{isRtl ? 'أوراق عمل العلوم الشرعية (Branch 3)' : 'Islamic Studies Worksheets'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => setWorksheetBranch('tajweed')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          worksheetBranch === 'tajweed'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>📖</span>
+                        <span>{isRtl ? 'ورقة عمل أحكام التجويد (Branch 2)' : 'Tajweed Worksheet'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => setWorksheetBranch('hifz')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          worksheetBranch === 'hifz'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>🕋</span>
+                        <span>{isRtl ? 'سجل متابعة التحفيظ (Branch 1)' : 'Hifz Evaluation Sheet'}</span>
+                      </button>
+                    </div>
+
+                    {/* Print Button */}
+                    <button 
+                      onClick={() => window.print()}
+                      className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-extrabold px-5 py-2.5 rounded-xl text-xs shadow transition flex items-center gap-2 ml-auto"
+                    >
+                      <span>🖨️</span>
+                      <span>{isRtl ? 'طباعة / تصدير PDF' : 'Print / Export to PDF'}</span>
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => window.print()}
-                    className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2.5 rounded-xl text-xs shadow transition flex items-center gap-2"
-                  >
-                    <span>🖨️</span>
-                    <span>{isRtl ? 'طباعة / حفظ بتنسيق PDF' : 'Print / Export to PDF'}</span>
-                  </button>
+
+                  {/* Sub-Category Filter for Islamic Studies */}
+                  {worksheetBranch === 'islamic' && (
+                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-slate-200">
+                      <span className="text-xs font-bold text-slate-500">{isRtl ? 'التخصص الشرعي:' : 'Discipline:'}</span>
+                      {[
+                        { id: 'aqeedah', icon: '🌟', labelAr: 'العقيدة وأركان الإيمان', labelEn: 'Aqeedah' },
+                        { id: 'fiqh', icon: '⚖️', labelAr: 'الفقه والعبادات', labelEn: 'Fiqh' },
+                        { id: 'seerah', icon: '📜', labelAr: 'السيرة النبوية', labelEn: 'Seerah' },
+                        { id: 'tazkiyah', icon: '💎', labelAr: 'الآداب والتزكية', labelEn: 'Tazkiyah' }
+                      ].map(cat => (
+                        <button
+                          key={cat.id}
+                          onClick={() => setWorksheetIslamicCategory(cat.id)}
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                            worksheetIslamicCategory === cat.id
+                              ? 'bg-gold-400 text-emerald-950 shadow font-extrabold'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          <span>{cat.icon}</span>
+                          <span>{isRtl ? cat.labelAr : cat.labelEn}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {/* Printable Document Sheet 1: Student Version */}
-                <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0">
-                  {/* Header */}
-                  <div className="text-center border-b-2 border-emerald-900 pb-4 mb-6">
-                    <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
-                      {isRtl ? 'منصة مِشكاة لتعليم القرآن الكريم والتجويد' : 'Mishkah Quranic Learning Platform'}
+                {/* --- BRANCH 3: ISLAMIC STUDIES WORKSHEET DUAL FORMAT --- */}
+                {worksheetBranch === 'islamic' && (() => {
+                  const ws = ISLAMIC_BRANCH_WORKSHEETS[worksheetIslamicCategory] || ISLAMIC_BRANCH_WORKSHEETS.aqeedah;
+                  return (
+                    <div className="space-y-8">
+                      {/* Printable Sheet 1: Student Version */}
+                      <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                        <div className="text-center border-b-2 border-emerald-900 pb-4 mb-6">
+                          <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
+                            {isRtl ? 'مِشكاة — نظام التشغيل الشامل للداعية والمعلم الشرعي | AnubisLand' : 'Mishkah Platform — AnubisLand'}
+                          </div>
+                          <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
+                            {isRtl ? ws.titleAr : ws.titleEn}
+                          </h2>
+                          <div className="inline-block bg-emerald-50 text-emerald-900 text-xs px-3 py-1 rounded-full font-bold border border-emerald-200 mt-1">
+                            {isRtl ? 'نسخة الطالب للمدارسة والتطبيق' : 'Student Study & Application Copy'}
+                          </div>
+                          <div className="flex flex-wrap justify-between items-center text-xs text-slate-600 mt-4 px-2">
+                            <span>{isRtl ? 'اسم الطالب / الدارس:' : 'Student Name:'} ____________________</span>
+                            <span>{isRtl ? 'المجال الشرعي:' : 'Discipline:'} {isRtl ? ws.categoryAr : ws.categoryEn}</span>
+                            <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
+                          </div>
+                        </div>
+
+                        {/* Core Scriptural Reference Box */}
+                        <div className="bg-emerald-50/70 rounded-2xl p-4 border border-emerald-200 mb-6 text-xs">
+                          <div className="font-bold text-emerald-900 mb-1">{isRtl ? '📖 الشاهد المعتمد من الكتاب والسنة:' : 'Core Scriptural Evidence:'}</div>
+                          <div className="font-quran text-base text-emerald-950 leading-relaxed mb-1">{ws.quranRef}</div>
+                          <div className="font-amiri text-xs text-slate-700">{ws.hadithRef}</div>
+                        </div>
+
+                        {/* Student Questions Table */}
+                        <div className="overflow-x-auto mb-6">
+                          <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                            <thead className="bg-emerald-800 text-white text-xs">
+                              <tr>
+                                <th className="p-3 w-10 text-center">#</th>
+                                <th className="p-3 w-44">{isRtl ? 'المسألة الشرعية' : 'Topic'}</th>
+                                <th className="p-3 w-48">{isRtl ? 'الدليل والتخريج' : 'Scripture / Source'}</th>
+                                <th className="p-3">{isRtl ? 'إجابة الطالب والتأصيل المستفاد' : 'Student Answer & Deductions'}</th>
+                                <th className="p-3 w-20 text-center">{isRtl ? 'الدرجة' : 'Grade'}</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200 text-xs">
+                              {ws.items.map((it, idx) => (
+                                <tr key={idx} className="hover:bg-slate-50">
+                                  <td className="p-3 text-center font-bold text-slate-500">{it.num}</td>
+                                  <td className="p-3 font-bold text-emerald-950 font-cairo">{it.topic}</td>
+                                  <td className="p-3 text-slate-600 font-amiri text-xs leading-relaxed">{it.scripture}</td>
+                                  <td className="p-3 space-y-2">
+                                    <div className="font-bold text-slate-800 font-amiri text-xs">{it.studentQuestion}</div>
+                                    <div className="text-slate-400 italic pt-1 border-b border-dashed border-slate-200">الإجابة: ____________________________________________________________________</div>
+                                    <div className="text-slate-400 italic border-b border-dashed border-slate-200">التطبيق العملي: ___________________________________________________________</div>
+                                  </td>
+                                  <td className="p-3 text-center text-slate-400">/ 5</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Student Version Footer */}
+                        <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
+                          <span>{isRtl ? 'تقييم وتوقيع المعلم:' : 'Teacher Signature & Grade:'} _______________</span>
+                          <span>Mishkah Operating System — AnubisLand</span>
+                        </div>
+                      </div>
+
+                      {/* Print Page Break */}
+                      <div className="page-break my-8 no-print border-t-2 border-dashed border-slate-300 text-center py-2 text-xs text-slate-400 font-bold">
+                        ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلم المعتمد' : 'Page Break — Teacher Answer Key Follows'}
+                      </div>
+
+                      {/* Printable Sheet 2: Teacher Answer Key */}
+                      <div className="bg-white rounded-3xl p-8 border-2 border-gold-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                        <div className="text-center border-b-2 border-gold-600 pb-4 mb-6">
+                          <span className="bg-gold-100 text-gold-900 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
+                            {isRtl ? 'خاص بالمعلم والشيخ — نموذج الإجابة المعتمد والتوجيهات التربوية' : 'Confidential Teacher Answer Key & Guidance'}
+                          </span>
+                          <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-2">
+                            {isRtl ? ws.titleAr : ws.titleEn}
+                          </h2>
+                          <div className="text-xs text-slate-500 mt-1">
+                            {isRtl ? 'دليل التصحيح النموذجي والتأصيل الشرعي المحكم' : 'Official Answer Key with Authentic Citations'}
+                          </div>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                            <thead className="bg-emerald-950 text-gold-300 text-xs">
+                              <tr>
+                                <th className="p-3 w-10 text-center">#</th>
+                                <th className="p-3 w-40">{isRtl ? 'المسألة الشرعية' : 'Topic'}</th>
+                                <th className="p-3">{isRtl ? 'نموذج الإجابة والتأصيل الشرعي المعتمد' : 'Official Teacher Answer Key'}</th>
+                                <th className="p-3 w-64">{isRtl ? 'الأثر السلوكي والتربوي المستهدف' : 'Behavioral & Spiritual Impact'}</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200 text-xs">
+                              {ws.items.map((it, idx) => (
+                                <tr key={idx} className="hover:bg-gold-50/40">
+                                  <td className="p-3 text-center font-bold text-slate-500">{it.num}</td>
+                                  <td className="p-3 font-bold text-emerald-950 font-cairo">{it.topic}</td>
+                                  <td className="p-3 font-amiri text-xs text-slate-800 leading-relaxed">
+                                    <div className="font-bold text-emerald-900 mb-1">السؤال: {it.studentQuestion}</div>
+                                    <div className="text-emerald-950 font-medium bg-emerald-50/50 p-2.5 rounded-lg border border-emerald-100">{it.teacherAnswer}</div>
+                                  </td>
+                                  <td className="p-3 text-slate-700 text-xs font-amiri leading-relaxed bg-amber-50/30">
+                                    {it.practicalImpact}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     </div>
-                    <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
-                      {isRtl ? 'ورقة مدارسة وتطبيق في أحكام التجويد (نسخة الطالب)' : 'Tajweed Student Worksheet'}
-                    </h2>
-                    <div className="flex justify-between items-center text-xs text-slate-600 mt-4 px-2">
-                      <span>{isRtl ? 'اسم الطالب / الدارس:' : 'Student Name:'} ____________________</span>
-                      <span>{isRtl ? 'السورة والآيات:' : 'Surah:'} {tajweedData?.metadata?.surah} ({tajweedData?.metadata?.ayahRange})</span>
-                      <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
+                  );
+                })()}
+
+                {/* --- BRANCH 2: TAJWEED WORKSHEET --- */}
+                {worksheetBranch === 'tajweed' && (
+                  <div className="space-y-8">
+                    {/* Printable Document Sheet 1: Student Version */}
+                    <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                      <div className="text-center border-b-2 border-emerald-900 pb-4 mb-6">
+                        <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
+                          {isRtl ? 'منصة مِشكاة لتعليم القرآن الكريم والتجويد — AnubisLand' : 'Mishkah Platform — AnubisLand'}
+                        </div>
+                        <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
+                          {isRtl ? 'ورقة مدارسة وتطبيق في أحكام التجويد (نسخة الطالب)' : 'Tajweed Student Worksheet'}
+                        </h2>
+                        <div className="flex justify-between items-center text-xs text-slate-600 mt-4 px-2">
+                          <span>{isRtl ? 'اسم الطالب / الدارس:' : 'Student Name:'} ____________________</span>
+                          <span>{isRtl ? 'السورة والآيات:' : 'Surah:'} {tajweedData?.metadata?.surah} ({tajweedData?.metadata?.ayahRange})</span>
+                          <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto mb-8">
+                        <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                          <thead className="bg-emerald-800 text-white text-xs">
+                            <tr>
+                              <th className="p-3 w-12 text-center">#</th>
+                              <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية (رسم عثماني)' : 'Quranic Word'}</th>
+                              <th className="p-3">{isRtl ? 'الحكم التجويدي المطبق' : 'Tajweed Rule'}</th>
+                              <th className="p-3">{isRtl ? 'العلة وسبب الحكم' : 'Reason / Articulation Rule'}</th>
+                              <th className="p-3 w-28 text-center">{isRtl ? 'الدرجة' : 'Grade'}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200 text-sm">
+                            {(tajweedData?.worksheet || []).map((row, i) => (
+                              <tr key={i} className="hover:bg-slate-50">
+                                <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
+                                <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
+                                <td className="p-3 text-slate-400 italic">____________________</td>
+                                <td className="p-3 text-slate-400 italic">________________________________________</td>
+                                <td className="p-3 text-center text-slate-400">/ 5</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
+                        <span>{isRtl ? 'ملاحظات المعلم / التقييم:' : 'Teacher Signature & Final Grade:'} _______________</span>
+                        <span>Mishkah PWA — AnubisLand</span>
+                      </div>
+                    </div>
+
+                    {/* Page Break for Print */}
+                    <div className="page-break my-8 no-print border-t-2 border-dashed border-slate-300 text-center py-2 text-xs text-slate-400 font-bold">
+                      ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلم' : 'Page Break — Teacher Answer Key Follows'}
+                    </div>
+
+                    {/* Printable Document Sheet 2: Teacher Answer Key */}
+                    <div className="bg-white rounded-3xl p-8 border-2 border-gold-300 shadow-lg print:border-none print:shadow-none print:p-0">
+                      <div className="text-center border-b-2 border-gold-600 pb-4 mb-6">
+                        <span className="bg-gold-100 text-gold-900 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
+                          {isRtl ? 'خاص بالمعلم فقط — نموذج الإجابة المعتمد' : 'Teacher Answer Key (Confidential)'}
+                        </span>
+                        <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-2">
+                          {isRtl ? 'دليل تصحيح ورقة العمل والعلل الصوتية' : 'Teacher Correction Guide & Phonetic Explanations'}
+                        </h2>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                          <thead className="bg-emerald-950 text-gold-300 text-xs">
+                            <tr>
+                              <th className="p-3 w-12 text-center">#</th>
+                              <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية' : 'Quranic Word'}</th>
+                              <th className="p-3">{isRtl ? 'الحكم الصحيح' : 'Correct Rule'}</th>
+                              <th className="p-3">{isRtl ? 'التوجيه والعلة الصوتية' : 'Phonetic Explanation'}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200 text-sm">
+                            {(tajweedData?.worksheet || []).map((row, i) => (
+                              <tr key={i} className="hover:bg-gold-50/40">
+                                <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
+                                <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
+                                <td className="p-3 font-bold text-emerald-800">{row.ruleApplied}</td>
+                                <td className="p-3 text-slate-700 text-xs leading-relaxed font-amiri">
+                                  {isRtl ? row.reasonAr : row.reasonEn}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
+                )}
 
-                  {/* Student Table */}
-                  <div className="overflow-x-auto mb-8">
-                    <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
-                      <thead className="bg-emerald-800 text-white text-xs">
-                        <tr>
-                          <th className="p-3 w-12 text-center">#</th>
-                          <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية (رسم عثماني)' : 'Quranic Word'}</th>
-                          <th className="p-3">{isRtl ? 'الحكم التجويدي المطبق' : 'Tajweed Rule'}</th>
-                          <th className="p-3">{isRtl ? 'العلة وسبب الحكم' : 'Reason / Articulation Rule'}</th>
-                          <th className="p-3 w-28 text-center">{isRtl ? 'الدرجة' : 'Grade'}</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200 text-sm">
-                        {(tajweedData?.worksheet || []).map((row, i) => (
-                          <tr key={i} className="hover:bg-slate-50">
-                            <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
-                            <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
-                            <td className="p-3 text-slate-400 italic">____________________</td>
-                            <td className="p-3 text-slate-400 italic">________________________________________</td>
-                            <td className="p-3 text-center text-slate-400">/ 5</td>
+                {/* --- BRANCH 1: HIFZ EVALUATION SHEET --- */}
+                {worksheetBranch === 'hifz' && (
+                  <div className="bg-white rounded-3xl p-8 border-2 border-slate-300 shadow-lg print:border-none print:shadow-none print:p-0 space-y-6">
+                    <div className="text-center border-b-2 border-emerald-900 pb-4 mb-4">
+                      <div className="text-xs text-emerald-800 font-bold uppercase tracking-widest">
+                        {isRtl ? 'مِشكاة — سجل المتابعة القرآني المتكامل | AnubisLand' : 'Mishkah Platform — AnubisLand'}
+                      </div>
+                      <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
+                        {isRtl ? HIFZ_BRANCH_WORKSHEET.titleAr : HIFZ_BRANCH_WORKSHEET.titleEn}
+                      </h2>
+                      <div className="flex flex-wrap justify-between items-center text-xs text-slate-600 mt-4 px-2">
+                        <span>{isRtl ? 'اسم الطالب:' : 'Student Name:'} ____________________</span>
+                        <span>{isRtl ? 'السورة والآيات المقررة:' : 'Surah / Passage:'} {hifzSurahName} ({hifzAyahRange})</span>
+                        <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
+                      </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
+                        <thead className="bg-emerald-800 text-white text-xs">
+                          <tr>
+                            <th className="p-3 w-12 text-center">#</th>
+                            <th className="p-3 w-56">{isRtl ? 'معيار التقييم' : 'Criterion'}</th>
+                            <th className="p-3">{isRtl ? 'الوصف التوجيهي والملاحظات' : 'Description & Teacher Notes'}</th>
+                            <th className="p-3 w-32 text-center">{isRtl ? 'الدرجة المستحقة' : 'Score'}</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Teacher Feedback Footer */}
-                  <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
-                    <span>{isRtl ? 'ملاحظات المعلم / التقييم:' : 'Teacher Signature & Final Grade:'} _______________</span>
-                    <span>Mishkah PWA — {new Date().getFullYear()}</span>
-                  </div>
-                </div>
-
-                {/* Page Break for Print */}
-                <div className="page-break my-8 no-print border-t-2 border-dashed border-slate-300 text-center py-2 text-xs text-slate-400 font-bold">
-                  ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلم' : 'Page Break — Teacher Answer Key Follows'}
-                </div>
-
-                {/* Printable Document Sheet 2: Teacher Answer Key */}
-                <div className="bg-white rounded-3xl p-8 border-2 border-gold-300 shadow-lg print:border-none print:shadow-none print:p-0">
-                  <div className="text-center border-b-2 border-gold-600 pb-4 mb-6">
-                    <span className="bg-gold-100 text-gold-900 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
-                      {isRtl ? 'خاص بالمعلم فقط — نموذج الإجابة المعتمد' : 'Teacher Answer Key (Confidential)'}
-                    </span>
-                    <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-2">
-                      {isRtl ? 'دليل تصحيح ورقة العمل والعلل الصوتية' : 'Teacher Correction Guide & Phonetic Explanations'}
-                    </h2>
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-right worksheet-table border border-slate-300 rounded-xl overflow-hidden">
-                      <thead className="bg-emerald-950 text-gold-300 text-xs">
-                        <tr>
-                          <th className="p-3 w-12 text-center">#</th>
-                          <th className="p-3 font-amiri text-base">{isRtl ? 'الكلمة القرآنية' : 'Quranic Word'}</th>
-                          <th className="p-3">{isRtl ? 'الحكم الصحيح' : 'Correct Rule'}</th>
-                          <th className="p-3">{isRtl ? 'التوجيه والعلة الصوتية' : 'Phonetic Explanation'}</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200 text-sm">
-                        {(tajweedData?.worksheet || []).map((row, i) => (
-                          <tr key={i} className="hover:bg-gold-50/40">
-                            <td className="p-3 text-center font-bold text-slate-500">{row.itemNumber || i + 1}</td>
-                            <td className="p-3 font-quran text-xl text-emerald-950 font-bold">{row.wordUthmani}</td>
-                            <td className="p-3 font-bold text-emerald-800">{row.ruleApplied}</td>
-                            <td className="p-3 text-slate-700 text-xs leading-relaxed font-amiri">
-                              {isRtl ? row.reasonAr : row.reasonEn}
-                            </td>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200 text-sm">
+                          {HIFZ_BRANCH_WORKSHEET.criteria.map((cr, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50">
+                              <td className="p-3 text-center font-bold text-slate-500">{cr.num}</td>
+                              <td className="p-3 font-bold text-emerald-950 font-cairo">{cr.domain}</td>
+                              <td className="p-3 text-slate-600 font-amiri text-xs leading-relaxed">
+                                <div>{cr.description}</div>
+                                <div className="text-slate-400 italic mt-2 border-b border-dashed border-slate-200 pb-1">ملاحظة المحفظ: __________________________________________________</div>
+                              </td>
+                              <td className="p-3 text-center font-bold text-emerald-900">
+                                <span className="text-slate-400 font-normal">___ / </span>{cr.maxScore}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot className="bg-emerald-50 text-emerald-950 font-bold text-sm">
+                          <tr>
+                            <td colSpan="3" className="p-3 text-left pl-6">{isRtl ? 'المجموع النهائي للتقييم:' : 'Total Final Score:'}</td>
+                            <td className="p-3 text-center text-emerald-900 font-extrabold">_____ / 100</td>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </tfoot>
+                      </table>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
+                      <span>{isRtl ? 'توقيع الشيخ المحفظ واعتماد الورد القادم:' : 'Teacher Signature & Next Assignment:'} _______________</span>
+                      <span>Mishkah PWA — AnubisLand</span>
+                    </div>
                   </div>
-                </div>
+                )}
+
               </div>
             )}
 
-            {/* ================= VIEW: INTERACTIVE SELF-GRADING QUIZ ================= */}
+            {/* ================= VIEW: INTERACTIVE SELF-GRADING QUIZ (MULTI-BRANCH) ================= */}
             {activeTab === 'quiz' && (
               <div className="space-y-6 animate-fadeIn max-w-4xl mx-auto">
                 <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
-                  <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-100">
-                    <div>
-                      <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                        {isRtl ? 'المراجعة الذاتية التفاعلية للدارسين' : 'Interactive Self-Grading Student Quiz'}
-                      </span>
-                      <h2 className="text-xl font-bold font-cairo text-emerald-950 mt-0.5">
-                        {isRtl ? 'اختبر معلوماتكِ في درس اليوم' : 'Test Your Knowledge on Today\'s Lesson'}
-                      </h2>
+                  
+                  {/* Quiz Branch Switcher & Header */}
+                  <div className="pb-4 mb-6 border-b border-slate-200">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                      <div>
+                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                          {isRtl ? 'منظومة المراجعة الذاتية التفاعلية للدارسين' : 'Interactive Self-Grading Student Quizzes'}
+                        </span>
+                        <h2 className="text-xl sm:text-2xl font-extrabold font-cairo text-emerald-950 mt-0.5">
+                          {isRtl ? 'اختبر معلوماتكِ التفاعلية في علوم الشريعة والقرآن' : 'Test Your Knowledge Across All Disciplines'}
+                        </h2>
+                      </div>
+                      {quizSubmitted && (
+                        <div className="bg-emerald-900 text-gold-300 px-4 py-2 rounded-2xl border border-gold-400 font-bold text-sm shadow">
+                          {isRtl ? `النتيجة النهائية: ${quizScore}%` : `Score: ${quizScore}%`}
+                        </div>
+                      )}
                     </div>
-                    {quizSubmitted && (
-                      <div className="bg-emerald-900 text-gold-300 px-4 py-2 rounded-2xl border border-gold-400 font-bold text-sm shadow">
-                        {isRtl ? `النتيجة النهائية: ${quizScore}%` : `Score: ${quizScore}%`}
+
+                    {/* Quiz Branch Selector Pills */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => handleSwitchQuizBranch('islamic', 'aqeedah')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          quizBranch === 'islamic'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>🕌</span>
+                        <span>{isRtl ? 'اختبار العلوم الشرعية (Branch 3)' : 'Islamic Studies Quiz'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleSwitchQuizBranch('tajweed')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          quizBranch === 'tajweed'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>📖</span>
+                        <span>{isRtl ? 'اختبار أحكام التجويد (Branch 2)' : 'Tajweed Quiz'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleSwitchQuizBranch('hifz')}
+                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                          quizBranch === 'hifz'
+                            ? 'bg-emerald-800 text-gold-200 shadow-md ring-2 ring-gold-400'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span>🕋</span>
+                        <span>{isRtl ? 'اختبار المتشابهات وضبط الحفظ (Branch 1)' : 'Hifz Mutashabihat Quiz'}</span>
+                      </button>
+                    </div>
+
+                    {/* Sub-Discipline Pills for Islamic Studies Quiz */}
+                    {quizBranch === 'islamic' && (
+                      <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-200/80">
+                        <span className="text-xs font-bold text-slate-500">{isRtl ? 'المجال:' : 'Subject:'}</span>
+                        {[
+                          { id: 'aqeedah', icon: '🌟', labelAr: 'العقيدة وأركان الإيمان', labelEn: 'Aqeedah' },
+                          { id: 'fiqh', icon: '⚖️', labelAr: 'الفقه والعبادات', labelEn: 'Fiqh' },
+                          { id: 'seerah', icon: '📜', labelAr: 'السيرة النبوية', labelEn: 'Seerah' },
+                          { id: 'tazkiyah', icon: '💎', labelAr: 'الآداب والتزكية', labelEn: 'Tazkiyah' }
+                        ].map(cat => (
+                          <button
+                            key={cat.id}
+                            onClick={() => handleSwitchQuizBranch('islamic', cat.id)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                              quizIslamicCategory === cat.id
+                                ? 'bg-gold-400 text-emerald-950 font-extrabold shadow'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            <span>{cat.icon}</span>
+                            <span>{isRtl ? cat.labelAr : cat.labelEn}</span>
+                          </button>
+                        ))}
                       </div>
                     )}
                   </div>
 
                   {/* Questions List */}
                   <div className="space-y-6">
-                    {quizQuestions.map((q, qIndex) => {
+                    {activeQuizQuestions.map((q, qIndex) => {
                       const selected = quizAnswers[q.id];
                       const isCorrect = selected === q.correctOptionId;
                       
                       return (
                         <div key={q.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
-                          <div className="flex items-start gap-2 mb-3">
+                          <div className="flex items-start gap-2.5 mb-3">
                             <span className="w-7 h-7 rounded-full bg-emerald-800 text-gold-200 font-bold text-xs flex items-center justify-center shrink-0">
                               {qIndex + 1}
                             </span>
@@ -3729,10 +4897,10 @@
 
                           {/* Explanations shown after submit */}
                           {quizSubmitted && (
-                            <div className={`mt-3 p-3 rounded-xl text-xs font-amiri text-sm ${
+                            <div className={`mt-3 p-3.5 rounded-xl text-xs font-amiri leading-relaxed ${
                               isCorrect ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-red-50 text-red-900 border border-red-200'
                             }`}>
-                              <strong>{isCorrect ? '✓ إجابة صحيحة بارك الله فيكِ:' : '✗ توضيح الإجابة الصحيحة:'}</strong> {isRtl ? q.explanationAr : q.explanationEn}
+                              <strong>{isCorrect ? '✓ إجابة صحيحة بارك الله فيكِ:' : '✗ توضيح الإجابة الصحيحة والتأصيل الشرعي:'}</strong> {isRtl ? q.explanationAr : q.explanationEn}
                             </div>
                           )}
                         </div>
