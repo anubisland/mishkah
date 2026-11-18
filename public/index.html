@@ -602,7 +602,7 @@
               phaseNameAr: 'المقدمة وعنصر التشويق (The Hook)',
               phaseNameEn: 'Hook & Interactive Question',
               allocatedMinutes: 5,
-              teacherGuidanceAr: 'اطرحي سؤالاً تفاعلياً على الطالبات في زوم: ما الفرق بين مجرد العلم الذهني بوجود الله وبين اليقين الذي يزيل الهم في الأزمات؟',
+              teacherGuidanceAr: 'اطرح سؤالاً تفاعلياً على الدارسين: ما الفرق بين مجرد العلم الذهني بوجود الله وبين اليقين الذي يزيل الهم في الأزمات؟',
               teacherGuidanceEn: 'Ask the students: How does knowing Allah is Al-Aleem and Al-Khabeer give us personal peace during exams and trials?',
               talkingPoints: [
                 'الافتتاح بالحمد والصلاة والسلام على رسول الله',
@@ -623,10 +623,10 @@
             },
             {
               phaseNumber: 3,
-              phaseNameAr: 'التطبيق العملي في واقع الطالبة المعاصر',
+              phaseNameAr: 'التطبيق العملي في واقع الدارس المعاصر',
               phaseNameEn: 'Real-Life Application & Emotional Resilience',
               allocatedMinutes: 15,
-              teacherGuidanceAr: 'تدريب الطالبات على التخلص من كلمة "لو" المحبطة واستبدالها بالرضا: "قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ".',
+              teacherGuidanceAr: 'تدريب الدارسين على التخلص من كلمة "لو" المحبطة واستبدالها بالرضا: "قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ".',
               teacherGuidanceEn: 'Equipping youth with the prophetic mindset: replacing paralyzing regret with proactive contentment.',
               talkingPoints: [
                 'استشعار معية الله في السراء والضراء',
@@ -638,7 +638,7 @@
               phaseNameAr: 'الخاتمة والواجب المنزلي وملخص الواتساب',
               phaseNameEn: 'Wrap-up, Reflection & WhatsApp Summary',
               allocatedMinutes: 5,
-              teacherGuidanceAr: 'توزيع ملخص الواتساب المعد مسبقاً بنقرة واحدة، ومطالبة كل طالبة بتطبيق ذكر اليوم.',
+              teacherGuidanceAr: 'توزيع ملخص الواتساب المعد مسبقاً بنقرة واحدة، وحث كل دارس على تطبيق ذكر اليوم.',
               teacherGuidanceEn: 'Copy and share the WhatsApp summary and launch the interactive 5-question review.',
               talkingPoints: [
                 'دعاء كفارة المجلس: سبحانك اللهم وبحمدك...',
@@ -791,10 +791,10 @@
                 <button 
                   onClick={() => setIsPinModalOpen(true)}
                   className="bg-emerald-800/80 hover:bg-emerald-700/80 border border-gold-400/50 text-gold-200 text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow-sm"
-                  title={isRtl ? 'رمز أمان المعلمة' : 'Teacher Security PIN'}
+                  title={isRtl ? 'رمز أمان المعلم' : 'Teacher Security PIN'}
                 >
                   <span>🔒</span>
-                  <span className="hidden sm:inline">{isRtl ? 'أمان المعلمة' : 'Teacher PIN'}</span>
+                  <span className="hidden sm:inline">{isRtl ? 'أمان المعلم' : 'Teacher PIN'}</span>
                   <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
                 </button>
 
@@ -864,7 +864,7 @@
             {/* Navigation Tabs Bar */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-emerald-800/80 flex overflow-x-auto py-2.5 gap-2 scrollbar-none">
               {[
-                { id: 'dashboard', icon: '📊', labelAr: 'لوحة المعلمة', labelEn: 'Dashboard' },
+                { id: 'dashboard', icon: '📊', labelAr: 'لوحة المعلم', labelEn: 'Dashboard' },
                 { id: 'tajweed', icon: '📖', labelAr: 'مُعين التجويد (Module A)', labelEn: 'Tajweed Copilot' },
                 { id: 'islamic', icon: '🕌', labelAr: 'الحلقات الشرعية (Module B)', labelEn: 'Islamic Studies' },
                 { id: 'worksheet', icon: '📝', labelAr: 'أوراق العمل والطباعة', labelEn: 'Print Worksheets' },
@@ -953,7 +953,7 @@
                     {
                       titleAr: 'أوراق عمل قابلة للطباعة (PDF)',
                       titleEn: 'Printable Worksheets',
-                      descAr: 'جدول منظم: الكلمة القرآنية | الحكم | العلة والسبب، مع نموذج إجابة خاص بالمعلمة.',
+                      descAr: 'جدول منظم: الكلمة القرآنية | الحكم | العلة والسبب، مع نموذج إجابة خاص بالمعلم.',
                       descEn: 'Clean structured tables with dual versions: student blank sheet and teacher answer key.',
                       icon: '🖨️',
                       tag: 'Print Ready'
@@ -1367,7 +1367,7 @@
                               </div>
                               <div className="text-gold-200/90 italic flex items-center gap-2 pt-2 border-t border-emerald-800/60">
                                 <span>💡</span>
-                                <span><strong>{isRtl ? 'إرشاد المعلمة للطالبات:' : 'Teacher Prompt:'}</strong> {card.teacherPrompt}</span>
+                                <span><strong>{isRtl ? 'إرشاد المعلم للدارسين:' : 'Teacher Prompt:'}</strong> {card.teacherPrompt}</span>
                               </div>
                             </div>
                           </div>
@@ -1457,7 +1457,7 @@
                     {/* Audience Level */}
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        {isRtl ? 'فئة الطالبات' : 'Target Audience'}
+                        {isRtl ? 'الفئة المستهدفة' : 'Target Audience'}
                       </label>
                       <select 
                         value={audienceLevel} 
@@ -1668,7 +1668,7 @@
                         {isRtl ? 'ورقة عمل التجويد القابلة للطباعة (Printable PDF)' : 'Printable Tajweed Worksheet'}
                       </h3>
                       <p className="text-xs text-slate-500">
-                        {isRtl ? 'نسختان متطابقتان: نسخة فارغة للطالبة + نموذج الإجابة للمعلمة' : 'Dual format: Student Blank Test & Teacher Answer Key'}
+                        {isRtl ? 'نسختان متطابقتان: نسخة فارغة للطالب + نموذج إجابة المعلم' : 'Dual format: Student Blank Test & Teacher Answer Key'}
                       </p>
                     </div>
                   </div>
@@ -1689,10 +1689,10 @@
                       {isRtl ? 'منصة مِشكاة لتعليم القرآن الكريم والتجويد' : 'Mishkah Quranic Learning Platform'}
                     </div>
                     <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-1">
-                      {isRtl ? 'ورقة عمل تفاعلية في أحكام التجويد (نسخة الطالبة)' : 'Tajweed Student Worksheet'}
+                      {isRtl ? 'ورقة مدارسة وتطبيق في أحكام التجويد (نسخة الطالب)' : 'Tajweed Student Worksheet'}
                     </h2>
                     <div className="flex justify-between items-center text-xs text-slate-600 mt-4 px-2">
-                      <span>{isRtl ? 'اسم الطالبة:' : 'Student Name:'} ____________________</span>
+                      <span>{isRtl ? 'اسم الطالب / الدارس:' : 'Student Name:'} ____________________</span>
                       <span>{isRtl ? 'السورة والآيات:' : 'Surah:'} {tajweedData?.metadata?.surah} ({tajweedData?.metadata?.ayahRange})</span>
                       <span>{isRtl ? 'التاريخ:' : 'Date:'} ___ / ___ / 2026</span>
                     </div>
@@ -1726,21 +1726,21 @@
 
                   {/* Teacher Feedback Footer */}
                   <div className="border-t border-slate-200 pt-4 text-xs text-slate-500 flex justify-between">
-                    <span>{isRtl ? 'توقيع المعلمة / التقييم النهائي:' : 'Teacher Signature & Final Grade:'} _______________</span>
+                    <span>{isRtl ? 'ملاحظات المعلم / التقييم:' : 'Teacher Signature & Final Grade:'} _______________</span>
                     <span>Mishkah PWA — {new Date().getFullYear()}</span>
                   </div>
                 </div>
 
                 {/* Page Break for Print */}
                 <div className="page-break my-8 no-print border-t-2 border-dashed border-slate-300 text-center py-2 text-xs text-slate-400 font-bold">
-                  ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلمة' : 'Page Break — Teacher Answer Key Follows'}
+                  ✂️ {isRtl ? 'فاصل صفحة الطباعة — يبدأ هنا نموذج إجابة المعلم' : 'Page Break — Teacher Answer Key Follows'}
                 </div>
 
                 {/* Printable Document Sheet 2: Teacher Answer Key */}
                 <div className="bg-white rounded-3xl p-8 border-2 border-gold-300 shadow-lg print:border-none print:shadow-none print:p-0">
                   <div className="text-center border-b-2 border-gold-600 pb-4 mb-6">
                     <span className="bg-gold-100 text-gold-900 border border-gold-300 text-xs px-3 py-1 rounded-full font-bold">
-                      {isRtl ? 'خاص بالمعلمة فقط — نموذج الإجابة المعتمد' : 'Teacher Answer Key (Confidential)'}
+                      {isRtl ? 'خاص بالمعلم فقط — نموذج الإجابة المعتمد' : 'Teacher Answer Key (Confidential)'}
                     </span>
                     <h2 className="text-2xl font-bold font-amiri text-emerald-950 mt-2">
                       {isRtl ? 'دليل تصحيح ورقة العمل والعلل الصوتية' : 'Teacher Correction Guide & Phonetic Explanations'}
@@ -1782,7 +1782,7 @@
                   <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-100">
                     <div>
                       <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                        {isRtl ? 'التقييم الذاتي الفوري للطالبات' : 'Interactive Self-Grading Student Quiz'}
+                        {isRtl ? 'المراجعة الذاتية التفاعلية للدارسين' : 'Interactive Self-Grading Student Quiz'}
                       </span>
                       <h2 className="text-xl font-bold font-cairo text-emerald-950 mt-0.5">
                         {isRtl ? 'اختبر معلوماتكِ في درس اليوم' : 'Test Your Knowledge on Today\'s Lesson'}
@@ -1952,7 +1952,7 @@
                   <span className="text-3xl">🔒</span>
                   <div>
                     <h3 className="text-lg font-bold text-emerald-950 font-cairo">
-                      {isRtl ? 'بوابة أمان المعلمة (Teacher PIN Access)' : 'Teacher Security Gate'}
+                      {isRtl ? 'بوابة أمان المعلم (Teacher PIN Access)' : 'Teacher Security Gate'}
                     </h3>
                     <p className="text-xs text-slate-500">
                       {isRtl ? 'حماية مفاتيح الذكاء الاصطناعي على الخادم ومنع الاستخدام غير المصرح به' : 'Serverless proxy security gate preventing unauthorized AI calls'}
@@ -1988,7 +1988,7 @@
                       setTeacherPin(tempPin);
                       localStorage.setItem('mishkah_pin', tempPin);
                       setIsPinModalOpen(false);
-                      showToast(isRtl ? 'تم تحديث وحفظ رمز المعلمة بنجاح 🔒' : 'Teacher PIN Saved Successfully 🔒');
+                      showToast(isRtl ? 'تم تحديث وحفظ رمز المعلم بنجاح 🔒' : 'Teacher PIN Saved Successfully 🔒');
                     }}
                     className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2 rounded-xl text-xs shadow"
                   >
@@ -2005,7 +2005,7 @@
               <div className="flex items-center gap-2">
                 <span className="font-bold text-gold-300 font-amiri text-base">مِشكاة | Mishkah</span>
                 <span>—</span>
-                <span>{isRtl ? 'منصة المعلمة الأولى لتعليم القرآن والعلوم الشرعية' : 'Empowering Quran & Islamic Studies Educators'}</span>
+                <span>{isRtl ? 'منصة الداعية والمعلم الأولى لتعليم القرآن والعلوم الشرعية' : 'Empowering Quran & Islamic Studies Educators'}</span>
               </div>
               <div className="text-[11px] text-emerald-400/80">
                 <span>Designed with ADR-0006 Grand Emerald & Soft Gold Motif • Gemini Flash Architecture</span>
