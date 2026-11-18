@@ -9,10 +9,10 @@
   <meta name="theme-color" content="#064E3B">
   <meta name="description" content="مِشكاة — نظام التشغيل الشامل للداعية والمعلم الشرعي: القرآن الكريم، أحكام التجويد، والعلوم الشرعية عبر زوم وحلقات العلم.">
 
-  <!-- Google Fonts: Cairo, Amiri, Plus Jakarta Sans -->
+  <!-- Google Fonts: Cairo, Amiri, Amiri Quran, Tajawal, Almarai, Noto Naskh Arabic -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Amiri+Quran&family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;600;700;800;900&family=Noto+Naskh+Arabic:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -69,20 +69,83 @@
     }
     body {
       font-size: var(--app-font-size);
-      background-color: #FAF8F5;
+      background-color: #F8F6F0;
+      /* Screen-wide subtle Islamic 8-pointed star & arabesque geometric pattern */
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(6, 78, 59, 0.05) 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg width='72' height='72' viewBox='0 0 72 72' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23064E3B' fill-opacity='0.038' fill-rule='evenodd'%3E%3Cpath d='M36 0l5.09 13.91L55 17l-10.91 7.09L48 36l-13.91-5.09L27 45l-5.09-13.91L8 29l10.91-7.09L15 8l13.91 5.09L36 0zm0 72l5.09-13.91L55 55l-10.91-7.09L48 36l-13.91 5.09L27 27l-5.09 13.91L8 43l10.91 7.09L15 64l13.91-5.09L36 72zM0 36l13.91 5.09L17 55l7.09-10.91L36 48l-5.09-13.91L45 27l-13.91-5.09L29 8l-7.09 10.91L8 15l5.09 13.91L0 36zm72 0l-13.91 5.09L55 55l-7.09-10.91L36 48l5.09-13.91L27 27l13.91-5.09L43 8l7.09 10.91L64 15l-5.09 13.91L72 36z'/%3E%3Ccircle cx='36' cy='36' r='3.5' fill='%23C59B27' fill-opacity='0.05'/%3E%3C/g%3E%3C/svg%3E");
+      background-attachment: fixed;
       color: #1E293B;
       font-family: 'Cairo', sans-serif;
+      transition: font-family 0.2s ease, font-size 0.2s ease;
     }
+
+    /* Sacred Quranic Text strictly locked to Uthmani font */
     .font-quran {
-      font-family: 'Amiri', serif;
-      line-height: 2.1;
+      font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif !important;
+      line-height: 2.3 !important;
+      letter-spacing: 0.02em;
     }
+
+    /* Grand Emerald Header & Dark Sections with Ornate Islamic Pattern */
     .emerald-pattern {
-      background: radial-gradient(circle at 50% 30%, #064E3B 0%, #032B20 70%, #011B13 100%);
+      background-color: #032B20;
+      background-image: 
+        radial-gradient(circle at 50% 25%, #064E3B 0%, #032B20 65%, #011B13 100%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FDE68A' fill-opacity='0.045' fill-rule='evenodd'%3E%3Cpath d='M30 0l3 9 9-3-3 9 9 3-9 3 3 9-9-3-3 9-3-9-9 3 3-9-9-3 9-3-3-9 9 3 3-9z'/%3E%3Ccircle cx='30' cy='30' r='1.8' fill='%23FDE68A' fill-opacity='0.08'/%3E%3C/g%3E%3C/svg%3E");
     }
+
+    /* WhatsApp & Chat Floor with Authentic Islamic Geometric Motif */
+    .islamic-chat-wallpaper {
+      background-color: #ECE7DE;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.45) 0%, transparent 100%),
+        url("data:image/svg+xml,%3Csvg width='56' height='56' viewBox='0 0 56 56' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23064E3B' fill-opacity='0.055' fill-rule='evenodd'%3E%3Cpath d='M28 0l4 11 11-4-4 11 11 4-11 4 4 11-11-4-4 11-4-11-11 4 4-11-11-4 11-4-4-11 11 4 4-11z'/%3E%3Ccircle cx='28' cy='28' r='2.5' fill='%23C59B27' fill-opacity='0.07'/%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    /* Calming, Soothing Islamic Card Palettes */
+    .card-islamic-pearl {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(6, 78, 59, 0.08);
+      box-shadow: 0 4px 20px -2px rgba(6, 78, 59, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+      position: relative;
+    }
+    .card-islamic-pearl::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(197, 155, 39, 0.5), transparent);
+      border-radius: 1.5rem 1.5rem 0 0;
+    }
+
+    .card-islamic-sage {
+      background: linear-gradient(135deg, rgba(240, 253, 244, 0.85) 0%, rgba(255, 255, 255, 0.97) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .card-islamic-amber {
+      background: linear-gradient(135deg, rgba(254, 252, 232, 0.85) 0%, rgba(255, 255, 255, 0.97) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.22);
+    }
+
+    .card-islamic-sky {
+      background: linear-gradient(135deg, rgba(240, 249, 255, 0.85) 0%, rgba(255, 255, 255, 0.97) 100%);
+      border: 1px solid rgba(14, 165, 233, 0.2);
+    }
+
+    .card-islamic-lavender {
+      background: linear-gradient(135deg, rgba(250, 245, 255, 0.85) 0%, rgba(255, 255, 255, 0.97) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+
     .gold-border-gradient {
       border-image: linear-gradient(to right, #C59B27, #FDE68A, #C59B27) 1;
     }
+
     /* Presentation Zoom Mode */
     .zoom-slide-fullscreen {
       position: fixed;
@@ -95,10 +158,12 @@
       align-items: center;
       padding: 2.5rem;
     }
+
     /* Print Stylesheet for Worksheets */
     @media print {
       body {
         background: white !important;
+        background-image: none !important;
         color: black !important;
         font-size: 13pt !important;
       }
@@ -165,11 +230,26 @@
       
       // Font Scale (14px - 20px)
       const [fontSize, setFontSize] = useState(16);
+      
+      // Font Family Switcher (Cairo, Amiri, Tajawal, Almarai, Noto Naskh)
+      const [appFont, setAppFont] = useState(localStorage.getItem('mishkah_font') || 'cairo');
+
+      const FONT_MAP = {
+        cairo: { nameAr: 'خط كايرو', nameEn: 'Cairo', css: "'Cairo', sans-serif" },
+        amiri: { nameAr: 'خط أميري', nameEn: 'Amiri', css: "'Amiri', serif" },
+        tajawal: { nameAr: 'خط تجوال', nameEn: 'Tajawal', css: "'Tajawal', sans-serif" },
+        almarai: { nameAr: 'خط المراعي', nameEn: 'Almarai', css: "'Almarai', sans-serif" },
+        naskh: { nameAr: 'خط النسخ', nameEn: 'Noto Naskh', css: "'Noto Naskh Arabic', serif" }
+      };
+
       useEffect(() => {
         document.documentElement.style.setProperty('--app-font-size', `${fontSize}px`);
         document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
         document.documentElement.lang = lang;
-      }, [fontSize, isRtl, lang]);
+        const fontConfig = FONT_MAP[appFont] || FONT_MAP.cairo;
+        document.body.style.fontFamily = fontConfig.css;
+        localStorage.setItem('mishkah_font', appFont);
+      }, [fontSize, isRtl, lang, appFont]);
 
       // Active View
       const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'tajweed' | 'islamic' | 'worksheet' | 'quiz'
@@ -628,6 +708,23 @@
                   <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
                 </button>
 
+                {/* Font Family Switcher */}
+                <div className="flex items-center space-x-1.5 space-x-reverse bg-emerald-950/70 border border-gold-400/50 rounded-lg px-2 py-1 text-xs text-gold-200">
+                  <span className="text-gold-300">🔤</span>
+                  <select 
+                    value={appFont} 
+                    onChange={(e) => setAppFont(e.target.value)}
+                    className="bg-transparent text-gold-100 font-semibold text-xs focus:outline-none cursor-pointer pr-1"
+                    title={isRtl ? 'اختيار خط واجهة التطبيق' : 'Choose Interface Font'}
+                  >
+                    <option value="cairo" className="bg-emerald-950 text-gold-100">خط كايرو (Cairo)</option>
+                    <option value="amiri" className="bg-emerald-950 text-gold-100">خط أميري (Amiri)</option>
+                    <option value="tajawal" className="bg-emerald-950 text-gold-100">خط تجوال (Tajawal)</option>
+                    <option value="almarai" className="bg-emerald-950 text-gold-100">خط المراعي (Almarai)</option>
+                    <option value="naskh" className="bg-emerald-950 text-gold-100">خط النسخ (Noto Naskh)</option>
+                  </select>
+                </div>
+
                 {/* Font Size Scaler */}
                 <div className="hidden md:flex items-center space-x-2 space-x-reverse bg-emerald-950/60 border border-emerald-700/60 rounded-lg px-2.5 py-1 text-xs text-emerald-100">
                   <span>Aa</span>
@@ -761,27 +858,35 @@
                       icon: '🛡️',
                       tag: 'Zero Weak Hadith'
                     }
-                  ].map((card, idx) => (
-                    <div key={idx} className="bg-white rounded-2xl p-5 border border-emerald-900/10 shadow-sm hover:shadow-md transition">
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="text-2xl">{card.icon}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full">
-                          {card.tag}
-                        </span>
+                  ].map((card, idx) => {
+                    const themeClass = [
+                      'card-islamic-sage',
+                      'card-islamic-amber',
+                      'card-islamic-sky',
+                      'card-islamic-lavender'
+                    ][idx % 4];
+                    return (
+                      <div key={idx} className={`${themeClass} rounded-2xl p-5 shadow-sm hover:shadow-md transition relative overflow-hidden`}>
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="text-2xl">{card.icon}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-white/85 text-emerald-900 border border-emerald-900/15 px-2.5 py-0.5 rounded-full shadow-xs">
+                            {card.tag}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-emerald-950 text-base mb-1.5 font-cairo">
+                          {isRtl ? card.titleAr : card.titleEn}
+                        </h3>
+                        <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                          {isRtl ? card.descAr : card.descEn}
+                        </p>
                       </div>
-                      <h3 className="font-bold text-emerald-950 text-base mb-1.5 font-cairo">
-                        {isRtl ? card.titleAr : card.titleEn}
-                      </h3>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        {isRtl ? card.descAr : card.descEn}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Quick Inspection of Active Prepared Lesson */}
                 {tajweedData && (
-                  <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-md">
+                  <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/10 shadow-md">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
                       <div>
                         <span className="text-xs text-emerald-700 font-bold uppercase tracking-wider">
@@ -843,7 +948,7 @@
               <div className="space-y-8 animate-fadeIn">
                 
                 {/* Generation Control Panel */}
-                <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
                   <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
                     <div className="flex items-center space-x-3 space-x-reverse">
                       <span className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
@@ -1079,7 +1184,7 @@
                     </div>
 
                     {/* Zoom Presentation Deck Cards */}
-                    <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                    <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
                       <div className="flex items-center justify-between pb-3 mb-6 border-b border-slate-100">
                         <h3 className="text-lg font-bold text-emerald-950 font-cairo flex items-center space-x-2 space-x-reverse">
                           <span>🖥️</span>
@@ -1163,7 +1268,7 @@
               <div className="space-y-8 animate-fadeIn">
                 
                 {/* Control Generator Panel */}
-                <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
                   <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
                     <div className="flex items-center space-x-3 space-x-reverse">
                       <span className="w-10 h-10 rounded-xl bg-gold-100 text-gold-800 flex items-center justify-center text-xl font-bold">
@@ -1282,7 +1387,7 @@
                   <div className="space-y-6">
 
                     {/* 1. Time-Boxed Lesson Blueprint */}
-                    <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                    <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
                       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-6 border-b border-slate-100">
                         <div>
                           <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
@@ -1335,7 +1440,7 @@
                     </div>
 
                     {/* 2. Authenticated Evidences & Guardrails */}
-                    <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                    <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
                       <div className="flex items-center justify-between pb-3 mb-5 border-b border-slate-100">
                         <h3 className="text-lg font-bold text-emerald-950 font-cairo flex items-center space-x-2 space-x-reverse">
                           <span>🛡️</span>
@@ -1379,26 +1484,54 @@
                       </div>
                     </div>
 
-                    {/* 3. WhatsApp Ready Kit (1-Click Copy) */}
-                    <div className="bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-950 text-white rounded-3xl p-6 border-2 border-gold-400 shadow-xl">
-                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-emerald-700">
-                        <div className="flex items-center space-x-2 space-x-reverse">
-                          <span className="text-2xl">📱</span>
-                          <h3 className="text-lg font-bold text-gold-300 font-cairo">
-                            {isRtl ? 'حقيبة الواتساب الجاهزة للإرسال الفوري' : '1-Click WhatsApp Parent/Student Broadcast Kit'}
-                          </h3>
+                    {/* 3. WhatsApp Ready Kit with Islamic Chat Wallpaper */}
+                    <div className="card-islamic-pearl rounded-3xl p-6 border-2 border-emerald-900/15 shadow-xl overflow-hidden">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-200">
+                        <div className="flex items-center space-x-2.5 space-x-reverse">
+                          <span className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl shadow-inner">
+                            💬
+                          </span>
+                          <div>
+                            <h3 className="text-lg font-bold text-emerald-950 font-cairo">
+                              {isRtl ? 'حقيبة الواتساب الجاهزة للإرسال الفوري' : '1-Click WhatsApp Parent/Student Broadcast Kit'}
+                            </h3>
+                            <p className="text-xs text-slate-500 font-medium">
+                              {isRtl ? 'خلفية إسلامية مخصصة لمعاينة رسائل الحلقات وأولياء الأمور' : 'Simulated chat preview with authentic Islamic background'}
+                            </p>
+                          </div>
                         </div>
                         <button 
                           onClick={handleCopyWhatsApp}
-                          className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-extrabold px-4 py-2 rounded-xl text-xs shadow-lg transition flex items-center space-x-1.5 space-x-reverse"
+                          className="bg-emerald-700 hover:bg-emerald-800 text-gold-100 font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md transition flex items-center space-x-2 space-x-reverse"
                         >
                           <span>📋</span>
                           <span>{isRtl ? 'نسخ الرسالة كاملة' : 'Copy Formatted Text'}</span>
                         </button>
                       </div>
 
-                      <div className="bg-emerald-950/80 rounded-2xl p-5 border border-emerald-700/80 font-amiri text-sm sm:text-base leading-relaxed text-slate-100 whitespace-pre-wrap select-all">
-                        {islamicData.whatsAppKit.formattedText}
+                      {/* Simulated Islamic WhatsApp Chat Interface */}
+                      <div className="islamic-chat-wallpaper rounded-2xl p-4 sm:p-6 border border-emerald-800/15 shadow-inner">
+                        <div className="max-w-2xl mx-auto bg-white/95 backdrop-blur-md rounded-2xl p-5 shadow-md border border-emerald-900/10 relative">
+                          {/* Chat sender header */}
+                          <div className="flex items-center justify-between pb-2 mb-3 border-b border-emerald-50 text-xs">
+                            <span className="font-bold text-emerald-900 flex items-center space-x-1.5 space-x-reverse">
+                              <span>🕌</span>
+                              <span>{isRtl ? 'رسالة حلقة اليوم المعتمدة' : 'Official Lesson Broadcast'}</span>
+                            </span>
+                            <span className="text-[11px] text-slate-400">اليوم • 5:00 م</span>
+                          </div>
+
+                          {/* Message Body */}
+                          <div className="font-amiri text-sm sm:text-base leading-relaxed text-slate-800 whitespace-pre-wrap select-all">
+                            {islamicData.whatsAppKit.formattedText}
+                          </div>
+
+                          {/* Chat message footer with blue checks */}
+                          <div className="flex items-center justify-end space-x-1.5 space-x-reverse text-[11px] text-slate-400 pt-3 border-t border-slate-100 mt-3">
+                            <span>جاهزة للنسخ</span>
+                            <span className="text-sky-500 font-bold">✓✓</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1529,7 +1662,7 @@
             {/* ================= VIEW: INTERACTIVE SELF-GRADING QUIZ ================= */}
             {activeTab === 'quiz' && (
               <div className="space-y-6 animate-fadeIn max-w-4xl mx-auto">
-                <div className="bg-white rounded-3xl p-6 border-2 border-emerald-800/10 shadow-lg">
+                <div className="card-islamic-pearl rounded-3xl p-6 border border-emerald-800/15 shadow-md">
                   <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-100">
                     <div>
                       <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
