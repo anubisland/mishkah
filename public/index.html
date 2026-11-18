@@ -496,6 +496,7 @@
       const [mutaSearchResults, setMutaSearchResults] = useState([]);
       const [isSearchingMuta, setIsSearchingMuta] = useState(false);
       const [mutaGuideNote, setMutaGuideNote] = useState('');
+      const [hifzViewMode, setHifzViewMode] = useState('mushaf_page'); // 'mushaf_page' | 'interactive_test'
       const [mushafPageNumber, setMushafPageNumber] = useState(562); // Default: Surah Al-Mulk Page 562
       const [mushafCurrentSurahId, setMushafCurrentSurahId] = useState(67);
       const [selectedSurahNumber, setSelectedSurahNumber] = useState(67);
@@ -1435,74 +1436,145 @@
             {/* ================= VIEW: MODULE A (TAJWEED COPILOT) ================= */}
                         {/* ================= VIEW: HIFZ & RECITATION WORKBENCH (BRANCH 1) ================= */}
             {activeTab === 'hifz' && (
-              <div className="space-y-8 animate-fadeIn">
+              <div className="space-y-6 animate-fadeIn">
                 
-                {/* Grand Emerald Header */}
+                {/* Header Banner */}
                 <div className="emerald-pattern rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden border-2 border-gold-400 shadow-xl">
                   <div className="absolute top-2.5 right-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
                   <div className="absolute top-2.5 left-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
                   <div className="relative z-10 max-w-4xl">
                     <div className="inline-flex items-center gap-2 bg-gold-400/20 text-gold-200 border border-gold-400/40 text-xs px-3 py-1 rounded-full mb-3 font-bold">
                       <span>🕋</span>
-                      <span>{isRtl ? 'الفرع الأول: مصحف التحفيظ والمدارسة البصرية المباشرة' : 'Branch 1: Visual Quran Memorization Workbench'}</span>
+                      <span>{isRtl ? 'الفرع الأول: منظومة التحفيظ المتكاملة (المصحف الورقي + اختبار الإتقان)' : 'Branch 1: Complete Quran Memorization System'}</span>
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-extrabold font-amiri text-gold-200 mb-2">
-                      {isRtl ? 'مصحف المدينة النبوية الشريفة (الصفحة الكاملة 15 سطراً)' : 'Madinah Mushaf Page Viewer (15-Line Standard)'}
+                      {isRtl ? 'مدارسة مصحف المدينة واختبارات الإتقان التفاعلية' : 'Madinah Mushaf Visuals & Interactive Testing'}
                     </h2>
                     <p className="text-emerald-100/90 text-xs sm:text-sm leading-relaxed mb-4">
                       {isRtl 
-                        ? 'عرض وجه المصحف الورقي المطبوع كاملاً كما في يد الشيخ والطالب برسم مجمع الملك فهد لطباعة المصحف الشريف، لترسيخ الذاكرة البصرية التامة وضبط أوائل وأواخر الآيات.'
-                        : 'Exact high-resolution page of King Fahd Complex Madinah Mushaf, identical to the physical Quran printed copy.'}
+                        ? 'يجمع بين صفحة المصحف الورقي المطبوع الحقيقي (15 سطراً) لترسيخ الذاكرة البصرية، وبين أدوات اختبار الإتقان الفورية (طمس فواصل الآيات، التسميع الغيبي، إخفاء الكلمات، وكاشف المتشابهات).'
+                        : 'Combines authentic 15-line Madinah Mushaf visual page with live mastery testing tools: mask endings, blind recitation, word-masking, and mutashabihat.'}
                     </p>
 
-                    {/* Quick Navigation Toolbar */}
+                    {/* Mode Toggle Switch (Mushaf Page vs Interactive Testing) */}
                     <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-emerald-800/80">
-                      
-                      {/* Surah Dropdown */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-gold-300">{isRtl ? 'السورة:' : 'Surah:'}</span>
-                        <select
-                          value={mushafCurrentSurahId}
-                          onChange={(e) => {
-                            const sid = parseInt(e.target.value);
-                            setMushafCurrentSurahId(sid);
-                            const surahItem = MUSHAF_SURAHS_PAGE_MAP.find(s => s.id === sid);
-                            if (surahItem) {
-                              setMushafPageNumber(surahItem.startPage);
-                              showToast(isRtl ? 'انتقال إلى ' + surahItem.name + ' (صفحة ' + surahItem.startPage + ')' : 'Navigated to ' + surahItem.name);
-                            }
-                          }}
-                          className="bg-emerald-900/90 border border-gold-400/50 rounded-xl px-3 py-1.5 text-xs text-gold-100 font-bold focus:outline-none focus:ring-2 focus:ring-gold-400"
+                      <div className="inline-flex bg-emerald-950/90 p-1.5 rounded-2xl border border-gold-400/60 shadow-md">
+                        <button
+                          type="button"
+                          onClick={() => setHifzViewMode('mushaf_page')}
+                          className={`px-4 sm:px-5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition ${
+                            hifzViewMode === 'mushaf_page'
+                              ? 'bg-gold-500 text-emerald-950 font-black shadow-md ring-2 ring-gold-300'
+                              : 'text-gold-200 hover:text-white'
+                          }`}
                         >
-                          {MUSHAF_SURAHS_PAGE_MAP.map(s => (
-                            <option key={s.id} value={s.id} className="bg-emerald-950 text-white">
-                              {s.id}. سورة {s.name} (صفحة {s.startPage})
-                            </option>
+                          <span>📖</span>
+                          <span>{isRtl ? '1. وجه المصحف الورقي (15 سطراً)' : '1. Real Mushaf Page'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setHifzViewMode('interactive_test')}
+                          className={`px-4 sm:px-5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition ${
+                            hifzViewMode === 'interactive_test'
+                              ? 'bg-gold-500 text-emerald-950 font-black shadow-md ring-2 ring-gold-300'
+                              : 'text-gold-200 hover:text-white'
+                          }`}
+                        >
+                          <span>🎯</span>
+                          <span>{isRtl ? '2. لوحة التسميع واختبار الإتقان' : '2. Recitation & Testing Board'}</span>
+                        </button>
+                      </div>
+
+                      {/* Quick Shortcut Buttons in Header */}
+                      {hifzViewMode === 'mushaf_page' && (
+                        <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                          <span className="text-gold-300 font-bold ml-1">{isRtl ? 'انتقال سريع:' : 'Quick:'}</span>
+                          {[
+                            { name: 'الفاتحة', p: 1 },
+                            { name: 'البقرة', p: 2 },
+                            { name: 'الكهف', p: 293 },
+                            { name: 'يس', p: 440 },
+                            { name: 'الملك', p: 562 },
+                            { name: 'جزء عم', p: 582 }
+                          ].map(lm => (
+                            <button
+                              key={lm.p}
+                              type="button"
+                              onClick={() => {
+                                setMushafPageNumber(lm.p);
+                                const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => lm.p >= s.startPage && lm.p <= s.endPage);
+                                if (sMatch) setMushafCurrentSurahId(sMatch.id);
+                                showToast(isRtl ? 'انتقال إلى ' + lm.name + ' (صفحة ' + lm.p + ')' : 'Navigated to ' + lm.name);
+                              }}
+                              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition ${
+                                mushafPageNumber === lm.p
+                                  ? 'bg-gold-500 text-emerald-950 border-gold-300'
+                                  : 'bg-emerald-900/80 hover:bg-emerald-800 text-gold-200 border-emerald-700'
+                              }`}
+                            >
+                              {lm.name} ({lm.p})
+                            </button>
                           ))}
-                        </select>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ================= MODE A: THE REAL PRINTED MADINAH MUSHAF PAGE ================= */}
+                {hifzViewMode === 'mushaf_page' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    
+                    {/* Navigation Bar for Mushaf Page */}
+                    <div className="card-islamic-pearl rounded-2xl p-4 shadow-sm border border-emerald-800/15 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex flex-wrap items-center gap-3">
+                        {/* Surah Dropdown */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-emerald-950">{isRtl ? 'السورة المباركة:' : 'Surah:'}</span>
+                          <select
+                            value={mushafCurrentSurahId}
+                            onChange={(e) => {
+                              const sid = parseInt(e.target.value);
+                              setMushafCurrentSurahId(sid);
+                              const surahItem = MUSHAF_SURAHS_PAGE_MAP.find(s => s.id === sid);
+                              if (surahItem) {
+                                setMushafPageNumber(surahItem.startPage);
+                                showToast(isRtl ? 'انتقال إلى سورة ' + surahItem.name + ' (صفحة ' + surahItem.startPage + ')' : 'Navigated to ' + surahItem.name);
+                              }
+                            }}
+                            className="bg-white border-2 border-emerald-700/40 rounded-xl px-3 py-1.5 text-xs text-emerald-950 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                          >
+                            {MUSHAF_SURAHS_PAGE_MAP.map(s => (
+                              <option key={s.id} value={s.id}>
+                                {s.id}. سورة {s.name} (صفحة {s.startPage})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Direct Page Input */}
+                        <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-300">
+                          <span className="text-xs font-bold text-slate-700">{isRtl ? 'الصفحة:' : 'Page:'}</span>
+                          <input
+                            type="number"
+                            min={1}
+                            max={604}
+                            value={mushafPageNumber}
+                            onChange={(e) => {
+                              const p = Math.max(1, Math.min(604, parseInt(e.target.value) || 1));
+                              setMushafPageNumber(p);
+                              const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage);
+                              if (sMatch) setMushafCurrentSurahId(sMatch.id);
+                            }}
+                            className="w-14 bg-white text-emerald-950 border border-slate-300 rounded-lg px-2 py-0.5 text-xs font-bold text-center focus:outline-none"
+                          />
+                          <span className="text-[11px] text-slate-500">{isRtl ? 'من 604' : 'of 604'}</span>
+                        </div>
                       </div>
 
-                      {/* Direct Page Input */}
-                      <div className="flex items-center gap-1.5 bg-emerald-900/80 px-3 py-1.5 rounded-xl border border-emerald-700">
-                        <span className="text-xs font-bold text-gold-300">{isRtl ? 'الصفحة:' : 'Page:'}</span>
-                        <input
-                          type="number"
-                          min={1}
-                          max={604}
-                          value={mushafPageNumber}
-                          onChange={(e) => {
-                            const p = Math.max(1, Math.min(604, parseInt(e.target.value) || 1));
-                            setMushafPageNumber(p);
-                            const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage);
-                            if (sMatch) setMushafCurrentSurahId(sMatch.id);
-                          }}
-                          className="w-14 bg-emerald-950 text-gold-200 border border-gold-400/40 rounded-lg px-2 py-0.5 text-xs font-bold text-center focus:outline-none"
-                        />
-                        <span className="text-[11px] text-emerald-300">{isRtl ? 'من 604' : 'of 604'}</span>
-                      </div>
-
-                      {/* Prev / Next Page Buttons */}
-                      <div className="flex items-center gap-1">
+                      {/* Prev / Next & Action to Test */}
+                      <div className="flex flex-wrap items-center gap-2">
                         <button
                           type="button"
                           onClick={() => {
@@ -1512,10 +1584,10 @@
                             if (sMatch) setMushafCurrentSurahId(sMatch.id);
                           }}
                           disabled={mushafPageNumber <= 1}
-                          className="bg-emerald-900/90 hover:bg-emerald-800 disabled:opacity-40 text-gold-200 border border-gold-400/40 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1"
+                          className="bg-white hover:bg-slate-50 disabled:opacity-40 text-emerald-950 border border-slate-300 px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
                         >
                           <span>➡️</span>
-                          <span>{isRtl ? 'الوجه السابق' : 'Prev Page'}</span>
+                          <span>{isRtl ? 'الوجه السابق' : 'Prev'}</span>
                         </button>
 
                         <button
@@ -1527,139 +1599,341 @@
                             if (sMatch) setMushafCurrentSurahId(sMatch.id);
                           }}
                           disabled={mushafPageNumber >= 604}
-                          className="bg-emerald-900/90 hover:bg-emerald-800 disabled:opacity-40 text-gold-200 border border-gold-400/40 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1"
+                          className="bg-white hover:bg-slate-50 disabled:opacity-40 text-emerald-950 border border-slate-300 px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
                         >
-                          <span>{isRtl ? 'الوجه التالي' : 'Next Page'}</span>
+                          <span>{isRtl ? 'الوجه التالي' : 'Next'}</span>
                           <span>⬅️</span>
                         </button>
-                      </div>
 
-                      {/* Quick Landmarks Shortcuts */}
-                      <div className="flex flex-wrap items-center gap-1 text-[11px]">
-                        <span className="text-gold-400 font-bold ml-1">{isRtl ? 'انتقال سريع:' : 'Quick:'}</span>
-                        {[
-                          { name: 'الفاتحة', p: 1 },
-                          { name: 'البقرة', p: 2 },
-                          { name: 'الكهف', p: 293 },
-                          { name: 'يس', p: 440 },
-                          { name: 'الملك', p: 562 },
-                          { name: 'جزء عم', p: 582 }
-                        ].map(lm => (
+                        {/* Switch to Testing for this page */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setHifzViewMode('interactive_test');
+                            showToast(isRtl ? 'فتح لوحة اختبار الإتقان وتسميع الوجه 🎯' : 'Switched to Testing Board 🎯');
+                          }}
+                          className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-4 py-1.5 rounded-xl text-xs font-black shadow transition flex items-center gap-1.5"
+                        >
+                          <span>🎯</span>
+                          <span>{isRtl ? 'اختبار إتقان هذا الوجه ⬅' : 'Test This Page ⬅'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* The Authentic 15-Line Printed Madinah Mushaf Page */}
+                    <div className="flex justify-center">
+                      <div className="bg-white rounded-3xl p-4 sm:p-8 shadow-2xl border-4 border-emerald-950/20 max-w-4xl w-full relative">
+                        {/* Top Mushaf Header */}
+                        <div className="flex justify-between items-center pb-3 mb-4 border-b-2 border-gold-500/70 text-emerald-950 font-bold font-cairo text-sm sm:text-base">
+                          <div className="flex items-center gap-2 text-emerald-900">
+                            <span>📖</span>
+                            <span>
+                              {isRtl 
+                                ? 'سورة ' + ((MUSHAF_SURAHS_PAGE_MAP.find(s => mushafPageNumber >= s.startPage && mushafPageNumber <= s.endPage))?.name || 'الملك')
+                                : 'Surah ' + ((MUSHAF_SURAHS_PAGE_MAP.find(s => mushafPageNumber >= s.startPage && mushafPageNumber <= s.endPage))?.name || 'Al-Mulk')}
+                            </span>
+                          </div>
+
+                          <div className="text-gold-700 font-extrabold text-xs sm:text-sm">
+                            {isRtl ? 'مصحف المدينة النبوية — مجمع الملك فهد لطباعة المصحف الشريف' : 'King Fahd Complex Madinah Mushaf'}
+                          </div>
+
+                          <div className="text-emerald-900">
+                            <span>{isRtl ? 'الجزء ' + Math.ceil(mushafPageNumber / 20) : 'Juz ' + Math.ceil(mushafPageNumber / 20)}</span>
+                          </div>
+                        </div>
+
+                        {/* The High-Resolution 15-Line Page Image */}
+                        <div className="bg-[#FFFDF9] border-2 border-emerald-900/10 rounded-2xl p-2 sm:p-6 shadow-inner flex justify-center items-center">
+                          <img
+                            key={mushafPageNumber}
+                            src={'https://android.quran.com/data/width_1260/page' + String(mushafPageNumber).padStart(3, '0') + '.png'}
+                            alt={'مصحف المدينة النبوية — صفحة ' + mushafPageNumber}
+                            className="w-full max-w-3xl h-auto block mx-auto bg-white filter contrast-110 drop-shadow-sm select-none"
+                            loading="eager"
+                            style={{ minHeight: '500px' }}
+                          />
+                        </div>
+
+                        {/* Bottom Mushaf Footer */}
+                        <div className="flex justify-between items-center pt-3 mt-4 border-t-2 border-gold-500/70 text-xs sm:text-sm font-bold text-emerald-950">
                           <button
-                            key={lm.p}
                             type="button"
                             onClick={() => {
-                              setMushafPageNumber(lm.p);
-                              const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => lm.p >= s.startPage && lm.p <= s.endPage);
+                              const p = Math.max(1, mushafPageNumber - 1);
+                              setMushafPageNumber(p);
+                              const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage);
                               if (sMatch) setMushafCurrentSurahId(sMatch.id);
-                              showToast(isRtl ? 'انتقال إلى ' + lm.name + ' (صفحة ' + lm.p + ')' : 'Navigated to ' + lm.name);
                             }}
-                            className={`px-2 py-1 rounded-lg border transition font-bold ${
-                              mushafPageNumber === lm.p
-                                ? 'bg-gold-500 text-emerald-950 border-gold-300'
-                                : 'bg-emerald-950/60 hover:bg-emerald-900 text-emerald-200 border-emerald-700/60'
-                            }`}
+                            disabled={mushafPageNumber <= 1}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 disabled:opacity-40 transition flex items-center gap-1 font-bold"
                           >
-                            {lm.name} ({lm.p})
+                            <span>➡️</span>
+                            <span>{isRtl ? 'السابق' : 'Prev'}</span>
                           </button>
-                        ))}
-                      </div>
 
+                          <div className="text-center">
+                            <span className="text-base sm:text-xl font-extrabold text-gold-600 font-amiri block">
+                              — {mushafPageNumber} —
+                            </span>
+                            <span className="text-[11px] text-slate-500 font-medium">
+                              {isRtl ? 'الحزب ' + Math.ceil(mushafPageNumber / 10) : 'Hizb ' + Math.ceil(mushafPageNumber / 10)}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const p = Math.min(604, mushafPageNumber + 1);
+                              setMushafPageNumber(p);
+                              const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage);
+                              if (sMatch) setMushafCurrentSurahId(sMatch.id);
+                            }}
+                            disabled={mushafPageNumber >= 604}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 disabled:opacity-40 transition flex items-center gap-1 font-bold"
+                          >
+                            <span>{isRtl ? 'التالي' : 'Next'}</span>
+                            <span>⬅️</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* THE AUTHENTIC PRINTED MADINAH MUSHAF PAGE (REAL PAPER VIEW) */}
-                <div className="flex justify-center">
-                  <div className="bg-white rounded-3xl p-4 sm:p-8 shadow-2xl border-4 border-emerald-950/20 max-w-4xl w-full relative">
+                {/* ================= MODE B: INTERACTIVE RECITATION & MASTERY TESTING ================= */}
+                {hifzViewMode === 'interactive_test' && (
+                  <div className="space-y-6 animate-fadeIn">
                     
-                    {/* Top Mushaf Header (Surah Name & Juz) */}
-                    <div className="flex justify-between items-center pb-3 mb-4 border-b-2 border-gold-500/70 text-emerald-950 font-bold font-cairo text-sm sm:text-base">
-                      <div className="flex items-center gap-2 text-emerald-900">
-                        <span>📖</span>
-                        <span>
-                          {isRtl 
-                            ? 'سورة ' + ((MUSHAF_SURAHS_PAGE_MAP.find(s => mushafPageNumber >= s.startPage && mushafPageNumber <= s.endPage))?.name || 'الملك')
-                            : 'Surah ' + ((MUSHAF_SURAHS_PAGE_MAP.find(s => mushafPageNumber >= s.startPage && mushafPageNumber <= s.endPage))?.name || 'Al-Mulk')}
-                        </span>
+                    {/* Live Recitation Controls Ribbon */}
+                    <div className="card-islamic-amber rounded-2xl p-4 sm:p-5 shadow-sm border border-gold-300/80 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🎛️</span>
+                        <div>
+                          <h3 className="text-sm font-bold text-emerald-950 font-cairo">
+                            {isRtl ? 'أدوات اختبار الإتقان المباشرة (طمس النهايات وإخفاء الكلمات)' : 'Mastery Recitation Controls'}
+                          </h3>
+                          <p className="text-[11px] text-slate-600">
+                            {isRtl ? 'انقر على أي أداة لاختبار فواصل الآيات أو التسميع الغيبي أو انقر أي كلمة لإخفائها' : 'Toggle ayah mask, blind recitation, or word masking'}
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="text-gold-700 font-extrabold">
-                        {isRtl ? 'مصحف المدينة النبوية — مجمع الملك فهد' : 'King Fahd Complex Madinah Mushaf'}
-                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {/* 1. Toggle Mask Endings */}
+                        <button
+                          type="button"
+                          onClick={() => setIsEndingsMasked(!isEndingsMasked)}
+                          className={`text-xs px-3.5 py-2 rounded-xl font-bold transition flex items-center gap-1.5 shadow-sm ${
+                            isEndingsMasked 
+                              ? 'bg-amber-600 text-white font-black ring-2 ring-amber-400' 
+                              : 'bg-white hover:bg-amber-50 text-emerald-950 border border-amber-300'
+                          }`}
+                          title={isRtl ? 'إخفاء آخر كلمتين من كل آية لاختبار حفظ الفواصل' : 'Hide last words of each ayah'}
+                        >
+                          <span>{isEndingsMasked ? '🙈' : '👁️'}</span>
+                          <span>{isRtl ? (isEndingsMasked ? 'إلغاء طمس النهايات' : 'طمس أواخر الآيات') : 'Mask Endings'}</span>
+                        </button>
 
-                      <div className="text-emerald-900">
-                        <span>{isRtl ? 'الجزء ' + Math.ceil(mushafPageNumber / 20) : 'Juz ' + Math.ceil(mushafPageNumber / 20)}</span>
+                        {/* 2. Toggle Full Blind Recitation */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsFullMasked(!isFullMasked);
+                            setRevealedAyahSet(new Set([1]));
+                          }}
+                          className={`text-xs px-3.5 py-2 rounded-xl font-bold transition flex items-center gap-1.5 shadow-sm ${
+                            isFullMasked 
+                              ? 'bg-emerald-800 text-gold-300 font-black ring-2 ring-emerald-500' 
+                              : 'bg-white hover:bg-emerald-50 text-emerald-950 border border-emerald-300'
+                          }`}
+                          title={isRtl ? 'إخفاء كامل للآيات مع إمكانية كشف آية آية بنقرة زر' : 'Blind recitation mode'}
+                        >
+                          <span>{isFullMasked ? '📖' : '🔒'}</span>
+                          <span>{isRtl ? (isFullMasked ? 'عرض كل الآيات' : 'تسميع غيبي كامل') : 'Blind Recitation'}</span>
+                        </button>
+
+                        {/* 3. Reset All Custom Masks */}
+                        {customMaskedWords.size > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setCustomMaskedWords(new Set())}
+                            className="bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 text-xs px-3 py-2 rounded-xl font-bold transition flex items-center gap-1"
+                          >
+                            <span>🔄</span>
+                            <span>{isRtl ? 'إظهار الكلمات المطموسة (' + customMaskedWords.size + ')' : 'Reset Masks'}</span>
+                          </button>
+                        )}
+
+                        {/* Switch back to Mushaf page */}
+                        <button
+                          type="button"
+                          onClick={() => setHifzViewMode('mushaf_page')}
+                          className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 border border-gold-400/40 text-xs px-3 py-2 rounded-xl font-bold transition flex items-center gap-1"
+                        >
+                          <span>📖</span>
+                          <span>{isRtl ? 'الرجوع للمصحف الورقي' : 'View Mushaf'}</span>
+                        </button>
                       </div>
                     </div>
 
-                    {/* The Printed 15-Line Mushaf Page Image (High-Res 1260px) */}
-                    <div className="bg-[#FFFDF9] border-2 border-emerald-900/10 rounded-2xl p-2 sm:p-6 shadow-inner flex justify-center items-center">
-                      <img
-                        key={mushafPageNumber}
-                        src={'https://android.quran.com/data/width_1260/page' + String(mushafPageNumber).padStart(3, '0') + '.png'}
-                        alt={'مصحف المدينة النبوية — صفحة ' + mushafPageNumber}
-                        className="w-full max-w-3xl h-auto block mx-auto bg-white filter contrast-110 drop-shadow-sm select-none"
-                        loading="eager"
-                        style={{ minHeight: '500px' }}
-                      />
-                    </div>
+                    {/* Quranic Ayahs Board with Clickable Words */}
+                    <div className="card-islamic-pearl rounded-3xl p-6 sm:p-8 shadow-md border-2 border-emerald-900/20 relative">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-emerald-900/10">
+                        <div className="flex items-center gap-2">
+                          <span className="w-9 h-9 rounded-xl bg-emerald-900 text-gold-300 font-amiri font-bold flex items-center justify-center text-lg shadow-sm">
+                            ۝
+                          </span>
+                          <div>
+                            <h3 className="text-xl font-extrabold text-emerald-950 font-amiri">
+                              {hifzSurahName} — {isRtl ? 'الآيات (' + hifzAyahRange + ')' : 'Ayahs (' + hifzAyahRange + ')'}
+                            </h3>
+                            <p className="text-xs text-slate-500">
+                              {isRtl ? '💡 نصيحة للمعلم: انقر على أي كلمة مباشرة لطمسها [ ... ] أو إظهارها أثناء التسميع' : 'Click any word to mask/unmask'}
+                            </p>
+                          </div>
+                        </div>
 
-                    {/* Bottom Mushaf Footer (Page Number & Navigation) */}
-                    <div className="flex justify-between items-center pt-3 mt-4 border-t-2 border-gold-500/70 text-xs sm:text-sm font-bold text-emerald-950">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const p = Math.max(1, mushafPageNumber - 1);
-                          setMushafPageNumber(p);
-                          const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage);
-                          if (sMatch) setMushafCurrentSurahId(sMatch.id);
-                        }}
-                        disabled={mushafPageNumber <= 1}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 disabled:opacity-40 transition flex items-center gap-1 font-bold"
-                      >
-                        <span>➡️</span>
-                        <span>{isRtl ? 'السابق' : 'Prev'}</span>
-                      </button>
-
-                      <div className="text-center">
-                        <span className="text-base sm:text-xl font-extrabold text-gold-600 font-amiri block">
-                          — {mushafPageNumber} —
-                        </span>
-                        <span className="text-[11px] text-slate-500 font-medium">
-                          {isRtl ? 'الحزب ' + Math.ceil(mushafPageNumber / 10) : 'Hizb ' + Math.ceil(mushafPageNumber / 10)}
-                        </span>
+                        {/* Repetition Loop Counter */}
+                        <div className="flex items-center gap-2 bg-emerald-950 text-gold-200 rounded-xl px-3 py-1.5 border border-gold-400/40 text-xs shadow-sm">
+                          <span>🔁 {isRtl ? 'عداد التكرار:' : 'Loop:'}</span>
+                          <div className="flex items-center gap-1">
+                            {[3, 5, 7].map(num => (
+                              <button
+                                key={num}
+                                type="button"
+                                onClick={() => { setRepeatTarget(num); setRepeatCount(0); }}
+                                className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                                  repeatTarget === num ? 'bg-gold-500 text-emerald-950 font-black' : 'text-emerald-300 hover:text-white'
+                                }`}
+                              >
+                                {num}x
+                              </button>
+                            ))}
+                          </div>
+                          <span className="text-gold-400 font-bold px-1">({repeatCount}/{repeatTarget})</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = repeatCount + 1;
+                              setRepeatCount(next > repeatTarget ? 1 : next);
+                              if (next === repeatTarget) {
+                                showToast(isRtl ? '🎉 ما شاء الله! اكتمل نصاب التكرار المطلوب' : 'Target reached! 🎉');
+                              }
+                            }}
+                            className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-black px-2.5 py-0.5 rounded shadow text-xs transition"
+                          >
+                            +1
+                          </button>
+                        </div>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const p = Math.min(604, mushafPageNumber + 1);
-                          setMushafPageNumber(p);
-                          const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage);
-                          if (sMatch) setMushafCurrentSurahId(sMatch.id);
-                        }}
-                        disabled={mushafPageNumber >= 604}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 disabled:opacity-40 transition flex items-center gap-1 font-bold"
-                      >
-                        <span>{isRtl ? 'التالي' : 'Next'}</span>
-                        <span>⬅️</span>
-                      </button>
-                    </div>
+                      {/* Basmalah */}
+                      <div className="text-center font-quran text-2xl text-emerald-900 mb-8 py-2 select-none border-b border-gold-400/20 max-w-md mx-auto">
+                        بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                      </div>
 
+                      {/* Ayahs List */}
+                      <div className="space-y-6">
+                        {hifzAyahs.map((ayah) => {
+                          const words = ayah.text.split(' ');
+                          const isRevealed = !isFullMasked || revealedAyahSet.has(ayah.num);
+
+                          return (
+                            <div 
+                              key={ayah.num}
+                              className={`p-5 rounded-2xl transition-all duration-200 bg-white border-2 border-emerald-900/15 shadow-sm hover:border-gold-500/50 ${
+                                activeRepeatAyah === ayah.num 
+                                  ? 'ring-2 ring-gold-400' 
+                                  : ''
+                              }`}
+                            >
+                              <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-100 text-xs">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-6 h-6 rounded-full bg-emerald-900 text-gold-300 font-bold flex items-center justify-center text-xs">
+                                    {ayah.num}
+                                  </span>
+                                  <span className="text-slate-600 font-bold">
+                                    {isRtl ? 'الآية رقم ' + ayah.num : 'Ayah ' + ayah.num}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => { setActiveRepeatAyah(ayah.num); setRepeatCount(0); }}
+                                    className={`text-[11px] px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${
+                                      activeRepeatAyah === ayah.num 
+                                        ? 'bg-gold-500 text-emerald-950 font-black' 
+                                        : 'text-slate-600 hover:bg-slate-100 border border-slate-200'
+                                    }`}
+                                  >
+                                    <span>🔁</span>
+                                    <span>{isRtl ? 'تركيز التكرار' : 'Focus'}</span>
+                                  </button>
+
+                                  {isFullMasked && (
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleRevealAyah(ayah.num)}
+                                      className={`text-[11px] px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${
+                                        isRevealed 
+                                          ? 'bg-emerald-100 text-emerald-900' 
+                                          : 'bg-emerald-900 text-gold-300 font-black shadow'
+                                      }`}
+                                    >
+                                      <span>{isRevealed ? '🙈 إخفاء' : '👁️ كشف للطالب'}</span>
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {!isRevealed ? (
+                                <div className="py-6 text-center text-slate-400 font-amiri text-lg border-2 border-dashed border-emerald-900/20 rounded-xl bg-emerald-950/5 select-none">
+                                  🔒 {isRtl ? 'الآية مخفية للتسميع الغيبي — اضغط "كشف للطالب" عند إتمام القراءة' : 'Ayah hidden for blind recitation'}
+                                </div>
+                              ) : (
+                                <div className="font-quran text-3xl sm:text-4xl font-bold leading-[2.6] text-black text-right flex flex-wrap gap-x-2.5 gap-y-3.5 items-baseline select-none">
+                                  {words.map((word, wIdx) => {
+                                    const isEndingWord = isEndingsMasked && (wIdx >= words.length - 2);
+                                    const isCustomMasked = customMaskedWords.has(ayah.num + '-' + wIdx);
+                                    const isMasked = isEndingWord || isCustomMasked;
+
+                                    return (
+                                      <span
+                                        key={wIdx}
+                                        onClick={() => toggleWordMask(ayah.num, wIdx)}
+                                        className={`px-1.5 py-0.5 rounded-lg cursor-pointer transition-all ${
+                                          isMasked 
+                                            ? 'bg-amber-200 text-amber-950 border-b-2 border-dashed border-amber-600 px-3 font-sans text-base select-none shadow-xs font-bold' 
+                                            : 'hover:bg-gold-200 hover:text-emerald-950'
+                                        }`}
+                                        title={isMasked ? (isRtl ? 'انقر لكشف الكلمة' : 'Click to reveal') : (isRtl ? 'انقر لطمس الكلمة' : 'Click to mask')}
+                                      >
+                                        {isMasked ? '[ ... ]' : word}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* POST-RECITATION TEACHER TOOLBAR */}
+                {/* POST-RECITATION WHATSAPP BROADCAST TOOL */}
                 <div className="card-islamic-amber rounded-2xl p-4 sm:p-5 shadow-sm border border-gold-300/80 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <span className="text-lg">🎛️</span>
                     <div>
                       <h3 className="text-sm font-bold text-emerald-950 font-cairo">
-                        {isRtl ? 'أدوات ما بعد التسميع الشفوي (للمحفظ والمعلم)' : 'Post-Recitation Teacher Tools'}
+                        {isRtl ? 'وِرد المدارسة والتذكرة بعد الحلقة' : 'Post-Session Student Broadcast'}
                       </h3>
                       <p className="text-[11px] text-slate-600">
-                        {isRtl ? 'بعد انتهاء الطالب من التسميع الشفوي، أرسل له وِرد الوجه أو قيّد المتشابهات لتثبيت حفظه' : 'Send WhatsApp broadcast or review Mutashabihat for this page'}
+                        {isRtl ? 'أرسل لطلابك وِرد الوجه ومتشابهاته وتوجيهاتك بضغطة واحدة عبر الواتساب' : 'Send WhatsApp broadcast to students'}
                       </p>
                     </div>
                   </div>
@@ -1684,14 +1958,14 @@
                   </div>
                 </div>
 
-                {/* MUTASHABIHAT CROSS-REFERENCE TOOL */}
+                {/* MUTASHABIHAT CROSS-REFERENCE ANALYZER */}
                 <div className="card-islamic-sage rounded-3xl p-6 shadow-sm border border-emerald-300/80">
                   <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-emerald-900/10">
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">🔍</span>
                       <div>
                         <h3 className="text-lg font-bold text-emerald-950 font-cairo">
-                          {isRtl ? 'كاشف المتشابهات اللفظية وتنبيهات الحفظ لهذا الوجه' : 'Mutashabihat Cross-Reference Analyzer'}
+                          {isRtl ? 'كاشف المتشابهات اللفظية وتنبيهات الحفظ' : 'Mutashabihat Cross-Reference Analyzer'}
                         </h3>
                         <p className="text-xs text-emerald-900/80">
                           {isRtl ? 'تنبيهات فورية للمحفظ بمواضع التشابه مع سور أخرى لتجنيب الدارسين الخطأ في التسميع' : 'Cross-references to alert students against common confusion'}
@@ -1710,17 +1984,17 @@
                       className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition border border-gold-400/40"
                     >
                       <span>{isAddMutaOpen ? '✕' : '➕'}</span>
-                      <span>{isRtl ? (isAddMutaOpen ? 'إغلاق نافذة الإضافة' : 'إضافة أو ربط متشابهة جديدة لهذا الوجه') : (isAddMutaOpen ? 'Close' : 'Link New Mutashabiha')}</span>
+                      <span>{isRtl ? (isAddMutaOpen ? 'إغلاق نافذة الإضافة' : 'إضافة أو ربط متشابهة جديدة') : (isAddMutaOpen ? 'Close' : 'Link New Mutashabiha')}</span>
                     </button>
                   </div>
 
-                  {/* Add Mutashabiha Drawer / Workbench */}
+                  {/* Add Mutashabiha Drawer */}
                   {isAddMutaOpen && (
                     <div className="mb-6 bg-white/95 border-2 border-emerald-700/40 rounded-2xl p-5 shadow-lg animate-fadeIn text-slate-800">
                       <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
                         <div className="flex items-center gap-2 font-bold text-emerald-900 text-sm">
                           <span>🔗</span>
-                          <span>{isRtl ? 'إدراج متشابهة لفظية خاصة بالوجه وتوجيه المعلم للدارس' : 'Add Custom Mutashabiha & Guidance Note'}</span>
+                          <span>{isRtl ? 'إدراج متشابهة لفظية خاصة وتوجيه المعلم للدارس' : 'Add Custom Mutashabiha & Guidance Note'}</span>
                         </div>
                         <span className="text-[11px] text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 font-bold">
                           {isRtl ? 'بالرسم العثماني المعتمد' : 'Verified Uthmani'}
@@ -1728,7 +2002,7 @@
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        {/* 1. Search Query */}
+                        {/* Search Query */}
                         <div className="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200">
                           <label className="block text-xs font-bold text-emerald-900 mb-1.5">
                             {isRtl ? '1. ابحث بكلمة من الآية المتشابهة في القرآن:' : '1. Search phrase in Quran:'}
@@ -1773,7 +2047,7 @@
                           )}
                         </div>
 
-                        {/* 2. Target Ayah Display */}
+                        {/* Target Ayah Display */}
                         <div className="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200">
                           <label className="block text-xs font-bold text-amber-900 mb-1.5">
                             {isRtl ? '2. الموضع المتشابه المختار بالرسم العثماني:' : '2. Selected similar ayah:'}
@@ -1784,7 +2058,7 @@
                         </div>
                       </div>
 
-                      {/* 3. Teacher Guidance Note */}
+                      {/* Teacher Guidance Note */}
                       <div className="mb-4">
                         <label className="block text-xs font-bold text-slate-800 mb-1">
                           {isRtl ? '3. توجيه الشيخ والمعلم / ضابط الفارق اللفظي لتثبيت الحفظ:' : '3. Memorization Tip & Distinguishing Rule:'}
