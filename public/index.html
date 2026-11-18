@@ -2642,56 +2642,57 @@
           showToast(isRtl ? 'لا توجد محاضرة نشطة حالياً في حقيبة العلوم الشرعية' : 'No active lecture to transfer');
           return;
         }
-        const newItems = [];
-        (islamicData.blueprint || []).forEach((b, idx) => {
-          newItems.push({
+        const newItems = (islamicData.worksheetItems && islamicData.worksheetItems.length > 0)
+          ? islamicData.worksheetItems
+          : (islamicData.blueprint || []).map((b, idx) => ({
             num: idx + 1,
             topic: b.phaseNameAr || ('المحور ' + (idx + 1)),
-            scripture: (islamicData.hadithVerification && islamicData.hadithVerification[0]?.text) || 'الدليل الشرعي المعتمد من الصحيحين',
-            studentQuestion: 'ما المستفاد العملي والتأصيلي من ' + (b.phaseNameAr || 'هذا المحور') + '؟ مع الاستدلال.',
-            teacherAnswer: b.teacherFocusAr || 'التأصيل العلمي والتربوي المنضبط المستخلص من المحاضرة.',
-            practicalImpact: 'التطبيق العملي والسلوكي في حياة المسلم والدارس.',
+            scripture: b.scripture || (islamicData.hadithVerification && islamicData.hadithVerification[0]?.text) || (islamicData.evidences && islamicData.evidences[0]?.arabicText) || 'الدليل الشرعي المعتمد',
+            studentQuestion: b.studentQuestion || ('ما المستفاد العملي والتأصيلي من محور: ' + (b.phaseNameAr || 'هذا المحور') + '؟ مع الاستدلال.'),
+            teacherAnswer: b.teacherFocusAr || b.teacherGuidanceAr || 'التأصيل العلمي والتربوي المنضبط المستخلص من المحاضرة.',
+            practicalImpact: b.practicalImpact || b.keyTakeawayAr || 'التطبيق العملي والسلوكي في حياة المسلم والدارس.',
             maxScore: 5
-          });
-        });
+          }));
+
         setCustomIslamicWorksheets(prev => ({
           ...prev,
           [worksheetIslamicCategory]: {
             id: worksheetIslamicCategory,
-            categoryAr: islamicData.metadata.category || 'العلوم الشرعية',
+            categoryAr: (islamicData.metadata && islamicData.metadata.category) || 'العلوم الشرعية',
             categoryEn: 'Islamic Studies',
-            titleAr: 'ورقة عمل وتطبيق: ' + (islamicData.metadata.topic || 'المحاضرة الشرعية'),
-            titleEn: 'Worksheet: ' + (islamicData.metadata.topic || 'Islamic Lecture'),
-            targetAudience: islamicData.metadata.audience || 'الدارسين والحلقة',
+            titleAr: 'ورقة عمل وتطبيق: ' + ((islamicData.metadata && islamicData.metadata.topic) || 'المحاضرة الشرعية'),
+            titleEn: 'Worksheet: ' + ((islamicData.metadata && islamicData.metadata.topic) || 'Islamic Lecture'),
+            targetAudience: (islamicData.metadata && islamicData.metadata.audience) || 'الدارسين والحلقة',
             quranRef: 'مقتبس من محاور المحاضرة الشرعية المعتمدة',
-            hadithRef: (islamicData.hadithVerification && islamicData.hadithVerification[0]?.text) || 'تخريج صحيح البخاري / مسلم',
+            hadithRef: (islamicData.hadithVerification && islamicData.hadithVerification[0]?.text) || (islamicData.evidences && islamicData.evidences[0]?.arabicText) || 'تخريج صحيح البخاري / مسلم',
             items: newItems
           }
         }));
         setWorksheetBranch('islamic');
         setWorksheetMode('preview');
         setActiveTab('worksheet');
-        showToast(isRtl ? 'تم نقل محاور المحاضرة إلى ورقة العمل للطباعة بنجاح ⚡' : 'Lecture transferred to worksheet ⚡');
+        showToast(isRtl ? `تم نقل ${newItems.length} محاور مفصلة إلى ورقة العمل للطباعة بنجاح ⚡` : 'Lecture transferred to worksheet ⚡');
       };
 
       // Import from Active Branch 3 Lecture to Quiz
       const handleTransferLectureToQuiz = () => {
-        if (!islamicData || !islamicData.quizQuestions || !islamicData.quizQuestions.length) {
+        const availableQuestions = (islamicData && (islamicData.quizQuestions || islamicData.reviewQuiz)) || [];
+        if (!islamicData || !availableQuestions.length) {
           showToast(isRtl ? 'لا توجد أسئلة مولدة في المحاضرة النشطة' : 'No generated questions in active lecture');
           return;
         }
-        const qs = islamicData.quizQuestions.map((q, idx) => ({
+        const qs = availableQuestions.map((q, idx) => ({
           id: 'custom_lec_' + idx + '_' + Date.now(),
-          questionAr: q.questionAr,
-          questionEn: q.questionAr,
+          questionAr: q.questionAr || q.question || 'سؤال في مدارسة المحاضرة',
+          questionEn: q.questionEn || q.questionAr || 'Lecture Quiz Question',
           options: (q.options || []).map(opt => ({
-            id: opt.id,
-            textAr: opt.textAr || opt.text,
-            textEn: opt.textAr || opt.text
+            id: opt.id || 'opt_' + Math.random(),
+            textAr: opt.textAr || opt.text || opt.title || 'خيار الإجابة',
+            textEn: opt.textEn || opt.textAr || opt.text || 'Answer option'
           })),
           correctOptionId: q.correctOptionId || 'a',
-          explanationAr: q.reflectionPrompt || 'توجيه شرعي مستفاد من المحاضرة',
-          explanationEn: q.reflectionPrompt || 'Islamic reflection from lecture'
+          explanationAr: q.explanationAr || q.reflectionPrompt || 'توجيه شرعي مستفاد من المحاضرة',
+          explanationEn: q.explanationEn || q.reflectionPrompt || 'Islamic reflection from lecture'
         }));
         setCustomIslamicQuizzes(prev => ({
           ...prev,
@@ -2702,7 +2703,7 @@
         setQuizAnswers({});
         setQuizSubmitted(false);
         setActiveTab('quiz');
-        showToast(isRtl ? 'تم نقل أسئلة المحاضرة إلى الاختبار الذاتي التفاعلي بنجاح ⚡' : 'Lecture questions transferred to quiz ⚡');
+        showToast(isRtl ? `تم نقل ${qs.length} أسئلة مستخلصة إلى الاختبار الذاتي التفاعلي بنجاح ⚡` : 'Lecture questions transferred to quiz ⚡');
       };
 
       // Import from Active Tajweed Lesson to Worksheet
@@ -2905,79 +2906,250 @@
         showToast(isRtl ? 'تم تحميل درس التجويد التجريبي الجاهز (سورة الملك) ⚡' : 'Pre-loaded Tajweed Demo Lesson Loaded (Al-Mulk) ⚡');
       }
 
-      // Smart Lecture Parser & Processor
+      // Intelligent Islamic Lecture & Document Parsing Engine
       function handleProcessCustomLecture() {
-        const topic = lessonTopic.trim() || (rawLectureText.split('\n')[0] || '').trim().replace(/^#+\s*/, '') || (isRtl ? 'محاضرة شرعية عامة' : 'Islamic Lecture');
-        const finalCategory = subjectCategory === 'custom' ? (customSubjectCategory.trim() || (isRtl ? 'علوم شرعية عامة' : 'Islamic Studies')) : subjectCategory;
+        if (!rawLectureText || !rawLectureText.trim()) {
+          showToast(isRtl ? 'يرجى لصق نص المحاضرة أو رفع ملف أولاً' : 'Please provide lecture text or upload file first');
+          return;
+        }
 
-        // Extract paragraphs and lines
-        const lines = rawLectureText.split('\n').map(l => l.trim()).filter(Boolean);
-        const talkingPoints = lines.slice(1, 7);
+        const rawClean = rawLectureText.trim();
+        const rawLines = rawClean.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
 
-        // Detect Hadith/Quran quotes in text
-        const detectedHadiths = [];
+        // 1. Detect Lecture Title
+        let detectedTopic = (lessonTopic && lessonTopic.trim()) || '';
+        if (!detectedTopic) {
+          for (let i = 0; i < Math.min(4, rawLines.length); i++) {
+            const line = rawLines[i].replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
+            if (line.length >= 4 && line.length <= 90 && !line.includes('بسم الله')) {
+              detectedTopic = line;
+              break;
+            }
+          }
+        }
+        const topic = detectedTopic || (isRtl ? 'محاضرة شرعية وتأصيل علمي' : 'Islamic Lecture');
+
+        // 2. Detect Subject Category
+        let finalCategory = subjectCategory === 'custom' ? (customSubjectCategory.trim() || 'فكر إسلامي ومعاصر') : subjectCategory;
+        if (!finalCategory || finalCategory === 'custom') {
+          const lowerText = rawClean.toLowerCase();
+          if (lowerText.includes('عقيدة') || lowerText.includes('توحيد') || lowerText.includes('إيمان') || lowerText.includes('شرك')) {
+            finalCategory = isRtl ? 'عقيدة وتوحيد' : 'Aqeedah & Tawheed';
+          } else if (lowerText.includes('فقه') || lowerText.includes('صلاة') || lowerText.includes('طهارة') || lowerText.includes('أحكام')) {
+            finalCategory = isRtl ? 'فقه وأصول' : 'Fiqh & Usul';
+          } else if (lowerText.includes('تفسير') || lowerText.includes('آيات') || lowerText.includes('سورة')) {
+            finalCategory = isRtl ? 'تفسير وعلوم القرآن' : 'Tafseer & Quranic Sciences';
+          } else if (lowerText.includes('سيرة') || lowerText.includes('غزوة') || lowerText.includes('صحابة')) {
+            finalCategory = isRtl ? 'السيرة النبوية والتاريخ' : 'Seerah & Islamic History';
+          } else if (lowerText.includes('خطاب') || lowerText.includes('مدني') || lowerText.includes('فكر') || lowerText.includes('حداثة') || lowerText.includes('علمانية') || lowerText.includes('شبهات') || lowerText.includes('مآلات')) {
+            finalCategory = isRtl ? 'فكر إسلامي ومعاصر وقضايا الخطاب' : 'Islamic Thought & Contemporary Discourse';
+          } else {
+            finalCategory = isRtl ? 'علوم شرعية عامة' : 'Islamic Studies';
+          }
+        }
+
+        // 3. Extract Quranic Verses and Hadiths / Citations across text
         const detectedAyahs = [];
-        lines.forEach(l => {
-          if (l.includes('قال تعالى') || l.includes('﴿') || l.includes('سورة')) {
+        const detectedHadiths = [];
+        rawLines.forEach(l => {
+          if (l.includes('قال تعالى') || l.includes('قوله تعالى') || l.includes('﴿') || (l.includes('سورة') && l.includes(':'))) {
             detectedAyahs.push(l);
-          } else if (l.includes('قال رسول الله') || l.includes('قال ﷺ') || l.includes('صحيح مسلم') || l.includes('صحيح البخاري') || l.includes('حديث')) {
+          } else if (l.includes('قال رسول الله') || l.includes('قال ﷺ') || l.includes('صحيح مسلم') || l.includes('صحيح البخاري') || l.includes('رواه') || l.includes('حديث')) {
             detectedHadiths.push(l);
           }
         });
 
-        // Built blueprint phases
-        const blueprint = [
-          {
-            phaseNumber: 1,
-            phaseNameAr: 'التمهيد والمدخل المشوق وغرس النية',
-            phaseNameEn: 'Introduction & Spiritual Readiness',
-            allocatedMinutes: Math.round(lessonDuration * 0.15),
-            teacherGuidanceAr: 'ابدأ بالحمد والثناء على الله، واطرح سؤالاً تفاعلياً يستفز عقول الدارسين لربط موضوع الدرس بحياتهم الواقعية.',
-            teacherGuidanceEn: 'Begin with Hamdalah, establish pure intentions, and ask an engaging opening question.',
-            talkingPoints: talkingPoints.slice(0, 2).length > 0 ? talkingPoints.slice(0, 2) : ['تجديد النية الصالحة قبل فتح أي كتاب', 'بيان أهمية موضوع المحاضرة وفضله في القرآن والسنة']
-          },
-          {
-            phaseNumber: 2,
-            phaseNameAr: 'شرح المحاور الأساسية والتأصيل الشرعي',
-            phaseNameEn: 'Core Concepts & Textual Authentication',
-            allocatedMinutes: Math.round(lessonDuration * 0.50),
-            teacherGuidanceAr: 'استعرض القواعد والمفاهيم الأساسية، مستشهداً بالأدلة المحققة من الصحيحين.',
-            teacherGuidanceEn: 'Explain core principles with authentic textual evidence.',
-            talkingPoints: talkingPoints.slice(2, 5).length > 0 ? talkingPoints.slice(2, 5) : ['تأصيل المسألة بالأدلة الثابتة', 'بيان الفروق الدقيقة وفهم سلف الأمة']
-          },
-          {
-            phaseNumber: 3,
-            phaseNameAr: 'القصة التربوية والتطبيق الواقعي المعاصر',
-            phaseNameEn: 'Practical Case & Narrative',
-            allocatedMinutes: Math.round(lessonDuration * 0.20),
-            teacherGuidanceAr: structuredStoryText || 'اربط الحكم النظري بقصة واقعية أو موقف من السيرة يلامس هموم الدارسين ويقوي يقينهم.',
-            teacherGuidanceEn: 'Connect theological principles to everyday human experience.',
-            talkingPoints: ['موقف تطبيقي من السيرة النبوية أو سلف الأمة', 'كيف ننقل المعرفة إلى سلوك عملي في البيت والعمل']
-          },
-          {
-            phaseNumber: 4,
-            phaseNameAr: 'الخاتمة والتكليف العملي وملخص الواتساب',
-            phaseNameEn: 'Summary, Action Item & WhatsApp Kit',
-            allocatedMinutes: Math.round(lessonDuration * 0.15),
-            teacherGuidanceAr: 'لخص المحاضرة في 3 نقاط محكمة، ووزع التكليف السلوكي لمجموعات الدارسين والحلقة.',
-            teacherGuidanceEn: 'Provide 3 key takeaways and actionable weekly practice.',
-            talkingPoints: ['مراجعة سريعة لأهم ما تم مدارسته', 'التكليف السلوكي التطبيقي لهذا الأسبوع']
-          }
-        ];
+        // 4. Intelligent Section Segmentation Engine
+        const headingRegex = /^(?:المبحث|المطلب|الفصل|الباب|المحور|المسألة|الوقفة|القسم|الأصل|القاعدة|الضابط|العنصر|النقطة)\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+|[\u0660-\u0669]+|[أ-ي])?[:\.\-\s]|^[#]{1,4}\s+|^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|حادي عشر|ثاني عشر)[:\.\-\s]|^(?:\d+|[\u0660-\u0669]+)[\.\-\)]\s+/i;
 
-        // Evidences
-        const evidences = [];
+        const rawSections = [];
+        let currentSec = null;
+
+        for (let i = 0; i < rawLines.length; i++) {
+          const line = rawLines[i];
+          const isHeadingMatch = headingRegex.test(line);
+          const isShortHeaderCandidate = line.length < 65 && !line.endsWith('.') && !line.endsWith('،') && !line.endsWith('؛') && (line.startsWith('**') || line.startsWith('•') || /^[^\s]{3,25}:/.test(line));
+
+          if ((isHeadingMatch || isShortHeaderCandidate) && rawSections.length < 10) {
+            if (currentSec && currentSec.lines.length > 0) {
+              rawSections.push(currentSec);
+            }
+            const cleanTitle = line.replace(/^[#*\-•\s\d\.\)\:،]+/, '').replace(/[*#]/g, '').trim();
+            currentSec = {
+              title: cleanTitle.length > 3 ? cleanTitle : ('المحور ' + (rawSections.length + 1)),
+              isFormalHeading: isHeadingMatch,
+              lines: []
+            };
+          } else {
+            if (!currentSec) {
+              currentSec = {
+                title: topic.length > 3 ? topic : (isRtl ? 'المحور التمهيدي والتأصيلي' : 'Introduction & Foundation'),
+                isFormalHeading: false,
+                lines: []
+              };
+            }
+            currentSec.lines.push(line);
+          }
+        }
+        if (currentSec && currentSec.lines.length > 0) {
+          rawSections.push(currentSec);
+        }
+
+        // Drop preamble metadata (e.g. author name, book title) if it precedes the first formal chapter/section
+        if (rawSections.length > 1 && !rawSections[0].isFormalHeading && rawSections[0].lines.length <= 2) {
+          rawSections.shift();
+        }
+
+        // Fallback Segmentation if document has no formal headings (continuous paragraphs)
+        let processedSections = [];
+        if (rawSections.length < 2) {
+          const totalLines = rawLines.length;
+          const chunkSize = Math.max(1, Math.ceil(totalLines / 4));
+          for (let c = 0; c < 4; c++) {
+            const chunkLines = rawLines.slice(c * chunkSize, (c + 1) * chunkSize);
+            if (chunkLines.length > 0) {
+              const firstLine = chunkLines[0].replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
+              const chunkTitle = firstLine.length > 50 ? (firstLine.substring(0, 50) + '...') : firstLine;
+              processedSections.push({
+                title: (isRtl ? `المحور ${c + 1}: ` : `Theme ${c + 1}: `) + chunkTitle,
+                lines: chunkLines
+              });
+            }
+          }
+        } else {
+          processedSections = rawSections;
+        }
+
+        if (processedSections.length > 6) {
+          processedSections = processedSections.slice(0, 6);
+        }
+
+        // 5. Build Rich Content for each Section (Worksheet Items, Blueprint & Zoom Cards)
+        const totalDuration = lessonDuration || 60;
+        const minutesPerPhase = Math.round(totalDuration / processedSections.length);
+
+        const blueprintPhases = [];
+        const worksheetRows = [];
+        const zoomDeck = [];
+        const quizList = [];
+
+        processedSections.forEach((sec, idx) => {
+          const secNum = idx + 1;
+          const secText = sec.lines.join(' ');
+          
+          // Substantive teacher synthesis extracted directly from the actual text of this section:
+          const candidateSentences = sec.lines.filter(l => l.length > 25 && !l.startsWith('#'));
+          let modelAnswer = candidateSentences.slice(0, 3).join(' ') || secText.substring(0, 220);
+          if (modelAnswer.length > 280) modelAnswer = modelAnswer.substring(0, 280) + '...';
+
+          // Extract or assign authentic scripture/evidence for this section
+          let secScripture = '';
+          const vMatch = secText.match(/(?:قال تعالى[:\s]*)?﴿[^﴾]+﴾/);
+          const hMatch = secText.match(/(?:قال رسول الله|قال النبي|روى البخاري|حديث)[\s\S]*?(?:«[^»]+»|"[^"]+")/);
+          if (vMatch) {
+            secScripture = vMatch[0];
+          } else if (hMatch) {
+            secScripture = hMatch[0];
+          } else if (detectedAyahs[idx % Math.max(1, detectedAyahs.length)]) {
+            secScripture = detectedAyahs[idx % Math.max(1, detectedAyahs.length)];
+          } else if (detectedHadiths[idx % Math.max(1, detectedHadiths.length)]) {
+            secScripture = detectedHadiths[idx % Math.max(1, detectedHadiths.length)];
+          } else {
+            secScripture = '﴿فَاسْتَمْسِكْ بِالَّذِي أُوحِيَ إِلَيْكَ ۖ إِنَّكَ عَلَىٰ صِرَاطٍ مُّسْتَقِيمٍ﴾ [الزخرف: 43]';
+          }
+          } else if (detectedAyahs[idx % Math.max(1, detectedAyahs.length)]) {
+            secScripture = detectedAyahs[idx % Math.max(1, detectedAyahs.length)];
+          } else if (detectedHadiths[idx % Math.max(1, detectedHadiths.length)]) {
+            secScripture = detectedHadiths[idx % Math.max(1, detectedHadiths.length)];
+          } else {
+            secScripture = '﴿فَاسْتَمْسِكْ بِالَّذِي أُوحِيَ إِلَيْكَ ۖ إِنَّكَ عَلَىٰ صِرَاطٍ مُّسْتَقِيمٍ﴾ [الزخرف: 43]';
+          }
+
+          // Generate a specific, non-generic student question based on the section's actual topic & text
+          const studentQ = `في ضوء محور (${sec.title})؛ بيّن القضية الشرعية أو الفكرية التي يقررها النص، وما هو الأثر المترتب عليها في واقع المسلم؟`;
+
+          // Generate an actionable practical & behavioral impact
+          const practicalImp = `ترسيخ الوعي المنضبط بـ (${sec.title})، والاعتزاز بمرجعية الوحي وسلطان النص، وتطبيق ذلك في الحوار ودفع الشبهات.`;
+
+          // Key talking points from section
+          const secTalkingPoints = candidateSentences.slice(0, 2).length > 0 
+            ? candidateSentences.slice(0, 2) 
+            : [`تأصيل مسألة: ${sec.title}`, 'استنباط الثمرة المنهجية والتربوية'];
+
+          // A. Blueprint Phase
+          blueprintPhases.push({
+            phaseNumber: secNum,
+            phaseNameAr: sec.title,
+            phaseNameEn: `Phase ${secNum}: ${sec.title}`,
+            allocatedMinutes: minutesPerPhase,
+            teacherGuidanceAr: modelAnswer,
+            teacherFocusAr: modelAnswer,
+            keyTakeawayAr: practicalImp,
+            studentQuestion: studentQ,
+            practicalImpact: practicalImp,
+            scripture: secScripture,
+            talkingPoints: secTalkingPoints
+          });
+
+          // B. Worksheet Row (Used directly by handleTransferLectureToWorksheet)
+          worksheetRows.push({
+            num: secNum,
+            topic: sec.title,
+            scripture: secScripture,
+            studentQuestion: studentQ,
+            teacherAnswer: modelAnswer,
+            practicalImpact: practicalImp,
+            maxScore: 5
+          });
+
+          // C. Zoom Presentation Card
+          zoomDeck.push({
+            slideNumber: secNum,
+            phaseTitle: `المحور ${secNum}`,
+            slideTitle: sec.title,
+            scriptureEvidence: secScripture,
+            talkingPoints: secTalkingPoints.join(' • '),
+            pedagogicalTip: practicalImp,
+            titleAr: sec.title,
+            bodyAr: modelAnswer,
+            practicalAction: practicalImp
+          });
+
+          // D. Authentic Quiz Question derived from this section
+          let coreCorrectStatement = candidateSentences[0] || modelAnswer;
+          if (coreCorrectStatement.length > 95) coreCorrectStatement = coreCorrectStatement.substring(0, 95) + '...';
+
+          quizList.push({
+            id: 'quiz_q_' + secNum + '_' + Date.now(),
+            questionAr: `بناءً على مدارسة محور: (${sec.title})؛ ما النتيجة المنهجية أو الضابط الشرعي الأساسي الذي يؤكده الشرح؟`,
+            questionEn: `Based on (${sec.title}); what is the primary conclusion established?`,
+            options: [
+              { id: 'a', textAr: coreCorrectStatement, textEn: 'The authentic conclusion established in the lecture' },
+              { id: 'b', textAr: 'الاعتماد على الآراء العقلية المجردة دون ضبط بأصول وقواعد فهم السلف', textEn: 'Relying on abstract opinion without scriptural grounding' },
+              { id: 'c', textAr: 'فصل المقاصد والتحسينيات عن الأصول والنصوص القطعية', textEn: 'Separating objectives from textual foundations' },
+              { id: 'd', textAr: 'التعامل مع النصوص كقضايا تاريخية لا تلزم الواقع المعاصر', textEn: 'Treating scripture as historically bound' }
+            ],
+            correctOptionId: 'a',
+            reflectionPrompt: `المستفاد من محور (${sec.title}): ${modelAnswer.substring(0, 140)}...`,
+            explanationAr: `المستفاد من محور (${sec.title}): ${modelAnswer.substring(0, 140)}...`
+          });
+        });
+
+        // 6. Evidences list for verification banner
+        const allEvidences = [];
         if (detectedAyahs.length > 0) {
-          evidences.push({
-            type: 'quran',
-            arabicText: detectedAyahs[0].replace(/.*قال تعالى[:s]*/, ''),
-            englishTranslation: 'Authentic Quranic Verse Citation',
-            citation: 'القرآن الكريم',
-            narrator: '—',
-            grading: 'متواتر قطعي الثبوت'
+          detectedAyahs.slice(0, 2).forEach(ay => {
+            allEvidences.push({
+              type: 'quran',
+              arabicText: ay.replace(/^.*(?:قال تعالى|قوله تعالى)[:\s]*/, ''),
+              englishTranslation: 'Authentic Quranic Text Extracted from Lecture',
+              citation: 'القرآن الكريم',
+              narrator: '—',
+              grading: 'متواتر قطعي الثبوت'
+            });
           });
         } else {
-          evidences.push({
+          allEvidences.push({
             type: 'quran',
             arabicText: 'يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ ٱتَّقُوا۟ ٱللَّهَ وَقُولُوا۟ قَوْلًۭا سَدِيدًۭا',
             englishTranslation: 'O you who have believed, fear Allah and speak words of appropriate justice.',
@@ -2988,7 +3160,7 @@
         }
 
         if (detectedHadiths.length > 0 || structuredHadithText) {
-          evidences.push({
+          allEvidences.push({
             type: 'hadith',
             arabicText: structuredHadithText || detectedHadiths[0] || '«إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى»',
             englishTranslation: 'Actions are according to intentions, and every person will have only what they intended.',
@@ -2998,63 +3170,42 @@
           });
         }
 
-        // WhatsApp summary kit
-        const whatsAppSummary = `🌿 *خلاصة درس اليوم:* ${topic} 🌿\n\nالسلام عليكم ورحمة الله وبركاته يا أحبة 🌸\n\n📌 *الموضوع:* ${topic} (${finalCategory})\n\n✨ *أهم الفوائد المستفادة من حلقة اليوم:*\n1️⃣ ${lines[1] || 'استحضار الإخلاص لله في كل عمل وقول.'}\n2️⃣ ${lines[2] || 'تطبيق ما تعلمناه عملياً لنكون قدوة صالحة.'}\n3️⃣ ${lines[3] || 'التمسك بالسنة النبوية الصحيحة في المعاملات والعبادات.'}\n\n🎯 *الواجب العملي للأسبوع:* تطبيق ذكر اليوم ومراجعة مدارسة الحلقة مع الأهل.\n\n🔗 منصة مِشكاة لتعليم القرآن والعلوم الشرعية — حفظكم الله وبارك فيكم! 🤍`;
+        // 7. Rich WhatsApp Summary
+        const summaryPoints = processedSections.slice(0, 4).map((s, idx) => {
+          const numEmoji = ['1️⃣', '2️⃣', '3️⃣', '4️⃣'][idx] || '🔹';
+          const summarySnippet = s.lines.find(l => l.length > 20) || s.title;
+          return `${numEmoji} *${s.title}:* ${summarySnippet.substring(0, 80)}`;
+        }).join('\n');
 
-        // Zoom cards
-        const zoomCards = [
-          {
-            slideNumber: 1,
-            titleAr: 'المحور الأول: ' + topic,
-            titleEn: 'Theme 1: ' + topic,
-            bodyAr: lines[1] || 'المدخل الأساسي للمحاضرة وتأصيلها الشرعي من كتاب الله وسنة رسوله ﷺ.',
-            bodyEn: 'Primary foundation and theological basis.',
-            practicalAction: 'جدد نيتك الصادقة لله قبل البدء.'
-          },
-          {
-            slideNumber: 2,
-            titleAr: 'المحور الثاني: التطبيق السلوكي والتربوي',
-            titleEn: 'Theme 2: Behavioral Impact',
-            bodyAr: lines[2] || 'العلم يهتف بالعمل فإن أجابه وإلا ارتحل، وثمرة العلم الحقيقية هي خشية الله ولين الجانب.',
-            bodyEn: 'Knowledge requires action and sincere character.',
-            practicalAction: 'احرص على أداء العبادة بحضور قلب وسكينة.'
-          }
-        ];
+        const whatsAppSummary = `🌿 *خلاصة درس اليوم:* ${topic} 🌿\n\nالسلام عليكم ورحمة الله وبركاته يا أحبة 🌸\n\n📌 *الموضوع:* ${topic} (${finalCategory})\n\n✨ *أهم المحاور والفوائد المستفادة:*\n${summaryPoints}\n\n🎯 *الواجب العملي للأسبوع:* مدارسة هذه المحاور وتطبيق مقتضاها السلوكي في حماية الفهم المنضبط ونقله للغير.\n\n🔗 منصة مِشكاة لتعليم القرآن والعلوم الشرعية — حفظكم الله وبارك فيكم! 🤍`;
 
+        // 8. Assemble Full Package Data
         const packageData = {
           metadata: {
             topic: topic,
             category: finalCategory,
-            durationMinutes: lessonDuration,
-            audience: audienceLevel
+            durationMinutes: totalDuration,
+            audience: audienceLevel || 'الدارسين والحلقة'
           },
-          blueprint,
-          evidences,
-          zoomCards,
+          blueprint: blueprintPhases,
+          worksheetItems: worksheetRows,
+          evidences: allEvidences,
+          hadithVerification: allEvidences,
+          zoomCards: zoomDeck,
+          zoomPresentation: zoomDeck,
           whatsAppKit: {
             headline: 'خلاصة: ' + topic,
             formattedText: whatsAppSummary,
             actionItem: 'شاركنا تطبيقك العملي لدرس اليوم!'
           },
-          reviewQuiz: [
-            {
-              id: 1,
-              questionAr: 'ما المقصد الأسمى من مدارسة موضوع: (' + topic + ')؟',
-              questionEn: 'What is the highest objective of studying this topic?',
-              options: [
-                { id: 'a', textAr: 'تحقيق الإخلاص لله والعمل بالعلم في واقع الحياة', textEn: 'Achieving sincerity and applying knowledge' },
-                { id: 'b', textAr: 'مجرد حفظ النظريات دون تطبيق', textEn: 'Mere theoretical memorization' },
-                { id: 'c', textAr: 'الجدال والمماراة', textEn: 'Arguing' }
-              ],
-              correctOptionId: 'a',
-              reflectionPrompt: 'ثمرة العلم الحقيقية هي العمل به والتزكية.'
-            }
-          ]
+          quizQuestions: quizList,
+          reviewQuiz: quizList
         };
 
         setIslamicData(packageData);
         setLessonTopic(topic);
-        showToast(isRtl ? 'تم تصنيف وتنسيق المحاضرة بنجاح ✨' : 'Lecture structured successfully ✨');
+        setSubjectCategory(finalCategory);
+        showToast(isRtl ? `تم استخلاص وتحليل (${processedSections.length}) محاور وتوليد ورقة العمل والاختبار بنجاح ✨` : 'Lecture analyzed successfully ✨');
       }
 
       function handleSaveIslamicLecture() {
@@ -6920,11 +7071,11 @@
                                 {isRtl ? phase.phaseNameAr : phase.phaseNameEn}
                               </h4>
                               <p className="text-xs text-slate-600 font-amiri leading-relaxed mb-3">
-                                {isRtl ? phase.teacherFocusAr : phase.teacherFocusEn}
+                                {isRtl ? (phase.teacherFocusAr || phase.teacherGuidanceAr) : (phase.teacherFocusEn || phase.teacherGuidanceEn)}
                               </p>
                             </div>
                             <div className="pt-2 border-t border-slate-200/80 text-[11px] text-emerald-900 font-bold">
-                              🎯 {isRtl ? phase.keyTakeawayAr : phase.keyTakeawayEn}
+                              🎯 {isRtl ? (phase.keyTakeawayAr || phase.practicalImpact) : (phase.keyTakeawayEn || phase.practicalImpact)}
                             </div>
                           </div>
                         ))}
@@ -6995,17 +7146,19 @@
                                 </span>
                               </div>
                               <h4 className="font-amiri text-lg font-bold text-gold-200 mb-2 leading-snug">
-                                {slide.slideTitle}
+                                {slide.slideTitle || slide.titleAr}
                               </h4>
-                              <p className="font-quran text-base sm:text-lg text-amber-100 leading-relaxed my-3 bg-emerald-900/60 p-3 rounded-xl border border-gold-400/30">
-                                {slide.scriptureEvidence}
-                              </p>
+                              {(slide.scriptureEvidence) && (
+                                <p className="font-quran text-base sm:text-lg text-amber-100 leading-relaxed my-3 bg-emerald-900/60 p-3 rounded-xl border border-gold-400/30">
+                                  {slide.scriptureEvidence}
+                                </p>
+                              )}
                               <p className="font-amiri text-xs text-slate-200 leading-relaxed">
-                                {slide.talkingPoints}
+                                {slide.talkingPoints || slide.bodyAr}
                               </p>
                             </div>
                             <div className="mt-4 pt-3 border-t border-emerald-800/80 text-[11px] text-gold-300 font-bold flex items-center justify-between">
-                              <span>💡 {slide.pedagogicalTip}</span>
+                              <span>💡 {slide.pedagogicalTip || slide.practicalAction}</span>
                             </div>
                           </div>
                         ))}
