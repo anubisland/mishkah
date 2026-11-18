@@ -67,14 +67,14 @@
     :root {
       --app-font-size: 16px;
     }
-    body {
+    body, #root, .islamic-screen-pattern {
       font-size: var(--app-font-size);
-      background-color: #F4EFE6;
+      background-color: #F3EFE6 !important;
       /* Clearly visible ornate Islamic Geometric star & interlaced arabesque pattern */
       background-image: 
         radial-gradient(circle at 50% 10%, rgba(6, 78, 59, 0.08) 0%, transparent 70%),
-        url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23064E3B' stroke-width='1.2' stroke-opacity='0.16'%3E%3Cpath d='M40 0L48 24L72 32L48 40L40 64L32 40L8 32L32 24Z' fill='%23064E3B' fill-opacity='0.04'/%3E%3Cpath d='M0 40L24 48L32 72L40 48L64 40L40 32L32 8L24 32Z' fill='%23064E3B' fill-opacity='0.04'/%3E%3Ccircle cx='40' cy='40' r='6' stroke='%23C59B27' stroke-opacity='0.25' stroke-width='1.4' fill='%23C59B27' fill-opacity='0.08'/%3E%3Ccircle cx='0' cy='0' r='6' stroke='%23C59B27' stroke-opacity='0.25' stroke-width='1.4' fill='%23C59B27' fill-opacity='0.08'/%3E%3Ccircle cx='80' cy='0' r='6' stroke='%23C59B27' stroke-opacity='0.25' stroke-width='1.4' fill='%23C59B27' fill-opacity='0.08'/%3E%3Ccircle cx='0' cy='80' r='6' stroke='%23C59B27' stroke-opacity='0.25' stroke-width='1.4' fill='%23C59B27' fill-opacity='0.08'/%3E%3Ccircle cx='80' cy='80' r='6' stroke='%23C59B27' stroke-opacity='0.25' stroke-width='1.4' fill='%23C59B27' fill-opacity='0.08'/%3E%3C/g%3E%3C/svg%3E");
-      background-attachment: fixed;
+        url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23064E3B' stroke-width='1.4' stroke-opacity='0.22'%3E%3Cpath d='M40 0L48 24L72 32L48 40L40 64L32 40L8 32L32 24Z' fill='%23064E3B' fill-opacity='0.05'/%3E%3Cpath d='M0 40L24 48L32 72L40 48L64 40L40 32L32 8L24 32Z' fill='%23064E3B' fill-opacity='0.05'/%3E%3Ccircle cx='40' cy='40' r='6' stroke='%23C59B27' stroke-opacity='0.35' stroke-width='1.5' fill='%23C59B27' fill-opacity='0.12'/%3E%3Ccircle cx='0' cy='0' r='6' stroke='%23C59B27' stroke-opacity='0.35' stroke-width='1.5' fill='%23C59B27' fill-opacity='0.12'/%3E%3Ccircle cx='80' cy='0' r='6' stroke='%23C59B27' stroke-opacity='0.35' stroke-width='1.5' fill='%23C59B27' fill-opacity='0.12'/%3E%3Ccircle cx='0' cy='80' r='6' stroke='%23C59B27' stroke-opacity='0.35' stroke-width='1.5' fill='%23C59B27' fill-opacity='0.12'/%3E%3Ccircle cx='80' cy='80' r='6' stroke='%23C59B27' stroke-opacity='0.35' stroke-width='1.5' fill='%23C59B27' fill-opacity='0.12'/%3E%3C/g%3E%3C/svg%3E") !important;
+      background-attachment: fixed !important;
       color: #1E293B;
       font-family: 'Cairo', sans-serif;
       transition: font-family 0.2s ease, font-size 0.2s ease;
@@ -193,23 +193,18 @@
 <body class="min-h-screen flex flex-col selection:bg-gold-200 selection:text-emerald-950">
   <div id="root"></div>
 
-  <!-- PWA Service Worker Registration & Live Version Purge -->
+  <!-- Immediate Service Worker & Stale Cache Purge for Clean Live Rendering -->
   <script>
-    // Immediate Cache-Buster & SW Refresh
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
         for (let registration of registrations) {
-          registration.update();
+          registration.unregister();
         }
       });
-      navigator.serviceWorker.register('./sw.js?v=' + Date.now()).catch(err => console.log('SW registration:', err.message));
     }
-    // Delete stale cache keys from initial load
     if ('caches' in window) {
       caches.keys().then(keys => {
-        keys.forEach(k => {
-          if (k !== 'mishkah-cache-v4') caches.delete(k);
-        });
+        keys.forEach(k => caches.delete(k));
       });
     }
   </script>
@@ -668,7 +663,7 @@
       };
 
       return (
-        <div className="min-h-screen flex flex-col bg-ivory-50">
+        <div className="min-h-screen flex flex-col islamic-screen-pattern">
           
           {/* TOAST ALERT */}
           {toast && (
