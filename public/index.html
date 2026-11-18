@@ -87,12 +87,23 @@
       letter-spacing: 0.02em;
     }
 
-    /* Grand Emerald Header & Dark Sections with Ornate Islamic Pattern */
-    .emerald-pattern {
-      background-color: #032B20;
+    /* Grand Emerald Header & Dark Sections with Intricate Visible Islamic Pattern */
+    .emerald-pattern, .islamic-header-pattern {
+      background-color: #02241A !important;
       background-image: 
-        radial-gradient(circle at 50% 25%, #064E3B 0%, #032B20 65%, #011B13 100%),
-        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FDE68A' fill-opacity='0.06' fill-rule='evenodd'%3E%3Cpath d='M30 0l3 9 9-3-3 9 9 3-9 3 3 9-9-3-3 9-3-9-9 3 3-9-9-3 9-3-3-9 9 3 3-9z'/%3E%3Ccircle cx='30' cy='30' r='2' fill='%23FDE68A' fill-opacity='0.12'/%3E%3C/g%3E%3C/svg%3E");
+        radial-gradient(circle at 50% 30%, rgba(6, 95, 70, 0.55) 0%, rgba(2, 36, 26, 0.95) 70%, #01140E 100%),
+        url("data:image/svg+xml,%3Csvg width='70' height='70' viewBox='0 0 70 70' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23FDE68A' stroke-width='1.4' stroke-opacity='0.28'%3E%3Cpath d='M35 0L42 21L63 28L42 35L35 56L28 35L7 28L28 21Z' fill='%23F59E0B' fill-opacity='0.12'/%3E%3Cpath d='M0 35L21 42L28 63L35 42L56 35L35 28L28 7L21 28Z' fill='%23F59E0B' fill-opacity='0.08'/%3E%3Ccircle cx='35' cy='35' r='5' stroke='%23FDE68A' stroke-opacity='0.45' stroke-width='1.5' fill='%23D97706' fill-opacity='0.22'/%3E%3Ccircle cx='0' cy='0' r='5' stroke='%23FDE68A' stroke-opacity='0.45' stroke-width='1.5' fill='%23D97706' fill-opacity='0.22'/%3E%3Ccircle cx='70' cy='0' r='5' stroke='%23FDE68A' stroke-opacity='0.45' stroke-width='1.5' fill='%23D97706' fill-opacity='0.22'/%3E%3Ccircle cx='0' cy='70' r='5' stroke='%23FDE68A' stroke-opacity='0.45' stroke-width='1.5' fill='%23D97706' fill-opacity='0.22'/%3E%3Ccircle cx='70' cy='70' r='5' stroke='%23FDE68A' stroke-opacity='0.45' stroke-width='1.5' fill='%23D97706' fill-opacity='0.22'/%3E%3C/g%3E%3C/svg%3E") !important;
+    }
+
+    /* Big Green Hero Card with Rich Visible Islamic Tapestry Pattern */
+    .islamic-hero-banner {
+      background-color: #033224 !important;
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(5, 150, 105, 0.45) 0%, rgba(3, 50, 36, 0.95) 75%, #011B13 100%),
+        url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23FDE68A' stroke-width='1.5' stroke-opacity='0.32'%3E%3Cpath d='M40 0L49 23L73 31L49 39L40 62L31 39L7 31L31 23Z' fill='%23F59E0B' fill-opacity='0.15'/%3E%3Cpath d='M0 40L23 49L31 73L39 49L62 40L39 31L31 7L23 31Z' fill='%23F59E0B' fill-opacity='0.12'/%3E%3Ccircle cx='40' cy='40' r='7' stroke='%23FDE68A' stroke-opacity='0.5' stroke-width='1.6' fill='%23D97706' fill-opacity='0.25'/%3E%3Ccircle cx='0' cy='0' r='7' stroke='%23FDE68A' stroke-opacity='0.5' stroke-width='1.6' fill='%23D97706' fill-opacity='0.25'/%3E%3Ccircle cx='80' cy='0' r='7' stroke='%23FDE68A' stroke-opacity='0.5' stroke-width='1.6' fill='%23D97706' fill-opacity='0.25'/%3E%3Ccircle cx='0' cy='80' r='7' stroke='%23FDE68A' stroke-opacity='0.5' stroke-width='1.6' fill='%23D97706' fill-opacity='0.25'/%3E%3Ccircle cx='80' cy='80' r='7' stroke='%23FDE68A' stroke-opacity='0.5' stroke-width='1.6' fill='%23D97706' fill-opacity='0.25'/%3E%3C/g%3E%3C/svg%3E") !important;
+      border: 2.5px solid rgba(245, 158, 11, 0.75) !important;
+      box-shadow: 0 20px 40px -10px rgba(1, 27, 19, 0.6) !important;
+      position: relative;
     }
 
     /* WhatsApp & Chat Floor with Authentic Islamic Geometric Motif */
@@ -674,9 +685,12 @@
           )}
 
           {/* TOP GRAND EMERALD HEADER */}
-          <header className="emerald-pattern text-white relative border-b-4 border-gold-400/80 shadow-xl overflow-hidden no-print">
+          <header className="emerald-pattern text-white relative border-b-4 border-gold-400 shadow-xl overflow-hidden no-print">
+            {/* Islamic Corner Rosette Accents */}
+            <div className="absolute top-2 right-4 text-gold-300/40 text-lg font-amiri pointer-events-none select-none">۞</div>
+            <div className="absolute top-2 left-4 text-gold-300/40 text-lg font-amiri pointer-events-none select-none">۞</div>
             {/* 8-pointed star watermark background */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
+            <div className="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center">
               <svg className="w-[600px] h-[600px] text-gold-300" viewBox="0 0 100 100" fill="currentColor">
                 <polygon points="50,0 64,28 95,21 80,50 95,79 64,72 50,100 36,72 5,79 20,50 5,21 36,28" />
               </svg>
@@ -792,8 +806,13 @@
             {activeTab === 'dashboard' && (
               <div className="space-y-8 animate-fadeIn">
                 
-                {/* Welcome Hero Banner */}
-                <div className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-900 rounded-3xl p-6 sm:p-8 text-white border-2 border-gold-400/40 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                {/* Welcome Hero Banner with Rich Islamic Tapestry */}
+                <div className="islamic-hero-banner rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                  {/* Islamic Corner Rosette Accents */}
+                  <div className="absolute top-2.5 right-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
+                  <div className="absolute top-2.5 left-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
+                  <div className="absolute bottom-2.5 right-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
+                  <div className="absolute bottom-2.5 left-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
                   <div className="relative z-10 max-w-2xl">
                     <div className="inline-flex items-center space-x-2 space-x-reverse bg-gold-400/20 text-gold-200 border border-gold-400/40 text-xs px-3 py-1 rounded-full mb-3">
                       <span>✨</span>
