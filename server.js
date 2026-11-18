@@ -744,6 +744,8 @@ Enforce strict Hadith verification (Narrator + Book + Sahih status) and time-box
     '.json': 'application/json',
     '.webmanifest': 'application/manifest+json',
     '.svg': 'image/svg+xml',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
     '.png': 'image/png',
     '.ico': 'image/x-icon'
   };
@@ -753,7 +755,12 @@ Enforce strict Hadith verification (Narrator + Book + Sahih status) and time-box
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('File Not Found');
     } else {
-      res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
+      res.writeHead(200, { 
+        'Content-Type': mimeTypes[ext] || 'application/octet-stream',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
       res.end(content);
     }
   });
