@@ -1912,7 +1912,9 @@
       const [isEndingsMasked, setIsEndingsMasked] = useState(false);
       const [mushafOverlayMode, setMushafOverlayMode] = useState('none'); // 'none', 'ruler', 'mask_bottom', 'mask_top', 'spotlight', 'interactive_lines'
       const [activeRulerLine, setActiveRulerLine] = useState(1); // 1 to 15
-      const [maskedMushafLines, setMaskedMushafLines] = useState(new Set()); // Lines 0 to 14 hidden for interactive recall testing
+      const [mushafMaskGranularity, setMushafMaskGranularity] = useState('words'); // 'words' (3 segments per line = 45 segments) or 'lines' (15 lines)
+      const [maskedMushafSegments, setMaskedMushafSegments] = useState(new Set()); // Segment keys like '0-0', '0-1', '0-2' for Line 0..14 and Segment 0..2
+      const [maskedMushafLines, setMaskedMushafLines] = useState(new Set()); // Backward compatibility
       
       // Passage-Based Testing System (Start, Middle, End, Custom)
       const [passageTestSection, setPassageTestSection] = useState('none'); // 'none', 'start', 'middle', 'end', 'custom'
@@ -2904,6 +2906,9 @@
       const [presentationFontSize, setPresentationFontSize] = useState('large'); // 'normal', 'large', 'xl'
       const [showSpeakerNotes, setShowSpeakerNotes] = useState(false);
       const [isExportingPptx, setIsExportingPptx] = useState(false);
+      const [stage3ActiveSlide, setStage3ActiveSlide] = useState(0);
+      const [stage3ViewMode, setStage3ViewMode] = useState('player'); // 'player' (Live Deck Carousel) or 'grid' (All Cards)
+      const [showMasterGuide, setShowMasterGuide] = useState(true);
 
       // Interactive Student Quiz State
       const [quizAnswers, setQuizAnswers] = useState({});
@@ -4534,22 +4539,26 @@
                               <span>{isRtl ? 'كشاف تركيز السطر' : 'Spotlight'}</span>
                             </button>
 
-                            {/* 5. Interactive Click-to-Mask Lines (Requested by user for iPhone & mobile perfection) */}
+                            {/* 5. Interactive Click-to-Mask Words & Lines (Requested by user for iPhone & mobile perfection) */}
                             <button
                               type="button"
                               onClick={() => {
                                 if (mushafOverlayMode === 'interactive_lines') {
                                   setMushafOverlayMode('none');
-                                  setMaskedMushafLines(new Set());
+                                  setMaskedMushafSegments(new Set());
                                 } else {
                                   setMushafOverlayMode('interactive_lines');
-                                  setMaskedMushafLines(new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]));
+                                  const s = new Set();
+                                  for (let l = 0; l < 15; l++) {
+                                    s.add(`${l}-0`); s.add(`${l}-1`); s.add(`${l}-2`);
+                                  }
+                                  setMaskedMushafSegments(s);
                                 }
                               }}
                               className={'px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1 border ' + (mushafOverlayMode === 'interactive_lines' ? 'bg-gold-500 text-emerald-950 border-gold-600 font-black shadow-md ring-2 ring-gold-300' : 'bg-white text-emerald-950 border-slate-300 hover:bg-slate-50')}
                             >
                               <span>🎭</span>
-                              <span>{isRtl ? 'طمس وتسميع الأسطر تفاعلياً (بالنقر للكشف)' : 'Tap-to-Mask Lines'}</span>
+                              <span>{isRtl ? 'حجب وتسميع الكلمات والأسطر تفاعلياً' : 'Tap-to-Mask Words & Lines'}</span>
                             </button>
 
                             {/* Reset Button */}
@@ -4558,7 +4567,7 @@
                                 type="button"
                                 onClick={() => {
                                   setMushafOverlayMode('none');
-                                  setMaskedMushafLines(new Set());
+                                  setMaskedMushafSegments(new Set());
                                 }}
                                 className="px-2.5 py-1.5 rounded-xl font-bold bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200 transition flex items-center gap-1"
                               >
@@ -4569,60 +4578,163 @@
                           </div>
                         </div>
 
-                        {/* Interactive Line-by-Line Masking Sub-bar */}
+                        {/* Interactive Word & Line Masking Sub-bar */}
                         {mushafOverlayMode === 'interactive_lines' && (
-                          <div className="mb-3 bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-950 text-white border-2 border-gold-400 rounded-2xl p-3 sm:p-4 shadow-md flex flex-wrap items-center justify-between gap-3 animate-fadeIn">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-gold-300 font-black text-xs sm:text-sm">
-                                  🎭 {isRtl ? 'وضع التسميع التفاعلي على صفحة المصحف الورقي:' : 'Interactive Mushaf Recall:'}
-                                </span>
-                                <span className="bg-gold-400 text-emerald-950 text-[10px] font-black px-2 py-0.5 rounded-full">
-                                  {isRtl ? `${maskedMushafLines.size} أسطر محجوبة` : `${maskedMushafLines.size} lines masked`}
-                                </span>
+                          <div className="mb-3 bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-950 text-white border-2 border-gold-400 rounded-2xl p-3 sm:p-4 shadow-md space-y-3 animate-fadeIn">
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gold-400/30 pb-2.5">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-gold-300 font-black text-xs sm:text-sm">
+                                    🎭 {isRtl ? 'وضع التسميع التفاعلي بحجب الكلمات والأسطر على صفحة المصحف:' : 'Interactive Word & Line Recall:'}
+                                  </span>
+                                  <span className="bg-gold-400 text-emerald-950 text-[10px] sm:text-xs font-black px-2.5 py-0.5 rounded-full shadow-xs">
+                                    {isRtl ? `${maskedMushafSegments.size} من 45 مقطع محجوب` : `${maskedMushafSegments.size} / 45 masked`}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-emerald-200 mt-0.5">
+                                  {isRtl 
+                                    ? 'انقر مباشرة على أي كلمة أو سطر لحجبه أو كشفه. يعمل بنقاء 100% على الآيفون والموبايل من صفحة مصحف المدينة دون أي تقطيع في الخطوط.' 
+                                    : 'Tap any word segment or line to reveal or mask. 100% authentic typography with zero mobile font rendering issues.'}
+                                </p>
                               </div>
-                              <p className="text-[11px] text-emerald-200 mt-1">
-                                {isRtl 
-                                  ? 'انقر مباشرة على أي سطر في صفحة المصحف لكشفه أو حجبه. يعمل بنقاء 100% على الآيفون والموبايل دون أي تشوه أو انفصال في خط المصحف.' 
-                                  : 'Tap any line on the Mushaf page to reveal or mask. Zero font rendering issues on mobile.'}
-                              </p>
+
+                              {/* Granularity Switch */}
+                              <div className="bg-emerald-900/80 p-1 rounded-xl flex items-center border border-gold-400/40 text-xs">
+                                <button
+                                  type="button"
+                                  onClick={() => setMushafMaskGranularity('words')}
+                                  className={'px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ' + (mushafMaskGranularity === 'words' ? 'bg-gold-500 text-emerald-950 font-black shadow-xs' : 'text-slate-300 hover:text-white')}
+                                >
+                                  <span>🔲</span>
+                                  <span>{isRtl ? 'وحدات الكلمات (45 مقطع)' : 'Words (45 Segments)'}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setMushafMaskGranularity('lines')}
+                                  className={'px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ' + (mushafMaskGranularity === 'lines' ? 'bg-gold-500 text-emerald-950 font-black shadow-xs' : 'text-slate-300 hover:text-white')}
+                                >
+                                  <span>📄</span>
+                                  <span>{isRtl ? 'أسطر كاملة (15 سطر)' : 'Full Lines (15)'}</span>
+                                </button>
+                              </div>
                             </div>
 
+                            {/* Preset Masking Modes */}
                             <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                              <button
-                                type="button"
-                                onClick={() => setMaskedMushafLines(new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]))}
-                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
-                              >
-                                <span>🔒</span>
-                                <span>{isRtl ? 'حجب الكل (15 سطر)' : 'Mask All'}</span>
-                              </button>
+                              <span className="text-[11px] text-gold-300 font-bold ml-1">{isRtl ? 'أنماط التركيز:' : 'Focus:'}</span>
+                              
                               <button
                                 type="button"
                                 onClick={() => {
-                                  const indices = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14].sort(() => 0.5 - Math.random()).slice(0, 7);
-                                  setMaskedMushafLines(new Set(indices));
+                                  const s = new Set();
+                                  for (let l = 0; l < 15; l++) s.add(`${l}-2`);
+                                  setMaskedMushafSegments(s);
+                                }}
+                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
+                                title="حجب أواخر الأسطر وفواصل الآيات لاختبار إتقان رؤوس الآيات"
+                              >
+                                <span>🎯</span>
+                                <span>{isRtl ? 'فواصل ونهايات الآيات' : 'Ayah Endings'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const s = new Set();
+                                  for (let l = 0; l < 15; l++) s.add(`${l}-0`);
+                                  setMaskedMushafSegments(s);
+                                }}
+                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
+                                title="حجب بدايات الأسطر ومطالع الآيات لاختبار مفاتيح الحفظ"
+                              >
+                                <span>🚀</span>
+                                <span>{isRtl ? 'أوائل الآيات' : 'Starters'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const s = new Set();
+                                  for (let l = 0; l < 7; l++) {
+                                    s.add(`${l}-0`); s.add(`${l}-1`); s.add(`${l}-2`);
+                                  }
+                                  setMaskedMushafSegments(s);
+                                }}
+                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
+                              >
+                                <span>🔺</span>
+                                <span>{isRtl ? 'النصف الأعلى (1-7)' : 'Top Half'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const s = new Set();
+                                  for (let l = 7; l < 15; l++) {
+                                    s.add(`${l}-0`); s.add(`${l}-1`); s.add(`${l}-2`);
+                                  }
+                                  setMaskedMushafSegments(s);
+                                }}
+                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
+                              >
+                                <span>🔻</span>
+                                <span>{isRtl ? 'النصف الأسفل (8-15)' : 'Bottom Half'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const s = new Set();
+                                  for (let l = 5; l < 10; l++) {
+                                    s.add(`${l}-0`); s.add(`${l}-1`); s.add(`${l}-2`);
+                                  }
+                                  setMaskedMushafSegments(s);
+                                }}
+                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
+                                title="حجب الثلث الأوسط (الأسطر 6 إلى 10)"
+                              >
+                                <span>📊</span>
+                                <span>{isRtl ? 'الثلث الأوسط' : 'Middle Third'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const allKeys = [];
+                                  for (let l = 0; l < 15; l++) {
+                                    for (let seg = 0; seg < 3; seg++) allKeys.push(`${l}-${seg}`);
+                                  }
+                                  const rand = allKeys.sort(() => 0.5 - Math.random()).slice(0, 18);
+                                  setMaskedMushafSegments(new Set(rand));
                                 }}
                                 className="px-2.5 py-1.5 bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black rounded-xl transition flex items-center gap-1"
                               >
                                 <span>🎲</span>
-                                <span>{isRtl ? 'حجب عشوائي (تسميع مفاجئ)' : 'Random Mask'}</span>
+                                <span>{isRtl ? 'حجب عشوائي للمقاطع' : 'Random Mask'}</span>
                               </button>
+
                               <button
                                 type="button"
-                                onClick={() => setMaskedMushafLines(new Set([1,3,5,7,9,11,13]))}
+                                onClick={() => {
+                                  const s = new Set();
+                                  for (let l = 0; l < 15; l++) {
+                                    s.add(`${l}-0`); s.add(`${l}-1`); s.add(`${l}-2`);
+                                  }
+                                  setMaskedMushafSegments(s);
+                                }}
                                 className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
                               >
-                                <span>🌓</span>
-                                <span>{isRtl ? 'حجب زوجي' : 'Alternate'}</span>
+                                <span>🔒</span>
+                                <span>{isRtl ? 'حجب كامل الوجه' : 'Mask All'}</span>
                               </button>
+
                               <button
                                 type="button"
-                                onClick={() => setMaskedMushafLines(new Set())}
+                                onClick={() => setMaskedMushafSegments(new Set())}
                                 className="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-emerald-950 rounded-xl font-bold transition flex items-center gap-1"
                               >
                                 <span>👁️</span>
-                                <span>{isRtl ? 'كشف كافة الأسطر' : 'Reveal All'}</span>
+                                <span>{isRtl ? 'كشف كامل الوجه' : 'Reveal All'}</span>
                               </button>
                             </div>
                           </div>
@@ -4763,42 +4875,101 @@
                               </div>
                             )}
 
-                            {/* OVERLAY: Interactive Line-by-Line Masking (Tap-to-Mask / Tap-to-Reveal) */}
+                            {/* OVERLAY: Interactive Word-by-Word & Line Masking (Tap-to-Mask / Tap-to-Reveal) */}
                             {mushafOverlayMode === 'interactive_lines' && (
                               <div className="absolute inset-0 select-none pointer-events-auto" style={{ zIndex: 12 }}>
                                 {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(lineIdx => {
-                                  const isMasked = maskedMushafLines.has(lineIdx);
+                                  if (mushafMaskGranularity === 'lines') {
+                                    const isLineMasked = maskedMushafSegments.has(`${lineIdx}-0`) || maskedMushafSegments.has(`${lineIdx}-1`) || maskedMushafSegments.has(`${lineIdx}-2`);
+                                    return (
+                                      <div
+                                        key={`line-${lineIdx}`}
+                                        onClick={() => {
+                                          setMaskedMushafSegments(prev => {
+                                            const next = new Set(prev);
+                                            if (isLineMasked) {
+                                              next.delete(`${lineIdx}-0`);
+                                              next.delete(`${lineIdx}-1`);
+                                              next.delete(`${lineIdx}-2`);
+                                            } else {
+                                              next.add(`${lineIdx}-0`);
+                                              next.add(`${lineIdx}-1`);
+                                              next.add(`${lineIdx}-2`);
+                                            }
+                                            return next;
+                                          });
+                                        }}
+                                        className={'absolute left-[2.5%] right-[2.5%] rounded-lg cursor-pointer transition-all duration-200 flex items-center justify-center ' + (
+                                          isLineMasked
+                                            ? 'shadow-md border border-gold-500/80 hover:border-gold-300'
+                                            : 'hover:bg-amber-400/20 border border-transparent hover:border-gold-400/40'
+                                        )}
+                                        style={{
+                                          top: (6.2 + lineIdx * 5.85) + '%',
+                                          height: '5.6%',
+                                          background: isLineMasked ? 'linear-gradient(135deg, #FAF7EE 0%, #F5ECE0 100%)' : 'transparent',
+                                          zIndex: isLineMasked ? 15 : 13
+                                        }}
+                                        title={isLineMasked ? (isRtl ? `السطر ${lineIdx + 1} محجوب للتسميع — انقر للكشف` : 'Line masked — tap to reveal') : (isRtl ? `السطر ${lineIdx + 1} مكشوف — انقر للحجب` : 'Line revealed — tap to mask')}
+                                      >
+                                        {isLineMasked && (
+                                          <span className="text-[10px] sm:text-xs font-black text-emerald-950 font-cairo flex items-center gap-1.5 opacity-90 hover:opacity-100 select-none">
+                                            <span>🔒</span>
+                                            <span>{isRtl ? `السطر ${lineIdx + 1} (انقر للكشف)` : `Line ${lineIdx + 1} (tap to reveal)`}</span>
+                                          </span>
+                                        )}
+                                      </div>
+                                    );
+                                  }
+
+                                  // Word segments mode: 3 segments per line (Right: Starters, Center: Middle words, Left: Endings/Ayah Rhymes)
                                   return (
-                                    <div
-                                      key={lineIdx}
-                                      onClick={() => {
-                                        setMaskedMushafLines(prev => {
-                                          const next = new Set(prev);
-                                          if (next.has(lineIdx)) next.delete(lineIdx);
-                                          else next.add(lineIdx);
-                                          return next;
-                                        });
-                                      }}
-                                      className={'absolute left-[2.5%] right-[2.5%] rounded-lg cursor-pointer transition-all duration-200 flex items-center justify-center ' + (
-                                        isMasked
-                                          ? 'shadow-md border border-gold-500/80 hover:border-gold-300'
-                                          : 'hover:bg-amber-400/20 border border-transparent hover:border-gold-400/40'
-                                      )}
-                                      style={{
-                                        top: (6.2 + lineIdx * 5.85) + '%',
-                                        height: '5.6%',
-                                        background: isMasked ? 'linear-gradient(135deg, #FAF7EE 0%, #F5ECE0 100%)' : 'transparent',
-                                        zIndex: isMasked ? 15 : 13
-                                      }}
-                                      title={isMasked ? (isRtl ? `السطر ${lineIdx + 1} محجوب للتسميع — انقر للكشف` : 'Line masked — tap to reveal') : (isRtl ? `السطر ${lineIdx + 1} مكشوف — انقر للحجب` : 'Line revealed — tap to mask')}
-                                    >
-                                      {isMasked && (
-                                        <span className="text-[10px] sm:text-xs font-black text-emerald-950 font-cairo flex items-center gap-1.5 opacity-90 hover:opacity-100 select-none">
-                                          <span>🔒</span>
-                                          <span>{isRtl ? `السطر ${lineIdx + 1} (انقر للكشف)` : `Line ${lineIdx + 1} (tap to reveal)`}</span>
-                                        </span>
-                                      )}
-                                    </div>
+                                    <React.Fragment key={`line-segs-${lineIdx}`}>
+                                      {[0, 1, 2].map(segIdx => {
+                                        const segKey = `${lineIdx}-${segIdx}`;
+                                        const isMasked = maskedMushafSegments.has(segKey);
+                                        const rightPos = segIdx === 0 ? '2.5%' : (segIdx === 1 ? '34%' : 'auto');
+                                        const leftPos = segIdx === 2 ? '2.5%' : 'auto';
+                                        const widthVal = segIdx === 1 ? '32%' : '30.5%';
+                                        const segLabel = segIdx === 0 ? (isRtl ? 'بداية السطر' : 'Start') : (segIdx === 1 ? (isRtl ? 'وسط' : 'Mid') : (isRtl ? 'فاصلة / نهاية' : 'End'));
+
+                                        return (
+                                          <div
+                                            key={segKey}
+                                            onClick={() => {
+                                              setMaskedMushafSegments(prev => {
+                                                const next = new Set(prev);
+                                                if (next.has(segKey)) next.delete(segKey);
+                                                else next.add(segKey);
+                                                return next;
+                                              });
+                                            }}
+                                            className={'absolute rounded-md cursor-pointer transition-all duration-150 flex items-center justify-center ' + (
+                                              isMasked
+                                                ? 'shadow-xs border border-gold-500/85 hover:border-gold-300'
+                                                : 'hover:bg-amber-400/20 border border-transparent hover:border-gold-400/30'
+                                            )}
+                                            style={{
+                                              top: (6.2 + lineIdx * 5.85) + '%',
+                                              height: '5.6%',
+                                              right: rightPos,
+                                              left: leftPos,
+                                              width: widthVal,
+                                              background: isMasked ? 'linear-gradient(135deg, #FAF7EE 0%, #F5ECE0 100%)' : 'transparent',
+                                              zIndex: isMasked ? 16 : 13
+                                            }}
+                                            title={isMasked ? (isRtl ? `مقطع ${segLabel} (السطر ${lineIdx + 1}) محجوب — انقر للكشف` : `Segment masked — tap to reveal`) : (isRtl ? `مقطع ${segLabel} (السطر ${lineIdx + 1}) مكشوف — انقر للحجب` : `Segment revealed — tap to mask`)}
+                                          >
+                                            {isMasked && (
+                                              <span className="text-[9px] sm:text-[10px] font-black text-emerald-950 font-cairo flex items-center gap-1 opacity-90 select-none">
+                                                <span>🔒</span>
+                                                <span className="hidden sm:inline">{segLabel}</span>
+                                              </span>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </React.Fragment>
                                   );
                                 })}
                               </div>
@@ -7045,6 +7216,96 @@
                         </div>
                       </div>
 
+                      {/* Master Practical Field Guide Banner */}
+                      <div className="bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-950 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border-2 border-gold-400 shadow-md">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer"
+                          onClick={() => setShowMasterGuide(!showMasterGuide)}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-xl sm:text-2xl">💡</span>
+                            <div>
+                              <h4 className="text-xs sm:text-sm font-black text-gold-300 font-cairo">
+                                {isRtl ? 'دليل المعلم التطبيقي: كيف تستثمر مراحل المحاضرة الست في إعداد وإلقاء درسك وحلقتك؟' : 'Teacher Guide: How to use the 6 lecture stages in your class'}
+                              </h4>
+                              <p className="text-[11px] text-emerald-200 mt-0.5">
+                                {isRtl ? 'خارطة طريق واضحة ومباشرة تجيبك عن كيفية الاستفادة الحقيقية من كل أداة ومخرج في الميدان' : 'Practical field roadmap explaining the exact purpose and workflow of each stage'}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            className="text-gold-300 hover:text-gold-100 text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-900 border border-gold-400/40"
+                          >
+                            {showMasterGuide ? (isRtl ? 'إخفاء الدليل ▲' : 'Hide ▲') : (isRtl ? 'عرض الدليل ▼' : 'Show Guide ▼')}
+                          </button>
+                        </div>
+
+                        {showMasterGuide && (
+                          <div className="mt-4 pt-4 border-t border-gold-400/30 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs animate-fadeIn">
+                            <div className="bg-emerald-900/60 p-3 rounded-xl border border-gold-400/20 space-y-1">
+                              <span className="text-gold-300 font-bold flex items-center gap-1.5">
+                                <span>📁 1.</span>
+                                <span>{isRtl ? 'إدخال ورفع المحاضرة' : '1. Input Lecture'}</span>
+                              </span>
+                              <p className="text-slate-200 text-[11px] leading-relaxed">
+                                {isRtl ? 'ارفع ملف الدرس كـ Word أو PDF مباشرة دون الحاجة لنسخ ولصق؛ ليتولى المحرك تفكيك المحاضرة واستخراج المحاور والآيات بدقة.' : 'Upload Word or PDF files directly without tedious copy-pasting.'}
+                              </p>
+                            </div>
+
+                            <div className="bg-emerald-900/60 p-3 rounded-xl border border-gold-400/20 space-y-1">
+                              <span className="text-gold-300 font-bold flex items-center gap-1.5">
+                                <span>⏱️ 2.</span>
+                                <span>{isRtl ? 'الخطة والأدلة الشرعية' : '2. Blueprint & Evidence'}</span>
+                              </span>
+                              <p className="text-slate-200 text-[11px] leading-relaxed">
+                                {isRtl ? 'تساعدك في ضبط توقيت الدرس بدقة (تمهيد 10د، تأصيل 25د، قصة وواقع 15د، خاتمة 10د) مع استحضار فوري للأحاديث المعتمدة والتأصيل.' : 'Time management and verified hadiths.'}
+                              </p>
+                            </div>
+
+                            <div className="bg-emerald-900/60 p-3 rounded-xl border border-gold-400/20 space-y-1">
+                              <span className="text-gold-300 font-bold flex items-center gap-1.5">
+                                <span>📽️ 3.</span>
+                                <span>{isRtl ? 'العرض الحي وبوربوينت' : '3. Live Deck & PPTX'}</span>
+                              </span>
+                              <p className="text-slate-200 text-[11px] leading-relaxed">
+                                {isRtl ? 'اعرض الشرائح مباشرة ملء الشاشة على البروجكتور أو زوم مع نقاط التحدث والتوجيهات، أو حمّل ملف بوربوينت PPTX للعرض أوفلاين.' : 'Live presenter mode on Zoom/projector + PPTX export.'}
+                              </p>
+                            </div>
+
+                            <div className="bg-emerald-900/60 p-3 rounded-xl border border-gold-400/20 space-y-1">
+                              <span className="text-gold-300 font-bold flex items-center gap-1.5">
+                                <span>📝 4.</span>
+                                <span>{isRtl ? 'ورقة العمل والطباعة' : '4. Printable Worksheet'}</span>
+                              </span>
+                              <p className="text-slate-200 text-[11px] leading-relaxed">
+                                {isRtl ? 'اطبع [نسخة الدارس] الفارغة ليحلها الطلاب في الحلقة ويكتبوا التطبيق السلوكي، واستعن بـ [نسخة المعلم] كدليل إجابة وتأصيل شرعي.' : 'Print student and teacher answer keys.'}
+                              </p>
+                            </div>
+
+                            <div className="bg-emerald-900/60 p-3 rounded-xl border border-gold-400/20 space-y-1">
+                              <span className="text-gold-300 font-bold flex items-center gap-1.5">
+                                <span>🎯 5.</span>
+                                <span>{isRtl ? 'الاختبار الذاتي الفوري' : '5. Interactive Quiz'}</span>
+                              </span>
+                              <p className="text-slate-200 text-[11px] leading-relaxed">
+                                {isRtl ? 'فعّل وضع الطالب في ختام الدرس لتقييم استيعاب الدارسين فورياً والحصول على نسبة الإتقان مع تغذية راجعة وتصحيح فوري.' : 'Interactive end-of-class quiz.'}
+                              </p>
+                            </div>
+
+                            <div className="bg-emerald-900/60 p-3 rounded-xl border border-gold-400/20 space-y-1">
+                              <span className="text-gold-300 font-bold flex items-center gap-1.5">
+                                <span>💬 6.</span>
+                                <span>{isRtl ? 'الواتساب ومكتبتي الدائمة' : '6. WhatsApp & Library'}</span>
+                              </span>
+                              <p className="text-slate-200 text-[11px] leading-relaxed">
+                                {isRtl ? 'انسخ ملخص التكليف المنزلي بنقرة زر وشاركه في جروب الواتساب مع أولياء الأمور أو الطلاب، واحفظ المحاضرة كاملة بمكتبتك.' : 'One-click WhatsApp homework broadcast and permanent library.'}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
                       {/* --- STAGE 1: INPUT & UPLOAD SECTION --- */}
                       <div id="stage-islamic-1" className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-emerald-900/15 shadow-sm space-y-4">
                         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -7639,73 +7900,279 @@
                             </span>
                             <span className="text-[11px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
                               <span>📽️</span>
-                              <span>{isRtl ? 'منظومة العروض التقديمية وشرائح الشرح (Lecture Presentation Suite)' : 'Lecture Presentation Suite'}</span>
+                              <span>{isRtl ? 'منظومة العروض التقديمية وشرائح الشرح الحية' : 'Live Presentation & PowerPoint Suite'}</span>
                             </span>
                           </div>
                           <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo mt-1">
-                            {isRtl ? 'عرض مباشر في قاعة المحاضرات / زوم + تصدير بوربوينت PowerPoint (.pptx)' : 'Live Presenter Mode & PowerPoint (.pptx) Export'}
+                            {isRtl ? 'مشغل شرائح تفاعلي حي + عرض ملء الشاشة لزوم + تصدير بوربوينت (.pptx)' : 'Interactive Live Slide Deck & PowerPoint (.pptx) Export'}
                           </h3>
                         </div>
 
-                        {/* Presentation Action Controls */}
+                        {/* Top Action & Mode Controls */}
                         <div className="flex flex-wrap items-center gap-2">
+                          {/* View Switch: Live Deck Player vs Grid */}
+                          <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200 text-xs">
+                            <button
+                              type="button"
+                              onClick={() => setStage3ViewMode('player')}
+                              className={'px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1 ' + (
+                                stage3ViewMode === 'player'
+                                  ? 'bg-emerald-900 text-gold-200 shadow-xs font-black'
+                                  : 'text-slate-600 hover:text-emerald-900'
+                              )}
+                            >
+                              <span>📽️</span>
+                              <span>{isRtl ? 'العارض الحي' : 'Live Player'}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setStage3ViewMode('grid')}
+                              className={'px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1 ' + (
+                                stage3ViewMode === 'grid'
+                                  ? 'bg-emerald-900 text-gold-200 shadow-xs font-black'
+                                  : 'text-slate-600 hover:text-emerald-900'
+                              )}
+                            >
+                              <span>🔲</span>
+                              <span>{isRtl ? 'كافة الشرائح' : 'Grid'}</span>
+                            </button>
+                          </div>
+
                           <button
                             type="button"
-                            onClick={() => handleStartLecturePresentation(0)}
-                            className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 font-black px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-2 transform hover:scale-105 active:scale-95 cursor-pointer"
+                            onClick={() => handleStartLecturePresentation(stage3ActiveSlide)}
+                            className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 font-black px-3.5 py-1.5 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 transform hover:scale-105 active:scale-95 cursor-pointer"
                           >
-                            <span>📽️</span>
-                            <span>{isRtl ? 'بدء العرض المباشر (ملء الشاشة)' : 'Launch Presenter Mode'}</span>
+                            <span>📺</span>
+                            <span>{isRtl ? 'ملء الشاشة لزوم' : 'Zoom Fullscreen'}</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={handleExportIslamicPowerPoint}
                             disabled={isExportingPptx}
-                            className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-2 transform hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
+                            className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-3.5 py-1.5 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 transform hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
                           >
                             <span>📥</span>
-                            <span>{isExportingPptx ? (isRtl ? 'جاري التصدير...' : 'Exporting...') : (isRtl ? 'تحميل كملف بوربوينت (.pptx)' : 'Download PowerPoint (.pptx)')}</span>
+                            <span>{isExportingPptx ? (isRtl ? 'جاري التصدير...' : 'Exporting...') : (isRtl ? 'تنزيل بوربوينت PPTX' : 'Export PPTX')}</span>
                           </button>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {(islamicData.zoomCards || islamicData.zoomPresentation || []).map((slide, sIdx) => (
-                          <div key={sIdx} className="bg-emerald-950 text-white rounded-2xl p-5 border-2 border-gold-400 shadow-md flex flex-col justify-between hover:border-gold-300 transition">
-                            <div>
-                              <div className="flex items-center justify-between mb-3 text-gold-300 text-xs font-bold">
-                                <span>{isRtl ? `الشريحة ${slide.slideNumber || sIdx + 1}` : `Slide ${sIdx + 1}`}</span>
-                                <span className="bg-emerald-900 px-2.5 py-0.5 rounded-full border border-gold-400/40 text-[10px]">
-                                  {slide.phaseTitle}
-                                </span>
-                              </div>
-                              <h4 className="font-amiri text-lg font-bold text-gold-200 mb-2 leading-snug">
-                                {slide.slideTitle || slide.titleAr}
-                              </h4>
-                              {(slide.scriptureEvidence) && (
-                                <p className="font-quran text-base sm:text-lg text-amber-100 leading-relaxed my-3 bg-emerald-900/60 p-3 rounded-xl border border-gold-400/30">
-                                  {slide.scriptureEvidence}
-                                </p>
-                              )}
-                              <p className="font-amiri text-xs text-slate-200 leading-relaxed">
-                                {slide.talkingPoints || slide.bodyAr}
-                              </p>
-                            </div>
-                            <div className="mt-4 pt-3 border-t border-emerald-800/80 text-[11px] text-gold-300 font-bold flex items-center justify-between">
-                              <span>💡 {slide.pedagogicalTip || slide.practicalAction}</span>
-                              <button
-                                type="button"
-                                onClick={() => handleStartLecturePresentation(sIdx)}
-                                className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-2.5 py-1 rounded-lg text-[10px] shadow-xs flex items-center gap-1 transition cursor-pointer"
-                              >
-                                <span>👁️</span>
-                                <span>{isRtl ? 'عرض الشريحة' : 'Present Slide'}</span>
-                              </button>
-                            </div>
+                      {/* Practical Guide Banner for Stage 3 */}
+                      <div className="bg-amber-50/80 border border-gold-400/60 rounded-2xl p-3 sm:p-4 text-xs text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                        <div className="flex items-start gap-2.5">
+                          <span className="text-xl shrink-0 mt-0.5">💡</span>
+                          <div className="space-y-0.5">
+                            <span className="font-black text-amber-900 block font-cairo">
+                              {isRtl ? 'دليل المعلم في قاعة الدرس والزوم:' : 'Teacher Field Instructions:'}
+                            </span>
+                            <p className="text-[11px] text-slate-700 leading-relaxed">
+                              {isRtl 
+                                ? 'استخدم مشغل الشرائح الحي لعرض أفكار الدرس بنقرات انسيابية، أو اضغط [ملء الشاشة لزوم] لبث الشرائح مباشرة على البروجكتور، أو حمّل ملف PowerPoint لتشغيله أوفلاين على حاسوبك.'
+                                : 'Use live deck player for interactive recitation, or click Fullscreen for Zoom/Projector, or download offline PowerPoint.'}
+                            </p>
                           </div>
-                        ))}
+                        </div>
+                        <span className="bg-emerald-900 text-gold-200 px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0">
+                          {((islamicData.zoomCards || islamicData.zoomPresentation || []).length || 1)} {isRtl ? 'شرائح جاهزة' : 'slides ready'}
+                        </span>
                       </div>
+
+                      {/* Slides List Computation */}
+                      {(() => {
+                        const slidesList = (islamicData.zoomCards && islamicData.zoomCards.length > 0)
+                          ? islamicData.zoomCards
+                          : (islamicData.blueprint || []);
+                        const safeIdx = Math.max(0, Math.min(slidesList.length - 1, stage3ActiveSlide));
+                        const currentSlide = slidesList[safeIdx] || slidesList[0] || {};
+                        const currentSlideTitle = currentSlide.slideTitle || currentSlide.titleAr || currentSlide.phaseTitle || currentSlide.phaseNameAr || (`المحور ${safeIdx + 1}`);
+                        const scriptureText = currentSlide.scriptureEvidence || currentSlide.scripture;
+                        const bodyText = currentSlide.talkingPoints || currentSlide.bodyAr || currentSlide.teacherFocusAr;
+                        const pedagogicalTip = currentSlide.pedagogicalTip || currentSlide.practicalAction || 'التركيز على ربط المعنى بالسلوك العملي للدارس';
+
+                        if (stage3ViewMode === 'player') {
+                          return (
+                            <div className="space-y-4">
+                              {/* 16:9 Live Widescreen Presenter Deck Card */}
+                              <div className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 text-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border-2 border-gold-400 shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[380px] sm:min-h-[440px]">
+                                
+                                {/* Slide Top Header */}
+                                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gold-400/30 pb-3 mb-4">
+                                  <div className="flex items-center gap-2">
+                                    <span className="bg-gold-500 text-emerald-950 text-xs font-black px-3 py-1 rounded-full shadow-xs">
+                                      {isRtl ? `شريحة ${safeIdx + 1} من ${slidesList.length}` : `Slide ${safeIdx + 1} of ${slidesList.length}`}
+                                    </span>
+                                    <span className="bg-emerald-900/80 text-gold-300 border border-gold-400/40 text-[11px] font-bold px-2.5 py-0.5 rounded-xl">
+                                      {currentSlide.phaseTitle || (isRtl ? 'المحور الرئيسي' : 'Main Theme')}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleStartLecturePresentation(safeIdx)}
+                                      className="bg-emerald-800 hover:bg-gold-500 hover:text-emerald-950 text-gold-200 border border-gold-400/50 text-[11px] font-black px-3 py-1 rounded-xl transition flex items-center gap-1 shadow-xs cursor-pointer"
+                                    >
+                                      <span>📺</span>
+                                      <span>{isRtl ? 'عرض الشريحة ملء الشاشة' : 'Fullscreen'}</span>
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Slide Content Area */}
+                                <div className="space-y-4 my-auto">
+                                  <h4 className="font-amiri text-xl sm:text-3xl font-extrabold text-gold-300 leading-snug">
+                                    {currentSlideTitle}
+                                  </h4>
+
+                                  {scriptureText && (
+                                    <div className="font-quran text-base sm:text-xl text-amber-100 leading-relaxed bg-emerald-900/70 p-4 sm:p-5 rounded-2xl border-2 border-gold-400/40 shadow-inner">
+                                      « {scriptureText} »
+                                    </div>
+                                  )}
+
+                                  {bodyText && (
+                                    <div className="bg-emerald-950/60 p-3.5 sm:p-4 rounded-xl border border-gold-400/20">
+                                      <span className="text-[11px] font-bold text-gold-400 block mb-1">
+                                        📌 {isRtl ? 'نقاط التحدث ومحتوى الشرح للمحاضر:' : 'Lecturer Talking Points:'}
+                                      </span>
+                                      <p className="font-amiri text-xs sm:text-sm text-slate-100 leading-relaxed whitespace-pre-line">
+                                        {bodyText}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  <div className="bg-gold-500/15 border-r-4 border-gold-400 p-3 rounded-xl flex items-center gap-2 text-xs sm:text-sm text-gold-200">
+                                    <span className="text-base shrink-0">💡</span>
+                                    <span><strong>{isRtl ? 'التوجيه التطبيقي للمعلم:' : 'Action Tip:'}</strong> {pedagogicalTip}</span>
+                                  </div>
+                                </div>
+
+                                {/* Slide Navigation Controller */}
+                                <div className="mt-6 pt-4 border-t border-gold-400/30 flex items-center justify-between gap-3">
+                                  <button
+                                    type="button"
+                                    disabled={safeIdx <= 0}
+                                    onClick={() => setStage3ActiveSlide(Math.max(0, safeIdx - 1))}
+                                    className="bg-emerald-900 hover:bg-emerald-800 disabled:opacity-40 text-gold-200 font-black px-4 py-2 rounded-xl text-xs sm:text-sm border border-gold-400/40 transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                                  >
+                                    <span>▶</span>
+                                    <span>{isRtl ? 'الشريحة السابقة' : 'Previous'}</span>
+                                  </button>
+
+                                  {/* Dots indicator */}
+                                  <div className="flex items-center gap-1.5 overflow-x-auto max-w-[200px] sm:max-w-xs scrollbar-none py-1">
+                                    {slidesList.map((_, dotIdx) => (
+                                      <button
+                                        key={dotIdx}
+                                        type="button"
+                                        onClick={() => setStage3ActiveSlide(dotIdx)}
+                                        className={'w-2.5 h-2.5 rounded-full transition-all ' + (
+                                          dotIdx === safeIdx ? 'bg-gold-400 w-6 shadow-xs' : 'bg-emerald-800 hover:bg-emerald-700'
+                                        )}
+                                        title={isRtl ? `شريحة ${dotIdx + 1}` : `Slide ${dotIdx + 1}`}
+                                      />
+                                    ))}
+                                  </div>
+
+                                  <button
+                                    type="button"
+                                    disabled={safeIdx >= slidesList.length - 1}
+                                    onClick={() => setStage3ActiveSlide(Math.min(slidesList.length - 1, safeIdx + 1))}
+                                    className="bg-gold-500 hover:bg-gold-400 disabled:opacity-40 text-emerald-950 font-black px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                                  >
+                                    <span>{isRtl ? 'الشريحة التالية' : 'Next'}</span>
+                                    <span>◀</span>
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Thumbnail Filmstrip Selector */}
+                              <div className="pt-2">
+                                <span className="text-xs font-bold text-emerald-950 block mb-2">
+                                  🎞️ {isRtl ? 'شريط الشرائح السريع (انقر للانتقال الفوري):' : 'Slide Filmstrip (Click to jump):'}
+                                </span>
+                                <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+                                  {slidesList.map((th, thIdx) => (
+                                    <button
+                                      key={thIdx}
+                                      type="button"
+                                      onClick={() => setStage3ActiveSlide(thIdx)}
+                                      className={'shrink-0 w-36 sm:w-44 text-right p-2.5 rounded-xl border-2 transition text-xs flex flex-col justify-between cursor-pointer ' + (
+                                        thIdx === safeIdx
+                                          ? 'bg-emerald-900 text-gold-200 border-gold-400 shadow-md ring-2 ring-gold-400/40 font-bold'
+                                          : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-700/40 hover:bg-emerald-50/50'
+                                      )}
+                                    >
+                                      <div className="flex items-center justify-between text-[10px] opacity-80 mb-1">
+                                        <span>#{thIdx + 1}</span>
+                                        <span className="truncate max-w-[80px]">{th.phaseTitle || ''}</span>
+                                      </div>
+                                      <p className="line-clamp-2 text-[11px] font-amiri font-bold leading-tight">
+                                        {th.slideTitle || th.titleAr || th.phaseTitle || (`شريحة ${thIdx + 1}`)}
+                                      </p>
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        // Grid View Mode
+                        return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {slidesList.map((slide, sIdx) => (
+                              <div key={sIdx} className="bg-emerald-950 text-white rounded-2xl p-5 border-2 border-gold-400 shadow-md flex flex-col justify-between hover:border-gold-300 transition">
+                                <div>
+                                  <div className="flex items-center justify-between mb-3 text-gold-300 text-xs font-bold">
+                                    <span>{isRtl ? `الشريحة ${slide.slideNumber || sIdx + 1}` : `Slide ${sIdx + 1}`}</span>
+                                    <span className="bg-emerald-900 px-2.5 py-0.5 rounded-full border border-gold-400/40 text-[10px]">
+                                      {slide.phaseTitle}
+                                    </span>
+                                  </div>
+                                  <h4 className="font-amiri text-lg font-bold text-gold-200 mb-2 leading-snug">
+                                    {slide.slideTitle || slide.titleAr}
+                                  </h4>
+                                  {(slide.scriptureEvidence) && (
+                                    <p className="font-quran text-base sm:text-lg text-amber-100 leading-relaxed my-3 bg-emerald-900/60 p-3 rounded-xl border border-gold-400/30">
+                                      {slide.scriptureEvidence}
+                                    </p>
+                                  )}
+                                  <p className="font-amiri text-xs text-slate-200 leading-relaxed">
+                                    {slide.talkingPoints || slide.bodyAr}
+                                  </p>
+                                </div>
+                                <div className="mt-4 pt-3 border-t border-emerald-800/80 text-[11px] text-gold-300 font-bold flex items-center justify-between gap-2">
+                                  <span className="truncate">💡 {slide.pedagogicalTip || slide.practicalAction}</span>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setStage3ActiveSlide(sIdx);
+                                        setStage3ViewMode('player');
+                                      }}
+                                      className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 font-bold px-2 py-1 rounded-lg text-[10px] border border-gold-400/40 transition cursor-pointer"
+                                    >
+                                      <span>📽️</span>
+                                      <span>{isRtl ? 'في المشغل' : 'Play'}</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleStartLecturePresentation(sIdx)}
+                                      className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-2.5 py-1 rounded-lg text-[10px] shadow-xs flex items-center gap-1 transition cursor-pointer"
+                                    >
+                                      <span>📺</span>
+                                      <span>{isRtl ? 'ملء الشاشة' : 'Present'}</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
 
                       {/* Navigation to Stage 4 */}
                       <div className="flex justify-end pt-3 border-t border-slate-100">
