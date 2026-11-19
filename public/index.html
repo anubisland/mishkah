@@ -1998,7 +1998,7 @@
       const [mutaSearchResults, setMutaSearchResults] = useState([]);
       const [isSearchingMuta, setIsSearchingMuta] = useState(false);
       const [mutaGuideNote, setMutaGuideNote] = useState('');
-      const [hifzViewMode, setHifzViewMode] = useState('mushaf_page'); // 'mushaf_page' | 'interactive_test'
+      const [hifzViewMode, setHifzViewMode] = useState('interactive_test'); // 'interactive_test' (Digital Lines Board) | 'mushaf_page' (Printed Image)
       const [mushafPageNumber, setMushafPageNumber] = useState(562); // Default: Surah Al-Mulk Page 562
       const [mushafCurrentSurahId, setMushafCurrentSurahId] = useState(67);
       const [selectedSurahNumber, setSelectedSurahNumber] = useState(67);
@@ -2015,8 +2015,7 @@
         const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage);
         if (sMatch) setMushafCurrentSurahId(sMatch.id);
         
-        setHifzViewMode('mushaf_page');
-
+        // Preserve user selected view mode (digital lines or mushaf page)
         // 1. Check if in preloaded passages
         const preloaded = PRELOADED_HIFZ_PASSAGES.find(item => item.pageNumber === p);
         if (preloaded) {
@@ -2941,7 +2940,7 @@
       const [islamicSubView, setIslamicSubView] = useState('workbench'); // 'workbench' or 'library'
       const [uploadedFileInfo, setUploadedFileInfo] = useState(null); // { name, sizeKb, wordCount, lineCount }
       const [isExtractingFile, setIsExtractingFile] = useState(false);
-      const [activeIslamicStage, setActiveIslamicStage] = useState(1); // 1, 2, 3, 4, 5, 6
+      const [activeIslamicStage, setActiveIslamicStage] = useState(() => (localStorage.getItem('mishkah_active_islamic_data') ? 2 : 1)); // 1 to 6
       const [islamicViewMode, setIslamicViewMode] = useState('stepper'); // 'stepper' (single stage focus) or 'all' (continuous)
       const [librarySearchQuery, setLibrarySearchQuery] = useState('');
       const [libraryFilterDiscipline, setLibraryFilterDiscipline] = useState('all');
@@ -4113,10 +4112,10 @@
                           }
                         }}
                         className="bg-gold-400 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1 transition"
-                        title={isRtl ? 'الإصدار المعتمد v47.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v47.0 — Click to force reload'}
+                        title={isRtl ? 'الإصدار المعتمد v48.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v48.0 — Click to force reload'}
                       >
                         <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                        <span>{isRtl ? 'الإصدار v47.0' : 'v47.0'}</span>
+                        <span>{isRtl ? 'الإصدار v48.0' : 'v48.0'}</span>
                         <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                           {isRtl ? 'أحدث تحديث' : 'Latest'}
                         </span>
@@ -4444,11 +4443,34 @@
                         : 'Combines authentic 15-line Madinah Mushaf visual page with live mastery testing tools: mask endings, blind recitation, word-masking, and mutashabihat.'}
                     </p>
 
-                    {/* Authentic Mushaf Page Header Badge */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-emerald-800/80">
-                      <div className="inline-flex items-center gap-2 bg-emerald-950/90 text-gold-300 px-4 py-2 rounded-2xl border border-gold-400/60 shadow-md text-xs sm:text-sm font-black">
-                        <span>📖</span>
-                        <span>{isRtl ? 'لوحة التسميع المباشرة على صفحة مصحف المدينة الورقي الشريف (15 سطراً)' : 'Authentic 15-Line Madinah Mushaf Page'}</span>
+                    {/* Authentic Mode Switcher Bar */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-emerald-800/80">
+                      <div className="bg-emerald-950 p-1.5 rounded-2xl border-2 border-gold-400 flex items-center gap-2 shadow-lg">
+                        <button
+                          type="button"
+                          onClick={() => setHifzViewMode('interactive_test')}
+                          className={'px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 ' + (
+                            hifzViewMode === 'interactive_test'
+                              ? 'bg-gold-500 text-emerald-950 shadow-md ring-2 ring-gold-300'
+                              : 'text-gold-200 hover:bg-emerald-900/60'
+                          )}
+                        >
+                          <span>📜</span>
+                          <span>{isRtl ? 'لوحة التسميع بالأسطر والآيات (الأسطر المتقنة)' : 'Digital Line Recitation Board'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setHifzViewMode('mushaf_page')}
+                          className={'px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 ' + (
+                            hifzViewMode === 'mushaf_page'
+                              ? 'bg-gold-500 text-emerald-950 shadow-md ring-2 ring-gold-300'
+                              : 'text-gold-200 hover:bg-emerald-900/60'
+                          )}
+                        >
+                          <span>📖</span>
+                          <span>{isRtl ? 'عرض وجه المصحف الورقي المصور' : 'Printed Mushaf Page Image'}</span>
+                        </button>
                       </div>
 
                       {/* Quick Shortcut Buttons in Header (Synchronized across both modes) */}
@@ -4481,7 +4503,7 @@
                 </div>
 
                 {/* ================= AUTHENTIC PRINTED MADINAH MUSHAF PAGE ================= */}
-                {(true) && (
+                {hifzViewMode === 'mushaf_page' && (
                   <div className="space-y-6 animate-fadeIn">
                     
                     {/* Navigation Bar for Mushaf Page (Mode 1 - Fully Synchronized) */}
@@ -4644,22 +4666,7 @@
                               <span>{isRtl ? 'كشاف تركيز السطر' : 'Spotlight'}</span>
                             </button>
 
-                            {/* 5. Interactive Click-to-Mask Lines & Sections (100% Solid Opaque Multi-Layer Architecture) */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (mushafOverlayMode === 'interactive_lines') {
-                                  setMushafOverlayMode('none');
-                                } else {
-                                  setMushafOverlayMode('interactive_lines');
-                                  setMaskedMushafLines(new Set(currentMushafLayout.lines.map(l => l.id)));
-                                }
-                              }}
-                              className={'px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1 border ' + (mushafOverlayMode === 'interactive_lines' ? 'bg-gold-500 text-emerald-950 border-gold-600 font-black shadow-md ring-2 ring-gold-300' : 'bg-white text-emerald-950 border-slate-300 hover:bg-slate-50')}
-                            >
-                              <span>🎭</span>
-                              <span>{isRtl ? 'حجب وتسميع الأسطر تفاعلياً' : 'Tap-to-Mask Lines'}</span>
-                            </button>
+
 
                             {/* Reset Button */}
                             {mushafOverlayMode !== 'none' && (
@@ -4677,140 +4684,6 @@
                             )}
                           </div>
                         </div>
-
-                        {/* Interactive Line Masking Sub-bar (Multi-Layer Calibrated Engine) */}
-                        {mushafOverlayMode === 'interactive_lines' && (
-                          <div className="mb-3 bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-950 text-white border-2 border-gold-400 rounded-2xl p-3 sm:p-4 shadow-md space-y-3 animate-fadeIn">
-                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gold-400/30 pb-2.5">
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-gold-300 font-black text-xs sm:text-sm">
-                                    🎭 {isRtl ? 'نظام الطبقات المتعددة: طبقة الحجب المصمتة المعايرة هندسياً (حجب كامل دون تسريب):' : 'Multi-Layer Opaque Recall Engine:'}
-                                  </span>
-                                  <span className="bg-gold-400 text-emerald-950 text-[10px] sm:text-xs font-black px-2.5 py-0.5 rounded-full shadow-xs">
-                                    {isRtl ? `${maskedMushafLines.size} من ${currentMushafLayout.lines.length} سطراً محجوباً` : `${maskedMushafLines.size} / ${currentMushafLayout.lines.length} masked`}
-                                  </span>
-                                </div>
-                                <p className="text-[11px] text-emerald-200 mt-0.5">
-                                  {isRtl 
-                                    ? 'كل سطر محجوب بطبقة مصمتة 100% بلون ورق المصحف الأصيل دون قص للكلمات. انقر على أي سطر لكشفه، أو استخدم الأنماط التلقائية أدناه:' 
-                                    : 'Calibrated line layers match printed lines with zero text clipping. Tap any line to reveal/mask, or use presets below:'}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Preset Masking Modes */}
-                            <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                              <span className="text-[11px] text-gold-300 font-bold ml-1">{isRtl ? 'أنماط التركيز:' : 'Presets:'}</span>
-                              
-                              <button
-                                type="button"
-                                onClick={() => setMaskedMushafLines(new Set(currentMushafLayout.lines.map(l => l.id)))}
-                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
-                                title="حجب الوجه كاملاً من أول سطر لآخر سطر للتسميع المتدرج"
-                              >
-                                <span>🔒</span>
-                                <span>{isRtl ? `حجب الوجه كاملاً (${currentMushafLayout.lines.length} سطر)` : `Mask All (${currentMushafLayout.lines.length})`}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  // Calibrated alternate lines strictly on Quran verse lines
-                                  const altIds = currentMushafLayout.verseLineIds.filter((_, idx) => idx % 2 === 0);
-                                  setMaskedMushafLines(new Set(altIds));
-                                }}
-                                className="px-2.5 py-1.5 bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black rounded-xl transition flex items-center gap-1 shadow-xs"
-                                title="حجب سطر وسطر بالضبط على أسطر الآيات لاختبار ربط بدايات ونهايات الأسطر دون قطع الحروف"
-                              >
-                                <span>🌓</span>
-                                <span>{isRtl ? 'حجب تبادلي (سطر وسطر)' : 'Alternate Lines'}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const halfLen = Math.ceil(currentMushafLayout.verseLineIds.length / 2);
-                                  setMaskedMushafLines(new Set(currentMushafLayout.verseLineIds.slice(0, halfLen)));
-                                }}
-                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
-                              >
-                                <span>🔺</span>
-                                <span>{isRtl ? 'حجب النصف الأعلى' : 'Top Half'}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const halfLen = Math.floor(currentMushafLayout.verseLineIds.length / 2);
-                                  setMaskedMushafLines(new Set(currentMushafLayout.verseLineIds.slice(halfLen)));
-                                }}
-                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
-                              >
-                                <span>🔻</span>
-                                <span>{isRtl ? 'حجب النصف الأسفل' : 'Bottom Half'}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const thirdLen = Math.ceil(currentMushafLayout.verseLineIds.length / 3);
-                                  setMaskedMushafLines(new Set(currentMushafLayout.verseLineIds.slice(0, thirdLen)));
-                                }}
-                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
-                              >
-                                <span>📊</span>
-                                <span>{isRtl ? 'الثلث 1' : '1st Third'}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const t1 = Math.ceil(currentMushafLayout.verseLineIds.length / 3);
-                                  const t2 = Math.ceil(currentMushafLayout.verseLineIds.length * 2 / 3);
-                                  setMaskedMushafLines(new Set(currentMushafLayout.verseLineIds.slice(t1, t2)));
-                                }}
-                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
-                              >
-                                <span>📊</span>
-                                <span>{isRtl ? 'الثلث 2' : '2nd Third'}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const t2 = Math.ceil(currentMushafLayout.verseLineIds.length * 2 / 3);
-                                  setMaskedMushafLines(new Set(currentMushafLayout.verseLineIds.slice(t2)));
-                                }}
-                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
-                              >
-                                <span>📊</span>
-                                <span>{isRtl ? 'الثلث 3' : '3rd Third'}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const copy = [...currentMushafLayout.verseLineIds].sort(() => 0.5 - Math.random());
-                                  setMaskedMushafLines(new Set(copy.slice(0, Math.min(7, copy.length))));
-                                }}
-                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
-                              >
-                                <span>🎲</span>
-                                <span>{isRtl ? 'حجب عشوائي' : 'Random Lines'}</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => setMaskedMushafLines(new Set())}
-                                className="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-emerald-950 rounded-xl font-bold transition flex items-center gap-1"
-                              >
-                                <span>👁️</span>
-                                <span>{isRtl ? 'كشف كامل الوجه' : 'Reveal All'}</span>
-                              </button>
-                            </div>
-                          </div>
-                        )}
 
                         {/* Interactive Ruler Controls (When ruler or spotlight active) */}
                         {(mushafOverlayMode === 'ruler' || mushafOverlayMode === 'spotlight') && (
@@ -4947,54 +4820,7 @@
                               </div>
                             )}
 
-                            {/* OVERLAY: Multi-Layer Architecture: Calibrated Line Masking Layers (Tap-to-Mask / Tap-to-Reveal) */}
-                            {mushafOverlayMode === 'interactive_lines' && (
-                              <div className="absolute inset-0 select-none pointer-events-auto" style={{ zIndex: 12 }}>
-                                {currentMushafLayout.lines.map(lineItem => {
-                                  const isLineMasked = maskedMushafLines.has(lineItem.id);
-                                  return (
-                                    <div
-                                      key={`mushaf-layer-line-${lineItem.id}`}
-                                      onClick={() => {
-                                        setMaskedMushafLines(prev => {
-                                          const next = new Set(prev);
-                                          if (next.has(lineItem.id)) next.delete(lineItem.id);
-                                          else next.add(lineItem.id);
-                                          return next;
-                                        });
-                                      }}
-                                      className={'absolute rounded-lg cursor-pointer transition-all duration-150 flex items-center justify-between px-3 sm:px-4 ' + (
-                                        isLineMasked
-                                          ? 'shadow-xs border-y-2 border-amber-600/70 hover:border-amber-500'
-                                          : 'hover:bg-amber-400/20 border border-transparent hover:border-gold-400/40'
-                                      )}
-                                      style={{
-                                        top: lineItem.top + '%',
-                                        height: lineItem.height + '%',
-                                        left: '2%',
-                                        right: '2%',
-                                        backgroundColor: isLineMasked ? '#FAF7EE' : 'transparent',
-                                        opacity: 1,
-                                        zIndex: isLineMasked ? 16 : 13
-                                      }}
-                                      title={isLineMasked ? (isRtl ? `${lineItem.label} محجوب بالكامل — انقر للكشف` : `${lineItem.label} masked — tap to reveal`) : (isRtl ? `${lineItem.label} مكشوف — انقر للحجب` : `${lineItem.label} revealed — tap to mask`)}
-                                    >
-                                      {isLineMasked && (
-                                        <>
-                                          <span className="text-[10px] sm:text-xs font-black text-emerald-950 font-cairo flex items-center gap-1.5 opacity-90 select-none">
-                                            <span>🔒</span>
-                                            <span>{lineItem.label}</span>
-                                          </span>
-                                          <span className="text-[9px] sm:text-[11px] font-bold text-amber-900/80 hidden sm:inline select-none">
-                                            {isRtl ? 'انقر لكشف السطر' : 'tap to reveal'}
-                                          </span>
-                                        </>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
+
                           </div>
                         </div>
 
@@ -5121,7 +4947,31 @@
                           <span>{isRtl ? (isDivineNamesMasked ? 'إلغاء طمس الصفات' : 'طمس الأسماء الحسنى') : 'Divine Names'}</span>
                         </button>
 
-                        {/* 4. Alternating 50% Cloze (Innovative) */}
+                        {/* 4. Alternating Lines (Line by Line) */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (passageMaskedAyahs.size > 0 && passageTestSection === 'alternate_lines') {
+                              setPassageTestSection('none');
+                              setPassageMaskedAyahs(new Set());
+                            } else {
+                              const altNums = hifzAyahs.filter((_, idx) => idx % 2 === 1).map(a => a.num);
+                              setPassageTestSection('alternate_lines');
+                              setPassageMaskedAyahs(new Set(altNums));
+                            }
+                          }}
+                          className={`p-2.5 rounded-xl font-bold text-xs transition flex flex-col items-center justify-center text-center gap-1 border shadow-xs ${
+                            passageTestSection === 'alternate_lines'
+                              ? 'bg-gold-500 text-emerald-950 border-gold-600 ring-2 ring-gold-400 font-black shadow-md'
+                              : 'bg-white hover:bg-amber-50 text-emerald-950 border-amber-300'
+                          }`}
+                          title={isRtl ? 'حجب سطر وسطر بدقة 100% دون أي تقطيع في الحروف' : 'Alternate Lines'}
+                        >
+                          <span className="text-base">🌓</span>
+                          <span>{isRtl ? (passageTestSection === 'alternate_lines' ? 'إلغاء سطر وسطر' : 'حجب سطر وسطر') : 'Alternate Lines'}</span>
+                        </button>
+
+                        {/* 4b. Alternating 50% Cloze */}
                         <button
                           type="button"
                           onClick={() => setIsAlternatingMasked(!isAlternatingMasked)}
