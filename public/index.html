@@ -3989,8 +3989,24 @@
                       <h1 className="text-xl sm:text-2xl font-black tracking-wide text-gold-200 font-amiri leading-none">
                         {isRtl ? 'مِشكاة' : 'Mishkah'}
                       </h1>
-                      <span className="bg-gold-500/20 text-gold-300 border border-gold-400/40 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold">
-                        v1.0 MVP
+                      <span 
+                        onClick={() => {
+                          if ('caches' in window) {
+                            caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
+                              window.location.reload(true);
+                            });
+                          } else {
+                            window.location.reload(true);
+                          }
+                        }}
+                        className="bg-gold-400 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1 transition"
+                        title={isRtl ? 'الإصدار المعتمد v44.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v44.0 — Click to force reload'}
+                      >
+                        <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
+                        <span>{isRtl ? 'الإصدار v44.0' : 'v44.0'}</span>
+                        <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
+                          {isRtl ? 'أحدث تحديث' : 'Latest'}
+                        </span>
                       </span>
                     </div>
                     <p className="text-[10px] sm:text-xs text-emerald-100/90 font-medium hidden sm:block mt-1">
@@ -7886,7 +7902,7 @@
 
                         {/* Top Action & Mode Controls */}
                         <div className="flex flex-wrap items-center gap-2">
-                          {/* View Switch: Live Deck Player vs Grid */}
+                          {/* View Switch: Dual Zoom Studio vs Grid */}
                           <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200 text-xs">
                             <button
                               type="button"
@@ -7897,8 +7913,8 @@
                                   : 'text-slate-600 hover:text-emerald-900'
                               )}
                             >
-                              <span>📽️</span>
-                              <span>{isRtl ? 'العارض الحي' : 'Live Player'}</span>
+                              <span>🎙️</span>
+                              <span>{isRtl ? 'كابينة زوم المزدوجة' : 'Zoom Studio'}</span>
                             </button>
                             <button
                               type="button"
@@ -7939,20 +7955,20 @@
                       {/* Practical Guide Banner for Stage 3 */}
                       <div className="bg-amber-50/80 border border-gold-400/60 rounded-2xl p-3 sm:p-4 text-xs text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
                         <div className="flex items-start gap-2.5">
-                          <span className="text-xl shrink-0 mt-0.5">💡</span>
+                          <span className="text-xl shrink-0 mt-0.5">🎙️</span>
                           <div className="space-y-0.5">
                             <span className="font-black text-amber-900 block font-cairo">
-                              {isRtl ? 'دليل المعلم في قاعة الدرس والزوم:' : 'Teacher Field Instructions:'}
+                              {isRtl ? 'كابينة المعلم لحلقة زوم الأونلاين (شاشة مزدوجة متزامنة):' : 'Zoom Educator Dual-Pane Studio:'}
                             </span>
                             <p className="text-[11px] text-slate-700 leading-relaxed">
                               {isRtl 
-                                ? 'استخدم مشغل الشرائح الحي لعرض أفكار الدرس بنقرات انسيابية، أو اضغط [ملء الشاشة لزوم] لبث الشرائح مباشرة على البروجكتور، أو حمّل ملف PowerPoint لتشغيله أوفلاين على حاسوبك.'
-                                : 'Use live deck player for interactive recitation, or click Fullscreen for Zoom/Projector, or download offline PowerPoint.'}
+                                ? 'الشاشة مقسمة لجزئين: الجانب الأيمن شريحة مرئية للدارس على زوم تركز بصره، والجانب الأيسر هو كابينة وتفريغ المحاضرة الخاص بك لتشرح وتفيض منه بطلاقة دون أن يراه الطلاب.'
+                                : 'Dual synchronized panes: Right pane is the student visual anchor for Zoom, left pane is your private substantive lecture script.'}
                             </p>
                           </div>
                         </div>
                         <span className="bg-emerald-900 text-gold-200 px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0">
-                          {((islamicData.zoomCards || islamicData.zoomPresentation || []).length || 1)} {isRtl ? 'شرائح جاهزة' : 'slides ready'}
+                          {((islamicData.zoomCards || islamicData.zoomPresentation || []).length || 1)} {isRtl ? 'محاور جاهزة' : 'modules ready'}
                         </span>
                       </div>
 
@@ -7967,102 +7983,162 @@
                         const scriptureText = currentSlide.scriptureEvidence || currentSlide.scripture;
                         const bodyText = currentSlide.talkingPoints || currentSlide.bodyAr || currentSlide.teacherFocusAr;
                         const pedagogicalTip = currentSlide.pedagogicalTip || currentSlide.practicalAction || 'التركيز على ربط المعنى بالسلوك العملي للدارس';
+                        const teleprompterText = currentSlide.fullSectionText || currentSlide.lectureNotes || currentSlide.bodyAr || currentSlide.teacherGuidanceAr || bodyText;
 
                         if (stage3ViewMode === 'player') {
                           return (
                             <div className="space-y-4">
-                              {/* 16:9 Live Widescreen Presenter Deck Card */}
-                              <div className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 text-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border-2 border-gold-400 shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[380px] sm:min-h-[440px]">
+                              {/* DUAL SPLIT-SCREEN COCKPIT FOR ZOOM (Right: Student Slide, Left: Teacher Script) */}
+                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
                                 
-                                {/* Slide Top Header */}
-                                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gold-400/30 pb-3 mb-4">
-                                  <div className="flex items-center gap-2">
-                                    <span className="bg-gold-500 text-emerald-950 text-xs font-black px-3 py-1 rounded-full shadow-xs">
-                                      {isRtl ? `شريحة ${safeIdx + 1} من ${slidesList.length}` : `Slide ${safeIdx + 1} of ${slidesList.length}`}
-                                    </span>
-                                    <span className="bg-emerald-900/80 text-gold-300 border border-gold-400/40 text-[11px] font-bold px-2.5 py-0.5 rounded-xl">
-                                      {currentSlide.phaseTitle || (isRtl ? 'المحور الرئيسي' : 'Main Theme')}
-                                    </span>
+                                {/* RIGHT PANE (7/12 cols): Zoom Student Presentation Slide */}
+                                <div className="lg:col-span-7 flex flex-col justify-between bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 text-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 border-2 border-gold-400 shadow-xl relative overflow-hidden min-h-[440px]">
+                                  
+                                  {/* Slide Top Header */}
+                                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gold-400/30 pb-3 mb-4">
+                                    <div className="flex items-center gap-2">
+                                      <span className="bg-gold-500 text-emerald-950 text-xs font-black px-3 py-1 rounded-full shadow-xs">
+                                        {isRtl ? `شريحة ${safeIdx + 1} من ${slidesList.length}` : `Slide ${safeIdx + 1} of ${slidesList.length}`}
+                                      </span>
+                                      <span className="bg-emerald-900/80 text-gold-300 border border-gold-400/40 text-[11px] font-bold px-2.5 py-0.5 rounded-xl">
+                                        {currentSlide.phaseTitle || (isRtl ? 'المحور المعروض للدارس في زوم' : 'Zoom Student View')}
+                                      </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleStartLecturePresentation(safeIdx)}
+                                        className="bg-emerald-800 hover:bg-gold-500 hover:text-emerald-950 text-gold-200 border border-gold-400/50 text-[11px] font-black px-3 py-1 rounded-xl transition flex items-center gap-1 shadow-xs cursor-pointer"
+                                        title="عرض الشريحة ملء الشاشة لمشاركتها عبر زوم"
+                                      >
+                                        <span>📺</span>
+                                        <span>{isRtl ? 'مشاركة ملء الشاشة لزوم' : 'Zoom Fullscreen'}</span>
+                                      </button>
+                                    </div>
                                   </div>
 
-                                  <div className="flex items-center gap-2">
+                                  {/* Slide Content Area (Visual Anchor for Student) */}
+                                  <div className="space-y-4 my-auto">
+                                    <h4 className="font-amiri text-xl sm:text-2xl lg:text-3xl font-extrabold text-gold-300 leading-snug">
+                                      {currentSlideTitle}
+                                    </h4>
+
+                                    {scriptureText && (
+                                      <div className="font-quran text-base sm:text-lg text-amber-100 leading-relaxed bg-emerald-900/70 p-4 rounded-2xl border-2 border-gold-400/40 shadow-inner">
+                                        « {scriptureText} »
+                                      </div>
+                                    )}
+
+                                    {/* Visual Talking Points */}
+                                    <div className="bg-emerald-950/60 p-3.5 rounded-xl border border-gold-400/20">
+                                      <span className="text-[11px] font-bold text-gold-400 block mb-1.5">
+                                        📌 {isRtl ? 'عناصر المحور المعروضة للدارس:' : 'Key Slide Points:'}
+                                      </span>
+                                      <div className="space-y-1 text-xs text-slate-100 font-amiri leading-relaxed">
+                                        {(currentSlide.talkingPoints ? currentSlide.talkingPoints.split(' • ') : [bodyText]).map((pt, pIdx) => (
+                                          <div key={pIdx} className="flex items-start gap-1.5">
+                                            <span className="text-gold-400 font-bold shrink-0">✦</span>
+                                            <span>{pt}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Slide Navigation Controller */}
+                                  <div className="mt-6 pt-4 border-t border-gold-400/30 flex items-center justify-between gap-2">
                                     <button
                                       type="button"
-                                      onClick={() => handleStartLecturePresentation(safeIdx)}
-                                      className="bg-emerald-800 hover:bg-gold-500 hover:text-emerald-950 text-gold-200 border border-gold-400/50 text-[11px] font-black px-3 py-1 rounded-xl transition flex items-center gap-1 shadow-xs cursor-pointer"
+                                      disabled={safeIdx <= 0}
+                                      onClick={() => setStage3ActiveSlide(Math.max(0, safeIdx - 1))}
+                                      className="bg-emerald-900 hover:bg-emerald-800 disabled:opacity-40 text-gold-200 font-black px-3.5 py-1.5 rounded-xl text-xs border border-gold-400/40 transition flex items-center gap-1 shadow-xs cursor-pointer"
                                     >
-                                      <span>📺</span>
-                                      <span>{isRtl ? 'عرض الشريحة ملء الشاشة' : 'Fullscreen'}</span>
+                                      <span>▶</span>
+                                      <span>{isRtl ? 'المحور السابق' : 'Previous'}</span>
+                                    </button>
+
+                                    {/* Dots indicator */}
+                                    <div className="flex items-center gap-1 overflow-x-auto max-w-[160px] scrollbar-none py-1">
+                                      {slidesList.map((_, dotIdx) => (
+                                        <button
+                                          key={dotIdx}
+                                          type="button"
+                                          onClick={() => setStage3ActiveSlide(dotIdx)}
+                                          className={'w-2 h-2 rounded-full transition-all ' + (
+                                            dotIdx === safeIdx ? 'bg-gold-400 w-5 shadow-xs' : 'bg-emerald-800 hover:bg-emerald-700'
+                                          )}
+                                          title={`محور ${dotIdx + 1}`}
+                                        />
+                                      ))}
+                                    </div>
+
+                                    <button
+                                      type="button"
+                                      disabled={safeIdx >= slidesList.length - 1}
+                                      onClick={() => setStage3ActiveSlide(Math.min(slidesList.length - 1, safeIdx + 1))}
+                                      className="bg-gold-500 hover:bg-gold-400 disabled:opacity-40 text-emerald-950 font-black px-3.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1 shadow-xs cursor-pointer"
+                                    >
+                                      <span>{isRtl ? 'المحور التالي' : 'Next'}</span>
+                                      <span>◀</span>
                                     </button>
                                   </div>
                                 </div>
 
-                                {/* Slide Content Area */}
-                                <div className="space-y-4 my-auto">
-                                  <h4 className="font-amiri text-xl sm:text-3xl font-extrabold text-gold-300 leading-snug">
-                                    {currentSlideTitle}
-                                  </h4>
-
-                                  {scriptureText && (
-                                    <div className="font-quran text-base sm:text-xl text-amber-100 leading-relaxed bg-emerald-900/70 p-4 sm:p-5 rounded-2xl border-2 border-gold-400/40 shadow-inner">
-                                      « {scriptureText} »
-                                    </div>
-                                  )}
-
-                                  {bodyText && (
-                                    <div className="bg-emerald-950/60 p-3.5 sm:p-4 rounded-xl border border-gold-400/20">
-                                      <span className="text-[11px] font-bold text-gold-400 block mb-1">
-                                        📌 {isRtl ? 'نقاط التحدث ومحتوى الشرح للمحاضر:' : 'Lecturer Talking Points:'}
+                                {/* LEFT PANE (5/12 cols): Teacher's Teleprompter & Private Lecture Script */}
+                                <div className="lg:col-span-5 flex flex-col justify-between card-islamic-amber rounded-2xl sm:rounded-3xl p-4 sm:p-5 border-2 border-gold-500/70 shadow-lg min-h-[440px]">
+                                  <div>
+                                    <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-amber-900/15">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-lg">🎙️</span>
+                                        <div>
+                                          <h4 className="text-xs sm:text-sm font-black text-amber-950 font-cairo">
+                                            {isRtl ? 'كابينة وتفريغ المعلم في زوم:' : "Teacher's Zoom Teleprompter:"}
+                                          </h4>
+                                          <span className="text-[10px] text-amber-800 font-bold">
+                                            {isRtl ? 'خاص بالمعلم للشرح والاستفاضة — لا يراه الطالب' : 'Private lecture script'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <span className="bg-emerald-900 text-gold-200 text-[10px] font-black px-2 py-0.5 rounded-full shadow-xs">
+                                        ⏱️ 10 {isRtl ? 'دقائق' : 'mins'}
                                       </span>
-                                      <p className="font-amiri text-xs sm:text-sm text-slate-100 leading-relaxed whitespace-pre-line">
-                                        {bodyText}
-                                      </p>
                                     </div>
-                                  )}
 
-                                  <div className="bg-gold-500/15 border-r-4 border-gold-400 p-3 rounded-xl flex items-center gap-2 text-xs sm:text-sm text-gold-200">
-                                    <span className="text-base shrink-0">💡</span>
-                                    <span><strong>{isRtl ? 'التوجيه التطبيقي للمعلم:' : 'Action Tip:'}</strong> {pedagogicalTip}</span>
+                                    {/* Full Substantive Section Lecture Text */}
+                                    <div className="space-y-3 max-h-[290px] overflow-y-auto pr-1 text-right scrollbar-thin">
+                                      <div className="bg-white/95 p-3.5 rounded-xl border border-amber-300 shadow-xs">
+                                        <span className="text-[11px] font-black text-emerald-950 font-cairo block mb-1.5 flex items-center gap-1">
+                                          <span>📜</span>
+                                          <span>{isRtl ? 'التفريغ العلمي الكامل والشرح التفصيلي لهذا المحور:' : 'Substantive Lecture Script:'}</span>
+                                        </span>
+                                        <p className="font-amiri text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-line text-justify">
+                                          {teleprompterText}
+                                        </p>
+                                      </div>
+
+                                      {/* Pedagogical Facilitation Tip for Zoom */}
+                                      <div className="bg-emerald-950 text-gold-200 p-3 rounded-xl border border-gold-400/40 text-xs shadow-xs space-y-1">
+                                        <div className="flex items-center gap-1.5 font-bold text-gold-300">
+                                          <span>💡</span>
+                                          <span>{isRtl ? 'توجيه إدارة النقاش مع الطلاب على زوم:' : 'Zoom Engagement Guidance:'}</span>
+                                        </div>
+                                        <p className="text-[11px] text-slate-100 leading-relaxed font-amiri">
+                                          {pedagogicalTip}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Teleprompter Footer */}
+                                  <div className="mt-3 pt-2.5 border-t border-amber-900/10 flex items-center justify-between text-[11px] text-amber-900 font-bold">
+                                    <span>{isRtl ? 'تزامن تلقائي مع تقليب الشريحة' : 'Auto-synced with slides'}</span>
+                                    <span className="text-emerald-950 font-black">
+                                      {isRtl ? `المحور ${safeIdx + 1} من ${slidesList.length}` : `${safeIdx + 1}/${slidesList.length}`}
+                                    </span>
                                   </div>
                                 </div>
 
-                                {/* Slide Navigation Controller */}
-                                <div className="mt-6 pt-4 border-t border-gold-400/30 flex items-center justify-between gap-3">
-                                  <button
-                                    type="button"
-                                    disabled={safeIdx <= 0}
-                                    onClick={() => setStage3ActiveSlide(Math.max(0, safeIdx - 1))}
-                                    className="bg-emerald-900 hover:bg-emerald-800 disabled:opacity-40 text-gold-200 font-black px-4 py-2 rounded-xl text-xs sm:text-sm border border-gold-400/40 transition flex items-center gap-1.5 shadow-xs cursor-pointer"
-                                  >
-                                    <span>▶</span>
-                                    <span>{isRtl ? 'الشريحة السابقة' : 'Previous'}</span>
-                                  </button>
-
-                                  {/* Dots indicator */}
-                                  <div className="flex items-center gap-1.5 overflow-x-auto max-w-[200px] sm:max-w-xs scrollbar-none py-1">
-                                    {slidesList.map((_, dotIdx) => (
-                                      <button
-                                        key={dotIdx}
-                                        type="button"
-                                        onClick={() => setStage3ActiveSlide(dotIdx)}
-                                        className={'w-2.5 h-2.5 rounded-full transition-all ' + (
-                                          dotIdx === safeIdx ? 'bg-gold-400 w-6 shadow-xs' : 'bg-emerald-800 hover:bg-emerald-700'
-                                        )}
-                                        title={isRtl ? `شريحة ${dotIdx + 1}` : `Slide ${dotIdx + 1}`}
-                                      />
-                                    ))}
-                                  </div>
-
-                                  <button
-                                    type="button"
-                                    disabled={safeIdx >= slidesList.length - 1}
-                                    onClick={() => setStage3ActiveSlide(Math.min(slidesList.length - 1, safeIdx + 1))}
-                                    className="bg-gold-500 hover:bg-gold-400 disabled:opacity-40 text-emerald-950 font-black px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 shadow-xs cursor-pointer"
-                                  >
-                                    <span>{isRtl ? 'الشريحة التالية' : 'Next'}</span>
-                                    <span>◀</span>
-                                  </button>
-                                </div>
                               </div>
 
                               {/* Thumbnail Filmstrip Selector */}
