@@ -1897,8 +1897,8 @@
         localStorage.setItem('mishkah_font_level', fontSizeLevel);
       }, [fontSizeLevel, isRtl, lang, appFont]);
 
-      // Active View
-      const [activeTab, setActiveTab] = useState('dashboard');
+      // Active View (Default directly to Branch 1: Authentic Mushaf & Recitation)
+      const [activeTab, setActiveTab] = useState('hifz');
 
       // ================= BRANCH 1: HIFZ & RECITATION STATE =================
       const [hifzPassageId, setHifzPassageId] = useState('mulk_page_562');
@@ -1965,7 +1965,7 @@
         const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage);
         if (sMatch) setMushafCurrentSurahId(sMatch.id);
         
-        if (switchMode) setHifzViewMode(switchMode);
+        setHifzViewMode('mushaf_page');
 
         // 1. Check if in preloaded passages
         const preloaded = PRELOADED_HIFZ_PASSAGES.find(item => item.pageNumber === p);
@@ -4093,12 +4093,11 @@
             {/* Navigation Tabs Bar */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-emerald-800/80 flex overflow-x-auto py-1.5 sm:py-2.5 gap-1.5 sm:gap-2 scrollbar-none">
               {[
-                { id: 'dashboard', icon: '📊', labelAr: 'لوحة المعلم', labelEn: 'Dashboard' },
-                { id: 'hifz', icon: '🕋', labelAr: 'أدوات التحفيظ (Branch 1)', labelEn: 'Memorization Tools' },
-                { id: 'tajweed', icon: '📖', labelAr: 'أدوات التجويد (Branch 2)', labelEn: 'Tajweed Tools' },
-                { id: 'islamic', icon: '🕌', labelAr: 'العلوم الشرعية (Branch 3)', labelEn: 'Islamic Studies' },
-                                { id: 'worksheet', icon: '📝', labelAr: 'أوراق العمل والطباعة', labelEn: 'Print Worksheets' },
-                { id: 'quiz', icon: '🎯', labelAr: 'الاختبار الذاتي التفاعلي', labelEn: 'Interactive Quiz' }
+                { id: 'hifz', icon: '🕋', labelAr: '1. التحفيظ ومصحف المدينة', labelEn: '1. Quran & Mushaf' },
+                { id: 'tajweed', icon: '📖', labelAr: '2. التجويد ومخارج الحروف', labelEn: '2. Tajweed Rules' },
+                { id: 'islamic', icon: '🕌', labelAr: '3. حلقات ومحاضرات العلوم الشرعية', labelEn: '3. Islamic Lectures' },
+                { id: 'worksheet', icon: '📝', labelAr: 'بنك أوراق العمل والطباعة', labelEn: 'Worksheets Bank' },
+                { id: 'quiz', icon: '🎯', labelAr: 'بنك الاختبارات الذاتية', labelEn: 'Quiz Bank' }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -4316,34 +4315,11 @@
                         : 'Combines authentic 15-line Madinah Mushaf visual page with live mastery testing tools: mask endings, blind recitation, word-masking, and mutashabihat.'}
                     </p>
 
-                    {/* Mode Toggle Switch (Mushaf Page vs Interactive Testing) */}
-                    <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-emerald-800/80">
-                      <div className="inline-flex bg-emerald-950/90 p-1.5 rounded-2xl border border-gold-400/60 shadow-md">
-                        <button
-                          type="button"
-                          onClick={() => setHifzViewMode('mushaf_page')}
-                          className={`px-4 sm:px-5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition ${
-                            hifzViewMode === 'mushaf_page'
-                              ? 'bg-gold-500 text-emerald-950 font-black shadow-md ring-2 ring-gold-300'
-                              : 'text-gold-200 hover:text-white'
-                          }`}
-                        >
-                          <span>📖</span>
-                          <span>{isRtl ? '1. وجه المصحف الورقي (15 سطراً)' : '1. Real Mushaf Page'}</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleNavigateMushafPage(mushafPageNumber, 'interactive_test')}
-                          className={`px-4 sm:px-5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition ${
-                            hifzViewMode === 'interactive_test'
-                              ? 'bg-gold-500 text-emerald-950 font-black shadow-md ring-2 ring-gold-300'
-                              : 'text-gold-200 hover:text-white'
-                          }`}
-                        >
-                          <span>🎯</span>
-                          <span>{isRtl ? '2. لوحة التسميع واختبار الإتقان' : '2. Recitation & Testing Board'}</span>
-                        </button>
+                    {/* Authentic Mushaf Page Header Badge */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-emerald-800/80">
+                      <div className="inline-flex items-center gap-2 bg-emerald-950/90 text-gold-300 px-4 py-2 rounded-2xl border border-gold-400/60 shadow-md text-xs sm:text-sm font-black">
+                        <span>📖</span>
+                        <span>{isRtl ? 'لوحة التسميع المباشرة على صفحة مصحف المدينة الورقي الشريف (15 سطراً)' : 'Authentic 15-Line Madinah Mushaf Page'}</span>
                       </div>
 
                       {/* Quick Shortcut Buttons in Header (Synchronized across both modes) */}
@@ -4375,8 +4351,8 @@
                   </div>
                 </div>
 
-                {/* ================= MODE A: THE REAL PRINTED MADINAH MUSHAF PAGE ================= */}
-                {hifzViewMode === 'mushaf_page' && (
+                {/* ================= AUTHENTIC PRINTED MADINAH MUSHAF PAGE ================= */}
+                {(true) && (
                   <div className="space-y-6 animate-fadeIn">
                     
                     {/* Navigation Bar for Mushaf Page (Mode 1 - Fully Synchronized) */}
@@ -5023,8 +4999,8 @@
                   </div>
                 )}
 
-                {/* ================= MODE B: INTERACTIVE RECITATION & MASTERY TESTING ================= */}
-                {hifzViewMode === 'interactive_test' && (
+                {/* ================= MODE B: DEPRECATED LEGACY DIGITAL TEXT (DISABLED) ================= */}
+                {(false) && (
                   <div className="space-y-6 animate-fadeIn">
                     
                     {/* Live Recitation Controls Ribbon */}
@@ -7951,10 +7927,11 @@
                             type="button"
                             onClick={handleExportIslamicPowerPoint}
                             disabled={isExportingPptx}
-                            className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-3.5 py-1.5 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 transform hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
+                            className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-2 transform hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer border-2 border-gold-300 ring-2 ring-gold-400/40"
+                            title={isRtl ? 'تنزيل ملف بوربوينت (.pptx) كامل التنسيق والشرائح للعرض أوفلاين' : 'Download PowerPoint (.pptx)'}
                           >
-                            <span>📥</span>
-                            <span>{isExportingPptx ? (isRtl ? 'جاري التصدير...' : 'Exporting...') : (isRtl ? 'تنزيل بوربوينت PPTX' : 'Export PPTX')}</span>
+                            <span className="text-base">📥</span>
+                            <span>{isExportingPptx ? (isRtl ? 'جاري تجهيز البوربوينت...' : 'Exporting...') : (isRtl ? 'تنزيل كملف بوربوينت (.pptx)' : 'Download PowerPoint (.pptx)')}</span>
                           </button>
                         </div>
                       </div>
@@ -8239,10 +8216,11 @@
                           <button
                             type="button"
                             onClick={() => window.print()}
-                            className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 font-bold px-3.5 py-2 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                            className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 border-2 border-gold-400 font-black px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-2 transform hover:scale-105 active:scale-95 cursor-pointer"
+                            title={isRtl ? 'طباعة الورقة أو حفظها كملف PDF من خيارات الطابعة' : 'Print or Save as PDF'}
                           >
                             <span>🖨️</span>
-                            <span>{isRtl ? 'طباعة ورقة العمل للدارسين' : 'Print Worksheet'}</span>
+                            <span>{isRtl ? 'طباعة ورقة العمل / حفظ كـ PDF' : 'Print Worksheet / Save PDF'}</span>
                           </button>
                         </div>
                       </div>
