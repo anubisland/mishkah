@@ -3926,22 +3926,39 @@
       function cleanSlideTitle(rawTitle) {
         if (!rawTitle) return 'محور الدرس';
         let t = rawTitle.replace(/^(?:المحور \d+[:\s]*|Theme \d+[:\s]*)/, '').trim();
-        t = t.replace(/(?:تأليف|للمؤلف|دار|نشر|صفحة|طبعة|تحقيق|إعداد)[\s\S]*$/, '').trim();
+        t = t.replace(/(?:تأليف|للمؤلف|دار|نشر|صفحة|طبعة|تحقيق|إعداد|ردمك|ISBN)[\s\S]*$/, '').trim();
         t = t.replace(/[:\-–—].*$/, '').trim();
-        if (t.length > 50) t = t.substring(0, 48) + '...';
+        if (t.length > 55) t = t.substring(0, 52) + '...';
         return t || 'محور الدرس ومسائله';
       }
 
-      // Professional Slide Distiller: Converts long paragraphs into 2-3 punchy, readable presentation bullets
+      // Professional Slide Distiller: Converts text into 3 articulate, substantive scholarly bullets
       function extractConciseSlideBullets(lines, secTitle) {
         const bullets = [];
+        const isNoiseLine = (t) => /^(?:ملاحظة منهجية|هذا الملخص|نسخة ممسوحة|التعرف على نصوصها|أخطاء طباعية|دار النشر|دار الوعي|طبعة ورقية|ملحق تعقيبي|ردمك|ISBN|\(?\d+\s*صفحة\)?)/i.test(t);
+
         for (const line of lines) {
           const clean = line.replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
-          if (/^(?:ملاحظة منهجية|هذا الملخص|دار النشر|طبعة|جميع الحقوق|تأليف)/i.test(clean)) continue;
-          const clauses = clean.split(/[،؛\.\-–]/).map(c => c.trim()).filter(c => c.length >= 14 && c.length <= 65);
-          for (const cl of clauses) {
-            if (!/^(?:أولا|ثانيا|ثالثا|وقد|كما أن|حيث إن|مما يذكر)/.test(cl)) {
-              bullets.push(cl);
+          if (!clean || isNoiseLine(clean)) continue;
+
+          // Split ONLY on sentence boundaries (period, newline, semicolon), NEVER commas!
+          const sentences = clean.split(/[.\n؛]/).map(s => s.trim()).filter(s => s.length >= 28);
+          for (let s of sentences) {
+            if (isNoiseLine(s)) continue;
+            if (/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|المبحث|المطلب|الفصل|الباب|المحور|القسم)/.test(s)) continue;
+
+            // Handle long sentences gracefully without destroying meaning
+            if (s.length > 115) {
+              const subClauses = s.split(/(?:\s+بل\s+|\s+حيث\s+|\s+كما\s+|\s+إذ\s+)/).map(c => c.trim()).filter(c => c.length >= 28 && c.length <= 115);
+              if (subClauses.length > 0) {
+                s = subClauses[0];
+              } else {
+                s = s.substring(0, 110).trim() + '...';
+              }
+            }
+
+            if (!bullets.includes(s)) {
+              bullets.push(s);
               if (bullets.length >= 3) break;
             }
           }
@@ -3950,17 +3967,17 @@
 
         const baseTitle = cleanSlideTitle(secTitle);
         if (bullets.length === 0) {
-          bullets.push(`تأصيل ومناقشة: ${baseTitle}`);
-          bullets.push('بيان الضوابط الشرعية والقواعد المنهجية');
-          bullets.push('الاستنباط التربوي والتطبيق العملي المعاصر');
+          bullets.push(`تحرير ومناقشة أبعاد: ${baseTitle}`);
+          bullets.push('بيان الضوابط الشرعية والقواعد المنهجية الحاكمة للمسألة');
+          bullets.push('الأثر السلوكي والواجب المنهجي المنضبط في واقع الدارسين');
         } else if (bullets.length === 1) {
-          bullets.push('تحرير محل النزاع وتحديد المفاهيم الشرعية');
-          bullets.push('الثمرة السلوكية وأثر الفهم المنضبط في الواقع');
+          bullets.push('تحرير محل النزاع وتحديد المفاهيم الشرعية بدقة');
+          bullets.push('الأثر المنهجي والواجب العملي تجاه مقتضيات هذا المحور');
         } else if (bullets.length === 2) {
-          bullets.push('خلاصة المسألة والواجب العملي تجاهها');
+          bullets.push('خلاصة المسألة وتوجيهات التطبيق العملي للدارسين');
         }
 
-        return bullets.slice(0, 3).map(b => b.length > 65 ? (b.substring(0, 63) + '...') : b);
+        return bullets.slice(0, 3);
       }
 
       function handleProcessCustomLecture() {
@@ -3972,18 +3989,41 @@
         const rawClean = sanitizeArabicExtractedText(rawLectureText).trim();
         const rawLines = rawClean.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
 
-        // 1. Detect Lecture Title
+        // Helper to identify OCR scan notices and publishing noise
+        const isNoiseLine = (line) => {
+          if (!line) return true;
+          if (/^(?:ملاحظة منهجية|هذا الملخص معد|نسخة ممسوحة|التعرف على نصوصها|أخطاء طباعية|دار النشر|دار الوعي|طبعة ورقية|ملحق تعقيبي|ردمك|ISBN)/i.test(line)) return true;
+          if (/^\(?\s*\d+\s*(?:صفحة|ص)?\s*\)?$/i.test(line)) return true;
+          if (line.includes('نسخة ممسوحة ضوئيا') || line.includes('359 صفحة')) return true;
+          return false;
+        };
+
+        const cleanLines = rawLines.filter(l => !isNoiseLine(l));
+
+        // 1. Detect Lecture Title from non-noise initial lines
         let detectedTopic = (lessonTopic && lessonTopic.trim()) || '';
+        let startContentIndex = 0;
+
         if (!detectedTopic) {
-          for (let i = 0; i < Math.min(4, rawLines.length); i++) {
-            const line = rawLines[i].replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
-            if (line.length >= 4 && line.length <= 90 && !line.includes('بسم الله')) {
+          for (let i = 0; i < Math.min(6, cleanLines.length); i++) {
+            const line = cleanLines[i].replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
+            if (line.includes('ملخص') || line.includes('كتاب') || line.includes('تأليف') || line.includes('دراسة')) {
+              detectedTopic = line
+                .replace(/^(?:ملخص شامل ل?|ملخص ك?تاب:?\s*)+/, '')
+                .replace(/تأليف[:\s].*$/, '')
+                .replace(/دار[:\s].*$/, '')
+                .trim();
+              startContentIndex = i + 1;
+              break;
+            } else if (line.length >= 4 && line.length <= 90 && !line.includes('بسم الله')) {
               detectedTopic = line;
+              startContentIndex = i + 1;
               break;
             }
           }
         }
         const topic = detectedTopic || (isRtl ? 'محاضرة شرعية وتأصيل علمي' : 'Islamic Lecture');
+        const contentLines = cleanLines.slice(startContentIndex);
 
         // 2. Detect Subject Category
         let finalCategory = subjectCategory === 'custom' ? (customSubjectCategory.trim() || 'فكر إسلامي ومعاصر') : subjectCategory;
@@ -4004,29 +4044,30 @@
           }
         }
 
-        // 3. Extract Quranic Verses and Hadiths / Citations across text
+        // 3. Extract Quranic Verses and Hadiths / Citations across text (excluding noise)
         const detectedAyahs = [];
         const detectedHadiths = [];
-        rawLines.forEach(l => {
-          if (l.includes('قال تعالى') || l.includes('قوله تعالى') || l.includes('﴿') || (l.includes('سورة') && l.includes(':'))) {
+        contentLines.forEach(l => {
+          if (isNoiseLine(l)) return;
+          if ((l.includes('قال تعالى') || l.includes('قوله تعالى') || l.includes('﴿')) && !l.includes('صفحة')) {
             detectedAyahs.push(l);
-          } else if (l.includes('قال رسول الله') || l.includes('قال ﷺ') || l.includes('صحيح مسلم') || l.includes('صحيح البخاري') || l.includes('رواه') || l.includes('حديث')) {
+          } else if (l.includes('قال رسول الله') || l.includes('قال ﷺ') || l.includes('صحيح مسلم') || l.includes('صحيح البخاري') || l.includes('رواه')) {
             detectedHadiths.push(l);
           }
         });
 
-        // 4. Intelligent Section Segmentation Engine
-        const headingRegex = /^(?:المبحث|المطلب|الفصل|الباب|المحور|المسألة|الوقفة|القسم|الأصل|القاعدة|الضابط|العنصر|النقطة)\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+|[\u0660-\u0669]+|[أ-ي])?[:\.\-\s]|^[#]{1,4}\s+|^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|حادي عشر|ثاني عشر)[:\.\-\s]|^(?:\d+|[\u0660-\u0669]+)[\.\-\)]\s+/i;
+        // 4. Intelligent Dynamic Section Segmentation Engine (Supports up to 20 slides naturally)
+        const headingRegex = /^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|حادي عشر|ثاني عشر|ثالث عشر|رابع عشر|خامس عشر|سادس عشر|المبحث|المطلب|الفصل|الباب|المحور|المسألة|الوقفة|القسم|الأصل|القاعدة|الضابط|العنصر|النقطة)\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+|[\u0660-\u0669]+|[أ-ي])?[:\.\-\s]|^[#]{1,4}\s+|^(?:\d+|[\u0660-\u0669]+)[\.\-\)]\s+/i;
 
         const rawSections = [];
         let currentSec = null;
 
-        for (let i = 0; i < rawLines.length; i++) {
-          const line = rawLines[i];
+        for (let i = 0; i < contentLines.length; i++) {
+          const line = contentLines[i];
           const isHeadingMatch = headingRegex.test(line);
-          const isShortHeaderCandidate = line.length < 65 && !line.endsWith('.') && !line.endsWith('،') && !line.endsWith('؛') && (line.startsWith('**') || line.startsWith('•') || /^[^\s]{3,25}:/.test(line));
+          const isShortHeaderCandidate = line.length < 55 && !line.endsWith('.') && !line.endsWith('،') && !line.endsWith('؛') && (line.startsWith('**') || line.startsWith('•') || /^[^\s]{3,25}:/.test(line));
 
-          if ((isHeadingMatch || isShortHeaderCandidate) && rawSections.length < 10) {
+          if ((isHeadingMatch || isShortHeaderCandidate) && rawSections.length < 24) {
             if (currentSec && currentSec.lines.length > 0) {
               rawSections.push(currentSec);
             }
@@ -4051,38 +4092,36 @@
           rawSections.push(currentSec);
         }
 
-        // Drop preamble metadata (e.g. author name, book title) if it precedes the first formal chapter/section
-        if (rawSections.length > 1 && !rawSections[0].isFormalHeading && rawSections[0].lines.length <= 2) {
-          rawSections.shift();
-        }
+        // Clean out empty or noise sections
+        let processedSections = rawSections.filter(sec => sec.lines.length > 0);
 
-        // Fallback Segmentation if document has no formal headings (continuous paragraphs)
-        let processedSections = [];
-        if (rawSections.length < 2) {
-          const totalLines = rawLines.length;
-          const chunkSize = Math.max(1, Math.ceil(totalLines / 4));
-          for (let c = 0; c < 4; c++) {
-            const chunkLines = rawLines.slice(c * chunkSize, (c + 1) * chunkSize);
+        // Dynamic Chunking for Long Unstructured Lectures (Never clamp to 4!)
+        if (processedSections.length < 3 && contentLines.length > 15) {
+          const totalLines = contentLines.length;
+          const targetSlides = Math.min(16, Math.max(4, Math.ceil(totalLines / 15)));
+          const chunkSize = Math.ceil(totalLines / targetSlides);
+          processedSections = [];
+          for (let c = 0; c < targetSlides; c++) {
+            const chunkLines = contentLines.slice(c * chunkSize, (c + 1) * chunkSize);
             if (chunkLines.length > 0) {
               const firstLine = chunkLines[0].replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
-              const chunkTitle = firstLine.length > 50 ? (firstLine.substring(0, 50) + '...') : firstLine;
+              const chunkTitle = firstLine.length > 50 ? (firstLine.substring(0, 48) + '...') : firstLine;
               processedSections.push({
                 title: (isRtl ? `المحور ${c + 1}: ` : `Theme ${c + 1}: `) + chunkTitle,
                 lines: chunkLines
               });
             }
           }
-        } else {
-          processedSections = rawSections;
         }
 
-        if (processedSections.length > 6) {
-          processedSections = processedSections.slice(0, 6);
+        // Allow up to 20 slides for rich, comprehensive 16-page lectures
+        if (processedSections.length > 20) {
+          processedSections = processedSections.slice(0, 20);
         }
 
         // 5. Build Rich Content for each Section (Worksheet Items, Blueprint & Zoom Cards)
         const totalDuration = lessonDuration || 60;
-        const minutesPerPhase = Math.round(totalDuration / processedSections.length);
+        const minutesPerPhase = Math.round(totalDuration / Math.max(1, processedSections.length));
 
         const blueprintPhases = [];
         const worksheetRows = [];
@@ -4093,18 +4132,22 @@
           const secNum = idx + 1;
           const secText = sec.lines.join(' ');
           
-          // Substantive teacher synthesis extracted directly from the actual text of this section:
-          const candidateSentences = sec.lines.filter(l => l.length > 25 && !l.startsWith('#'));
+          // Substantive teacher synthesis extracted directly from the actual text:
+          const candidateSentences = sec.lines.filter(l => l.length > 25 && !l.startsWith('#') && !isNoiseLine(l));
           let modelAnswer = candidateSentences.slice(0, 3).join(' ') || secText.substring(0, 220);
           if (modelAnswer.length > 280) modelAnswer = modelAnswer.substring(0, 280) + '...';
 
-          // Extract or assign authentic scripture/evidence for this section
+          // Extract 3 substantive, high-quality bullet points for this slide
+          const secBullets = extractConciseSlideBullets(sec.lines, sec.title);
+          const secTalkingPoints = secBullets.join(' • ');
+
+          // Extract or assign authentic scripture/evidence (excluding noise)
           let secScripture = '';
           const vMatch = secText.match(/(?:قال تعالى[:\s]*)?﴿[^﴾]+﴾/);
           const hMatch = secText.match(/(?:قال رسول الله|قال النبي|روى البخاري|حديث)[\s\S]*?(?:«[^»]+»|"[^"]+")/);
-          if (vMatch) {
+          if (vMatch && !vMatch[0].includes('صفحة') && !vMatch[0].includes('ممسوحة')) {
             secScripture = vMatch[0];
-          } else if (hMatch) {
+          } else if (hMatch && !hMatch[0].includes('صفحة') && !hMatch[0].includes('ممسوحة')) {
             secScripture = hMatch[0];
           } else if (detectedAyahs[idx % Math.max(1, detectedAyahs.length)]) {
             secScripture = detectedAyahs[idx % Math.max(1, detectedAyahs.length)];
@@ -4114,16 +4157,9 @@
             secScripture = '﴿فَاسْتَمْسِكْ بِالَّذِي أُوحِيَ إِلَيْكَ ۖ إِنَّكَ عَلَىٰ صِرَاطٍ مُّسْتَقِيمٍ﴾ [الزخرف: 43]';
           }
 
-          // Generate a specific, non-generic student question based on the section's actual topic & text
+          // Generate student question & practical impact
           const studentQ = `في ضوء محور (${sec.title})؛ بيّن القضية الشرعية أو الفكرية التي يقررها النص، وما هو الأثر المترتب عليها في واقع المسلم؟`;
-
-          // Generate an actionable practical & behavioral impact
           const practicalImp = `ترسيخ الوعي المنضبط بـ (${sec.title})، والاعتزاز بمرجعية الوحي وسلطان النص، وتطبيق ذلك في الحوار ودفع الشبهات.`;
-
-          // Key talking points from section
-          const secTalkingPoints = candidateSentences.slice(0, 2).length > 0 
-            ? candidateSentences.slice(0, 2) 
-            : [`تأصيل مسألة: ${sec.title}`, 'استنباط الثمرة المنهجية والتربوية'];
 
           // A. Blueprint Phase
           blueprintPhases.push({
@@ -4137,10 +4173,11 @@
             studentQuestion: studentQ,
             practicalImpact: practicalImp,
             scripture: secScripture,
+            bulletPoints: secBullets,
             talkingPoints: secTalkingPoints
           });
 
-          // B. Worksheet Row (Used directly by handleTransferLectureToWorksheet)
+          // B. Worksheet Row
           worksheetRows.push({
             num: secNum,
             topic: sec.title,
@@ -4157,15 +4194,16 @@
             phaseTitle: `المحور ${secNum}`,
             slideTitle: sec.title,
             scriptureEvidence: secScripture,
-            talkingPoints: secTalkingPoints.join(' • '),
+            bulletPoints: secBullets,
+            talkingPoints: secTalkingPoints,
             pedagogicalTip: practicalImp,
             titleAr: sec.title,
             bodyAr: modelAnswer,
             practicalAction: practicalImp
           });
 
-          // D. Authentic Quiz Question derived from this section
-          let coreCorrectStatement = candidateSentences[0] || modelAnswer;
+          // D. Quiz Question derived from this section
+          let coreCorrectStatement = secBullets[0] || candidateSentences[0] || modelAnswer;
           if (coreCorrectStatement.length > 95) coreCorrectStatement = coreCorrectStatement.substring(0, 95) + '...';
 
           quizList.push({
@@ -4200,7 +4238,7 @@
         } else {
           allEvidences.push({
             type: 'quran',
-            arabicText: 'يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ ٱتَّقُوا۟ ٱللَّهَ وَقُولُوا۟ قَوْلًۭا سَدِيدًۭا',
+            arabicText: 'يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ ٱتَّقُوا۟ ٱللَّهَ وَقُولُوا۟ قَوْلًۭا سَدِيدًۭا',
             englishTranslation: 'O you who have believed, fear Allah and speak words of appropriate justice.',
             citation: 'سورة الأحزاب: 70',
             narrator: '—',
@@ -4219,42 +4257,32 @@
           });
         }
 
-        // 7. Rich WhatsApp Summary
-        const summaryPoints = processedSections.slice(0, 4).map((s, idx) => {
-          const numEmoji = ['1️⃣', '2️⃣', '3️⃣', '4️⃣'][idx] || '🔹';
-          const summarySnippet = s.lines.find(l => l.length > 20) || s.title;
-          return `${numEmoji} *${s.title}:* ${summarySnippet.substring(0, 80)}`;
-        }).join('\n');
-
-        const whatsAppSummary = `🌿 *خلاصة درس اليوم:* ${topic} 🌿\n\nالسلام عليكم ورحمة الله وبركاته يا أحبة 🌸\n\n📌 *الموضوع:* ${topic} (${finalCategory})\n\n✨ *أهم المحاور والفوائد المستفادة:*\n${summaryPoints}\n\n🎯 *الواجب العملي للأسبوع:* مدارسة هذه المحاور وتطبيق مقتضاها السلوكي في حماية الفهم المنضبط ونقله للغير.\n\n🔗 منصة مِشكاة لتعليم القرآن والعلوم الشرعية — حفظكم الله وبارك فيكم! 🤍`;
-
-        // 8. Assemble Full Package Data
-        const packageData = {
+        const generatedData = {
           metadata: {
             topic: topic,
+            audience: studentLevel === 'intermediate' ? 'المستوى المتوسط' : (studentLevel === 'advanced' ? 'المستوى المتقدم والتأصيلي' : 'المستوى المبتدئ والناشئة'),
+            duration: totalDuration,
+            targetOutcome: isRtl ? `استيعاب أصول ومسائل (${topic}) والتطبيق المنهجي المعاصر` : `Comprehending issues of (${topic})`,
             category: finalCategory,
-            durationMinutes: totalDuration,
-            audience: audienceLevel || 'الدارسين والحلقة'
+            discipline: finalCategory
           },
           blueprint: blueprintPhases,
           worksheetItems: worksheetRows,
-          evidences: allEvidences,
-          hadithVerification: allEvidences,
+          worksheet: worksheetRows,
           zoomCards: zoomDeck,
           zoomPresentation: zoomDeck,
-          whatsAppKit: {
-            headline: 'خلاصة: ' + topic,
-            formattedText: whatsAppSummary,
-            actionItem: 'شاركنا تطبيقك العملي لدرس اليوم!'
-          },
           quizQuestions: quizList,
-          reviewQuiz: quizList
+          evidences: allEvidences,
+          discussionPrompts: [
+            `ما هو أثر تعظيم مرجعية الوحي وسلطان النص في صيانة الفكر المعاصر؟`,
+            `كيف نطبق الضوابط والقواعد المستفادة من (${topic}) في واقعنا وحواراتنا؟`
+          ]
         };
 
-        setIslamicData(packageData);
-        setLessonTopic(topic);
-        setSubjectCategory(finalCategory);
-        showToast(isRtl ? `تم استخلاص وتحليل (${processedSections.length}) محاور وتوليد ورقة العمل والاختبار بنجاح ✨` : 'Lecture analyzed successfully ✨');
+        setIslamicData(generatedData);
+        setActiveIslamicStage(2);
+        setStage3ActiveSlide(0);
+        showToast(isRtl ? `تم تحليل المحاضرة واستخلاص ${processedSections.length} محوراً تفصيلياً مع عناصر العرض بنجاح ✨` : `Parsed lecture into ${processedSections.length} detailed modules ✨`);
       }
 
       function handleSaveIslamicLecture() {
@@ -4365,34 +4393,34 @@
           const category = (islamicData.metadata && islamicData.metadata.category) || 'العلوم الشرعية';
           const audience = (islamicData.metadata && islamicData.metadata.audience) || 'الدارسين والحلقة';
 
-          // SLIDE 1: COVER SLIDE (Centered, 10.0 x 5.625 in, margins x: 0.8, w: 8.4)
+          // SLIDE 1: COVER SLIDE (10.0 x 5.625 in, margins x: 0.8, w: 8.4)
           const cover = pptx.addSlide();
           cover.background = { color: '062319' }; // Deep Islamic Emerald
 
           cover.addText('مِشكاة | منصة التعليم الشرعي والقرآني', {
             x: 0.8, y: 0.8, w: 8.4, h: 0.4,
-            fontSize: 12, fontFace: 'Arial', color: 'D97706', bold: true, align: 'right'
+            fontSize: 12, fontFace: 'Arial', color: 'D97706', bold: true, align: 'right', rtlMode: true
           });
 
           cover.addText(cleanTopic, {
-            x: 0.8, y: 1.4, w: 8.4, h: 1.4,
-            fontSize: 24, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'right'
+            x: 0.8, y: 1.4, w: 8.4, h: 1.3,
+            fontSize: 22, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'right', rtlMode: true
           });
 
           cover.addText(`المجال: ${category}   •   المستوى: ${audience}`, {
-            x: 0.8, y: 2.9, w: 8.4, h: 0.4,
-            fontSize: 12, fontFace: 'Arial', color: '86EFAC', align: 'right'
+            x: 0.8, y: 2.8, w: 8.4, h: 0.4,
+            fontSize: 12, fontFace: 'Arial', color: '86EFAC', align: 'right', rtlMode: true
           });
 
           // Gold Separator Line
           cover.addShape(pptx.ShapeType.line, {
-            x: 0.8, y: 3.4, w: 8.4, h: 0,
+            x: 0.8, y: 3.3, w: 8.4, h: 0,
             line: { color: 'C69214', width: 1.5 }
           });
 
-          cover.addText('إعداد وتقديم: فضيلة المعلم والمحاضر الشرعي\nمنظومة مِشكاة — شركة AnubisLand للحلول الرقمية', {
-            x: 0.8, y: 3.7, w: 8.4, h: 0.8,
-            fontSize: 11, fontFace: 'Arial', color: '94A3B8', align: 'right'
+          cover.addText('إعداد وتقديم: فضيلة المعلم والمحاضر الشرعي\nمنظومة مِشكاة للتعليم الشرعي — شركة AnubisLand للحلول الرقمية', {
+            x: 0.8, y: 3.6, w: 8.4, h: 0.9,
+            fontSize: 11, fontFace: 'Arial', color: '94A3B8', align: 'right', rtlMode: true
           });
 
           // CONTENT SLIDES: Each section / module
@@ -4407,109 +4435,83 @@
             // 1. Slide Title Header
             const slideTitleText = cleanSlideTitle(s.slideTitle || s.phaseTitle || s.phaseNameAr || (`المحور ${idx + 1}`));
             slide.addText(`المحور ${idx + 1}: ${slideTitleText}`, {
-              x: 0.8, y: 0.4, w: 8.4, h: 0.6,
-              fontSize: 18, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'right'
+              x: 0.8, y: 0.35, w: 8.4, h: 0.55,
+              fontSize: 18, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'right', rtlMode: true
             });
 
             // Gold Separator Line
             slide.addShape(pptx.ShapeType.line, {
-              x: 0.8, y: 1.05, w: 8.4, h: 0,
+              x: 0.8, y: 0.95, w: 8.4, h: 0,
               line: { color: 'B45309', width: 1.2 }
             });
 
-            let currentY = 1.2;
+            let currentY = 1.1;
 
-            // 2. Scripture / Evidence Box (if present)
+            // 2. Scripture / Evidence Box (Clean Ayah/Hadith without scan noise)
             const scriptureText = s.scriptureEvidence || s.scripture || '';
-            if (scriptureText) {
+            const hasScripture = scriptureText && !scriptureText.includes('صفحة') && !scriptureText.includes('ممسوحة');
+            if (hasScripture) {
               slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.8, y: currentY, w: 8.4, h: 0.7,
+                x: 0.8, y: currentY, w: 8.4, h: 0.65,
                 fill: { color: '041E15' }, line: { color: 'B45309', width: 1 }
               });
               slide.addText(`« ${scriptureText} »`, {
-                x: 0.9, y: currentY + 0.05, w: 8.2, h: 0.6,
-                fontSize: 11, fontFace: 'Arial', color: 'FEF3C7', align: 'center', italic: true
+                x: 0.9, y: currentY + 0.05, w: 8.2, h: 0.55,
+                fontSize: 11, fontFace: 'Arial', color: 'FEF3C7', align: 'center', italic: true, rtlMode: true
               });
-              currentY += 0.85;
+              currentY += 0.78;
             }
 
-            // 3. Slide Bullet Cards (Max 3, clean spacing, never overflowing!)
-            const rawPptxBullets = (Array.isArray(s.bulletPoints) ? s.bulletPoints : (Array.isArray(s.talkingPoints) ? s.talkingPoints : (s.talkingPoints ? s.talkingPoints.split(' • ') : [])))
-              .map(b => b.trim()).filter(Boolean);
-            const pptxBullets = (rawPptxBullets.length > 0 ? rawPptxBullets : ['تأصيل المحور ومناقشة قضاياه الأساسية', 'الضوابط الشرعية والقواعد المنهجية', 'الثمرة السلوكية والتطبيق المعاصر'])
+            // 3. Slide Bullet Cards (3 Substantive Focus Cards, Universal Typography)
+            const rawPptxBullets = (Array.isArray(s.bulletPoints) && s.bulletPoints.length > 0)
+              ? s.bulletPoints
+              : (s.talkingPoints ? s.talkingPoints.split(' • ') : []);
+            const pptxBullets = (rawPptxBullets.length > 0 ? rawPptxBullets : ['تأصيل المحور ومناقشة قضاياه الأساسية', 'الضوابط الشرعية والقواعد المنهجية الحاكمة', 'الثمرة السلوكية والتطبيق المعاصر للدارسين'])
               .slice(0, 3)
-              .map(b => b.length > 70 ? (b.split(/[،؛\.\-]/)[0] || b).substring(0, 68) + '...' : b);
+              .map(b => b.length > 115 ? (b.substring(0, 112) + '...') : b);
+
+            const cardH = hasScripture ? 0.70 : 0.80;
+            const gap = hasScripture ? 0.78 : 0.90;
 
             pptxBullets.forEach((bullet, bIdx) => {
-              const cardY = currentY + (bIdx * 0.76);
+              const cardY = currentY + (bIdx * gap);
               slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.8, y: cardY, w: 8.4, h: 0.64,
-                fill: { color: '0A3324' }, line: { color: 'C69214', width: 1 }
+                x: 0.8, y: cardY, w: 8.4, h: cardH,
+                fill: { color: '0A3324' }, line: { color: 'C69214', width: 1.2 }
               });
-              slide.addText(`✦  ${bIdx + 1}.  ${bullet}`, {
-                x: 1.0, y: cardY + 0.04, w: 8.0, h: 0.56,
-                fontSize: 13, fontFace: 'Arial', color: 'F8FAFC', bold: true, align: 'right'
+              slide.addText(`[${bIdx + 1}]  ${bullet}`, {
+                x: 1.0, y: cardY + 0.06, w: 8.0, h: cardH - 0.12,
+                fontSize: 12, fontFace: 'Arial', color: 'F8FAFC', bold: true, align: 'right', rtlMode: true
               });
             });
 
-            // 4. Practical Impact Footer (Placed safely at bottom: y: 4.65)
+            // 4. Practical Impact Footer
             const impactText = s.pedagogicalTip || s.practicalAction || s.keyTakeawayAr || s.practicalImpact || '';
             if (impactText) {
-              const cleanImpact = impactText.length > 85 ? (impactText.substring(0, 83) + '...') : impactText;
-              slide.addText(`💡 الأثر السلوكي والتطبيقي: ${cleanImpact}`, {
-                x: 0.8, y: 4.75, w: 8.4, h: 0.45,
-                fontSize: 10.5, fontFace: 'Arial', color: 'FDE68A', align: 'right'
+              const cleanImpact = impactText.length > 95 ? (impactText.substring(0, 92) + '...') : impactText;
+              slide.addText(`● الأثر السلوكي والتطبيقي: ${cleanImpact}`, {
+                x: 0.8, y: 4.60, w: 8.4, h: 0.45,
+                fontSize: 10, fontFace: 'Arial', color: '86EFAC', align: 'right', rtlMode: true
               });
             }
 
-            // 5. Speaker Notes (Full detailed transcript for teacher)
-            const fullScript = s.fullSectionText || s.bodyAr || s.teacherGuidanceAr || '';
-            const notesText = [
-              `[تفريغ المحاضرة والشرح التفصيلي للمحور]:\n${fullScript}`,
-              s.studentQuestion ? `\n[سؤال تفاعلي للدارسين]:\n${s.studentQuestion}` : '',
-              s.pedagogicalTip ? `\n[توجيه إدارة النقاش]:\n${s.pedagogicalTip}` : ''
-            ].filter(Boolean).join('\n');
-
-            if (notesText) {
-              slide.addNotes(notesText);
-            }
+            // Slide Number Indicator
+            slide.addText(`${idx + 1} / ${slidesData.length}`, {
+              x: 0.8, y: 5.10, w: 2.0, h: 0.3,
+              fontSize: 9, fontFace: 'Arial', color: '64748B', align: 'left'
+            });
           });
 
-          // SLIDE 3: CLOSING SLIDE (10.0 x 5.625 in)
-          const finalSlide = pptx.addSlide();
-          finalSlide.background = { color: '062319' };
-
-          finalSlide.addText('خاتمة وتكليف الأسبوع', {
-            x: 0.8, y: 0.6, w: 8.4, h: 0.6,
-            fontSize: 20, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'right'
-          });
-
-          finalSlide.addShape(pptx.ShapeType.line, {
-            x: 0.8, y: 1.25, w: 8.4, h: 0,
-            line: { color: 'C69214', width: 1.5 }
-          });
-
-          finalSlide.addText('«العِلْمُ يَهْتِفُ بِالعَمَلِ، فَإِنْ أَجَابَهُ وَإِلَّا ارْتَحَلَ»', {
-            x: 0.8, y: 1.5, w: 8.4, h: 0.5,
-            fontSize: 13, fontFace: 'Arial', color: 'FEF3C7', italic: true, align: 'center'
-          });
-
-          finalSlide.addShape(pptx.ShapeType.roundRect, {
-            x: 0.8, y: 2.2, w: 8.4, h: 2.2,
-            fill: { color: '0A3324' }, line: { color: 'C69214', width: 1 }
-          });
-
-          finalSlide.addText('1. مدارسة ومراجعة محاور الدرس مع أفراد الحلقة والأسرة.\n2. إتمام ورقة العمل وحل بنك الأسئلة والاختبار الذاتي.\n3. تطبيق التكليف السلوكي في حماية الفهم المنضبط ونقله للغير.', {
-            x: 1.1, y: 2.4, w: 7.8, h: 1.8,
-            fontSize: 12, fontFace: 'Arial', color: 'F8FAFC', lineSpacing: 22, align: 'right'
-          });
-
-          const cleanFileName = cleanTopic.replace(/[/\\:*?"<>|]/g, '_').substring(0, 45);
-          await pptx.writeFile({ fileName: `عرض_${cleanFileName}.pptx` });
-          showToast(isRtl ? 'تم تصدير وتحميل ملف بوربوينت PowerPoint (.pptx) بنجاح 📊' : 'PowerPoint exported successfully 📊');
+          // Save Presentation
+          const sanitizedFilename = (cleanTopic || 'المحاضرة_الشرعية')
+            .replace(/[/\\?%*:|"<>]/g, '')
+            .substring(0, 40)
+            .trim();
+          await pptx.writeFile({ fileName: `مِشكاة_${sanitizedFilename}.pptx` });
+          showToast(isRtl ? 'تم تنزيل العرض التقديمي كملف بوربوينت بنجاح ✨' : 'PowerPoint presentation exported successfully ✨');
         } catch (err) {
-          console.error('PPTX export error:', err);
-          showToast(isRtl ? 'حدث خطأ أثناء تصدير البوربوينت' : 'Error exporting PowerPoint');
+          console.error('Error generating PowerPoint file:', err);
+          showToast(isRtl ? 'حدث خطأ أثناء إنشاء ملف البوربوينت' : 'Error generating PowerPoint file');
         } finally {
           setIsExportingPptx(false);
         }
@@ -5106,10 +5108,10 @@
                           }
                         }}
                         className="bg-gold-400 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1 transition"
-                        title={isRtl ? 'الإصدار المعتمد v53.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v53.0 — Click to force reload'}
+                        title={isRtl ? 'الإصدار المعتمد v54.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v54.0 — Click to force reload'}
                       >
                         <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                        <span>{isRtl ? 'الإصدار v53.0' : 'v53.0'}</span>
+                        <span>{isRtl ? 'الإصدار v54.0' : 'v54.0'}</span>
                         <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                           {isRtl ? 'أحدث تحديث' : 'Latest'}
                         </span>
@@ -8954,10 +8956,12 @@
                                         📌 {isRtl ? 'عناصر المحور المعروضة للدارس:' : 'Key Slide Points:'}
                                       </span>
                                       <div className="space-y-1 text-xs text-slate-100 font-amiri leading-relaxed">
-                                        {(currentSlide.talkingPoints ? currentSlide.talkingPoints.split(' • ') : [bodyText]).map((pt, pIdx) => (
-                                          <div key={pIdx} className="flex items-start gap-1.5">
-                                            <span className="text-gold-400 font-bold shrink-0">✦</span>
-                                            <span>{pt}</span>
+                                        {(currentSlide.bulletPoints || (currentSlide.talkingPoints ? currentSlide.talkingPoints.split(' • ') : [bodyText])).map((pt, pIdx) => (
+                                          <div key={pIdx} className="flex items-start gap-2 bg-emerald-900/50 p-2 sm:p-2.5 rounded-xl border border-gold-400/30">
+                                            <span className="w-5 h-5 rounded-full bg-gold-500/20 text-gold-300 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">
+                                              {pIdx + 1}
+                                            </span>
+                                            <span className="font-semibold text-slate-100">{pt}</span>
                                           </div>
                                         ))}
                                       </div>
@@ -8977,7 +8981,7 @@
                                     </button>
 
                                     {/* Dots indicator */}
-                                    <div className="flex items-center gap-1 overflow-x-auto max-w-[160px] scrollbar-none py-1">
+                                    <div className="flex items-center gap-1 overflow-x-auto max-w-[220px] scrollbar-none py-1">
                                       {slidesList.map((_, dotIdx) => (
                                         <button
                                           key={dotIdx}
@@ -11210,9 +11214,18 @@
                         </div>
                       )}
 
-                      {/* Body Content */}
-                      <div className={`font-amiri text-slate-100 my-4 text-right ${textScaleClass}`}>
-                        {bodyText}
+                      {/* Body Content - 3 Focus Cards */}
+                      <div className="my-4 space-y-3 w-full">
+                        {(currentSlide.bulletPoints || (currentSlide.talkingPoints ? currentSlide.talkingPoints.split(' • ') : [bodyText])).map((pt, pIdx) => (
+                          <div key={pIdx} className="flex items-start gap-3 bg-emerald-900/60 p-3.5 sm:p-4 rounded-2xl border border-gold-400/30 shadow-md text-right">
+                            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gold-500 text-emerald-950 font-black flex items-center justify-center text-xs sm:text-sm shrink-0 mt-0.5 shadow-sm">
+                              {pIdx + 1}
+                            </span>
+                            <p className="font-amiri text-base sm:text-xl lg:text-2xl text-slate-100 font-bold leading-relaxed">
+                              {pt}
+                            </p>
+                          </div>
+                        ))}
                       </div>
 
                       {/* Behavioral Impact Footer */}
