@@ -3000,6 +3000,48 @@
       }
 
       // Intelligent Islamic Lecture & Document Parsing Engine
+      
+      // Helper to clean book metadata & author names from slide titles
+      function cleanSlideTitle(rawTitle) {
+        if (!rawTitle) return 'محور الدرس';
+        let t = rawTitle.replace(/^(?:المحور \d+[:\s]*|Theme \d+[:\s]*)/, '').trim();
+        t = t.replace(/(?:تأليف|للمؤلف|دار|نشر|صفحة|طبعة|تحقيق|إعداد)[\s\S]*$/, '').trim();
+        t = t.replace(/[:\-–—].*$/, '').trim();
+        if (t.length > 50) t = t.substring(0, 48) + '...';
+        return t || 'محور الدرس ومسائله';
+      }
+
+      // Professional Slide Distiller: Converts long paragraphs into 2-3 punchy, readable presentation bullets
+      function extractConciseSlideBullets(lines, secTitle) {
+        const bullets = [];
+        for (const line of lines) {
+          const clean = line.replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
+          if (/^(?:ملاحظة منهجية|هذا الملخص|دار النشر|طبعة|جميع الحقوق|تأليف)/i.test(clean)) continue;
+          const clauses = clean.split(/[،؛\.\-–]/).map(c => c.trim()).filter(c => c.length >= 14 && c.length <= 65);
+          for (const cl of clauses) {
+            if (!/^(?:أولا|ثانيا|ثالثا|وقد|كما أن|حيث إن|مما يذكر)/.test(cl)) {
+              bullets.push(cl);
+              if (bullets.length >= 3) break;
+            }
+          }
+          if (bullets.length >= 3) break;
+        }
+
+        const baseTitle = cleanSlideTitle(secTitle);
+        if (bullets.length === 0) {
+          bullets.push(`تأصيل ومناقشة: ${baseTitle}`);
+          bullets.push('بيان الضوابط الشرعية والقواعد المنهجية');
+          bullets.push('الاستنباط التربوي والتطبيق العملي المعاصر');
+        } else if (bullets.length === 1) {
+          bullets.push('تحرير محل النزاع وتحديد المفاهيم الشرعية');
+          bullets.push('الثمرة السلوكية وأثر الفهم المنضبط في الواقع');
+        } else if (bullets.length === 2) {
+          bullets.push('خلاصة المسألة والواجب العملي تجاهها');
+        }
+
+        return bullets.slice(0, 3).map(b => b.length > 65 ? (b.substring(0, 63) + '...') : b);
+      }
+
       function handleProcessCustomLecture() {
         if (!rawLectureText || !rawLectureText.trim()) {
           showToast(isRtl ? 'يرجى لصق نص المحاضرة أو رفع ملف أولاً' : 'Please provide lecture text or upload file first');
@@ -4112,10 +4154,10 @@
                           }
                         }}
                         className="bg-gold-400 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1 transition"
-                        title={isRtl ? 'الإصدار المعتمد v50.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v50.0 — Click to force reload'}
+                        title={isRtl ? 'الإصدار المعتمد v51.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v51.0 — Click to force reload'}
                       >
                         <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                        <span>{isRtl ? 'الإصدار v50.0' : 'v50.0'}</span>
+                        <span>{isRtl ? 'الإصدار v51.0' : 'v51.0'}</span>
                         <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                           {isRtl ? 'أحدث تحديث' : 'Latest'}
                         </span>

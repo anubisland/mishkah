@@ -3,7 +3,7 @@
  * Network-First Strategy to ensure live updates are always visible
  */
 
-const CACHE_NAME = 'mishkah-cache-v50';
+const CACHE_NAME = 'mishkah-cache-v51';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
