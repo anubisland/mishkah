@@ -2892,6 +2892,19 @@
       // Interactive Student Quiz State
       const [quizAnswers, setQuizAnswers] = useState({});
       const [quizSubmitted, setQuizSubmitted] = useState(false);
+      const [islamicQuizAnswers, setIslamicQuizAnswers] = useState({});
+      const [islamicQuizSubmitted, setIslamicQuizSubmitted] = useState(false);
+      const [islamicWorksheetViewMode, setIslamicWorksheetViewMode] = useState('student'); // 'student' or 'teacher'
+
+      // Dynamic Islamic Quiz Score Calculation
+      const islamicQuizScore = useMemo(() => {
+        if (!islamicData || !islamicData.quizQuestions || !islamicData.quizQuestions.length) return 0;
+        let correct = 0;
+        islamicData.quizQuestions.forEach(q => {
+          if (islamicQuizAnswers[q.id] === (q.correctOptionId || 'a')) correct++;
+        });
+        return Math.round((correct / islamicData.quizQuestions.length) * 100);
+      }, [islamicData, islamicQuizAnswers]);
 
       // Toast notification
       const [toast, setToast] = useState(null);
@@ -3058,13 +3071,6 @@
             secScripture = vMatch[0];
           } else if (hMatch) {
             secScripture = hMatch[0];
-          } else if (detectedAyahs[idx % Math.max(1, detectedAyahs.length)]) {
-            secScripture = detectedAyahs[idx % Math.max(1, detectedAyahs.length)];
-          } else if (detectedHadiths[idx % Math.max(1, detectedHadiths.length)]) {
-            secScripture = detectedHadiths[idx % Math.max(1, detectedHadiths.length)];
-          } else {
-            secScripture = '﴿فَاسْتَمْسِكْ بِالَّذِي أُوحِيَ إِلَيْكَ ۖ إِنَّكَ عَلَىٰ صِرَاطٍ مُّسْتَقِيمٍ﴾ [الزخرف: 43]';
-          }
           } else if (detectedAyahs[idx % Math.max(1, detectedAyahs.length)]) {
             secScripture = detectedAyahs[idx % Math.max(1, detectedAyahs.length)];
           } else if (detectedHadiths[idx % Math.max(1, detectedHadiths.length)]) {
@@ -6843,6 +6849,57 @@
                   {/* ================= SUBVIEW 2: WORKBENCH & INPUT MODES ================= */}
                   {islamicSubView === 'workbench' && (
                     <div className="space-y-6 pt-2">
+
+                      {/* Sequential 6-Stage Stepper Navigation Bar */}
+                      <div className="sticky top-2 z-20 bg-emerald-950/95 backdrop-blur-md text-white p-2.5 sm:p-3 rounded-2xl border-2 border-gold-400 shadow-xl no-print">
+                        <div className="flex items-center justify-between gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs">
+                          {[
+                            { id: 'stage-islamic-1', num: 1, labelAr: '1. إدخال المحاضرة', icon: '📁', active: true },
+                            { id: 'stage-islamic-2', num: 2, labelAr: '2. الخطة والأدلة', icon: '⏱️', active: !!islamicData },
+                            { id: 'stage-islamic-3', num: 3, labelAr: '3. العرض وبوربوينت', icon: '📽️', active: !!islamicData },
+                            { id: 'stage-islamic-4', num: 4, labelAr: '4. ورقة العمل', icon: '📝', active: !!islamicData },
+                            { id: 'stage-islamic-5', num: 5, labelAr: '5. الاختبار الذاتي', icon: '🎯', active: !!islamicData },
+                            { id: 'stage-islamic-6', num: 6, labelAr: '6. الواتساب والمكتبة', icon: '💬', active: !!islamicData }
+                          ].map(st => (
+                            <button
+                              key={st.id}
+                              type="button"
+                              disabled={!st.active}
+                              onClick={() => {
+                                const el = document.getElementById(st.id);
+                                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }}
+                              className={'flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold transition whitespace-nowrap ' + (
+                                st.active
+                                  ? 'bg-emerald-900/80 hover:bg-gold-500 hover:text-emerald-950 text-gold-200 border border-gold-400/50 shadow-xs cursor-pointer'
+                                  : 'bg-emerald-950/40 text-slate-500 border border-emerald-900/40 cursor-not-allowed opacity-60'
+                              )}
+                            >
+                              <span className="w-5 h-5 rounded-full bg-gold-400 text-emerald-950 text-[10px] font-black flex items-center justify-center">
+                                {st.num}
+                              </span>
+                              <span>{st.icon}</span>
+                              <span>{st.labelAr}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* --- STAGE 1: INPUT & UPLOAD SECTION --- */}
+                      <div id="stage-islamic-1" className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-emerald-900/15 shadow-sm space-y-4">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                          <div className="flex items-center gap-2">
+                            <span className="bg-gold-500 text-emerald-950 text-xs font-black px-2.5 py-0.5 rounded-full shadow-xs">
+                              المرحلة 1 من 6
+                            </span>
+                            <h3 className="font-extrabold text-emerald-950 text-sm sm:text-base font-cairo">
+                              {isRtl ? 'إدخال ورفع ملف المحاضرة (Word .docx / PDF / نص / لصق)' : 'Step 1: Input or Upload Lecture File'}
+                            </h3>
+                          </div>
+                          <span className="text-xs text-slate-500 font-bold hidden sm:inline">
+                            {isRtl ? 'اختر طريقة الإدخال الأنسب لك:' : 'Choose Input Mode:'}
+                          </span>
+                        </div>
                       
                       {/* Input Mode Toggle: File vs Paste vs Structured */}
                       <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -7178,12 +7235,14 @@
                         </div>
                       )}
 
+                      </div>
+
                     </div>
                   )}
 
                 </div>
 
-                {/* ================= ACTIVE LECTURE ARTIFACTS VIEW ================= */}
+                {/* ================= ACTIVE LECTURE SEQUENTIAL 6-STAGE ARTIFACTS VIEW ================= */}
                 {islamicData && (
                   <div className="space-y-6">
 
@@ -7192,9 +7251,14 @@
                       <div className="flex items-center gap-2">
                         <span className="text-xl">🕌</span>
                         <div>
-                          <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo">
-                            {islamicData.metadata.topic}
-                          </h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo">
+                              {islamicData.metadata.topic}
+                            </h3>
+                            <span className="bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                              مكتمل 6 مراحل ✓
+                            </span>
+                          </div>
                           <span className="text-xs text-slate-500 font-bold">
                             {islamicData.metadata.category} • {islamicData.metadata.durationMinutes} دقيقة • {islamicData.metadata.audience}
                           </span>
@@ -7205,121 +7269,157 @@
                         <button
                           type="button"
                           onClick={handleSaveIslamicLecture}
-                          className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 px-3.5 py-2 rounded-xl text-xs font-black shadow-sm border border-gold-400 flex items-center gap-1.5 transition"
+                          className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 px-3.5 py-2 rounded-xl text-xs font-black shadow-sm border border-gold-400 flex items-center gap-1.5 transition cursor-pointer"
                         >
                           <span>💾</span>
                           <span>{isRtl ? 'حفظ بمكتبتي' : 'Save to Library'}</span>
                         </button>
                         <button
                           type="button"
-                          onClick={handleTransferLectureToWorksheet}
-                          className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-3.5 py-2 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition"
+                          onClick={() => {
+                            const el = document.getElementById('stage-islamic-4');
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                          className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-3.5 py-2 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition cursor-pointer"
                         >
                           <span>📝</span>
-                          <span>{isRtl ? 'إرسال لورقة العمل والطباعة' : 'Send to Worksheet'}</span>
+                          <span>{isRtl ? 'الانتقال لورقة العمل' : 'Jump to Worksheet'}</span>
                         </button>
                         <button
                           type="button"
-                          onClick={handleTransferLectureToQuiz}
-                          className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition"
+                          onClick={() => {
+                            const el = document.getElementById('stage-islamic-5');
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                          className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
                         >
                           <span>🎯</span>
-                          <span>{isRtl ? 'إرسال للاختبار التفاعلي' : 'Send to Quiz'}</span>
+                          <span>{isRtl ? 'الانتقال للاختبار' : 'Jump to Quiz'}</span>
                         </button>
                       </div>
                     </div>
 
-                    {/* 1. Time-Boxed Lesson Blueprint */}
-                    <div className="card-islamic-pearl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-emerald-800/15 shadow-md">
-                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 sm:mb-6 border-b border-slate-100">
-                        <div>
-                          <span className="text-[11px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                            {isRtl ? 'المخطط الزمني المنضبط بالدقائق' : 'Minute-by-Minute Time-Boxed Blueprint'}
+                    {/* ================= STAGE 2: TIME-BOXED BLUEPRINT & HADITH VERIFICATION ================= */}
+                    <div id="stage-islamic-2" className="space-y-6">
+                      
+                      {/* 2.1 Time-Boxed Lesson Blueprint */}
+                      <div className="card-islamic-pearl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-emerald-800/15 shadow-md">
+                        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 sm:mb-6 border-b border-slate-100">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="bg-gold-500 text-emerald-950 text-xs font-black px-2.5 py-0.5 rounded-full shadow-xs">
+                                المرحلة 2 من 6
+                              </span>
+                              <span className="text-[11px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                                {isRtl ? 'المخطط الزمني المنضبط بالدقائق' : 'Minute-by-Minute Time-Boxed Blueprint'}
+                              </span>
+                            </div>
+                            <h3 className="text-lg sm:text-xl font-extrabold text-emerald-950 font-amiri mt-1">
+                              {islamicData.metadata.topic} — ({islamicData.metadata.durationMinutes} {isRtl ? 'دقيقة' : 'Minutes'})
+                            </h3>
+                          </div>
+                          <span className="bg-emerald-100 text-emerald-900 font-bold text-xs px-3 py-1 rounded-full">
+                            {islamicData.metadata.category}
                           </span>
-                          <h3 className="text-lg sm:text-xl font-extrabold text-emerald-950 font-amiri">
-                            {islamicData.metadata.topic} — ({islamicData.metadata.durationMinutes} {isRtl ? 'دقيقة' : 'Minutes'})
-                          </h3>
                         </div>
-                        <span className="bg-emerald-100 text-emerald-900 font-bold text-xs px-3 py-1 rounded-full">
-                          {islamicData.metadata.category}
-                        </span>
+
+                        {/* Timeline Phases */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          {islamicData.blueprint.map((phase, idx) => (
+                            <div key={idx} className="bg-slate-50 rounded-2xl p-4 border border-slate-200 hover:border-emerald-400 transition flex flex-col justify-between">
+                              <div>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="w-6 h-6 rounded-full bg-emerald-800 text-gold-200 text-xs font-bold flex items-center justify-center">
+                                    {phase.phaseNumber || idx + 1}
+                                  </span>
+                                  <span className="bg-gold-100 text-gold-800 font-bold text-xs px-2.5 py-0.5 rounded-full">
+                                    ⏱️ {phase.allocatedMinutes} {isRtl ? 'د' : 'min'}
+                                  </span>
+                                </div>
+                                <h4 className="font-bold text-emerald-950 text-sm mb-2 font-cairo">
+                                  {isRtl ? phase.phaseNameAr : phase.phaseNameEn}
+                                </h4>
+                                <p className="text-xs text-slate-600 font-amiri leading-relaxed mb-3">
+                                  {isRtl ? (phase.teacherFocusAr || phase.teacherGuidanceAr) : (phase.teacherFocusEn || phase.teacherGuidanceEn)}
+                                </p>
+                              </div>
+                              <div className="pt-2 border-t border-slate-200/80 text-[11px] text-emerald-900 font-bold">
+                                🎯 {isRtl ? (phase.keyTakeawayAr || phase.practicalImpact) : (phase.keyTakeawayEn || phase.practicalImpact)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
 
-                      {/* Timeline Phases */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {islamicData.blueprint.map((phase, idx) => (
-                          <div key={idx} className="bg-slate-50 rounded-2xl p-4 border border-slate-200 hover:border-emerald-400 transition flex flex-col justify-between">
-                            <div>
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="w-6 h-6 rounded-full bg-emerald-800 text-gold-200 text-xs font-bold flex items-center justify-center">
-                                  {phase.phaseNumber || idx + 1}
+                      {/* 2.2 Authenticated Hadith Verification (Strict Sahih Bukhari & Muslim) */}
+                      <div className="card-islamic-amber rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-gold-400/40 shadow-md">
+                        <div className="flex items-center gap-2 pb-3 mb-4 border-b border-gold-400/30">
+                          <span className="text-xl">🛡️</span>
+                          <div>
+                            <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo">
+                              {isRtl ? 'سياج التوثيق الشرعي الصارم (أحاديث صحيحة فقط)' : 'Authentic Evidences Verification'}
+                            </h3>
+                            <span className="text-[11px] text-amber-900 font-bold">
+                              {isRtl ? 'التزام تام بأحاديث الصحيحين مع بيان الراوي ورقم الباب ورقم الحديث' : 'Citing Sahih Al-Bukhari & Sahih Muslim only'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          {(islamicData.hadithVerification || islamicData.evidences || []).map((hd, idx) => (
+                            <div key={idx} className="bg-white/90 rounded-2xl p-4 border border-gold-300 shadow-xs">
+                              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                <span className="bg-emerald-900 text-gold-200 text-xs px-3 py-1 rounded-full font-bold">
+                                  {hd.source || hd.citation || 'صحيح البخاري'}
                                 </span>
-                                <span className="bg-gold-100 text-gold-800 font-bold text-xs px-2.5 py-0.5 rounded-full">
-                                  ⏱️ {phase.allocatedMinutes} {isRtl ? 'د' : 'min'}
+                                <span className="text-xs font-bold text-slate-600">
+                                  {isRtl ? 'الراوي / الشاهد:' : 'Narrator:'} {hd.narrator || 'الصحابي الجليل'}
                                 </span>
                               </div>
-                              <h4 className="font-bold text-emerald-950 text-sm mb-2 font-cairo">
-                                {isRtl ? phase.phaseNameAr : phase.phaseNameEn}
-                              </h4>
-                              <p className="text-xs text-slate-600 font-amiri leading-relaxed mb-3">
-                                {isRtl ? (phase.teacherFocusAr || phase.teacherGuidanceAr) : (phase.teacherFocusEn || phase.teacherGuidanceEn)}
+                              <p className="font-amiri text-sm sm:text-base text-emerald-950 font-medium leading-relaxed my-2">
+                                «{hd.text || hd.arabicText}»
                               </p>
+                              <div className="text-xs text-slate-600 font-amiri pt-2 border-t border-slate-100 flex items-center justify-between">
+                                <span><strong>{isRtl ? 'التخريج والحكم:' : 'Grade:'}</strong> {hd.ruling || hd.grading || 'صحيح معتمد'}</span>
+                                <span className="text-emerald-800 font-bold">✓ صحيح معتمد</span>
+                              </div>
                             </div>
-                            <div className="pt-2 border-t border-slate-200/80 text-[11px] text-emerald-900 font-bold">
-                              🎯 {isRtl ? (phase.keyTakeawayAr || phase.practicalImpact) : (phase.keyTakeawayEn || phase.practicalImpact)}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                          ))}
+                        </div>
 
-                    {/* 2. Authenticated Hadith Verification (Strict Sahih Bukhari & Muslim) */}
-                    <div className="card-islamic-amber rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-gold-400/40 shadow-md">
-                      <div className="flex items-center gap-2 pb-3 mb-4 border-b border-gold-400/30">
-                        <span className="text-xl">🛡️</span>
-                        <div>
-                          <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo">
-                            {isRtl ? 'سياج التوثيق الشرعي الصارم (أحاديث صحيحة فقط)' : 'Authentic Evidences Verification'}
-                          </h3>
-                          <span className="text-[11px] text-amber-900 font-bold">
-                            {isRtl ? 'التزام تام بأحاديث الصحيحين مع بيان الراوي ورقم الباب ورقم الحديث' : 'Citing Sahih Al-Bukhari & Sahih Muslim only'}
-                          </span>
+                        {/* Navigation to Stage 3 */}
+                        <div className="flex justify-end pt-3 mt-3 border-t border-gold-400/30">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const el = document.getElementById('stage-islamic-3');
+                              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }}
+                            className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 font-black px-4 py-2 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <span>{isRtl ? 'الانتقال للمرحلة التالية: 3. منظومة العروض وبوربوينت' : 'Next: 3. Presentation & PowerPoint'}</span>
+                            <span>◀</span>
+                          </button>
                         </div>
                       </div>
 
-                      <div className="space-y-3">
-                        {(islamicData.hadithVerification || islamicData.evidences || []).map((hd, idx) => (
-                          <div key={idx} className="bg-white/90 rounded-2xl p-4 border border-gold-300 shadow-xs">
-                            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                              <span className="bg-emerald-900 text-gold-200 text-xs px-3 py-1 rounded-full font-bold">
-                                {hd.source || hd.citation || 'صحيح البخاري'}
-                              </span>
-                              <span className="text-xs font-bold text-slate-600">
-                                {isRtl ? 'الراوي / الشاهد:' : 'Narrator:'} {hd.narrator || 'الصحابي الجليل'}
-                              </span>
-                            </div>
-                            <p className="font-amiri text-sm sm:text-base text-emerald-950 font-medium leading-relaxed my-2">
-                              «{hd.text || hd.arabicText}»
-                            </p>
-                            <div className="text-xs text-slate-600 font-amiri pt-2 border-t border-slate-100 flex items-center justify-between">
-                              <span><strong>{isRtl ? 'التخريج والحكم:' : 'Grade:'}</strong> {hd.ruling || hd.grading || 'صحيح معتمد'}</span>
-                              <span className="text-emerald-800 font-bold">✓ صحيح معتمد</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
                     </div>
 
-                    {/* 3. Interactive Lecture Presentation & PowerPoint Suite */}
-                    <div className="card-islamic-pearl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-emerald-800/15 shadow-md">
-                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-100">
+                    {/* ================= STAGE 3: INTERACTIVE LECTURE PRESENTATION & POWERPOINT SUITE ================= */}
+                    <div id="stage-islamic-3" className="card-islamic-pearl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-emerald-800/15 shadow-md space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
                         <div>
-                          <span className="text-[11px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
-                            <span>📽️</span>
-                            <span>{isRtl ? 'منظومة العروض التقديمية وشرائح الشرح (Lecture Presentation Suite)' : 'Lecture Presentation Suite'}</span>
-                          </span>
-                          <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo">
-                            {isRtl ? 'عرض مباشر في قاعة المحاضرات / زوم + تصدير بوربوينت PowerPoint' : 'Live Presenter Mode & PowerPoint (.pptx) Export'}
+                          <div className="flex items-center gap-2">
+                            <span className="bg-gold-500 text-emerald-950 text-xs font-black px-2.5 py-0.5 rounded-full shadow-xs">
+                              المرحلة 3 من 6
+                            </span>
+                            <span className="text-[11px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                              <span>📽️</span>
+                              <span>{isRtl ? 'منظومة العروض التقديمية وشرائح الشرح (Lecture Presentation Suite)' : 'Lecture Presentation Suite'}</span>
+                            </span>
+                          </div>
+                          <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo mt-1">
+                            {isRtl ? 'عرض مباشر في قاعة المحاضرات / زوم + تصدير بوربوينت PowerPoint (.pptx)' : 'Live Presenter Mode & PowerPoint (.pptx) Export'}
                           </h3>
                         </div>
 
@@ -7373,7 +7473,7 @@
                               <button
                                 type="button"
                                 onClick={() => handleStartLecturePresentation(sIdx)}
-                                className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-2.5 py-1 rounded-lg text-[10px] shadow-xs flex items-center gap-1 transition"
+                                className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-2.5 py-1 rounded-lg text-[10px] shadow-xs flex items-center gap-1 transition cursor-pointer"
                               >
                                 <span>👁️</span>
                                 <span>{isRtl ? 'عرض الشريحة' : 'Present Slide'}</span>
@@ -7382,31 +7482,395 @@
                           </div>
                         ))}
                       </div>
+
+                      {/* Navigation to Stage 4 */}
+                      <div className="flex justify-end pt-3 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const el = document.getElementById('stage-islamic-4');
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                          className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 font-black px-4 py-2 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <span>{isRtl ? 'الانتقال للمرحلة التالية: 4. ورقة العمل والطباعة' : 'Next: 4. Worksheet & Print'}</span>
+                          <span>◀</span>
+                        </button>
+                      </div>
                     </div>
 
-                    {/* 4. WhatsApp Ring Broadcast Kit */}
-                    <div className="card-islamic-pearl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-emerald-800/15 shadow-md">
-                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-100">
+                    {/* ================= STAGE 4: EMBEDDED MODEL WORKSHEET & PRINTABLE TABLE ================= */}
+                    <div id="stage-islamic-4" className="card-islamic-pearl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-emerald-800/20 shadow-md space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
                         <div>
-                          <span className="text-[11px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                            {isRtl ? 'حقيبة الواتساب بنقرة واحدة (WhatsApp Ring Broadcast Kit)' : 'WhatsApp Ring Broadcast'}
-                          </span>
-                          <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo">
+                          <div className="flex items-center gap-2">
+                            <span className="bg-gold-500 text-emerald-950 text-xs font-black px-2.5 py-0.5 rounded-full shadow-xs">
+                              المرحلة 4 من 6
+                            </span>
+                            <span className="text-[11px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                              {isRtl ? 'ورقة العمل النموذجية للدارسين والطباعة الفورية' : 'Model Worksheet & Printable Student Sheet'}
+                            </span>
+                          </div>
+                          <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo mt-1">
+                            {isRtl ? 'جدول المدارسة والتأصيل الشرعي المستخلص من المحاضرة' : 'Islamic Studies Analytical Worksheet Table'}
+                          </h3>
+                        </div>
+
+                        {/* View Mode & Print Controls */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200 text-xs">
+                            <button
+                              type="button"
+                              onClick={() => setIslamicWorksheetViewMode('student')}
+                              className={'px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1 ' + (
+                                islamicWorksheetViewMode === 'student'
+                                  ? 'bg-emerald-900 text-gold-200 shadow-xs font-black'
+                                  : 'text-slate-600 hover:text-slate-900'
+                              )}
+                            >
+                              <span>✍️</span>
+                              <span>{isRtl ? 'نسخة الطالب (فارغة)' : 'Student Version'}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setIslamicWorksheetViewMode('teacher')}
+                              className={'px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1 ' + (
+                                islamicWorksheetViewMode === 'teacher'
+                                  ? 'bg-gold-500 text-emerald-950 shadow-xs font-black'
+                                  : 'text-slate-600 hover:text-slate-900'
+                              )}
+                            >
+                              <span>📖</span>
+                              <span>{isRtl ? 'نموذج المعلم (مع الإجابات)' : 'Teacher Key'}</span>
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => window.print()}
+                            className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 font-bold px-3.5 py-2 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <span>🖨️</span>
+                            <span>{isRtl ? 'طباعة ورقة العمل للدارسين' : 'Print Worksheet'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Worksheet Items Table */}
+                      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+                        <table className="w-full text-right border-collapse text-xs">
+                          <thead>
+                            <tr className="bg-emerald-950 text-gold-300 font-cairo text-xs border-b border-gold-400/40">
+                              <th className="p-3 w-12 text-center font-bold">#</th>
+                              <th className="p-3 w-1/4 font-bold">{isRtl ? 'المسألة الشرعية / محور الدرس' : 'Topic / Issue'}</th>
+                              <th className="p-3 font-bold">
+                                {islamicWorksheetViewMode === 'teacher' 
+                                  ? (isRtl ? 'نموذج الإجابة والتأصيل الشرعي المعتمد (دليل المعلم)' : 'Teacher Answer Key & Evidences')
+                                  : (isRtl ? 'السؤال المطروح ومساحة إجابة الدارس' : 'Student Question & Response Area')}
+                              </th>
+                              <th className="p-3 w-1/4 font-bold">{isRtl ? 'الأثر السلوكي والتربوي المستهدف' : 'Behavioral & Spiritual Impact'}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {(islamicData.worksheetItems && islamicData.worksheetItems.length > 0 
+                              ? islamicData.worksheetItems 
+                              : (islamicData.blueprint || []).map((b, idx) => ({
+                                  num: idx + 1,
+                                  topic: b.phaseNameAr || ('المحور ' + (idx + 1)),
+                                  studentQuestion: b.studentQuestion || ('في ضوء محور: ' + (b.phaseNameAr || 'هذا المحور') + '؛ ما الحكم الشرعي والأثر العملي؟'),
+                                  teacherAnswer: b.teacherFocusAr || b.teacherGuidanceAr || 'التأصيل المنضبط من المحاضرة.',
+                                  practicalImpact: b.practicalImpact || b.keyTakeawayAr || 'التطبيق السلوكي في واقع المسلم.'
+                                }))
+                            ).map((row, rIdx) => (
+                              <tr key={rIdx} className={rIdx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}>
+                                <td className="p-3 text-center font-bold text-slate-500">{row.num || rIdx + 1}</td>
+                                <td className="p-3 font-bold text-emerald-950 font-cairo">
+                                  {row.topic}
+                                  {row.scripture && (
+                                    <div className="font-quran text-[11px] text-emerald-800 font-normal mt-1 bg-emerald-50/70 p-1.5 rounded-lg border border-emerald-100">
+                                      {row.scripture}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="p-3 text-slate-700 font-amiri leading-relaxed">
+                                  {islamicWorksheetViewMode === 'teacher' ? (
+                                    <div className="bg-amber-50/60 p-2.5 rounded-xl border border-amber-200/70">
+                                      <div className="font-bold text-amber-950 mb-1 text-[11px]">
+                                        {row.studentQuestion}
+                                      </div>
+                                      <div className="text-slate-800 text-xs">
+                                        <strong>{isRtl ? 'نموذج الإجابة:' : 'Answer:'}</strong> {row.teacherAnswer}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-2">
+                                      <div className="font-bold text-emerald-950">
+                                        {row.studentQuestion}
+                                      </div>
+                                      <div className="border border-dashed border-slate-300 rounded-xl p-3 bg-slate-50/40 text-slate-400 text-[11px] min-h-[50px]">
+                                        {isRtl ? '.........................................................................................................................................' : 'Write your answer here...'}
+                                      </div>
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="p-3 text-slate-600 font-amiri leading-relaxed">
+                                  <span className="text-emerald-900 font-bold">🎯 </span>
+                                  {row.practicalImpact}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Stage Navigation Footer */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                        <span className="text-xs text-slate-500 font-bold">
+                          {isRtl ? 'جاهزة للطباعة والتوزيع على الدارسين' : 'Ready for printing and distribution'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const el = document.getElementById('stage-islamic-5');
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                          className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 font-black px-4 py-2 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <span>{isRtl ? 'الانتقال للمرحلة التالية: 5. الاختبار الذاتي التفاعلي' : 'Next: 5. Interactive Quiz'}</span>
+                          <span>◀</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* ================= STAGE 5: INTERACTIVE QUIZ & SELF-GRADING BANK ================= */}
+                    <div id="stage-islamic-5" className="card-islamic-pearl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-emerald-800/20 shadow-md space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="bg-gold-500 text-emerald-950 text-xs font-black px-2.5 py-0.5 rounded-full shadow-xs">
+                              المرحلة 5 من 6
+                            </span>
+                            <span className="text-[11px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                              {isRtl ? 'بنك الاختبار والتقييم الذاتي التفاعلي للدارسين' : 'Interactive Self-Grading Quiz'}
+                            </span>
+                          </div>
+                          <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo mt-1">
+                            {isRtl ? 'أسئلة تفاعلية فورية لقياس استيعاب مفاهيم المحاضرة' : 'Comprehension & Reflection Questions'}
+                          </h3>
+                        </div>
+
+                        {/* Live Score Banner */}
+                        {islamicQuizSubmitted && (
+                          <div className="bg-emerald-900 text-gold-200 px-4 py-2 rounded-xl border border-gold-400 font-black text-xs sm:text-sm shadow-md flex items-center gap-2">
+                            <span>🏆</span>
+                            <span>{isRtl ? `النتيجة المحققة: ${islamicQuizScore}%` : `Score: ${islamicQuizScore}%`}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Quiz Question Cards */}
+                      <div className="space-y-4">
+                        {(islamicData.quizQuestions || []).map((q, qIdx) => {
+                          const selected = islamicQuizAnswers[q.id];
+                          const correct = q.correctOptionId || 'a';
+                          const isCorrect = selected === correct;
+                          return (
+                            <div 
+                              key={q.id || qIdx} 
+                              className={'p-4 sm:p-5 rounded-2xl border transition ' + (
+                                islamicQuizSubmitted
+                                  ? isCorrect
+                                    ? 'bg-emerald-50/80 border-emerald-300'
+                                    : 'bg-rose-50/60 border-rose-300'
+                                  : 'bg-white border-slate-200 hover:border-gold-400'
+                              )}
+                            >
+                              <div className="flex items-start justify-between gap-2 mb-3">
+                                <h4 className="font-bold text-emerald-950 text-xs sm:text-sm font-cairo leading-relaxed flex items-center gap-2">
+                                  <span className="w-6 h-6 rounded-full bg-emerald-900 text-gold-200 text-xs font-bold flex items-center justify-center shrink-0">
+                                    {qIdx + 1}
+                                  </span>
+                                  <span>{q.questionAr || q.qAr}</span>
+                                </h4>
+                                {islamicQuizSubmitted && (
+                                  <span className={'text-xs font-black px-2.5 py-0.5 rounded-full shrink-0 ' + (
+                                    isCorrect ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
+                                  )}>
+                                    {isCorrect ? (isRtl ? '✓ إجابة صحيحة' : 'Correct') : (isRtl ? '✗ غير صحيحة' : 'Incorrect')}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Options */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                                {(q.options || q.opts || []).map((opt) => {
+                                  const optId = opt.id;
+                                  const optText = opt.textAr || opt.text || opt.textEn;
+                                  const isSelected = selected === optId;
+                                  let optClasses = 'border text-xs rounded-xl p-2.5 flex items-center gap-2 text-right transition cursor-pointer ';
+                                  if (islamicQuizSubmitted) {
+                                    if (optId === correct) {
+                                      optClasses += 'bg-emerald-100/80 border-emerald-400 text-emerald-950 font-bold';
+                                    } else if (isSelected) {
+                                      optClasses += 'bg-rose-100 border-rose-400 text-rose-950 font-bold';
+                                    } else {
+                                      optClasses += 'bg-white border-slate-200 text-slate-500 opacity-60';
+                                    }
+                                  } else {
+                                    if (isSelected) {
+                                      optClasses += 'bg-emerald-900 text-gold-200 border-gold-400 font-bold shadow-xs';
+                                    } else {
+                                      optClasses += 'bg-slate-50/70 hover:bg-slate-100 border-slate-200 text-slate-800';
+                                    }
+                                  }
+
+                                  return (
+                                    <button
+                                      key={optId}
+                                      type="button"
+                                      disabled={islamicQuizSubmitted}
+                                      onClick={() => setIslamicQuizAnswers(prev => ({ ...prev, [q.id]: optId }))}
+                                      className={optClasses}
+                                    >
+                                      <span className={'w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ' + (
+                                        isSelected ? 'bg-gold-400 text-emerald-950' : 'bg-slate-200 text-slate-700'
+                                      )}>
+                                        {optId.toUpperCase()}
+                                      </span>
+                                      <span className="flex-1 font-amiri leading-snug">{optText}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Explanation & Reflection when submitted */}
+                              {islamicQuizSubmitted && (q.explanationAr || q.reflectionPrompt || q.exp) && (
+                                <div className="mt-3 pt-3 border-t border-slate-200 text-xs font-amiri text-slate-700 leading-relaxed bg-white/80 p-3 rounded-xl border border-slate-100">
+                                  <strong className="text-emerald-900">{isRtl ? 'التوجيه العلمي والتأمل:' : 'Pedagogical Reflection:'}</strong> {q.explanationAr || q.reflectionPrompt || q.exp}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Quiz Action Buttons */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setIslamicQuizSubmitted(true)}
+                            disabled={islamicQuizSubmitted || Object.keys(islamicQuizAnswers).length === 0}
+                            className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 font-black px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-2 disabled:opacity-40 cursor-pointer"
+                          >
+                            <span>🎯</span>
+                            <span>{isRtl ? 'تصحيح الإجابات وحساب النتيجة' : 'Check Answers & Grade'}</span>
+                          </button>
+
+                          {islamicQuizSubmitted && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIslamicQuizAnswers({});
+                                setIslamicQuizSubmitted(false);
+                              }}
+                              className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold px-3.5 py-2 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <span>🔄</span>
+                              <span>{isRtl ? 'إعادة المحاولة' : 'Retry Quiz'}</span>
+                            </button>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const el = document.getElementById('stage-islamic-6');
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                          className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <span>{isRtl ? 'الانتقال للمرحلة التالية: 6. النشر عبر الواتساب وحفظ المحاضرة' : 'Next: 6. WhatsApp & Library'}</span>
+                          <span>◀</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* ================= STAGE 6: WHATSAPP BROADCAST KIT & SAVE TO LIBRARY ================= */}
+                    <div id="stage-islamic-6" className="card-islamic-pearl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-emerald-800/20 shadow-md space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="bg-gold-500 text-emerald-950 text-xs font-black px-2.5 py-0.5 rounded-full shadow-xs">
+                              المرحلة 6 من 6
+                            </span>
+                            <span className="text-[11px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                              {isRtl ? 'النشر عبر الواتساب وحفظ المحاضرة في مكتبتي' : 'WhatsApp Broadcast & Save to Library'}
+                            </span>
+                          </div>
+                          <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo mt-1">
                             {isRtl ? 'رسالة ملخصة وجذابة في 10 أسطر منسقة بالإيموجي لمجموعات الدارسين' : '10-Line Formatted Summary with Emojis'}
                           </h3>
                         </div>
-                        <button
-                          type="button"
-                          onClick={handleCopyWhatsApp}
-                          className="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow flex items-center gap-1.5"
-                        >
-                          <span>📋</span>
-                          <span>{isRtl ? 'نسخ الرسالة بنقرة واحدة' : 'Copy Message'}</span>
-                        </button>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={handleCopyWhatsApp}
+                            className="bg-emerald-700 hover:bg-emerald-600 text-white font-black px-4 py-2 rounded-xl text-xs transition shadow-md flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <span>📋</span>
+                            <span>{isRtl ? 'نسخ الرسالة بنقرة واحدة' : 'Copy Message'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleSaveIslamicLecture}
+                            className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-md border border-gold-400 flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <span>💾</span>
+                            <span>{isRtl ? 'حفظ المحاضرة بمكتبتي' : 'Save to Library'}</span>
+                          </button>
+                        </div>
                       </div>
 
                       <div className="bg-slate-900 text-emerald-200 rounded-2xl p-4 sm:p-5 font-mono text-xs sm:text-sm leading-relaxed whitespace-pre-wrap border border-slate-700">
                         {islamicData.whatsAppKit.formattedText}
+                      </div>
+
+                      {/* Success completion banner */}
+                      <div className="card-islamic-sage rounded-2xl p-4 border border-emerald-300 flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-2xl">🎉</span>
+                          <div>
+                            <h4 className="font-bold text-emerald-950 text-xs sm:text-sm font-cairo">
+                              {isRtl ? 'اكتملت كافة مراحل إعداد المحاضرة بنجاح!' : 'Lecture Preparation Complete!'}
+                            </h4>
+                            <p className="text-[11px] sm:text-xs text-emerald-900/80 mt-0.5">
+                              {isRtl 
+                                ? 'يمكنك الآن شرحها عبر زوم أو عرض الشرائح، توزيع أوراق العمل، إجراء الاختبار، ومشاركة الملخص مع دارسيك.'
+                                : 'You are all set to present, print worksheets, run the quiz, and broadcast the summary.'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setIslamicSubView('library')}
+                            className="bg-white hover:bg-emerald-50 text-emerald-950 border border-emerald-300 font-bold px-3.5 py-1.5 rounded-xl text-xs transition shadow-xs flex items-center gap-1 cursor-pointer"
+                          >
+                            <span>📚</span>
+                            <span>{isRtl ? 'الانتقال إلى مكتبتي' : 'Go to Library'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleResetIslamicForm}
+                            className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 font-bold px-3.5 py-1.5 rounded-xl text-xs transition shadow-xs flex items-center gap-1 cursor-pointer"
+                          >
+                            <span>➕</span>
+                            <span>{isRtl ? 'تحضير درس جديد' : 'New Lesson'}</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
 
