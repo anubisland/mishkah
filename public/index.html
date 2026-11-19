@@ -3196,7 +3196,7 @@
       const [mutaSearchResults, setMutaSearchResults] = useState([]);
       const [isSearchingMuta, setIsSearchingMuta] = useState(false);
       const [mutaGuideNote, setMutaGuideNote] = useState('');
-      const [hifzViewMode, setHifzViewMode] = useState('interactive_test'); // 'interactive_test' (Digital Lines Board) | 'mushaf_page' (Printed Image)
+      const [hifzViewMode, setHifzViewMode] = useState('mushaf_page'); // 'mushaf_page' (Printed Image - Primary) | 'interactive_test' (Digital Lines Board)
       const [mushafPageNumber, setMushafPageNumber] = useState(562); // Default: Surah Al-Mulk Page 562
       const [mushafCurrentSurahId, setMushafCurrentSurahId] = useState(67);
       const [selectedSurahNumber, setSelectedSurahNumber] = useState(67);
@@ -5386,10 +5386,10 @@
                           }
                         }}
                         className="bg-gold-400 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1 transition"
-                        title={isRtl ? 'الإصدار المعتمد v55.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v55.0 — Click to force reload'}
+                        title={isRtl ? 'الإصدار المعتمد v56.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v56.0 — Click to force reload'}
                       >
                         <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                        <span>{isRtl ? 'الإصدار v55.0' : 'v55.0'}</span>
+                        <span>{isRtl ? 'الإصدار v56.0' : 'v56.0'}</span>
                         <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                           {isRtl ? 'أحدث تحديث' : 'Latest'}
                         </span>
@@ -5720,19 +5720,7 @@
                     {/* Authentic Mode Switcher Bar */}
                     <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-emerald-800/80">
                       <div className="bg-emerald-950 p-1.5 rounded-2xl border-2 border-gold-400 flex items-center gap-2 shadow-lg">
-                        <button
-                          type="button"
-                          onClick={() => setHifzViewMode('interactive_test')}
-                          className={'px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 ' + (
-                            hifzViewMode === 'interactive_test'
-                              ? 'bg-gold-500 text-emerald-950 shadow-md ring-2 ring-gold-300'
-                              : 'text-gold-200 hover:bg-emerald-900/60'
-                          )}
-                        >
-                          <span>📜</span>
-                          <span>{isRtl ? 'لوحة التسميع بالأسطر والآيات (الأسطر المتقنة)' : 'Digital Line Recitation Board'}</span>
-                        </button>
-
+                        {/* 1. Printed Mushaf Page (Primary Default) */}
                         <button
                           type="button"
                           onClick={() => setHifzViewMode('mushaf_page')}
@@ -5744,6 +5732,20 @@
                         >
                           <span>📖</span>
                           <span>{isRtl ? 'عرض وجه المصحف الورقي المصور' : 'Printed Mushaf Page Image'}</span>
+                        </button>
+
+                        {/* 2. Digital Recitation Board */}
+                        <button
+                          type="button"
+                          onClick={() => setHifzViewMode('interactive_test')}
+                          className={'px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 ' + (
+                            hifzViewMode === 'interactive_test'
+                              ? 'bg-gold-500 text-emerald-950 shadow-md ring-2 ring-gold-300'
+                              : 'text-gold-200 hover:bg-emerald-900/60'
+                          )}
+                        >
+                          <span>📜</span>
+                          <span>{isRtl ? 'لوحة التسميع بالأسطر والآيات (الأسطر المتقنة)' : 'Digital Line Recitation Board'}</span>
                         </button>
                       </div>
 
