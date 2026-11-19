@@ -5351,7 +5351,7 @@
           )}
 
           {/* TOP GRAND EMERALD HEADER */}
-          <header className="emerald-pattern text-white relative border-b-4 border-gold-400 shadow-xl overflow-hidden no-print">
+          <header className="emerald-pattern text-white relative border-b-4 border-gold-400 shadow-xl overflow-hidden rounded-b-3xl sm:rounded-b-[36px] no-print">
             {/* Islamic Corner Rosette Accents */}
             <div className="absolute top-2 right-4 text-gold-300/40 text-lg font-amiri pointer-events-none select-none">۞</div>
             <div className="absolute top-2 left-4 text-gold-300/40 text-lg font-amiri pointer-events-none select-none">۞</div>
@@ -5364,56 +5364,35 @@
 
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-4 relative z-10">
               {/* Row 1: Brand Logo & Title on Right + Actions on Left */}
-              <div className="flex items-center justify-between gap-2 mb-2 sm:mb-3">
+              <div className="flex items-center justify-between gap-3 mb-3">
                 {/* Brand */}
-                <div className="flex items-center gap-2.5 sm:gap-4 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
-                  <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-950 border-2 border-gold-400 p-0.5 shadow-md flex items-center justify-center transform hover:scale-105 transition overflow-hidden shrink-0">
-                    <img src="icons/mishkah-app-icon.jpg" alt="Mishkah Logo" className="w-full h-full object-cover rounded-lg sm:rounded-xl drop-shadow" />
+                <div className="flex items-center gap-3 sm:gap-4 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-950 border-2 border-gold-400 p-0.5 shadow-lg flex items-center justify-center transform hover:scale-105 transition overflow-hidden shrink-0">
+                    <img src="icons/mishkah-app-icon.jpg" alt="Mishkah Logo" className="w-full h-full object-cover rounded-xl drop-shadow" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h1 className="text-xl sm:text-2xl font-black tracking-wide text-gold-200 font-amiri leading-none">
-                        {isRtl ? 'مِشكاة' : 'Mishkah'}
-                      </h1>
-                      <span 
-                        onClick={() => {
-                          if ('caches' in window) {
-                            caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
-                              window.location.reload(true);
-                            });
-                          } else {
-                            window.location.reload(true);
-                          }
-                        }}
-                        className="bg-gold-400 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1 transition"
-                        title={isRtl ? 'الإصدار المعتمد v56.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v56.0 — Click to force reload'}
-                      >
-                        <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                        <span>{isRtl ? 'الإصدار v56.0' : 'v56.0'}</span>
-                        <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
-                          {isRtl ? 'أحدث تحديث' : 'Latest'}
-                        </span>
-                      </span>
-                    </div>
-                    <p className="text-[10px] sm:text-xs text-emerald-100/90 font-medium hidden sm:block mt-1">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-wide text-gold-300 font-amiri drop-shadow-md leading-none">
+                      {isRtl ? 'مِشكاة' : 'Mishkah'}
+                    </h1>
+                    <p className="text-xs sm:text-sm text-emerald-100/90 font-medium hidden sm:block mt-1 font-cairo">
                       {isRtl ? 'نظام التشغيل الشامل للداعية والمعلم الشرعي' : "Comprehensive OS for Da'wah & Islamic Educators"}
                     </p>
                   </div>
                 </div>
 
                 {/* Quick Actions (Library + Security + Lang) */}
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <button 
                     type="button"
                     onClick={() => {
                       setActiveTab('islamic');
                       setIslamicSubView('library');
                     }}
-                    className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black text-xs px-2.5 sm:px-3 py-1.5 rounded-lg shadow-xs transition flex items-center gap-1.5"
+                    className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black text-xs px-2.5 sm:px-3 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1.5"
                     title={isRtl ? 'مكتبة محاضراتي المحفوظة' : 'My Lectures Library'}
                   >
                     <span>📚</span>
-                    <span className="text-[11px] font-black">{isRtl ? 'مكتبة محاضراتي' : 'My Library'}</span>
+                    <span className="text-[11px] sm:text-xs font-black">{isRtl ? 'مكتبة محاضراتي' : 'My Library'}</span>
                     <span className="bg-emerald-950 text-gold-200 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
                       {savedIslamicLectures.length}
                     </span>
@@ -5421,7 +5400,7 @@
 
                   <button 
                     onClick={() => setIsPinModalOpen(true)}
-                    className="bg-emerald-800/90 hover:bg-emerald-700 border border-gold-400/50 text-gold-200 text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition shadow-xs"
+                    className="bg-emerald-800/90 hover:bg-emerald-700 border border-gold-400/50 text-gold-200 text-xs px-2.5 py-1.5 rounded-xl flex items-center gap-1 transition shadow-xs"
                     title={isRtl ? 'رمز أمان المعلم' : 'Teacher Security PIN'}
                   >
                     <span>🔒</span>
@@ -5431,64 +5410,89 @@
 
                   <button 
                     onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-                    className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black text-xs px-2.5 py-1.5 rounded-lg transition shadow-xs flex items-center gap-1"
+                    className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black text-xs px-2.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1"
                   >
                     <span>🌐</span>
-                    <span className="text-[11px]">{lang === 'ar' ? 'EN' : 'عربي'}</span>
+                    <span className="text-[11px] font-bold">{lang === 'ar' ? 'EN' : 'عربي'}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Row 2: Typography Toolbar (Font Selector & Font Sizes side by side) */}
-              <div className="flex items-center justify-between gap-2 pt-1 border-t border-emerald-800/50 flex-wrap sm:flex-nowrap">
-                {/* Font Family */}
-                <div className="flex items-center gap-1 bg-emerald-950/70 border border-gold-400/50 rounded-xl px-2 py-1 text-xs text-gold-200 shadow-xs flex-1 sm:flex-initial">
-                  <span className="text-gold-300 text-xs">🔤</span>
-                  <select 
-                    value={appFont} 
-                    onChange={(e) => {
-                      const newF = e.target.value;
-                      setAppFont(newF);
-                      const fCfg = FONT_MAP[newF] || FONT_MAP.cairo;
-                      showToast(isRtl ? 'تم تفعيل ' + fCfg.nameAr + ' ✨' : 'Font set to ' + fCfg.nameEn + ' ✨');
-                    }}
-                    className="bg-transparent text-gold-100 font-bold text-[11px] focus:outline-none cursor-pointer w-full sm:w-auto"
-                    title={isRtl ? 'اختيار خط واجهة التطبيق' : 'Choose Interface Font'}
-                  >
-                    <option value="cairo" className="bg-emerald-950 text-gold-100">خط كايرو (Cairo)</option>
-                    <option value="amiri" className="bg-emerald-950 text-gold-100">خط أميري (Amiri)</option>
-                    <option value="tajawal" className="bg-emerald-950 text-gold-100">خط تجوال (Tajawal)</option>
-                    <option value="almarai" className="bg-emerald-950 text-gold-100">خط المراعي (Almarai)</option>
-                    <option value="naskh" className="bg-emerald-950 text-gold-100">خط النسخ (Noto Naskh)</option>
-                  </select>
-                </div>
+              {/* Row 2: Typography Group on Right + Version Badge on Left */}
+              <div className="flex items-center justify-between gap-3 pt-2 pb-1 border-t border-emerald-800/60 flex-wrap sm:flex-nowrap">
+                {/* Group: Font Family Dropdown + Font Size Pills Side by Side */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Font Family */}
+                  <div className="flex items-center gap-1 bg-emerald-950/80 border border-gold-400/50 rounded-xl px-2.5 py-1 text-xs text-gold-200 shadow-xs">
+                    <span className="text-gold-300 text-xs">🔤</span>
+                    <select 
+                      value={appFont} 
+                      onChange={(e) => {
+                        const newF = e.target.value;
+                        setAppFont(newF);
+                        const fCfg = FONT_MAP[newF] || FONT_MAP.cairo;
+                        showToast(isRtl ? 'تم تفعيل ' + fCfg.nameAr + ' ✨' : 'Font set to ' + fCfg.nameEn + ' ✨');
+                      }}
+                      className="bg-transparent text-gold-100 font-bold text-[11px] focus:outline-none cursor-pointer"
+                      title={isRtl ? 'اختيار خط واجهة التطبيق' : 'Choose Interface Font'}
+                    >
+                      <option value="cairo" className="bg-emerald-950 text-gold-100">خط كايرو (Cairo)</option>
+                      <option value="amiri" className="bg-emerald-950 text-gold-100">خط أميري (Amiri)</option>
+                      <option value="tajawal" className="bg-emerald-950 text-gold-100">خط تجوال (Tajawal)</option>
+                      <option value="almarai" className="bg-emerald-950 text-gold-100">خط المراعي (Almarai)</option>
+                      <option value="naskh" className="bg-emerald-950 text-gold-100">خط النسخ (Noto Naskh)</option>
+                    </select>
+                  </div>
 
-                {/* Font Size Pills */}
-                <div className="flex items-center gap-1 bg-emerald-950/70 border border-gold-400/50 rounded-xl px-1.5 py-1 text-xs text-gold-200 shadow-xs">
-                  <span className="text-gold-300 text-[10px] font-bold hidden sm:inline">{isRtl ? 'الخط:' : 'Size:'}</span>
-                  <div className="flex items-center bg-emerald-900/80 rounded-lg p-0.5 gap-0.5 border border-emerald-700/60">
-                    {Object.entries(FONT_SIZE_LEVELS).map(([key, config]) => {
-                      const isActive = fontSizeLevel === key;
-                      return (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => {
-                            setFontSizeLevel(key);
-                            showToast(isRtl ? 'حجم الخط: ' + config.labelAr : 'Font size: ' + config.labelEn);
-                          }}
-                          className={'px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold transition-all ' + (
-                            isActive 
-                              ? 'bg-gold-500 text-emerald-950 shadow-xs font-black' 
-                              : 'text-emerald-100 hover:text-gold-200'
-                          )}
-                        >
-                          {isRtl ? config.labelAr : config.labelEn}
-                        </button>
-                      );
-                    })}
+                  {/* Font Size Pills (Directly Beside Font Family!) */}
+                  <div className="flex items-center gap-1 bg-emerald-950/80 border border-gold-400/50 rounded-xl px-2 py-1 text-xs text-gold-200 shadow-xs">
+                    <span className="text-gold-300 text-[10px] font-bold">{isRtl ? 'حجم الخط:' : 'Size:'}</span>
+                    <div className="flex items-center bg-emerald-900/80 rounded-lg p-0.5 gap-0.5 border border-emerald-700/60">
+                      {Object.entries(FONT_SIZE_LEVELS).map(([key, config]) => {
+                        const isActive = fontSizeLevel === key;
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => {
+                              setFontSizeLevel(key);
+                              showToast(isRtl ? 'حجم الخط: ' + config.labelAr : 'Font size: ' + config.labelEn);
+                            }}
+                            className={'px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold transition-all ' + (
+                              isActive 
+                                ? 'bg-gold-500 text-emerald-950 shadow-xs font-black' 
+                                : 'text-emerald-100 hover:text-gold-200'
+                            )}
+                          >
+                            {isRtl ? config.labelAr : config.labelEn}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
+
+                {/* System Version Badge positioned at the end of Row 2 */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if ('caches' in window) {
+                      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
+                        window.location.reload(true);
+                      });
+                    } else {
+                      window.location.reload(true);
+                    }
+                  }}
+                  className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
+                  title={isRtl ? 'الإصدار المعتمد v56.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v56.0 — Click to force reload'}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
+                  <span>{isRtl ? 'الإصدار v56.0' : 'v56.0'}</span>
+                  <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
+                    {isRtl ? 'أحدث تحديث' : 'Latest'}
+                  </span>
+                </button>
               </div>
             </div>
 
