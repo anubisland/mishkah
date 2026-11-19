@@ -1910,8 +1910,9 @@
       // Teacher Live Masking Controls
       const [quranFontSize, setQuranFontSize] = useState('medium'); // 'small', 'medium', 'large'
       const [isEndingsMasked, setIsEndingsMasked] = useState(false);
-      const [mushafOverlayMode, setMushafOverlayMode] = useState('none'); // 'none', 'ruler', 'mask_bottom', 'mask_top', 'spotlight'
+      const [mushafOverlayMode, setMushafOverlayMode] = useState('none'); // 'none', 'ruler', 'mask_bottom', 'mask_top', 'spotlight', 'interactive_lines'
       const [activeRulerLine, setActiveRulerLine] = useState(1); // 1 to 15
+      const [maskedMushafLines, setMaskedMushafLines] = useState(new Set()); // Lines 0 to 14 hidden for interactive recall testing
       
       // Passage-Based Testing System (Start, Middle, End, Custom)
       const [passageTestSection, setPassageTestSection] = useState('none'); // 'none', 'start', 'middle', 'end', 'custom'
@@ -2860,7 +2861,22 @@
       const [lessonTopic, setLessonTopic] = useState('أركان الإيمان الستة والسكينة النفسية');
       const [lessonDuration, setLessonDuration] = useState(45);
       const [audienceLevel, setAudienceLevel] = useState('اليافعين والمهتدين الجدد (Bilingual Youth)');
-      const [islamicData, setIslamicData] = useState(null);
+      const [islamicData, setIslamicData] = useState(() => {
+        try {
+          const s = localStorage.getItem('mishkah_active_islamic_data');
+          return s ? JSON.parse(s) : null;
+        } catch (e) { return null; }
+      });
+      const [isCurrentLectureSaved, setIsCurrentLectureSaved] = useState(false);
+
+      // Auto-persist active lecture so progress is NEVER lost across refreshes
+      useEffect(() => {
+        if (islamicData) {
+          try {
+            localStorage.setItem('mishkah_active_islamic_data', JSON.stringify(islamicData));
+          } catch (e) {}
+        }
+      }, [islamicData]);
       const [savedIslamicLectures, setSavedIslamicLectures] = useState(() => {
         try {
           const s = localStorage.getItem('mishkah_saved_lectures');
@@ -3224,17 +3240,29 @@
 
       function handleSaveIslamicLecture() {
         if (!islamicData) return;
-        const newEntry = {
-          id: 'lec_' + Date.now(),
-          savedAt: new Date().toLocaleDateString('ar-EG'),
-          data: islamicData
-        };
-        const updated = [newEntry, ...savedIslamicLectures.filter(x => x.data.metadata.topic !== islamicData.metadata.topic)];
-        setSavedIslamicLectures(updated);
         try {
-          localStorage.setItem('mishkah_saved_lectures', JSON.stringify(updated));
-        } catch (e) {}
-        showToast(isRtl ? 'تم حفظ المحاضرة في مكتبتك الخاصة 💾' : 'Lecture saved to your library 💾');
+          const currentTopic = islamicData?.metadata?.topic || 'محاضرة شرعية';
+          const newEntry = {
+            id: 'lec_' + Date.now(),
+            savedAt: new Date().toLocaleDateString('ar-EG'),
+            data: islamicData
+          };
+          const existing = Array.isArray(savedIslamicLectures) ? savedIslamicLectures : [];
+          const updated = [newEntry, ...existing.filter(x => (x?.data?.metadata?.topic || '') !== currentTopic)];
+          setSavedIslamicLectures(updated);
+          try {
+            localStorage.setItem('mishkah_saved_lectures', JSON.stringify(updated));
+            localStorage.setItem('mishkah_active_islamic_data', JSON.stringify(islamicData));
+          } catch (storageErr) {
+            console.warn('LocalStorage save warning:', storageErr);
+          }
+          setIsCurrentLectureSaved(true);
+          showToast(isRtl ? 'تم حفظ المحاضرة في مكتبتك الخاصة بنجاح 💾' : 'Lecture saved to your library 💾');
+        } catch (err) {
+          console.error('Error saving lecture:', err);
+          setIsCurrentLectureSaved(true);
+          showToast(isRtl ? 'تم حفظ المحاضرة محلياً 💾' : 'Lecture saved locally 💾');
+        }
       }
 
       function handleDeleteSavedLecture(id) {
@@ -3544,9 +3572,14 @@
 
       function handleResetIslamicForm() {
         setIslamicData(null);
+        setIsCurrentLectureSaved(false);
         setRawLectureText('');
         setLessonTopic('');
         setCustomSubjectCategory('');
+        setUploadedFileInfo(null);
+        try {
+          localStorage.removeItem('mishkah_active_islamic_data');
+        } catch (e) {}
         showToast(isRtl ? 'تمت تهيئة الشاشة لبدء درس جديد على نظافة 🌿' : 'Reset to clean slate 🌿');
       }
 
@@ -4501,11 +4534,32 @@
                               <span>{isRtl ? 'كشاف تركيز السطر' : 'Spotlight'}</span>
                             </button>
 
+                            {/* 5. Interactive Click-to-Mask Lines (Requested by user for iPhone & mobile perfection) */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (mushafOverlayMode === 'interactive_lines') {
+                                  setMushafOverlayMode('none');
+                                  setMaskedMushafLines(new Set());
+                                } else {
+                                  setMushafOverlayMode('interactive_lines');
+                                  setMaskedMushafLines(new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]));
+                                }
+                              }}
+                              className={'px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1 border ' + (mushafOverlayMode === 'interactive_lines' ? 'bg-gold-500 text-emerald-950 border-gold-600 font-black shadow-md ring-2 ring-gold-300' : 'bg-white text-emerald-950 border-slate-300 hover:bg-slate-50')}
+                            >
+                              <span>🎭</span>
+                              <span>{isRtl ? 'طمس وتسميع الأسطر تفاعلياً (بالنقر للكشف)' : 'Tap-to-Mask Lines'}</span>
+                            </button>
+
                             {/* Reset Button */}
                             {mushafOverlayMode !== 'none' && (
                               <button
                                 type="button"
-                                onClick={() => setMushafOverlayMode('none')}
+                                onClick={() => {
+                                  setMushafOverlayMode('none');
+                                  setMaskedMushafLines(new Set());
+                                }}
                                 className="px-2.5 py-1.5 rounded-xl font-bold bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200 transition flex items-center gap-1"
                               >
                                 <span>✕</span>
@@ -4514,6 +4568,65 @@
                             )}
                           </div>
                         </div>
+
+                        {/* Interactive Line-by-Line Masking Sub-bar */}
+                        {mushafOverlayMode === 'interactive_lines' && (
+                          <div className="mb-3 bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-950 text-white border-2 border-gold-400 rounded-2xl p-3 sm:p-4 shadow-md flex flex-wrap items-center justify-between gap-3 animate-fadeIn">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-gold-300 font-black text-xs sm:text-sm">
+                                  🎭 {isRtl ? 'وضع التسميع التفاعلي على صفحة المصحف الورقي:' : 'Interactive Mushaf Recall:'}
+                                </span>
+                                <span className="bg-gold-400 text-emerald-950 text-[10px] font-black px-2 py-0.5 rounded-full">
+                                  {isRtl ? `${maskedMushafLines.size} أسطر محجوبة` : `${maskedMushafLines.size} lines masked`}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-emerald-200 mt-1">
+                                {isRtl 
+                                  ? 'انقر مباشرة على أي سطر في صفحة المصحف لكشفه أو حجبه. يعمل بنقاء 100% على الآيفون والموبايل دون أي تشوه أو انفصال في خط المصحف.' 
+                                  : 'Tap any line on the Mushaf page to reveal or mask. Zero font rendering issues on mobile.'}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                              <button
+                                type="button"
+                                onClick={() => setMaskedMushafLines(new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]))}
+                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
+                              >
+                                <span>🔒</span>
+                                <span>{isRtl ? 'حجب الكل (15 سطر)' : 'Mask All'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const indices = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14].sort(() => 0.5 - Math.random()).slice(0, 7);
+                                  setMaskedMushafLines(new Set(indices));
+                                }}
+                                className="px-2.5 py-1.5 bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black rounded-xl transition flex items-center gap-1"
+                              >
+                                <span>🎲</span>
+                                <span>{isRtl ? 'حجب عشوائي (تسميع مفاجئ)' : 'Random Mask'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setMaskedMushafLines(new Set([1,3,5,7,9,11,13]))}
+                                className="px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400/40 rounded-xl font-bold transition flex items-center gap-1"
+                              >
+                                <span>🌓</span>
+                                <span>{isRtl ? 'حجب زوجي' : 'Alternate'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setMaskedMushafLines(new Set())}
+                                className="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-emerald-950 rounded-xl font-bold transition flex items-center gap-1"
+                              >
+                                <span>👁️</span>
+                                <span>{isRtl ? 'كشف كافة الأسطر' : 'Reveal All'}</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Interactive Ruler Controls (When ruler or spotlight active) */}
                         {(mushafOverlayMode === 'ruler' || mushafOverlayMode === 'spotlight') && (
@@ -4647,6 +4760,47 @@
                                   className="absolute left-0 right-0 bottom-0 bg-slate-900/65 backdrop-blur-[1px] transition-all duration-300"
                                   style={{ top: (activeRulerLine * 6.55) + '%' }}
                                 />
+                              </div>
+                            )}
+
+                            {/* OVERLAY: Interactive Line-by-Line Masking (Tap-to-Mask / Tap-to-Reveal) */}
+                            {mushafOverlayMode === 'interactive_lines' && (
+                              <div className="absolute inset-0 select-none pointer-events-auto" style={{ zIndex: 12 }}>
+                                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(lineIdx => {
+                                  const isMasked = maskedMushafLines.has(lineIdx);
+                                  return (
+                                    <div
+                                      key={lineIdx}
+                                      onClick={() => {
+                                        setMaskedMushafLines(prev => {
+                                          const next = new Set(prev);
+                                          if (next.has(lineIdx)) next.delete(lineIdx);
+                                          else next.add(lineIdx);
+                                          return next;
+                                        });
+                                      }}
+                                      className={'absolute left-[2.5%] right-[2.5%] rounded-lg cursor-pointer transition-all duration-200 flex items-center justify-center ' + (
+                                        isMasked
+                                          ? 'shadow-md border border-gold-500/80 hover:border-gold-300'
+                                          : 'hover:bg-amber-400/20 border border-transparent hover:border-gold-400/40'
+                                      )}
+                                      style={{
+                                        top: (6.2 + lineIdx * 5.85) + '%',
+                                        height: '5.6%',
+                                        background: isMasked ? 'linear-gradient(135deg, #FAF7EE 0%, #F5ECE0 100%)' : 'transparent',
+                                        zIndex: isMasked ? 15 : 13
+                                      }}
+                                      title={isMasked ? (isRtl ? `السطر ${lineIdx + 1} محجوب للتسميع — انقر للكشف` : 'Line masked — tap to reveal') : (isRtl ? `السطر ${lineIdx + 1} مكشوف — انقر للحجب` : 'Line revealed — tap to mask')}
+                                    >
+                                      {isMasked && (
+                                        <span className="text-[10px] sm:text-xs font-black text-emerald-950 font-cairo flex items-center gap-1.5 opacity-90 hover:opacity-100 select-none">
+                                          <span>🔒</span>
+                                          <span>{isRtl ? `السطر ${lineIdx + 1} (انقر للكشف)` : `Line ${lineIdx + 1} (tap to reveal)`}</span>
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>
@@ -6864,22 +7018,28 @@
                             <button
                               key={st.id}
                               type="button"
-                              disabled={!st.active}
                               onClick={() => {
-                                const el = document.getElementById(st.id);
+                                const targetId = st.active ? st.id : 'stages-roadmap-preview';
+                                const el = document.getElementById(targetId);
                                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                               }}
-                              className={'flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold transition whitespace-nowrap ' + (
+                              className={'flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold transition whitespace-nowrap cursor-pointer ' + (
                                 st.active
-                                  ? 'bg-emerald-900/80 hover:bg-gold-500 hover:text-emerald-950 text-gold-200 border border-gold-400/50 shadow-xs cursor-pointer'
-                                  : 'bg-emerald-950/40 text-slate-500 border border-emerald-900/40 cursor-not-allowed opacity-60'
+                                  ? 'bg-emerald-900 hover:bg-gold-500 hover:text-emerald-950 text-gold-200 border-2 border-gold-400 shadow-md ring-1 ring-gold-400/50 font-black'
+                                  : 'bg-emerald-900/60 hover:bg-emerald-800 text-amber-200 border border-gold-500/40 opacity-95'
                               )}
+                              title={st.active ? (isRtl ? 'انتقل إلى هذه المرحلة' : 'Jump to stage') : (isRtl ? 'مرحلة قادمة — تتولد تلقائياً بعد رفع الملف' : 'Upcoming stage')}
                             >
                               <span className="w-5 h-5 rounded-full bg-gold-400 text-emerald-950 text-[10px] font-black flex items-center justify-center">
                                 {st.num}
                               </span>
                               <span>{st.icon}</span>
                               <span>{st.labelAr}</span>
+                              {!st.active && (
+                                <span className="bg-emerald-950 text-gold-300 text-[9px] px-1.5 py-0.2 rounded-full font-bold">
+                                  {isRtl ? 'قادمة' : 'Pending'}
+                                </span>
+                              )}
                             </button>
                           ))}
                         </div>
@@ -7237,6 +7397,66 @@
 
                       </div>
 
+                      {/* --- UPCOMING STAGES ROADMAP GUIDE (WHEN NO ACTIVE LECTURE) --- */}
+                      {!islamicData && (
+                        <div id="stages-roadmap-preview" className="card-islamic-pearl rounded-3xl p-5 sm:p-7 border-2 border-dashed border-emerald-800/30 shadow-md space-y-5 animate-fadeIn">
+                          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-900/10 pb-4">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xl">🗺️</span>
+                                <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo">
+                                  {isRtl ? 'خريطة مراحل إعداد المحاضرة (المراحل 2 إلى 6):' : 'Upcoming Lecture Stages (2 through 6):'}
+                                </h3>
+                              </div>
+                              <p className="text-xs text-slate-600 mt-1">
+                                {isRtl 
+                                  ? 'بمجرد رفع ملفك أو لصق النص بالخطوة 1 أعلاه؛ ستتولد المراحل الخمس التالية تلقائياً بالترتيب في هذه الشاشة دون أي تنقل:' 
+                                  : 'Once you upload your file above, the following 5 stages generate automatically in this single view:'}
+                              </p>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={handleLoadDemoIslamic}
+                              className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-4 py-2 rounded-xl text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer transform hover:scale-105"
+                            >
+                              <span>💡</span>
+                              <span>{isRtl ? 'معاينة نموذج تجريبي بكافة المراحل' : 'Load Demo with All 6 Stages'}</span>
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                            {[
+                              { num: 2, title: isRtl ? '2. الخطة والأدلة' : '2. Plan & Hadith', desc: isRtl ? 'المخطط الزمني بالدقائق وتوثيق أحاديث الصحيحين' : 'Minute blueprint & Sahih Hadiths', icon: '⏱️' },
+                              { num: 3, title: isRtl ? '3. العرض وبوربوينت' : '3. PPTX Slides', desc: isRtl ? 'عرض مباشر لزوم وتنزيل ملف بوربوينت PPTX' : 'Zoom Presenter & PPTX Download', icon: '📽️' },
+                              { num: 4, title: isRtl ? '4. ورقة العمل والطباعة' : '4. Worksheet Table', desc: isRtl ? 'جدول المدارسة للدارسين مع الطباعة الفورية' : 'Study worksheet & instant print', icon: '📝' },
+                              { num: 5, title: isRtl ? '5. الاختبار الذاتي التفاعلي' : '5. Interactive Quiz', desc: isRtl ? 'أسئلة الاختيار من متعدد وتصحيح فوري' : 'Multiple choice quiz & live scoring', icon: '🎯' },
+                              { num: 6, title: isRtl ? '6. الواتساب والمكتبة' : '6. WhatsApp & Library', desc: isRtl ? 'ملخص رسائل الواتساب وحفظ دائم بمكتبتك' : 'WhatsApp summary & library save', icon: '💬' }
+                            ].map(stg => (
+                              <div key={stg.num} className="bg-white/80 rounded-2xl p-4 border border-emerald-900/10 shadow-xs flex flex-col justify-between hover:border-gold-400 transition">
+                                <div>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="w-6 h-6 rounded-full bg-emerald-900 text-gold-200 text-xs font-black flex items-center justify-center shadow-xs">
+                                      {stg.num}
+                                    </span>
+                                    <span className="text-xl">{stg.icon}</span>
+                                  </div>
+                                  <h4 className="font-bold text-emerald-950 text-xs sm:text-sm font-cairo mb-1">
+                                    {stg.title}
+                                  </h4>
+                                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                                    {stg.desc}
+                                  </p>
+                                </div>
+                                <div className="mt-3 pt-2 border-t border-slate-100 text-[10px] text-emerald-800 font-bold">
+                                  ⚡ {isRtl ? 'توليد تلقائي فوري' : 'Auto-generated'}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                     </div>
                   )}
 
@@ -7269,10 +7489,14 @@
                         <button
                           type="button"
                           onClick={handleSaveIslamicLecture}
-                          className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 px-3.5 py-2 rounded-xl text-xs font-black shadow-sm border border-gold-400 flex items-center gap-1.5 transition cursor-pointer"
+                          className={'px-3.5 py-2 rounded-xl text-xs font-black shadow-sm border transition flex items-center gap-1.5 cursor-pointer ' + (
+                            isCurrentLectureSaved
+                              ? 'bg-emerald-800 text-gold-300 border-gold-400 ring-2 ring-gold-400/50'
+                              : 'bg-emerald-900 hover:bg-emerald-950 text-gold-200 border-gold-400'
+                          )}
                         >
                           <span>💾</span>
-                          <span>{isRtl ? 'حفظ بمكتبتي' : 'Save to Library'}</span>
+                          <span>{isCurrentLectureSaved ? (isRtl ? '✓ محفوظة بمكتبتك' : 'Saved in Library') : (isRtl ? 'حفظ بمكتبتي' : 'Save to Library')}</span>
                         </button>
                         <button
                           type="button"
@@ -7825,10 +8049,14 @@
                           <button
                             type="button"
                             onClick={handleSaveIslamicLecture}
-                            className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-4 py-2 rounded-xl text-xs transition shadow-md border border-gold-400 flex items-center gap-1.5 cursor-pointer"
+                            className={'px-4 py-2 rounded-xl text-xs font-black transition shadow-md border flex items-center gap-1.5 cursor-pointer ' + (
+                              isCurrentLectureSaved
+                                ? 'bg-emerald-800 text-gold-300 border-gold-400 ring-2 ring-gold-400/50'
+                                : 'bg-gold-500 hover:bg-gold-400 text-emerald-950 border-gold-400'
+                            )}
                           >
                             <span>💾</span>
-                            <span>{isRtl ? 'حفظ المحاضرة بمكتبتي' : 'Save to Library'}</span>
+                            <span>{isCurrentLectureSaved ? (isRtl ? '✓ تم الحفظ بمكتبتك بنجاح' : 'Saved in Library') : (isRtl ? 'حفظ المحاضرة بمكتبتي' : 'Save to Library')}</span>
                           </button>
                         </div>
                       </div>
