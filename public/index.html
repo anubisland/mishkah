@@ -30,6 +30,10 @@
     }
   </script>
 
+  <!-- Client-side PowerPoint (.pptx) Presentation Engine -->
+  <script src="libs/jszip.min.js"></script>
+  <script src="libs/pptxgen.bundle.js"></script>
+
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -2880,6 +2884,10 @@
       // Presentation & Slide State
       const [activeSlideIndex, setActiveSlideIndex] = useState(0);
       const [isFullscreenZoom, setIsFullscreenZoom] = useState(false);
+      const [presentationTarget, setPresentationTarget] = useState('islamic'); // 'islamic' or 'tajweed'
+      const [presentationFontSize, setPresentationFontSize] = useState('large'); // 'normal', 'large', 'xl'
+      const [showSpeakerNotes, setShowSpeakerNotes] = useState(false);
+      const [isExportingPptx, setIsExportingPptx] = useState(false);
 
       // Interactive Student Quiz State
       const [quizAnswers, setQuizAnswers] = useState({});
@@ -3239,6 +3247,189 @@
         setIslamicSubView('workbench');
         showToast(isRtl ? 'تم فتح المحاضرة المحفوظة 📖' : 'Loaded saved lecture 📖');
       }
+
+      // Start Fullscreen Presentation for Lecture
+      const handleStartLecturePresentation = (slideIndex = 0) => {
+        setPresentationTarget('islamic');
+        setActiveSlideIndex(slideIndex);
+        setIsFullscreenZoom(true);
+      };
+
+      // Start Fullscreen Presentation for Tajweed
+      const handleStartTajweedPresentation = (slideIndex = 0) => {
+        setPresentationTarget('tajweed');
+        setActiveSlideIndex(slideIndex);
+        setIsFullscreenZoom(true);
+      };
+
+      // Keyboard navigation for presentation mode
+      useEffect(() => {
+        if (!isFullscreenZoom) return;
+        const handleKeyDown = (e) => {
+          if (e.key === 'Escape') {
+            setIsFullscreenZoom(false);
+          } else if (e.key === 'ArrowLeft') {
+            setActiveSlideIndex(prev => {
+              const max = presentationTarget === 'islamic'
+                ? (((islamicData && (islamicData.zoomCards || islamicData.blueprint || [])).length || 1) - 1)
+                : (((tajweedData && (tajweedData.presentationCards || [])).length || 1) - 1);
+              return Math.min(max, prev + 1);
+            });
+          } else if (e.key === 'ArrowRight') {
+            setActiveSlideIndex(prev => Math.max(0, prev - 1));
+          } else if (e.key === ' ' || e.key === 'Spacebar') {
+            e.preventDefault();
+            setActiveSlideIndex(prev => {
+              const max = presentationTarget === 'islamic'
+                ? (((islamicData && (islamicData.zoomCards || islamicData.blueprint || [])).length || 1) - 1)
+                : (((tajweedData && (tajweedData.presentationCards || [])).length || 1) - 1);
+              return Math.min(max, prev + 1);
+            });
+          }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+      }, [isFullscreenZoom, presentationTarget, islamicData, tajweedData]);
+
+      // Export Lecture Presentation to Microsoft PowerPoint (.pptx)
+      const handleExportIslamicPowerPoint = async () => {
+        if (!islamicData) {
+          showToast(isRtl ? 'لا توجد محاضرة لتحويلها إلى عرض تقديمي' : 'No lecture to export');
+          return;
+        }
+        if (typeof PptxGenJS === 'undefined') {
+          showToast(isRtl ? 'محرك البوربوينت جاري تحميله، يرجى الانتظار ثوانٍ...' : 'PowerPoint engine loading...');
+          return;
+        }
+        setIsExportingPptx(true);
+        try {
+          const pptx = new PptxGenJS();
+          pptx.layout = 'LAYOUT_16x9';
+          pptx.rtlMode = isRtl;
+
+          const topic = (islamicData.metadata && islamicData.metadata.topic) || 'المحاضرة الشرعية والتأصيل العلمي';
+          const category = (islamicData.metadata && islamicData.metadata.category) || 'العلوم الشرعية';
+
+          // Slide 1: Grand Islamic Title & Cover Slide
+          const cover = pptx.addSlide();
+          cover.background = { color: '062319' }; // Islamic Emerald
+
+          cover.addShape(pptx.ShapeType.roundRect, {
+            x: 0.8, y: 0.8, w: 11.7, h: 5.6,
+            fill: { color: '0A3324' }, line: { color: 'C69214', width: 2 }
+          });
+
+          cover.addText('مِشكاة | Mishkah', {
+            x: 1.2, y: 1.2, w: 10.9, h: 0.6,
+            fontSize: 16, fontFace: 'Arial', color: 'F59E0B', bold: true, align: isRtl ? 'right' : 'left'
+          });
+
+          cover.addText(topic, {
+            x: 1.2, y: 2.2, w: 10.9, h: 1.8,
+            fontSize: 32, fontFace: 'Traditional Arabic', color: 'FEF3C7', bold: true, align: isRtl ? 'right' : 'left'
+          });
+
+          cover.addText(`المجال: ${category} | المستوى: ${(islamicData.metadata && islamicData.metadata.audience) || 'الدارسين والحلقة'}`, {
+            x: 1.2, y: 4.2, w: 10.9, h: 0.6,
+            fontSize: 15, fontFace: 'Arial', color: '86EFAC', align: isRtl ? 'right' : 'left'
+          });
+
+          cover.addText('إعداد وتقديم: فضيلة المعلم والمحاضر الشرعي\nشركة AnubisLand — منظومة مِشكاة للتعليم الشرعي والقرآني', {
+            x: 1.2, y: 5.0, w: 10.9, h: 1.0,
+            fontSize: 13, fontFace: 'Arial', color: 'CBD5E1', align: isRtl ? 'right' : 'left'
+          });
+
+          // Content Slides: Each extracted theme / section
+          const slidesData = (islamicData.zoomCards && islamicData.zoomCards.length > 0)
+            ? islamicData.zoomCards
+            : (islamicData.blueprint || []);
+
+          slidesData.forEach((s, idx) => {
+            const slide = pptx.addSlide();
+            slide.background = { color: '062319' };
+
+            // Outer decorative border
+            slide.addShape(pptx.ShapeType.roundRect, {
+              x: 0.6, y: 0.5, w: 12.1, h: 6.2,
+              fill: { color: '0A3324' }, line: { color: 'D97706', width: 1.5 }
+            });
+
+            // Slide Header
+            const slideTitleText = s.slideTitle || s.phaseTitle || s.phaseNameAr || (`المحور ${idx + 1}`);
+            slide.addText(`المحور ${idx + 1}: ${slideTitleText}`, {
+              x: 0.9, y: 0.8, w: 11.5, h: 0.8,
+              fontSize: 22, fontFace: 'Traditional Arabic', color: 'F59E0B', bold: true, align: isRtl ? 'right' : 'left'
+            });
+
+            let currentY = 1.7;
+
+            // Scripture / Evidence Callout (if present)
+            const scriptureText = s.scriptureEvidence || s.scripture || '';
+            if (scriptureText) {
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.9, y: currentY, w: 11.5, h: 1.3,
+                fill: { color: '041E15' }, line: { color: 'B45309', width: 1 }
+              });
+              slide.addText(scriptureText, {
+                x: 1.1, y: currentY + 0.1, w: 11.1, h: 1.1,
+                fontSize: 15, fontFace: 'Amiri', color: 'FEF3C7', align: 'center', italic: true
+              });
+              currentY += 1.5;
+            }
+
+            // Substantive Content / Talking Points
+            const bodyText = s.bodyAr || s.talkingPoints || s.teacherFocusAr || s.teacherGuidanceAr || '';
+            slide.addText(bodyText, {
+              x: 0.9, y: currentY, w: 11.5, h: 2.1,
+              fontSize: 17, fontFace: 'Traditional Arabic', color: 'F8FAFC', lineSpacing: 26, align: isRtl ? 'right' : 'left'
+            });
+
+            // Practical Impact / Action Footer
+            const impactText = s.pedagogicalTip || s.practicalAction || s.keyTakeawayAr || s.practicalImpact || '';
+            if (impactText) {
+              slide.addText(`💡 الأثر السلوكي والتطبيقي: ${impactText}`, {
+                x: 0.9, y: 5.8, w: 11.5, h: 0.7,
+                fontSize: 13, fontFace: 'Arial', color: 'FDE68A', bold: true, align: isRtl ? 'right' : 'left'
+              });
+            }
+
+            // Speaker Notes for the Lecturer / Doctor
+            const notesText = [
+              `[توجيه المحاضر والشرح]: ${s.pedagogicalTip || s.teacherFocusAr || ''}`,
+              s.studentQuestion ? `[سؤال تفاعلي للدارسين]: ${s.studentQuestion}` : ''
+            ].filter(Boolean).join('\n\n');
+
+            if (notesText) {
+              slide.addNotes(notesText);
+            }
+          });
+
+          // Summary Slide
+          const finalSlide = pptx.addSlide();
+          finalSlide.background = { color: '062319' };
+          finalSlide.addShape(pptx.ShapeType.roundRect, {
+            x: 0.8, y: 0.8, w: 11.7, h: 5.6,
+            fill: { color: '0A3324' }, line: { color: 'C69214', width: 2 }
+          });
+          finalSlide.addText('خاتمة وتكليف الأسبوع', {
+            x: 1.2, y: 1.2, w: 10.9, h: 0.8,
+            fontSize: 26, fontFace: 'Traditional Arabic', color: 'F59E0B', bold: true, align: isRtl ? 'right' : 'left'
+          });
+          finalSlide.addText('«العِلْمُ يَهْتِفُ بِالعَمَلِ، فَإِنْ أَجَابَهُ وَإِلَّا ارْتَحَلَ»\n\n1. مراجعة محاور المحاضرة مع أفراد الحلقة والأسرة.\n2. إتمام الاختبار الذاتي القصير عبر منصة مِشكاة.\n3. تطبيق التكليف السلوكي في حماية الفهم المنضبط ونقله للغير.', {
+            x: 1.2, y: 2.3, w: 10.9, h: 3.2,
+            fontSize: 18, fontFace: 'Traditional Arabic', color: 'F8FAFC', lineSpacing: 28, align: isRtl ? 'right' : 'left'
+          });
+
+          const cleanFileName = topic.replace(/[\/\\:*?"<>|]/g, '_').substring(0, 45);
+          await pptx.writeFile({ fileName: `عرض_${cleanFileName}.pptx` });
+          showToast(isRtl ? 'تم تصدير وتحميل ملف بوربوينت PowerPoint (.pptx) بنجاح 📊' : 'PowerPoint exported successfully 📊');
+        } catch (err) {
+          console.error('PPTX export error:', err);
+          showToast(isRtl ? 'حدث خطأ أثناء تصدير البوربوينت' : 'Error exporting PowerPoint');
+        } finally {
+          setIsExportingPptx(false);
+        }
+      };
 
       // Universal Document Extractor for Word (.docx), PDF (.pdf), and Text (.txt, .md)
       async function handleLectureFileUpload(file) {
@@ -7119,25 +7310,45 @@
                       </div>
                     </div>
 
-                    {/* 3. Zoom Slide Deck for Presentation */}
+                    {/* 3. Interactive Lecture Presentation & PowerPoint Suite */}
                     <div className="card-islamic-pearl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-emerald-800/15 shadow-md">
                       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-100">
                         <div>
-                          <span className="text-[11px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                            {isRtl ? 'بطاقات الشرح التفاعلية لبرنامج زوم (Zoom Presentation Cards)' : 'Zoom Teaching Slides'}
+                          <span className="text-[11px] sm:text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>📽️</span>
+                            <span>{isRtl ? 'منظومة العروض التقديمية وشرائح الشرح (Lecture Presentation Suite)' : 'Lecture Presentation Suite'}</span>
                           </span>
                           <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo">
-                            {isRtl ? 'عرض بصري واضح للمحاور والأدلة أثناء البث' : 'High-Contrast Teaching Cards'}
+                            {isRtl ? 'عرض مباشر في قاعة المحاضرات / زوم + تصدير بوربوينت PowerPoint' : 'Live Presenter Mode & PowerPoint (.pptx) Export'}
                           </h3>
                         </div>
-                        <span className="text-xs bg-emerald-100 text-emerald-900 px-3 py-1 rounded-full font-bold">
-                          {(islamicData.zoomCards || islamicData.zoomPresentation || []).length} {isRtl ? 'بطاقات' : 'Cards'}
-                        </span>
+
+                        {/* Presentation Action Controls */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleStartLecturePresentation(0)}
+                            className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 font-black px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-2 transform hover:scale-105 active:scale-95 cursor-pointer"
+                          >
+                            <span>📽️</span>
+                            <span>{isRtl ? 'بدء العرض المباشر (ملء الشاشة)' : 'Launch Presenter Mode'}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleExportIslamicPowerPoint}
+                            disabled={isExportingPptx}
+                            className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-2 transform hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
+                          >
+                            <span>📥</span>
+                            <span>{isExportingPptx ? (isRtl ? 'جاري التصدير...' : 'Exporting...') : (isRtl ? 'تحميل كملف بوربوينت (.pptx)' : 'Download PowerPoint (.pptx)')}</span>
+                          </button>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {(islamicData.zoomCards || islamicData.zoomPresentation || []).map((slide, sIdx) => (
-                          <div key={sIdx} className="bg-emerald-950 text-white rounded-2xl p-5 border-2 border-gold-400 shadow-md flex flex-col justify-between">
+                          <div key={sIdx} className="bg-emerald-950 text-white rounded-2xl p-5 border-2 border-gold-400 shadow-md flex flex-col justify-between hover:border-gold-300 transition">
                             <div>
                               <div className="flex items-center justify-between mb-3 text-gold-300 text-xs font-bold">
                                 <span>{isRtl ? `الشريحة ${slide.slideNumber || sIdx + 1}` : `Slide ${sIdx + 1}`}</span>
@@ -7159,6 +7370,14 @@
                             </div>
                             <div className="mt-4 pt-3 border-t border-emerald-800/80 text-[11px] text-gold-300 font-bold flex items-center justify-between">
                               <span>💡 {slide.pedagogicalTip || slide.practicalAction}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleStartLecturePresentation(sIdx)}
+                                className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black px-2.5 py-1 rounded-lg text-[10px] shadow-xs flex items-center gap-1 transition"
+                              >
+                                <span>👁️</span>
+                                <span>{isRtl ? 'عرض الشريحة' : 'Present Slide'}</span>
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -8662,21 +8881,202 @@
             )}
           </main>
 
-          {/* ================= FULLSCREEN ZOOM PRESENTATION OVERLAY ================= */}
-          {isFullscreenZoom && tajweedData && (
-            <div className="zoom-slide-fullscreen">
-              <button 
-                onClick={() => setIsFullscreenZoom(false)}
-                className="absolute top-6 left-6 bg-red-600/80 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-xl font-bold transition shadow-2xl z-50"
-              >
-                ✕ {isRtl ? 'إنهاء وضع العرض' : 'Exit Presentation'}
-              </button>
+          {/* ================= FULLSCREEN PRESENTATION OVERLAY ================= */}
+          {isFullscreenZoom && (presentationTarget === 'islamic' ? islamicData : tajweedData) && (
+            <div className="zoom-slide-fullscreen select-none">
+              {/* Top Control Bar */}
+              <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 z-50 px-2 pointer-events-auto">
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => setIsFullscreenZoom(false)}
+                    className="bg-red-600/90 hover:bg-red-600 text-white text-xs px-3.5 py-2 rounded-xl font-bold transition shadow-lg flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>✕</span>
+                    <span>{isRtl ? 'إنهاء العرض' : 'Exit'}</span>
+                  </button>
 
-              {(() => {
-                const cardsList = tajweedData.presentationCards || [];
-                const card = cardsList[activeSlideIndex] || cardsList[0] || { ayahTextUthmani: '', highlightedPortion: '', titleAr: '', titleEn: '', explanationAr: '', explanationEn: '' };
+                  {/* Font Size Adjuster */}
+                  <div className="bg-emerald-950/90 border border-gold-400/40 rounded-xl p-1 flex items-center gap-1 text-xs text-gold-300">
+                    <span className="px-1.5 text-[10px] text-slate-400">{isRtl ? 'الخط:' : 'Font:'}</span>
+                    <button 
+                      onClick={() => setPresentationFontSize('normal')}
+                      className={`px-2 py-1 rounded-lg font-bold transition cursor-pointer ${presentationFontSize === 'normal' ? 'bg-gold-500 text-emerald-950' : 'hover:bg-emerald-800'}`}
+                    >
+                      {isRtl ? 'صغير' : 'Sm'}
+                    </button>
+                    <button 
+                      onClick={() => setPresentationFontSize('large')}
+                      className={`px-2 py-1 rounded-lg font-bold transition cursor-pointer ${presentationFontSize === 'large' ? 'bg-gold-500 text-emerald-950' : 'hover:bg-emerald-800'}`}
+                    >
+                      {isRtl ? 'متوسط' : 'Md'}
+                    </button>
+                    <button 
+                      onClick={() => setPresentationFontSize('xl')}
+                      className={`px-2 py-1 rounded-lg font-bold transition cursor-pointer ${presentationFontSize === 'xl' ? 'bg-gold-500 text-emerald-950' : 'hover:bg-emerald-800'}`}
+                    >
+                      {isRtl ? 'كبير' : 'Lg'}
+                    </button>
+                  </div>
+
+                  {/* Presenter Notes Toggle */}
+                  {presentationTarget === 'islamic' && (
+                    <button
+                      onClick={() => setShowSpeakerNotes(prev => !prev)}
+                      className={`text-xs px-3 py-2 rounded-xl font-bold transition border flex items-center gap-1.5 shadow-md cursor-pointer ${
+                        showSpeakerNotes 
+                          ? 'bg-gold-500 text-emerald-950 border-gold-300' 
+                          : 'bg-emerald-950/80 text-gold-300 border-gold-400/30 hover:bg-emerald-900'
+                      }`}
+                    >
+                      <span>📝</span>
+                      <span>{isRtl ? (showSpeakerNotes ? 'إخفاء ملاحظات الشرح' : 'ملاحظات المحاضر') : 'Notes'}</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Download PowerPoint Button directly from Presenter View */}
+                  {presentationTarget === 'islamic' && (
+                    <button
+                      onClick={handleExportIslamicPowerPoint}
+                      disabled={isExportingPptx}
+                      className="bg-gold-500 hover:bg-gold-400 text-emerald-950 text-xs px-3 py-2 rounded-xl font-black transition shadow-lg flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                    >
+                      <span>📥</span>
+                      <span>{isExportingPptx ? (isRtl ? 'جاري التحميل...' : 'Exporting...') : (isRtl ? 'تحميل كبوربوينت (.pptx)' : 'PowerPoint (.pptx)')}</span>
+                    </button>
+                  )}
+
+                  {/* Native Fullscreen Toggle */}
+                  <button
+                    onClick={() => {
+                      if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(() => {});
+                      } else {
+                        document.exitFullscreen().catch(() => {});
+                      }
+                    }}
+                    className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 text-xs px-3 py-2 rounded-xl font-bold transition border border-gold-400/30 shadow-md cursor-pointer"
+                  >
+                    ⛶ {isRtl ? 'شاشة كاملة' : 'Fullscreen'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Slide Content Rendering */}
+              {presentationTarget === 'islamic' ? (() => {
+                const slidesList = (islamicData.zoomCards && islamicData.zoomCards.length > 0)
+                  ? islamicData.zoomCards
+                  : (islamicData.blueprint || []);
+                const currentSlide = slidesList[activeSlideIndex] || slidesList[0] || {};
+                const slideTitleText = currentSlide.slideTitle || currentSlide.phaseTitle || currentSlide.phaseNameAr || (`المحور ${activeSlideIndex + 1}`);
+                const scriptureText = currentSlide.scriptureEvidence || currentSlide.scripture;
+                const bodyText = currentSlide.bodyAr || currentSlide.talkingPoints || currentSlide.teacherFocusAr || currentSlide.teacherGuidanceAr;
+                const impactText = currentSlide.pedagogicalTip || currentSlide.practicalAction || currentSlide.keyTakeawayAr || currentSlide.practicalImpact;
+
+                const textScaleClass = presentationFontSize === 'normal' 
+                  ? 'text-base sm:text-lg leading-relaxed' 
+                  : presentationFontSize === 'xl' 
+                  ? 'text-xl sm:text-3xl leading-loose font-bold' 
+                  : 'text-lg sm:text-2xl leading-relaxed';
+
                 return (
-                  <div className="w-full max-w-5xl flex flex-col justify-between items-center text-center text-white space-y-6">
+                  <div className="w-full max-w-5xl flex flex-col justify-between items-center text-white px-4 my-auto pt-16 pb-6">
+                    {/* Slide Container 16:9 Aspect with Grand Emerald Styling */}
+                    <div className="w-full bg-emerald-950/90 rounded-3xl p-6 sm:p-10 border-2 border-gold-400 shadow-2xl relative overflow-hidden backdrop-blur-md">
+                      
+                      {/* Top Meta Header */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-gold-400/30">
+                        <div className="flex items-center gap-2 text-gold-300 font-bold text-xs sm:text-sm">
+                          <span className="w-7 h-7 rounded-full bg-gold-500 text-emerald-950 font-black flex items-center justify-center text-xs">
+                            {activeSlideIndex + 1}
+                          </span>
+                          <span>{islamicData.metadata.topic}</span>
+                        </div>
+                        <span className="bg-emerald-900 px-3 py-1 rounded-full text-gold-300 text-xs font-bold border border-gold-400/30">
+                          {islamicData.metadata.category}
+                        </span>
+                      </div>
+
+                      {/* Section Heading */}
+                      <h3 className="font-amiri text-2xl sm:text-4xl font-extrabold text-gold-200 mb-6 leading-snug text-right">
+                        {slideTitleText}
+                      </h3>
+
+                      {/* Scripture Box */}
+                      {scriptureText && (
+                        <div className="my-4 p-4 sm:p-5 rounded-2xl bg-emerald-900/70 border-2 border-gold-400/50 shadow-inner text-center">
+                          <p className="font-quran text-xl sm:text-3xl text-amber-100 leading-relaxed drop-shadow-sm">
+                            {scriptureText}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Body Content */}
+                      <div className={`font-amiri text-slate-100 my-4 text-right ${textScaleClass}`}>
+                        {bodyText}
+                      </div>
+
+                      {/* Behavioral Impact Footer */}
+                      {impactText && (
+                        <div className="mt-6 pt-4 border-t border-gold-400/30 flex items-center gap-2 text-xs sm:text-sm text-gold-300 font-bold bg-emerald-900/40 p-3 rounded-xl text-right">
+                          <span>💡</span>
+                          <span>{isRtl ? 'الأثر السلوكي والتطبيقي:' : 'Practical Impact:'} {impactText}</span>
+                        </div>
+                      )}
+
+                      {/* Speaker Notes Drawer (Toggled by Presenter) */}
+                      {showSpeakerNotes && (
+                        <div className="mt-4 p-4 rounded-xl bg-amber-950/80 border border-gold-400/60 text-right animate-fadeIn">
+                          <span className="block text-gold-300 font-bold text-xs mb-1">
+                            📝 {isRtl ? 'ملاحظات وتوجيهات الشرح للمحاضر (خاص بالمعلم):' : 'Presenter Notes:'}
+                          </span>
+                          <p className="font-amiri text-xs sm:text-sm text-amber-100 leading-relaxed">
+                            {currentSlide.pedagogicalTip || currentSlide.teacherFocusAr || currentSlide.teacherGuidanceAr || 'استعرض المحور مع إشراك الدارسين في استنباط الثمرات.'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bottom Navigation Toolbar */}
+                    <div className="flex items-center gap-3 pt-6">
+                      <button 
+                        disabled={activeSlideIndex === 0}
+                        onClick={() => setActiveSlideIndex(prev => prev - 1)}
+                        className="bg-emerald-800 disabled:opacity-25 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2 rounded-xl text-sm transition shadow-md flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span>◀</span>
+                        <span>{isRtl ? 'السابق' : 'Previous'}</span>
+                      </button>
+
+                      {/* Slide Indicator Dots / Count */}
+                      <div className="flex items-center gap-2 px-3">
+                        <span className="text-gold-300 font-bold text-sm sm:text-base">
+                          {activeSlideIndex + 1} / {slidesList.length}
+                        </span>
+                      </div>
+
+                      <button 
+                        disabled={activeSlideIndex === slidesList.length - 1}
+                        onClick={() => setActiveSlideIndex(prev => prev + 1)}
+                        className="bg-emerald-800 disabled:opacity-25 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2 rounded-xl text-sm transition shadow-md flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span>{isRtl ? 'التالي' : 'Next'}</span>
+                        <span>▶</span>
+                      </button>
+                    </div>
+
+                    <div className="text-[11px] text-slate-400 pt-2 font-mono">
+                      {isRtl ? 'يمكنك التنقل بالأسهم ◄ ► أو المسافة (Space)، والخروج بزر Esc' : 'Use arrow keys or space to navigate, Esc to exit'}
+                    </div>
+                  </div>
+                );
+              })() : (() => {
+                // Tajweed presentation code (preserves existing functionality)
+                const cardsList = tajweedData.presentationCards || [];
+                const card = cardsList[activeSlideIndex] || cardsList[0] || {};
+                return (
+                  <div className="w-full max-w-5xl flex flex-col justify-between items-center text-center text-white space-y-6 pt-16">
                     <div className="text-gold-300 text-sm font-bold tracking-widest uppercase">
                       {isRtl ? card.titleAr : card.titleEn}
                     </div>
@@ -8711,17 +9111,17 @@
                       <button 
                         disabled={activeSlideIndex === 0}
                         onClick={() => setActiveSlideIndex(prev => prev - 1)}
-                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-sm"
+                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-sm cursor-pointer"
                       >
                         {isRtl ? 'السابق' : 'Previous'}
                       </button>
                       <span className="text-gold-300 font-bold text-base px-3">
-                        {activeSlideIndex + 1} / {(tajweedData.presentationCards || []).length}
+                        {activeSlideIndex + 1} / {cardsList.length}
                       </span>
                       <button 
-                        disabled={activeSlideIndex === (tajweedData.presentationCards || []).length - 1}
+                        disabled={activeSlideIndex === cardsList.length - 1}
                         onClick={() => setActiveSlideIndex(prev => prev + 1)}
-                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-sm"
+                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-sm cursor-pointer"
                       >
                         {isRtl ? 'التالي' : 'Next'}
                       </button>
