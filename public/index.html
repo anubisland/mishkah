@@ -4166,6 +4166,7 @@
         case 'makharij_jawf':
           return plates.filter(p => p.id === 'jawf_overview' || p.id === 'jawf_three_letters');
         case 'makharij_halq':
+        case 'izhar_halqi':
           return plates.filter(p => p.id === 'halq_sections_vocal_cords' || p.id === 'makhraj_hamzah_haa' || p.id === 'makhraj_ayn_haa' || p.id === 'makhraj_ghayn_khaa');
         case 'makharij_lisan':
           return plates.filter(p => p.id === 'tongue_divisions' || p.id === 'makhraj_qaaf' || p.id === 'makhraj_kaaf' || p.id === 'makhraj_jeem' || p.id === 'makhraj_sheen' || p.id === 'makhraj_yaa' || p.id === 'compare_jeem_sheen_yaa' || p.id === 'makhraj_daad_pressure_contact' || p.id === 'daad_tongue_edges' || p.id === 'makhraj_laam' || p.id === 'laam_tongue_region' || p.id === 'compare_laam_tafkheem_tarqeeq' || p.id === 'makhraj_noon' || p.id === 'makhraj_raa' || p.id === 'raa_gap_takreer' || p.id === 'compare_raa_tafkheem_tarqeeq' || p.id === 'makhraj_taa_daal_taa' || p.id === 'makhraj_saad_seen_zay' || p.id === 'makhraj_zaa_zaal_thaa');
@@ -4174,15 +4175,30 @@
         case 'sifat_mutadaddah':
           return plates.filter(p => p.id === 'sifat_mutadaddah_intro' || p.id === 'sifat_kaaf_taa_breath_release' || p.id === 'bayniyyah_noon_meem' || p.id === 'bayniyyah_ayn' || p.id === 'letter_timing_measurements');
         case 'sifat_ghayr_mutadaddah':
+        case 'qalqalah_sifah':
           return plates.filter(p => p.id === 'makhraj_sheen' || p.id === 'daad_tongue_edges' || p.id === 'makhraj_saad_seen_zay' || p.id === 'raa_gap_takreer');
+        case 'idgham_ahkam':
+          return plates.filter(p => p.id === 'makhraj_noon' || p.id === 'ghunnah_nasal_cavity');
+        case 'iqlab_hukm':
+          return plates.filter(p => p.id === 'makhraj_meem' || p.id === 'makhraj_baa' || p.id === 'ghunnah_nasal_cavity');
+        case 'ikhfaa_haqiqi':
         case 'noon_sakinah_ahkam':
           return plates.filter(p => p.id === 'makhraj_noon' || p.id === 'ghunnah_nasal_cavity' || p.id === 'bayniyyah_noon_meem');
         case 'meem_sakinah_mushaddadatayn':
+        case 'meem_sakinah_rules':
           return plates.filter(p => p.id === 'makhraj_meem' || p.id === 'ghunnah_nasal_cavity' || p.id === 'bayniyyah_noon_meem');
+        case 'lamat_sawakin':
+          return plates.filter(p => p.id === 'makhraj_laam' || p.id === 'laam_tongue_region' || p.id === 'compare_laam_tafkheem_tarqeeq');
+        case 'mislan_mutaqariban':
+          return plates.filter(p => p.id === 'tongue_divisions' || p.id === 'makhraj_taa_daal_taa');
         case 'tafkheem_tarqeeq':
           return plates.filter(p => p.id === 'compare_laam_tafkheem_tarqeeq' || p.id === 'compare_raa_tafkheem_tarqeeq' || p.id === 'makhraj_taa_daal_taa');
         case 'madd_asli_fari':
+        case 'madd_lazim_fawatih':
+        case 'madd_akham':
           return plates.filter(p => p.id === 'jawf_overview' || p.id === 'jawf_three_letters');
+        case 'hamzat_wasl_qat':
+          return plates.filter(p => p.id === 'halq_sections_vocal_cords' || p.id === 'makhraj_hamzah_haa');
         default:
           return plates.filter(p => p.id === 'overview_vocal_tract' || p.id === 'makharij_overview');
       }
@@ -5128,6 +5144,47 @@
       const currentSuwaydLesson = useMemo(() => {
         return SUWAYD_TAJWEED_CURRICULUM.find(l => l.id === suwaydLessonId) || SUWAYD_TAJWEED_CURRICULUM[0];
       }, [suwaydLessonId]);
+
+      // Dynamic sequence of fullscreen Zoom Presentation slides (Matn/Plate -> Letter Breakdown -> Quranic Metronome Drills)
+      const currentZoomSlides = useMemo(() => {
+        if (!currentSuwaydLesson) return [];
+        const slides = [];
+
+        // Slide 0: Matn and Illustrated Anatomical Plate
+        slides.push({
+          type: 'overview',
+          titleAr: 'الشاهد المعتمد من المتن واللوحة التعليمية المصورة',
+          titleEn: 'Authentic Matn Verse & Illustrated Anatomical Plate'
+        });
+
+        // Systematic Letter & Case Breakdown Slides
+        if (Array.isArray(currentSuwaydLesson.ruleBreakdown) && currentSuwaydLesson.ruleBreakdown.length > 0) {
+          currentSuwaydLesson.ruleBreakdown.forEach((item, bIdx) => {
+            slides.push({
+              type: 'breakdown',
+              item: item,
+              bIndex: bIdx,
+              titleAr: item.titleAr,
+              titleEn: item.titleAr
+            });
+          });
+        }
+
+        // Individual Quranic Practice Words with Live Metronome
+        if (Array.isArray(currentSuwaydLesson.examples) && currentSuwaydLesson.examples.length > 0) {
+          currentSuwaydLesson.examples.forEach((ex, exIdx) => {
+            slides.push({
+              type: 'example',
+              example: ex,
+              exIndex: exIdx,
+              titleAr: ex.word,
+              titleEn: ex.word
+            });
+          });
+        }
+
+        return slides;
+      }, [currentSuwaydLesson]);
 
       const [activeMakhrajId, setActiveMakhrajId] = useState('lisan');
       const [metronomeCount, setMetronomeCount] = useState(2); // 2, 4, 5, 6
@@ -7876,10 +7933,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v73.8 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v73.8 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v73.9 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v73.9 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v73.8' : 'v73.8'}</span>
+                  <span>{isRtl ? 'الإصدار v73.9' : 'v73.9'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -9574,7 +9631,7 @@
                       )}
                     >
                       <span>📖</span>
-                      <span>{isRtl ? '1. فهرس دروس التجويد (16 درساً)' : '1. Tajweed Lessons (16)'}</span>
+                      <span>{isRtl ? '1. فهرس دروس التجويد (' + SUWAYD_TAJWEED_CURRICULUM.length + ' درساً)' : '1. Tajweed Lessons (' + SUWAYD_TAJWEED_CURRICULUM.length + ')'}</span>
                     </button>
 
                     {/* SubTab 2: 39 Plates Illustrated Atlas */}
@@ -9644,7 +9701,7 @@
                                     {isRtl ? 'حقيبة التجويد المصور — فهرس الدروس المعتمدة (د. أيمن رشدي سويد)' : 'Illustrated Tajweed Curriculum — Lessons Catalog'}
                                   </h2>
                                   <span className="bg-emerald-100 text-emerald-900 border border-emerald-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-                                    {isRtl ? '16 درساً موثقاً 100%' : '16 Lessons'}
+                                    {isRtl ? `${SUWAYD_TAJWEED_CURRICULUM.length} درساً موثقاً 100%` : `${SUWAYD_TAJWEED_CURRICULUM.length} Lessons`}
                                   </span>
                                 </div>
                                 <p className="text-xs text-slate-600 font-medium mt-1">
@@ -9672,7 +9729,7 @@
                                   )}
                                 >
                                   <span>📖</span>
-                                  <span>{isRtl ? 'فهرس الدروس (16)' : 'Lessons (16)'}</span>
+                                  <span>{isRtl ? `فهرس الدروس (${SUWAYD_TAJWEED_CURRICULUM.length})` : `Lessons (${SUWAYD_TAJWEED_CURRICULUM.length})`}</span>
                                 </button>
                                 <button
                                   type="button"
@@ -9697,7 +9754,7 @@
                                 {isRtl ? 'أبواب التجويد:' : 'Chapters:'}
                               </span>
                               {[
-                                { id: 'all', labelAr: 'كافة أبواب الكتاب (16)', labelEn: 'All Chapters (16)' },
+                                { id: 'all', labelAr: `كافة أبواب الكتاب (${SUWAYD_TAJWEED_CURRICULUM.length})`, labelEn: `All Chapters (${SUWAYD_TAJWEED_CURRICULUM.length})` },
                                 { id: 'makharij', labelAr: 'مخارج الحروف (4)', labelEn: 'Articulation (4)' },
                                 { id: 'sifat', labelAr: 'صفات الحروف والقلقلة (2)', labelEn: 'Sifat & Qalqalah (2)' },
                                 { id: 'noon_and_meem', labelAr: 'النون والميم والغنن (2)', labelEn: 'Noon & Meem (2)' },
@@ -10605,121 +10662,262 @@
 
                     {/* ================= FULLSCREEN ZOOM PRESENTATION MODAL ================= */}
                     {suwaydZoomModalOpen && (
-                      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
-                        <div className="bg-gradient-to-b from-emerald-950 to-slate-950 text-white rounded-3xl max-w-4xl w-full border-2 border-gold-400/80 shadow-2xl p-6 sm:p-8 flex flex-col max-h-[92vh] overflow-y-auto">
+                      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/90 backdrop-blur-md animate-fadeIn">
+                        <div className="bg-gradient-to-b from-emerald-950 via-slate-950 to-slate-950 text-white rounded-3xl max-w-5xl w-full border-2 border-gold-400/80 shadow-2xl p-5 sm:p-8 flex flex-col max-h-[94vh] overflow-y-auto">
+                          
                           {/* Modal Header */}
-                          <div className="flex items-center justify-between pb-4 border-b border-gold-500/30">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-gold-400 font-bold">۞</span>
-                                <h3 className="text-lg sm:text-xl font-black text-gold-200 font-cairo">
+                          <div className="flex items-center justify-between pb-4 border-b border-gold-500/30 gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-gold-400 font-bold text-lg">۞</span>
+                                <h3 className="text-base sm:text-xl font-black text-gold-200 font-cairo truncate">
                                   {isRtl ? currentSuwaydLesson.titleAr : currentSuwaydLesson.titleEn}
                                 </h3>
+                                {(() => {
+                                  const curSlide = currentZoomSlides[suwaydZoomSlideIndex];
+                                  if (curSlide && curSlide.type === 'breakdown') {
+                                    return (
+                                      <span className="text-[11px] font-black bg-gold-500/20 text-gold-300 border border-gold-400/50 px-2.5 py-0.5 rounded-full">
+                                        {curSlide.item.tagAr}
+                                      </span>
+                                    );
+                                  }
+                                  return null;
+                                })()}
                               </div>
-                              <p className="text-xs text-slate-300 mt-0.5">
-                                {isRtl ? currentSuwaydLesson.suwaydRef : (currentSuwaydLesson.suwaydRefEn || currentSuwaydLesson.suwaydRef)} — {isRtl ? 'شريحة العرض لبرنامج Zoom' : 'Interactive Zoom Presentation Slide'}
+                              <p className="text-xs text-slate-300 mt-1 flex items-center gap-1.5 flex-wrap">
+                                <span>{isRtl ? currentSuwaydLesson.suwaydRef : (currentSuwaydLesson.suwaydRefEn || currentSuwaydLesson.suwaydRef)}</span>
+                                <span className="text-gold-400">•</span>
+                                <span className="text-gold-300 font-bold">
+                                  {(() => {
+                                    const curSlide = currentZoomSlides[suwaydZoomSlideIndex];
+                                    if (!curSlide) return '';
+                                    if (curSlide.type === 'overview') return isRtl ? 'الشاهد من المتن واللوحة التعليمية' : 'Authentic Plate & Matn';
+                                    if (curSlide.type === 'breakdown') return isRtl ? `عرض تفصيلي: ${curSlide.item.titleAr}` : `Breakdown: ${curSlide.item.titleAr}`;
+                                    return isRtl ? `تطبيق إفرادي وضبط المترونوم (${curSlide.example.word})` : `Word Practice (${curSlide.example.word})`;
+                                  })()}
+                                </span>
                               </p>
                             </div>
 
                             <button
                               type="button"
-                              onClick={() => setSuwaydZoomModalOpen(false)}
-                              className="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black flex items-center justify-center transition border border-slate-700"
+                              onClick={() => {
+                                setMetronomePlaying(false);
+                                setSuwaydZoomModalOpen(false);
+                              }}
+                              className="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-black flex items-center justify-center transition border border-slate-700 shrink-0"
                             >
                               ✕
                             </button>
                           </div>
 
+                          {/* Quick Jump Navigation Pills Bar */}
+                          <div className="flex items-center gap-2 overflow-x-auto pt-2 pb-3.5 border-b border-gold-500/20 no-scrollbar min-h-[50px] select-none">
+                            <span className="text-[11px] font-bold text-slate-400 shrink-0 ml-1">
+                              {isRtl ? 'الانتقال المباشر:' : 'Jump to:'}
+                            </span>
+                            {currentZoomSlides.map((s, idx) => {
+                              const isCurrent = suwaydZoomSlideIndex === idx;
+                              let label = `${idx + 1}`;
+                              let icon = '🎯';
+                              if (s.type === 'overview') {
+                                icon = '🖼️';
+                                label = isRtl ? 'المتن واللوحة' : 'Plate';
+                              } else if (s.type === 'breakdown') {
+                                icon = '🔤';
+                                label = s.item.letter || s.item.titleAr.replace(/^.*:\s*/, '');
+                              } else if (s.type === 'example') {
+                                icon = '⏱️';
+                                label = s.example.word;
+                              }
+                              return (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => setSuwaydZoomSlideIndex(idx)}
+                                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 my-0.5 ${
+                                    isCurrent
+                                      ? 'bg-gold-500 text-emerald-950 font-black shadow-md ring-2 ring-gold-300'
+                                      : 'bg-emerald-950/80 hover:bg-emerald-900 text-slate-300 border border-gold-500/30'
+                                  }`}
+                                  title={s.titleAr}
+                                >
+                                  <span>{icon}</span>
+                                  <span className="truncate max-w-[120px]">{label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+
                           {/* Modal Slide Body */}
                           <div className="py-6 flex-1 flex flex-col justify-center">
-                            {suwaydZoomSlideIndex === 0 ? (
-                            /* Slide 0: Matn and Authentic Dr. Ayman Suwayd Illustrated Plate */
-                            (() => {
-                              const lessonPlates = getSuwaydPlatesForLesson(currentSuwaydLesson.id);
-                              const currentPlate = lessonPlates.find(p => p.id === activeSuwaydPlateId) || lessonPlates[0] || SUWAYD_PLATES[0];
+                            {(() => {
+                              const curSlide = currentZoomSlides[suwaydZoomSlideIndex] || currentZoomSlides[0];
+                              if (!curSlide) return null;
 
-                              return (
-                                <div className="space-y-5">
-                                  {/* Matn Citation */}
-                                  <div className="bg-emerald-900/60 rounded-2xl p-4 sm:p-5 border border-gold-500/40 text-center shadow-md">
-                                    <span className="text-xs font-bold text-gold-300 block mb-2">{isRtl ? 'الشاهد المعتمد من المتن:' : 'Authentic Matn Citation:'}</span>
-                                    <div className="font-naskh text-lg sm:text-xl text-gold-100 font-bold leading-loose whitespace-pre-line select-all">
-                                      {currentSuwaydLesson.matnVerseAr}
+                              /* ---------------- Slide Type 1: Overview (Matn & Illustrated Plate) ---------------- */
+                              if (curSlide.type === 'overview') {
+                                const lessonPlates = getSuwaydPlatesForLesson(currentSuwaydLesson.id);
+                                const currentPlate = lessonPlates.find(p => p.id === activeSuwaydPlateId) || lessonPlates[0] || SUWAYD_PLATES[0];
+
+                                return (
+                                  <div className="space-y-5 animate-fadeIn">
+                                    {/* Matn Citation */}
+                                    <div className="bg-emerald-900/60 rounded-2xl p-4 sm:p-5 border border-gold-500/40 text-center shadow-md">
+                                      <span className="text-xs font-bold text-gold-300 block mb-2">{isRtl ? 'الشاهد المعتمد من المتن المنظوم:' : 'Authentic Matn Citation:'}</span>
+                                      <div className="font-naskh text-lg sm:text-2xl text-gold-100 font-bold leading-loose whitespace-pre-line select-all">
+                                        {currentSuwaydLesson.matnVerseAr}
+                                      </div>
+                                    </div>
+
+                                    {/* Authentic Plate Display in Zoom Presentation */}
+                                    <div className="bg-white text-slate-900 rounded-3xl p-4 sm:p-6 border-2 border-gold-400 shadow-2xl max-w-2xl mx-auto space-y-3">
+                                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-emerald-900/10">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-lg">🖼️</span>
+                                          <div>
+                                            <h4 className="text-sm sm:text-base font-black text-emerald-950 font-cairo">
+                                              {isRtl ? currentPlate.titleAr : currentPlate.titleEn}
+                                            </h4>
+                                            <p className="text-[11px] text-emerald-800 font-medium">
+                                              {isRtl ? `كتاب التجويد المصور — ص ${currentPlate.pageInBook} (د. أيمن رشدي سويد)` : `Illustrated Tajweed — p. ${currentPlate.pageInBook} (Dr. Ayman Suwayd)`}
+                                            </p>
+                                          </div>
+                                        </div>
+
+                                        <span className="text-xs font-black bg-emerald-900 text-gold-200 px-3 py-1 rounded-xl shadow-xs">
+                                          {isRtl ? 'د. أيمن رشدي سويد' : 'Dr. Ayman Suwayd'}
+                                        </span>
+                                      </div>
+
+                                      {/* Horizontal Letter / Plate Switcher if lesson has multiple plates */}
+                                      {lessonPlates.length > 1 && (
+                                        <div className="flex items-center justify-center gap-1.5 flex-wrap pt-1 pb-1">
+                                          {lessonPlates.map(lp => {
+                                            const isSel = lp.id === currentPlate.id;
+                                            return (
+                                              <button
+                                                key={lp.id}
+                                                type="button"
+                                                onClick={() => setActiveSuwaydPlateId(lp.id)}
+                                                className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
+                                                  isSel
+                                                    ? 'bg-emerald-900 text-gold-200 border-gold-400 font-black shadow-sm ring-1 ring-gold-400'
+                                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
+                                                }`}
+                                              >
+                                                {lp.letters && lp.letters.length > 0 && <span className="font-quran text-gold-600 font-bold">{lp.letters.join('، ')}</span>}
+                                                <span>{isRtl ? lp.titleAr.replace(/^.*:\s*/, '') : lp.titleEn.replace(/^.*:\s*/, '')}</span>
+                                              </button>
+                                            );
+                                          })}
+                                        </div>
+                                      )}
+
+                                      {/* High-Resolution Color Plate Image */}
+                                      <div className="w-full flex items-center justify-center p-2 bg-gradient-to-br from-amber-50/40 via-white to-emerald-50/40 rounded-2xl border border-slate-200 shadow-inner">
+                                        <img
+                                          src={`images/tajweed/${currentPlate.filename}`}
+                                          onError={(e) => {
+                                            e.target.src = `https://image.slidesharecdn.com/1-160316105247/85/1-${currentPlate.slideNum}-638.jpg`;
+                                          }}
+                                          alt={currentPlate.titleAr}
+                                          className="max-h-72 sm:max-h-84 w-auto object-contain rounded-xl drop-shadow"
+                                          loading="eager"
+                                        />
+                                      </div>
+
+                                      {/* Acoustic guidance text */}
+                                      <p className="text-xs sm:text-sm text-slate-700 font-cairo leading-relaxed text-center px-2 font-medium">
+                                        {isRtl ? currentPlate.descAr : currentPlate.descEn}
+                                      </p>
                                     </div>
                                   </div>
+                                );
+                              }
 
-                                  {/* Authentic Plate Display in Zoom Presentation */}
-                                  <div className="bg-white text-slate-900 rounded-3xl p-4 sm:p-6 border-2 border-gold-400 shadow-2xl max-w-2xl mx-auto space-y-3">
-                                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-emerald-900/10">
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-lg">🖼️</span>
+                              /* ---------------- Slide Type 2: Rule Breakdown (Letter, Mechanism, 3 Quranic Boxes) ---------------- */
+                              if (curSlide.type === 'breakdown') {
+                                const item = curSlide.item;
+                                return (
+                                  <div className="space-y-6 animate-fadeIn">
+                                    {/* Breakdown Title & Badge Card */}
+                                    <div className="bg-gradient-to-r from-emerald-900/80 via-emerald-950 to-slate-900 rounded-3xl p-5 border-2 border-gold-500/40 shadow-xl flex flex-wrap items-center justify-between gap-4">
+                                      <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gold-400 text-emerald-950 flex items-center justify-center font-quran text-3xl sm:text-4xl font-black shadow-lg ring-4 ring-gold-200/50 shrink-0">
+                                          {item.letter}
+                                        </div>
                                         <div>
-                                          <h4 className="text-sm font-black text-emerald-950 font-cairo">
-                                            {isRtl ? currentPlate.titleAr : currentPlate.titleEn}
+                                          <h4 className="text-lg sm:text-2xl font-black text-gold-200 font-cairo">
+                                            {item.titleAr}
                                           </h4>
-                                          <p className="text-[11px] text-emerald-800 font-medium">
-                                            {isRtl ? `كتاب التجويد المصور — ص ${currentPlate.pageInBook} (مجلد 1)` : `Illustrated Tajweed — p. ${currentPlate.pageInBook} (Vol. 1)`}
-                                          </p>
+                                          <span className="inline-block mt-1 text-xs font-bold px-3 py-0.5 rounded-full bg-emerald-800 text-gold-200 border border-gold-400/30">
+                                            {item.tagAr}
+                                          </span>
                                         </div>
                                       </div>
 
-                                      <span className="text-xs font-black bg-emerald-900 text-gold-200 px-3 py-1 rounded-xl shadow-xs">
-                                        {isRtl ? 'د. أيمن رشدي سويد' : 'Dr. Ayman Suwayd'}
-                                      </span>
+                                      <div className="text-xs text-slate-300 font-cairo bg-slate-900/60 px-4 py-2 rounded-xl border border-white/10 hidden sm:block">
+                                        {isRtl ? 'كتاب التجويد المصور — د. أيمن سويد' : 'Dr. Ayman Suwayd'}
+                                      </div>
                                     </div>
 
-                                    {/* Horizontal Letter / Plate Switcher if lesson has multiple plates */}
-                                    {lessonPlates.length > 1 && (
-                                      <div className="flex items-center justify-center gap-1.5 flex-wrap pt-1 pb-1">
-                                        {lessonPlates.map(lp => {
-                                          const isSel = lp.id === currentPlate.id;
-                                          return (
-                                            <button
-                                              key={lp.id}
-                                              type="button"
-                                              onClick={() => setActiveSuwaydPlateId(lp.id)}
-                                              className={`px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
-                                                isSel
-                                                  ? 'bg-emerald-900 text-gold-200 border-gold-400 font-black shadow-sm ring-1 ring-gold-400'
-                                                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
-                                              }`}
-                                            >
-                                              {lp.letters && lp.letters.length > 0 && <span className="font-quran text-gold-600 font-bold">{lp.letters.join('، ')}</span>}
-                                              <span>{isRtl ? lp.titleAr.replace(/^.*:\s*/, '') : lp.titleEn.replace(/^.*:\s*/, '')}</span>
-                                            </button>
-                                          );
-                                        })}
+                                    {/* Precise Phonetic Mechanism Explanation */}
+                                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/15 shadow-inner">
+                                      <span className="text-xs font-bold text-gold-300 block mb-1.5">
+                                        {isRtl ? 'الآلية المخرجية والصوتية الدقيقة للحرف والحكم:' : 'Phonetic Articulation Mechanism:'}
+                                      </span>
+                                      <p className="text-sm sm:text-base text-slate-100 font-cairo leading-relaxed">
+                                        {item.explanationAr}
+                                      </p>
+                                    </div>
+
+                                    {/* The Three Large Uthmani Quranic Boxes */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                      {item.examples.map((ex, exI) => (
+                                        <div
+                                          key={exI}
+                                          className="bg-gradient-to-b from-slate-900 via-emerald-950 to-slate-900 rounded-3xl p-5 border-2 border-gold-400/60 shadow-xl text-center flex flex-col justify-between hover:border-gold-300 transition duration-300"
+                                        >
+                                          <div className="text-xs font-bold text-gold-300 uppercase tracking-wider pb-2 border-b border-gold-500/20 mb-3">
+                                            {ex.type}
+                                          </div>
+
+                                          <div className="py-4 font-quran text-4xl sm:text-5xl text-gold-200 font-black select-all tracking-wide drop-shadow-md">
+                                            {ex.word}
+                                          </div>
+
+                                          <div className="pt-2 text-xs text-slate-300 font-cairo border-t border-gold-500/20 mt-3 font-medium">
+                                            {ex.surah}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+
+                                    {/* Authentic Performance Alert */}
+                                    {item.warningAr && (
+                                      <div className="bg-amber-950/70 border-2 border-amber-500/50 rounded-2xl p-4 text-amber-200 text-xs sm:text-sm font-cairo flex items-start gap-3 shadow-md">
+                                        <span className="text-xl text-amber-400 shrink-0">⚠️</span>
+                                        <div>
+                                          <strong className="text-gold-300 block mb-1">
+                                            {isRtl ? 'تنبيه الأداء والإتقان للشيخ والمعلم:' : 'Authentic Performance Alert:'}
+                                          </strong>
+                                          <p className="leading-relaxed">
+                                            {item.warningAr}
+                                          </p>
+                                        </div>
                                       </div>
                                     )}
-
-                                    {/* High-Resolution Color Plate Image */}
-                                    <div className="w-full flex items-center justify-center p-2 bg-gradient-to-br from-amber-50/40 via-white to-emerald-50/40 rounded-2xl border border-slate-200 shadow-inner">
-                                      <img
-                                        src={`images/tajweed/${currentPlate.filename}`}
-                                        onError={(e) => {
-                                          e.target.src = `https://image.slidesharecdn.com/1-160316105247/85/1-${currentPlate.slideNum}-638.jpg`;
-                                        }}
-                                        alt={currentPlate.titleAr}
-                                        className="max-h-72 sm:max-h-84 w-auto object-contain rounded-xl drop-shadow"
-                                        loading="eager"
-                                      />
-                                    </div>
-
-                                    {/* Acoustic guidance text */}
-                                    <p className="text-xs text-slate-700 font-cairo leading-relaxed text-center px-2 font-medium">
-                                      {isRtl ? currentPlate.descAr : currentPlate.descEn}
-                                    </p>
                                   </div>
-                                </div>
-                              );
-                            })()
-                          ) : (
-                              /* Slide 1+: Individual Quranic Word & Live Metronome */
-                              (() => {
-                                const example = currentSuwaydLesson.examples[suwaydZoomSlideIndex - 1];
-                                if (!example) return null;
+                                );
+                              }
+
+                              /* ---------------- Slide Type 3: Individual Example & Metronome ---------------- */
+                              if (curSlide.type === 'example') {
+                                const example = curSlide.example;
                                 return (
-                                  <div className="space-y-8 text-center">
+                                  <div className="space-y-8 text-center animate-fadeIn">
                                     <div className="text-xs text-gold-300 font-bold uppercase tracking-widest">
                                       {example.surah}
                                     </div>
@@ -10772,8 +10970,10 @@
                                     </div>
                                   </div>
                                 );
-                              })()
-                            )}
+                              }
+
+                              return null;
+                            })()}
                           </div>
 
                           {/* Modal Footer Controls */}
@@ -10787,14 +10987,16 @@
                               {isRtl ? '◀ الشريحة السابقة' : '◀ Previous'}
                             </button>
 
-                            <span className="text-xs font-bold text-gold-300">
-                              {suwaydZoomSlideIndex + 1} / {currentSuwaydLesson.examples.length + 1}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs sm:text-sm font-bold text-gold-300">
+                                {isRtl ? 'شريحة' : 'Slide'} {suwaydZoomSlideIndex + 1} / {currentZoomSlides.length}
+                              </span>
+                            </div>
 
                             <button
                               type="button"
-                              disabled={suwaydZoomSlideIndex >= currentSuwaydLesson.examples.length}
-                              onClick={() => setSuwaydZoomSlideIndex(prev => Math.min(currentSuwaydLesson.examples.length, prev + 1))}
+                              disabled={suwaydZoomSlideIndex >= currentZoomSlides.length - 1}
+                              onClick={() => setSuwaydZoomSlideIndex(prev => Math.min(currentZoomSlides.length - 1, prev + 1))}
                               className="px-4 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 disabled:opacity-40 text-emerald-950 font-black text-xs transition"
                             >
                               {isRtl ? 'الشريحة التالية ▶' : 'Next ▶'}
