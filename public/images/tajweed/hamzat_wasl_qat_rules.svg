@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#062e22"/>
+      <stop offset="50%" stop-color="#021c14"/>
+      <stop offset="100%" stop-color="#01120c"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="cardGradGreen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#022c22" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="cardGradAmber" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#78350f" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#451a03" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="cardGradBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="620" rx="24" fill="url(#bgGrad)"/>
+  <rect x="12" y="12" width="936" height="596" rx="18" fill="none" stroke="#d97706" stroke-width="2" stroke-opacity="0.6"/>
+  <rect x="18" y="18" width="924" height="584" rx="14" fill="none" stroke="#fef08a" stroke-width="1" stroke-dasharray="8,4" stroke-opacity="0.4"/>
+
+  <!-- Islamic Corner Stars -->
+  <g fill="#d97706">
+    <circle cx="32" cy="32" r="5"/>
+    <circle cx="928" cy="32" r="5"/>
+    <circle cx="32" cy="588" r="5"/>
+    <circle cx="928" cy="588" r="5"/>
+  </g>
+
+  <!-- Header Banner -->
+  <g text-anchor="middle">
+    <text x="480" y="48" font-family="'Cairo', 'Amiri', Arial, sans-serif" font-size="22" font-weight="900" fill="url(#goldGrad)">
+      ۞ مَنْظُومَةُ أَحْكَامِ هَمْزَتَيِ الْوَصْلِ وَالْقَطْعِ وَحَرَكَةِ الاِبْتِدَاءِ ۞
+    </text>
+    <text x="480" y="74" font-family="'Cairo', Arial, sans-serif" font-size="13" font-weight="700" fill="#a7f3d0">
+      كِتَابُ التَّجْوِيدِ الْمُصَوَّرِ — الدُّكْتُورُ أَيْمَنُ رُشْدِي سُوَيْد (المجلد الثاني، ص 529–550)
+    </text>
+  </g>
+
+  <!-- Main Divider Line -->
+  <line x1="40" y1="88" x2="920" y2="88" stroke="#d97706" stroke-width="1.5" stroke-opacity="0.5"/>
+
+  <!-- Left Column: همزة القطع (Disjunctive Hamzah) -->
+  <g transform="translate(40, 102)" filter="url(#shadow)">
+    <rect width="260" height="380" rx="18" fill="url(#cardGradBlue)" stroke="#60a5fa" stroke-width="2"/>
+    
+    <!-- Header -->
+    <rect width="260" height="52" rx="18" fill="#1e40af"/>
+    <rect y="36" width="260" height="16" fill="#1e40af"/>
+    <text x="130" y="34" font-family="'Cairo', Arial, sans-serif" font-size="16" font-weight="900" fill="#ffffff" text-anchor="middle">
+      1. هَمْزَةُ الْقَطْعِ (أَ، أُ، إِ)
+    </text>
+
+    <!-- Definition -->
+    <text x="130" y="80" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="700" fill="#bfdbfe" text-anchor="middle">
+      همزة أصلية تثبت وصلاً ووقفاً وابتداءً
+    </text>
+
+    <!-- Rule 1 -->
+    <g transform="translate(14, 100)">
+      <rect width="232" height="68" rx="12" fill="#0f172a" fill-opacity="0.7" stroke="#3b82f6" stroke-width="1"/>
+      <text x="218" y="24" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="800" fill="#fde047" text-anchor="end">رسمها وضبطها:</text>
+      <text x="218" y="46" font-family="'Amiri', 'Amiri Quran', Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="end">تُرسم برأس عين صغيرة (أَ - أُ - إِ)</text>
+    </g>
+
+    <!-- Rule 2 -->
+    <g transform="translate(14, 180)">
+      <rect width="232" height="88" rx="12" fill="#0f172a" fill-opacity="0.7" stroke="#3b82f6" stroke-width="1"/>
+      <text x="218" y="24" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="800" fill="#fde047" text-anchor="end">مواضعها في القرآن:</text>
+      <text x="218" y="46" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="end">• في الأسماء: أَحْمَد، إِبْرَاهِيم</text>
+      <text x="218" y="66" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="end">• في الأفعال: أَنْعَمْتَ، أَرْسَلْنَا</text>
+      <text x="218" y="84" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#e2e8f0" text-anchor="end">• في الحروف: إِلَىٰ، إِنَّ، أَوْ، إِذَا</text>
+    </g>
+
+    <!-- Rule 3 -->
+    <g transform="translate(14, 280)">
+      <rect width="232" height="84" rx="12" fill="#1e3a8a" fill-opacity="0.5" stroke="#60a5fa" stroke-width="1"/>
+      <text x="218" y="24" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="800" fill="#67e8f9" text-anchor="end">حكمها الأدائي:</text>
+      <text x="218" y="48" font-family="'Cairo', Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="end">التحقيق الصريح دون إسقاط</text>
+      <text x="218" y="68" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" fill="#fef08a" text-anchor="end">﴿قُلْ أَرَءَيْتُمْ﴾ - ﴿إِنَّ ٱللَّهَ﴾</text>
+    </g>
+  </g>
+
+  <!-- Right Column: همزة الوصل (Connecting Hamzah) -->
+  <g transform="translate(320, 102)" filter="url(#shadow)">
+    <rect width="600" height="380" rx="18" fill="url(#cardGradGreen)" stroke="#d97706" stroke-width="2"/>
+    
+    <!-- Header -->
+    <rect width="600" height="52" rx="18" fill="#047857"/>
+    <rect y="36" width="600" height="16" fill="#047857"/>
+    <text x="300" y="34" font-family="'Cairo', Arial, sans-serif" font-size="16" font-weight="900" fill="#ffffff" text-anchor="middle">
+      2. هَمْزَةُ الْوَصْلِ (ٱ) — حَرَكَةُ الاِبْتِدَاءِ بِهَا
+    </text>
+
+    <!-- Definition Subtitle -->
+    <text x="300" y="78" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="800" fill="#fef08a" text-anchor="middle">
+      تَثْبُتُ عِنْدَ الاِبْتِدَاءِ فَقَطْ وَتَسْقُطُ حَتْماً فِي دَرَجِ الْكَلاَمِ (عَلاَمَتُهَا: ٱ)
+    </text>
+
+    <!-- Section A: في الأفعال -->
+    <g transform="translate(16, 94)">
+      <rect width="568" height="136" rx="14" fill="#022c22" stroke="#10b981" stroke-width="1.5"/>
+      <rect width="568" height="30" rx="14" fill="#065f46"/>
+      <rect y="16" width="568" height="14" fill="#065f46"/>
+      <text x="284" y="21" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="900" fill="#fde047" text-anchor="middle">
+        [أ] حَرَكَتُهَا فِي الأَفْعَالِ (يُنْظَرُ إِلَى ثَالِثِ حَرْفٍ فِي الْفِعْلِ)
+      </text>
+
+      <!-- Case 1: الضم -->
+      <g transform="translate(290, 36)">
+        <rect width="266" height="88" rx="10" fill="#064e3b" stroke="#34d399" stroke-width="1"/>
+        <text x="250" y="22" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="900" fill="#fef08a" text-anchor="end">1. الْبَدْءُ بِالضَّمِّ (وُجُوباً):</text>
+        <text x="250" y="42" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#ecfdf5" text-anchor="end">إذا كان ثالث الفعل مضموماً ضماً أصلياً لازماً</text>
+        <text x="250" y="68" font-family="'Amiri Quran', Arial, sans-serif" font-size="16" font-weight="900" fill="#fbbf24" text-anchor="end">﴿ٱدْعُ﴾ — ﴿ٱرْكُضْ﴾ — ﴿ٱخْرُجْ﴾</text>
+      </g>
+
+      <!-- Case 2: الكسر -->
+      <g transform="translate(12, 36)">
+        <rect width="266" height="88" rx="10" fill="#064e3b" stroke="#34d399" stroke-width="1"/>
+        <text x="250" y="22" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="900" fill="#fef08a" text-anchor="end">2. الْبَدْءُ بِالْكَسْرِ (وُجُوباً):</text>
+        <text x="250" y="40" font-family="'Cairo', Arial, sans-serif" font-size="10.5" fill="#ecfdf5" text-anchor="end">• إن كان ثالثه مفتوحاً: ﴿ٱذْهَبْ﴾ أو مكسوراً: ﴿ٱرْجِعْ﴾</text>
+        <text x="250" y="58" font-family="'Cairo', Arial, sans-serif" font-size="10.5" fill="#fca5a5" text-anchor="end">• أو مضموماً ضماً عارضاً في 5 أفعال:</text>
+        <text x="250" y="78" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="900" fill="#67e8f9" text-anchor="end">﴿ٱمْشُوا۟﴾ ﴿ٱقْضُوا۟﴾ ﴿ٱبْنُوا۟﴾ ﴿ٱئْتُوا۟﴾ ﴿ٱمْضُوا۟﴾</text>
+      </g>
+    </g>
+
+    <!-- Section B: في الأسماء -->
+    <g transform="translate(16, 240)">
+      <rect width="568" height="126" rx="14" fill="#022c22" stroke="#d97706" stroke-width="1.5"/>
+      <rect width="568" height="30" rx="14" fill="#78350f"/>
+      <rect y="16" width="568" height="14" fill="#78350f"/>
+      <text x="284" y="21" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="900" fill="#fef08a" text-anchor="middle">
+        [ب] حَرَكَتُهَا فِي الأَسْمَاءِ وَأَلْ التَّعْرِيفِ (لاَ تُضَمُّ فِي الاسْمِ أَبَداً)
+      </text>
+
+      <!-- Subcase B1: الفتح مع أل -->
+      <g transform="translate(290, 36)">
+        <rect width="266" height="80" rx="10" fill="#451a03" stroke="#f59e0b" stroke-width="1"/>
+        <text x="250" y="22" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="900" fill="#fef08a" text-anchor="end">1. الْبَدْءُ بِالْفَتْحِ (فِي أَلْ التَّعْرِيفِ):</text>
+        <text x="250" y="42" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#fef3c7" text-anchor="end">تُفتح دائماً لكثرة دورانها تسهيلاً للنطق</text>
+        <text x="250" y="66" font-family="'Amiri Quran', Arial, sans-serif" font-size="15" font-weight="900" fill="#34d399" text-anchor="end">﴿ٱلْحَمْدُ﴾ — ﴿ٱلنَّاسُ﴾ — ﴿ٱلْكِتَـٰبُ﴾</text>
+      </g>
+
+      <!-- Subcase B2: الكسر في الأسماء السبعة والمصادر -->
+      <g transform="translate(12, 36)">
+        <rect width="266" height="80" rx="10" fill="#451a03" stroke="#f59e0b" stroke-width="1"/>
+        <text x="250" y="22" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="900" fill="#fef08a" text-anchor="end">2. الْبَدْءُ بِالْكَسْرِ (فِي الأَسْمَاءِ السَّبْعَةِ):</text>
+        <text x="250" y="42" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#fef3c7" text-anchor="end">ابن، ابنة، امرؤ، امرأة، اثنان، اثنتان، اسم</text>
+        <text x="250" y="66" font-family="'Amiri Quran', Arial, sans-serif" font-size="14" font-weight="900" fill="#fbbf24" text-anchor="end">﴿ٱبْنَ مَرْيَمَ﴾ — ﴿ٱمْرُؤٌا۟﴾ — ﴿ٱسْمُهُۥٓ﴾</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Guidance Card: اجتماع همزة الوصل وهمزة القطع -->
+  <g transform="translate(40, 494)" filter="url(#shadow)">
+    <rect width="880" height="106" rx="16" fill="url(#cardGradAmber)" stroke="#f59e0b" stroke-width="2"/>
+    <text x="860" y="28" font-family="'Cairo', Arial, sans-serif" font-size="13" font-weight="900" fill="#fde047" text-anchor="end">
+      ⭐ قَاعِدَةٌ ذَهَبِيَّةٌ فِي الِابْتِدَاءِ بِالْفِعْلِ الْمَهْمُوزِ (اجْتِمَاعُ هَمْزَتَيِ الْوَصْلِ وَالْقَطْعِ):
+    </text>
+    <text x="860" y="52" font-family="'Cairo', Arial, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="end">
+      إذا تقدّمت همزة الوصل على همزة قطع ساكنة في أول الفعل: تسقط همزة الوصل وصلاً ويثبت القطع (﴿الَّذِي ٱؤْتُمِنَ﴾).
+    </text>
+    <text x="860" y="74" font-family="'Cairo', Arial, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="end">
+      أما عند الابتداء بالفعل: تثبت همزة الوصل بحركتها وتبدل همزة القطع حرف مد مجانس:
+    </text>
+    <text x="860" y="96" font-family="'Amiri Quran', Arial, sans-serif" font-size="15" font-weight="900" fill="#fef08a" text-anchor="end">
+      ﴿ٱؤْتُمِنَ﴾ تبتدئ بها: [ أُوتُمِنَ ] بالواو  •  ﴿ٱئْتُونِي﴾ تبتدئ بها: [ إِيتُونِي ] بالياء  •  ﴿ٱئْذَن لِّي﴾ تبتدئ بها: [ إِيذَن لِّي ]
+    </text>
+  </g>
+</svg>

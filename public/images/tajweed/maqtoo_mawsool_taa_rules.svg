@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#062e22"/>
+      <stop offset="50%" stop-color="#021c14"/>
+      <stop offset="100%" stop-color="#01120c"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="cardGradGreen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#022c22" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="cardGradAmber" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#78350f" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#451a03" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="cardGradPurple" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#581c87" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#2e1065" stop-opacity="0.95"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="620" rx="24" fill="url(#bgGrad)"/>
+  <rect x="12" y="12" width="936" height="596" rx="18" fill="none" stroke="#d97706" stroke-width="2" stroke-opacity="0.6"/>
+  <rect x="18" y="18" width="924" height="584" rx="14" fill="none" stroke="#fef08a" stroke-width="1" stroke-dasharray="8,4" stroke-opacity="0.4"/>
+
+  <!-- Header Banner -->
+  <g text-anchor="middle">
+    <text x="480" y="48" font-family="'Cairo', Arial, sans-serif" font-size="22" font-weight="900" fill="url(#goldGrad)">
+      ۞ الْمَقْطُوعُ وَالْمَوْصُولُ وَتَاءَاتُ التَّأْنِيثِ وَالأَلِفَاتُ السَّبْعُ ۞
+    </text>
+    <text x="480" y="74" font-family="'Cairo', Arial, sans-serif" font-size="13" font-weight="700" fill="#a7f3d0">
+      كِتَابُ التَّجْوِيدِ الْمُصَوَّرِ — الدُّكْتُورُ أَيْمَنُ رُشْدِي سُوَيْد (المجلد الثاني، ص 551–578)
+    </text>
+  </g>
+
+  <line x1="40" y1="88" x2="920" y2="88" stroke="#d97706" stroke-width="1.5" stroke-opacity="0.5"/>
+
+  <!-- 3 Main Columns -->
+  <!-- Col 1: المقطوع والموصول -->
+  <g transform="translate(40, 102)" filter="url(#shadow)">
+    <rect width="280" height="380" rx="18" fill="url(#cardGradGreen)" stroke="#10b981" stroke-width="2"/>
+    <rect width="280" height="48" rx="18" fill="#047857"/>
+    <rect y="32" width="280" height="16" fill="#047857"/>
+    <text x="140" y="32" font-family="'Cairo', Arial, sans-serif" font-size="15" font-weight="900" fill="#ffffff" text-anchor="middle">
+      1. الْمَقْطُوعُ وَالْمَوْصُولُ
+    </text>
+    <text x="260" y="74" font-family="'Cairo', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#fef08a" text-anchor="end">ضابط الوقف الاختباري والاضطراري:</text>
+    <text x="260" y="96" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#ecfdf5" text-anchor="end">• المقطوع: يجوز الوقف على الأولى منهما</text>
+    <text x="260" y="118" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#ecfdf5" text-anchor="end">• الموصول: لا يوقف إلا على الكلمة كاملة</text>
+
+    <g transform="translate(14, 134)">
+      <rect width="252" height="110" rx="10" fill="#022c22" stroke="#34d399" stroke-width="1"/>
+      <text x="238" y="24" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="900" fill="#fde047" text-anchor="end">أشهر مواضع القطع باتفاق:</text>
+      <text x="238" y="48" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">﴿أَن لَّا مَلْجَأَ﴾ (في 10 مواضع)</text>
+      <text x="238" y="72" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">﴿وَإِن مَّا نُرِيَنَّكَ﴾ (بالرعد)</text>
+      <text x="238" y="96" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">﴿مِن كُلِّ مَا سَأَلْتُمُوهُ﴾ (إبراهيم)</text>
+    </g>
+
+    <g transform="translate(14, 256)">
+      <rect width="252" height="106" rx="10" fill="#022c22" stroke="#34d399" stroke-width="1"/>
+      <text x="238" y="24" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="900" fill="#fde047" text-anchor="end">أشهر مواضع الوصل باتفاق:</text>
+      <text x="238" y="48" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">﴿أَلَّا تَعْبُدُوٓا۟ إِلَّا ٱللَّهَ﴾</text>
+      <text x="238" y="72" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">﴿فَإِلَّمْ يَسْتَجِيبُوا۟ لَكُمْ﴾</text>
+      <text x="238" y="96" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">﴿أَيْنَمَا تَكُونُوا۟ يُدْرِككُّمُ﴾</text>
+    </g>
+  </g>
+
+  <!-- Col 2: تاءات التأنيث المبسوطة -->
+  <g transform="translate(340, 102)" filter="url(#shadow)">
+    <rect width="280" height="380" rx="18" fill="url(#cardGradAmber)" stroke="#f59e0b" stroke-width="2"/>
+    <rect width="280" height="48" rx="18" fill="#b45309"/>
+    <rect y="32" width="280" height="16" fill="#b45309"/>
+    <text x="140" y="32" font-family="'Cairo', Arial, sans-serif" font-size="15" font-weight="900" fill="#ffffff" text-anchor="middle">
+      2. تَاءَاتُ التَّأْنِيثِ الْمَبْسُوطَةُ
+    </text>
+    <text x="260" y="74" font-family="'Cairo', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#fef08a" text-anchor="end">رُسمت بالتاء المفتوحة ويوقف عليها بالتاء:</text>
+    <text x="260" y="96" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#fef3c7" text-anchor="end">قاعدة حفص: اتباع رسم المصحف العثماني</text>
+    <text x="260" y="118" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#fef3c7" text-anchor="end">المربوطة (ـة) يوقف عليها بالهاء (رَحْمَهْ)</text>
+
+    <g transform="translate(14, 134)">
+      <rect width="252" height="228" rx="10" fill="#451a03" stroke="#f59e0b" stroke-width="1"/>
+      <text x="238" y="24" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="900" fill="#fde047" text-anchor="end">أهم الكلمات بالتاء المبسوطة:</text>
+      <text x="238" y="48" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">1. ﴿رَحْمَتَ ٱللَّهِ﴾ (7 مواضع بالتاء)</text>
+      <text x="238" y="74" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">2. ﴿نِعْمَتَ ٱللَّهِ﴾ (11 موضعاً بالتاء)</text>
+      <text x="238" y="100" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">3. ﴿ٱمْرَأَتُ عِمْرَٰنَ﴾ (المضافة لزوجها)</text>
+      <text x="238" y="126" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">4. ﴿سُنَّتَ ٱلْأَوَّلِينَ﴾ (5 مواضع)</text>
+      <text x="238" y="152" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">5. ﴿لَعْنَتَ ٱللَّهِ﴾ • ﴿مَعْصِيَتِ ٱلرَّسُولِ﴾</text>
+      <text x="238" y="178" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">6. ﴿شَجَرَتَ ٱلزَّقُّومِ﴾ • ﴿قُرَّتُ عَيْنٍ﴾</text>
+      <text x="238" y="206" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">7. ﴿فِطْرَتَ ٱللَّهِ﴾ • ﴿بَقِيَّتُ ٱللَّهِ﴾</text>
+    </g>
+  </g>
+
+  <!-- Col 3: الألفات السبع -->
+  <g transform="translate(640, 102)" filter="url(#shadow)">
+    <rect width="280" height="380" rx="18" fill="url(#cardGradPurple)" stroke="#c084fc" stroke-width="2"/>
+    <rect width="280" height="48" rx="18" fill="#7e22ce"/>
+    <rect y="32" width="280" height="16" fill="#7e22ce"/>
+    <text x="140" y="32" font-family="'Cairo', Arial, sans-serif" font-size="15" font-weight="900" fill="#ffffff" text-anchor="middle">
+      3. الأَلِفَاتُ السَّبْعُ (ـ۠)
+    </text>
+    <text x="260" y="74" font-family="'Cairo', Arial, sans-serif" font-size="11.5" font-weight="800" fill="#fef08a" text-anchor="end">حكمها: تثبت وقفاً وتسقط وصلاً:</text>
+    <text x="260" y="96" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#f3e8ff" text-anchor="end">توضع فوقها علامة الصفر المستطيل القائم</text>
+    <text x="260" y="118" font-family="'Cairo', Arial, sans-serif" font-size="11" fill="#f3e8ff" text-anchor="end">تمد حركتين عند الوقف عليها لحفص</text>
+
+    <g transform="translate(14, 134)">
+      <rect width="252" height="228" rx="10" fill="#2e1065" stroke="#a855f7" stroke-width="1"/>
+      <text x="238" y="24" font-family="'Cairo', Arial, sans-serif" font-size="12" font-weight="900" fill="#fde047" text-anchor="end">مواضع الألفات السبع بالقرآن:</text>
+      <text x="238" y="48" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">1. ﴿أَنَا۠﴾ (حيثما وردت بالقرآن)</text>
+      <text x="238" y="74" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">2. ﴿لَّـٰكِنَّا۠ هُوَ ٱللَّهُ﴾ (الكهف 38)</text>
+      <text x="238" y="100" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">3. ﴿ٱلظُّنُونَا۠﴾ (الأحزاب 10)</text>
+      <text x="238" y="126" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">4. ﴿ٱلرَّسُولَا۠﴾ (الأحزاب 66)</text>
+      <text x="238" y="152" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">5. ﴿ٱلسَّبِيلَا۠﴾ (الأحزاب 67)</text>
+      <text x="238" y="178" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">6. ﴿سَلَـٰسِلَا۠﴾ (الإنسان 4 - وجهان وقفاً)</text>
+      <text x="238" y="206" font-family="'Amiri Quran', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="end">7. ﴿قَوَارِيرَا۠﴾ (الإنسان 15 - الموضع الأول)</text>
+    </g>
+  </g>
+
+  <!-- Bottom Bar: خلاصة وتوجيه الشيخ -->
+  <g transform="translate(40, 496)" filter="url(#shadow)">
+    <rect width="880" height="104" rx="16" fill="#0f172a" stroke="#d97706" stroke-width="2"/>
+    <text x="860" y="28" font-family="'Cairo', Arial, sans-serif" font-size="13" font-weight="900" fill="#fde047" text-anchor="end">
+      ⭐ تَوْجِيهُ الشَّيْخِ د. أَيْمَن سُوَيْد لِتِلْكَ الأَبْوَابِ:
+    </text>
+    <text x="860" y="52" font-family="'Cairo', Arial, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="end">
+      هذه المباحث الثلاثة تعتمد على الرواية الصريحة واتباع رسم مصحف عثمان رضي الله عنه دون قياس؛
+    </text>
+    <text x="860" y="74" font-family="'Cairo', Arial, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="end">
+      فلا يوقف على المقطوع إلا اتباعاً لرسمه، ولا يوقف على التاء المبسوطة بالهاء، وتسقط الألفات السبع وصلاً لالتقاء الساكنين أو للرواية.
+    </text>
+  </g>
+</svg>

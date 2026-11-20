@@ -633,5 +633,47 @@ window.SUWAYD_PLATES = [
     "pageInBook": 145,
     "descAr": "أزمنة الحروف المتحركة متساوية دائماً، وأزمنة الحروف الساكنة تتفاوت بحسب جريان الصوت (الرخو أطول من البيني أطول من الشديد).",
     "descEn": "All vowels have equal duration; consonants vary: Fricative (longest) > Intermediate > Plosive/Stop (shortest)."
+  },
+  {
+    "id": "hamzat_wasl_qat_plate",
+    "slideNum": 118,
+    "titleAr": "أحكام همزتي الوصل والقطع وحركة الابتداء بهمزة الوصل",
+    "titleEn": "Hamzat Al-Wasl & Al-Qat' Rules & Starting Vowels",
+    "category": "ahkam",
+    "organAr": "أحكام الابتداء والرسم",
+    "organEn": "Starting & Orthography",
+    "letters": ["ٱ", "أ"],
+    "filename": "hamzat_wasl_qat_rules.svg",
+    "pageInBook": 531,
+    "descAr": "لوحة تأصيلية معتمدة من كتاب التجويد المصور لدكتور أيمن سويد: بيان حركة الابتداء بهمزة الوصل في الأفعال (ضم أو كسر) وفي الأسماء (فتح أو كسر) وضبط همزة القطع.",
+    "descEn": "Authentic plate from Illustrated Tajweed by Dr. Ayman Suwayd: Starting rules for Hamzat Al-Wasl in verbs and nouns."
+  },
+  {
+    "id": "maqtoo_mawsool_plate",
+    "slideNum": 119,
+    "titleAr": "المقطوع والموصول وتاءات التأنيث المبسوطة والألفات السبع",
+    "titleEn": "Cut & Connected Words, Open Taa & The 7 Alifs",
+    "category": "ahkam",
+    "organAr": "رسم المصحف العثماني",
+    "organEn": "Uthmani Script Rules",
+    "letters": ["ت", "ـ۠"],
+    "filename": "maqtoo_mawsool_taa_rules.svg",
+    "pageInBook": 553,
+    "descAr": "لوحة قواعد الرسم وضوابط الوقف الاختباري والاضطراري على المقطوع والموصول وتاءات التأنيث المبسوطة والألفات السبع لدكتور أيمن سويد.",
+    "descEn": "Plate for cut/connected words, feminine open taa, and the seven alifs."
+  },
+  {
+    "id": "waqf_ibtida_sakt_plate",
+    "slideNum": 120,
+    "titleAr": "أحكام الوقف والابتداء والسكتات اللطيفة الأربع لحفص",
+    "titleEn": "Rules of Waqf, Ibtida & Hafs 4 Pauses",
+    "category": "ahkam",
+    "organAr": "الوقف والابتداء",
+    "organEn": "Stopping & Pausing",
+    "letters": ["مـ", "قلى", "ج", "س"],
+    "filename": "waqf_ibtida_sakt_rules.svg",
+    "pageInBook": 581,
+    "descAr": "لوحة تفصيلية لأقسام الوقف الجائز (التام والكافي والحسن)، والوقف القبيح الممنوع، والسكتات الأربع الواجبة لحفص من طريق الشاطبية.",
+    "descEn": "Plate of permissible stops (Tam, Kafi, Hasan), prohibited Qabeeh stops, and the four mandatory pauses in Hafs."
   }
 ];
