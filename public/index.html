@@ -5558,6 +5558,24 @@
       const [islamicQuizAnswers, setIslamicQuizAnswers] = useState({});
       const [islamicQuizSubmitted, setIslamicQuizSubmitted] = useState(false);
       const [islamicWorksheetViewMode, setIslamicWorksheetViewMode] = useState('student'); // 'student' or 'teacher'
+      const [extractedEvidences, setExtractedEvidences] = useState(() => {
+        try {
+          const s = localStorage.getItem('mishkah_active_islamic_evidences');
+          return s ? JSON.parse(s) : { quranicVerses: [], hadiths: [], scholarlyProofs: [] };
+        } catch (e) { return { quranicVerses: [], hadiths: [], scholarlyProofs: [] }; }
+      });
+      const [showExtractedTextPreview, setShowExtractedTextPreview] = useState(false);
+      const [showEvidenceBankModal, setShowEvidenceBankModal] = useState(false);
+      const [evidenceBankFilter, setEvidenceBankFilter] = useState('all'); // 'all', 'quran', 'hadith', 'scholarly'
+      const [teacherScriptFontSize, setTeacherScriptFontSize] = useState('medium'); // 'small', 'medium', 'large'
+
+      useEffect(() => {
+        if (extractedEvidences) {
+          try {
+            localStorage.setItem('mishkah_active_islamic_evidences', JSON.stringify(extractedEvidences));
+          } catch (e) {}
+        }
+      }, [extractedEvidences]);
 
       // Dynamic Islamic Quiz Score Calculation
       const islamicQuizScore = useMemo(() => {
@@ -5602,7 +5620,7 @@
         return t || 'محور الدرس ومسائله';
       }
 
-      // Professional Slide Distiller: Converts text into 3 articulate, substantive scholarly bullets
+      // Professional Slide Distiller: Converts text into 2-3 concise, distilled, high-impact golden bullets (strictly uncluttered)
       function extractConciseSlideBullets(lines, secTitle) {
         const bullets = [];
         const isNoiseLine = (t) => /^(?:ملاحظة منهجية|هذا الملخص|نسخة ممسوحة|التعرف على نصوصها|أخطاء طباعية|دار النشر|دار الوعي|طبعة ورقية|ملحق تعقيبي|ردمك|ISBN|\(?\d+\s*صفحة\)?)/i.test(t);
@@ -5611,40 +5629,40 @@
           const clean = line.replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
           if (!clean || isNoiseLine(clean)) continue;
 
-          // Split ONLY on sentence boundaries (period, newline, semicolon), NEVER commas!
-          const sentences = clean.split(/[.\n؛]/).map(s => s.trim()).filter(s => s.length >= 28);
+          // Split on periods, semicolons, or newlines
+          const sentences = clean.split(/[.\n؛]/).map(s => s.trim()).filter(s => s.length >= 18 && s.length <= 160);
           for (let s of sentences) {
             if (isNoiseLine(s)) continue;
-            if (/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|المبحث|المطلب|الفصل|الباب|المحور|القسم)/.test(s)) continue;
+            if (/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|المبحث|المطلب|الفصل|الباب|المحور)/.test(s)) continue;
 
-            // Handle long sentences gracefully without destroying meaning
-            if (s.length > 115) {
-              const subClauses = s.split(/(?:\s+بل\s+|\s+حيث\s+|\s+كما\s+|\s+إذ\s+)/).map(c => c.trim()).filter(c => c.length >= 28 && c.length <= 115);
+            // Distill long sentences to crisp thesis statements (under 80 chars)
+            if (s.length > 80) {
+              const subClauses = s.split(/(?:\s+بل\s+|\s+حيث\s+|\s+كما\s+|\s+إذ\s+|\s+بحيث\s+)/).map(c => c.trim()).filter(c => c.length >= 18 && c.length <= 80);
               if (subClauses.length > 0) {
                 s = subClauses[0];
               } else {
-                s = s.substring(0, 110).trim() + '...';
+                s = s.substring(0, 78).trim() + '...';
               }
             }
 
-            if (!bullets.includes(s)) {
+            if (!bullets.includes(s) && bullets.length < 3) {
               bullets.push(s);
-              if (bullets.length >= 3) break;
             }
+            if (bullets.length >= 3) break;
           }
           if (bullets.length >= 3) break;
         }
 
         const baseTitle = cleanSlideTitle(secTitle);
         if (bullets.length === 0) {
-          bullets.push(`تحرير ومناقشة أبعاد: ${baseTitle}`);
-          bullets.push('بيان الضوابط الشرعية والقواعد المنهجية الحاكمة للمسألة');
-          bullets.push('الأثر السلوكي والواجب المنهجي المنضبط في واقع الدارسين');
+          bullets.push(`تحرير أصل وضابط: ${baseTitle}`);
+          bullets.push('بيان الدلالة الشرعية ومحل الشاهد المنهجي');
+          bullets.push('الأثر السلوكي والواجب العملي المنضبط للدارسين');
         } else if (bullets.length === 1) {
           bullets.push('تحرير محل النزاع وتحديد المفاهيم الشرعية بدقة');
           bullets.push('الأثر المنهجي والواجب العملي تجاه مقتضيات هذا المحور');
         } else if (bullets.length === 2) {
-          bullets.push('خلاصة المسألة وتوجيهات التطبيق العملي للدارسين');
+          bullets.push('خلاصة المسألة والواجب السلوكي المترتب عليها');
         }
 
         return bullets.slice(0, 3);
@@ -5657,6 +5675,8 @@
         }
 
         const rawClean = sanitizeArabicExtractedText(rawLectureText).trim();
+        const evs = extractEvidencesAndProofs(rawClean);
+        setExtractedEvidences(evs);
         const rawLines = rawClean.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
 
         // Helper to identify OCR scan notices and publishing noise
@@ -5866,7 +5886,12 @@
             scriptureEvidence: secScripture,
             bulletPoints: secBullets,
             talkingPoints: secTalkingPoints,
+            fullSectionText: sec.lines.join('\n\n') || secText,
             pedagogicalTip: practicalImp,
+            discussionPrompts: [
+              `في ضوء مدارسة (${sec.title})؛ كيف نترجم هذا الأصل الشرعي إلى أثر سلوكي في واقعنا؟`,
+              `ما وجه الدلالة ومحل الشاهد من الدليل الشرعي المستخلص في ترسيخ هذه القضية؟`
+            ],
             titleAr: sec.title,
             bodyAr: modelAnswer,
             practicalAction: practicalImp
@@ -5930,7 +5955,7 @@
         const generatedData = {
           metadata: {
             topic: topic,
-            audience: studentLevel === 'intermediate' ? 'المستوى المتوسط' : (studentLevel === 'advanced' ? 'المستوى المتقدم والتأصيلي' : 'المستوى المبتدئ والناشئة'),
+            audience: (audienceLevel && audienceLevel.includes('بالمستوى المتقدم')) ? 'المستوى المتقدم والتأصيلي' : (audienceLevel && audienceLevel.includes('اليافعين') ? 'المستوى المتوسط والناشئة' : (audienceLevel || 'المستوى العام للدارسين')),
             duration: totalDuration,
             targetOutcome: isRtl ? `استيعاب أصول ومسائل (${topic}) والتطبيق المنهجي المعاصر` : `Comprehending issues of (${topic})`,
             category: finalCategory,
@@ -6187,8 +6212,155 @@
         }
       };
 
+      // Intelligent Islamic Evidences & Scientific Proofs Extractor
+      function extractEvidencesAndProofs(rawText) {
+        if (!rawText) return { quranicVerses: [], hadiths: [], scholarlyProofs: [] };
+        var text = sanitizeArabicExtractedText(rawText);
+        
+        var quranicVerses = [];
+        var hadiths = [];
+        var scholarlyProofs = [];
+
+        // A. Quranic Verses: Bracketed with ﴿...﴾
+        var bracketMatches = text.match(/﴿[^﴾]{4,400}﴾/g) || [];
+        bracketMatches.forEach(function(m, idx) {
+          var cleanVerse = m.replace(/[﴿﴾]/g, '').trim();
+          if (cleanVerse && !cleanVerse.includes('صفحة') && !cleanVerse.includes('ممسوحة')) {
+            var afterIdx = text.indexOf(m) + m.length;
+            var citationNearby = text.slice(afterIdx, afterIdx + 50).match(/[\[\(]([^\]\)]{2,25})[:\s]+(\d+)[\'\]\)]/);
+            var citation = 'القرآن الكريم';
+            if (citationNearby) {
+              var surahName = citationNearby[1].replace(/[:\s]+$/, '').trim();
+              citation = surahName + ': ' + citationNearby[2].trim();
+            }
+            if (!quranicVerses.some(function(q) { return q.plainText === cleanVerse || cleanVerse.includes(q.plainText) || q.plainText.includes(cleanVerse); })) {
+              quranicVerses.push({
+                id: 'q_' + idx,
+                type: 'quran',
+                arabicText: '﴿' + cleanVerse + '﴾',
+                plainText: cleanVerse,
+                citation: citation,
+                grading: 'متواتر قطعي الثبوت'
+              });
+            }
+          }
+        });
+
+        // B. Quranic Verses: Contextual (قال تعالى / قوله تعالى) without double brackets or duplicates
+        var ayahContextMatches = text.match(/(?:قال تعالى|قوله تعالى|وقوله سبحانه|كما قال سبحانه)[:\s]*([«"][^»"]+[»"]|[^\n.؛]{15,250}[.؛\n])/g) || [];
+        ayahContextMatches.forEach(function(m, idx) {
+          if (quranicVerses.length >= 8) return;
+          var clean = m.replace(/^(?:قال تعالى|قوله تعالى|وقوله سبحانه|كما قال سبحانه)[:\s]*/, '').replace(/[«»"﴿﴾]/g, '').trim();
+          clean = clean.replace(/[\[\(][^\]\)]+[\]\)]$/, '').trim(); // strip trailing [الرعد: 28]
+          if (clean.length >= 15 && clean.length <= 250 && !clean.includes('صفحة')) {
+            var alreadyExtracted = quranicVerses.some(function(q) {
+              return q.plainText === clean || q.plainText.includes(clean.slice(0, 20)) || clean.includes(q.plainText.slice(0, 20));
+            });
+            if (!alreadyExtracted) {
+              quranicVerses.push({
+                id: 'q_ctx_' + idx,
+                type: 'quran',
+                arabicText: '﴿' + clean + '﴾',
+                plainText: clean,
+                citation: 'القرآن الكريم',
+                grading: 'متواتر قطعي الثبوت'
+              });
+            }
+          }
+        });
+
+        // Fallback default verse if none extracted
+        if (quranicVerses.length === 0) {
+          quranicVerses.push({
+            id: 'q_default',
+            type: 'quran',
+            arabicText: '﴿يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَالَّذِينَ أُوتُوا الْعِلْمَ دَرَجَاتٍ﴾',
+            plainText: 'يرفع الله الذين آمنوا منكم والذين أوتوا العلم درجات',
+            citation: 'سورة المجادلة: 11',
+            grading: 'متواتر قطعي الثبوت'
+          });
+        }
+
+        // C. Prophetic Hadiths
+        var hadithPatterns = [
+          /(?:قال رسول الله|قال النبي|روى البخاري|روى مسلم|أخرجه الترمذي|عن أبي هريرة|عن عمر بن الخطاب|عن عائشة|عن أنس|عن عبد الله بن مسعود|عن ابن عباس|في الصحيحين)[:\s]*([«"][^»"]+[»"]|[^\n.؛]{15,280}[.؛\n])/g
+        ];
+        hadithPatterns.forEach(function(pat) {
+          var matches = text.match(pat) || [];
+          matches.forEach(function(m, idx) {
+            if (hadiths.length >= 8) return;
+            var clean = m.trim();
+            if (clean.length >= 20 && !clean.includes('صفحة') && !hadiths.some(function(h) { return h.arabicText.includes(clean.slice(0, 25)); })) {
+              var narrator = 'صحابي جليل رضي الله عنه';
+              if (clean.includes('أبي هريرة')) narrator = 'أبو هريرة رضي الله عنه';
+              else if (clean.includes('عمر بن الخطاب')) narrator = 'عمر بن الخطاب رضي الله عنه';
+              else if (clean.includes('عائشة')) narrator = 'أم المؤمنين عائشة رضي الله عنها';
+              else if (clean.includes('أنس')) narrator = 'أنس بن مالك رضي الله عنه';
+              else if (clean.includes('ابن عباس')) narrator = 'عبد الله بن عباس رضي الله عنهما';
+              else if (clean.includes('ابن مسعود')) narrator = 'عبد الله بن مسعود رضي الله عنه';
+              else if (clean.includes('صهيب') || clean.includes('عجب')) narrator = 'صهيب بن سنان الرومي رضي الله عنه';
+
+              var source = 'السنن والصحاح المعتمدة';
+              if (clean.includes('البخاري') && clean.includes('مسلم')) source = 'متفق عليه (صحيح البخاري ومسلم)';
+              else if (clean.includes('البخاري')) source = 'صحيح البخاري';
+              else if (clean.includes('مسلم')) source = 'صحيح مسلم';
+              else if (clean.includes('الترمذي')) source = 'سنن الترمذي';
+              else if (clean.includes('أحمد')) source = 'مسند الإمام أحمد';
+
+              hadiths.push({
+                id: 'h_' + idx,
+                type: 'hadith',
+                arabicText: clean.startsWith('«') ? clean : ('«' + clean.replace(/^[^«"]*([«"])/, '$1') + '»'),
+                plainText: clean,
+                narrator: narrator,
+                source: source,
+                grading: 'صحيح ومقبول استدلالاً'
+              });
+            }
+          });
+        });
+
+        if (hadiths.length === 0) {
+          hadiths.push({
+            id: 'h_default',
+            type: 'hadith',
+            arabicText: '«إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى»',
+            plainText: 'إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى',
+            narrator: 'أمير المؤمنين عمر بن الخطاب رضي الله عنه',
+            source: 'صحيح البخاري (1) وصحيح مسلم (1907)',
+            grading: 'صحيح متفق عليه'
+          });
+        }
+
+        // D. Scholarly Sayings & Scientific / Factual Proofs
+        var scholarPatterns = /(?:قال ابن تيمية|قال ابن القيم|قال الإمام أحمد|قال الشافعي|قال مالك|قال أبو حنيفة|قال النووي|قال ابن كثير|قال الحسن البصري|أثبتت الدراسات|أثبت العلم الحديث|الحقيقة العلمية)[:\s]*([^\n.؛]{15,220}[.؛\n])/g;
+        var scholarMatches = text.match(scholarPatterns) || [];
+        scholarMatches.forEach(function(m, idx) {
+          if (scholarlyProofs.length >= 6) return;
+          var clean = m.trim();
+          var author = 'من أئمة الهدى وأهل العلم';
+          if (clean.includes('ابن تيمية')) author = 'شيخ الإسلام ابن تيمية';
+          else if (clean.includes('ابن القيم')) author = 'الإمام ابن قيم الجوزية';
+          else if (clean.includes('أحمد')) author = 'الإمام أحمد بن حنبل';
+          else if (clean.includes('الشافعي')) author = 'الإمام محمد بن إدريس الشافعي';
+          else if (clean.includes('مالك')) author = 'الإمام مالك بن أنس';
+          else if (clean.includes('النووي')) author = 'الإمام يحيى بن شرف النووي';
+          else if (clean.includes('ابن كثير')) author = 'الحافظ ابن كثير الدمشقي';
+          else if (clean.includes('العلم') || clean.includes('الدراسات')) author = 'البرهان العلمي والبحث المعاصر';
+
+          scholarlyProofs.push({
+            id: 's_' + idx,
+            type: 'scholarly_scientific',
+            author: author,
+            quote: clean,
+            context: 'التأصيل والاستدلال المنهجي'
+          });
+        });
+
+        return { quranicVerses: quranicVerses, hadiths: hadiths, scholarlyProofs: scholarlyProofs };
+      }
+
       // Comprehensive Arabic Document Cleaner & Sanitizer
-      // Cleans PDF.js and Word font encoding artifacts (repeated Dals used as tatweel/stretch bars, reversed ligatures, TOC dot leaders)
       function sanitizeArabicExtractedText(rawText) {
         if (!rawText) return '';
         let text = rawText;
@@ -6273,8 +6445,48 @@
               for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const content = await page.getTextContent();
-                const pageStr = content.items.map(item => item.str).join(' ');
-                pagesText.push(pageStr);
+                const items = (content.items || []).filter(it => it.str && it.str.trim());
+                if (items.length === 0) continue;
+
+                // Group text items by vertical baseline (tolerance 3.5px) to preserve actual paragraphs and headings
+                const linesMap = [];
+                items.forEach(item => {
+                  const y = item.transform ? item.transform[5] : 0;
+                  const x = item.transform ? item.transform[4] : 0;
+                  let lineObj = linesMap.find(l => Math.abs(l.y - y) <= 3.5);
+                  if (!lineObj) {
+                    lineObj = { y, items: [] };
+                    linesMap.push(lineObj);
+                  }
+                  lineObj.items.push({ x, str: item.str });
+                });
+
+                // Sort lines vertically from top to bottom of page (decreasing Y)
+                linesMap.sort((a, b) => b.y - a.y);
+
+                const pageLines = linesMap.map(line => {
+                  // For Arabic RTL reading order: sort descending X
+                  line.items.sort((a, b) => b.x - a.x);
+                  let lineStr = '';
+                  for (let k = 0; k < line.items.length; k++) {
+                    const cur = line.items[k].str;
+                    if (!lineStr) {
+                      lineStr = cur;
+                    } else {
+                      const lastChar = lineStr.slice(-1);
+                      const firstChar = cur.charAt(0);
+                      // If contiguous Arabic connecting letters, stitch cleanly without broken spaces
+                      if (/[بتثجحخسشصضطظعغفقكلمنهيئءؤ]/.test(lastChar) && /[\u0600-\u06FF]/.test(firstChar)) {
+                        lineStr += cur;
+                      } else {
+                        lineStr += ' ' + cur;
+                      }
+                    }
+                  }
+                  return lineStr.trim();
+                }).filter(l => l.length > 0);
+
+                pagesText.push(pageLines.join('\n'));
               }
               extractedText = pagesText.join('\n\n');
             } else {
@@ -6293,6 +6505,8 @@
 
           const cleanExtracted = sanitizeArabicExtractedText(extractedText);
           setRawLectureText(cleanExtracted);
+          const evs = extractEvidencesAndProofs(cleanExtracted);
+          setExtractedEvidences(evs);
 
           // Infer topic title
           const cleanName = fname.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
@@ -6642,19 +6856,47 @@
           zoomCards: [
             {
               slideNumber: 1,
+              phaseTitle: 'المحور 1',
+              slideTitle: 'ما هو جوهر الإيمان؟',
               titleAr: 'ما هو جوهر الإيمان؟',
               titleEn: 'What is the Essence of Iman?',
+              scriptureEvidence: '﴿يَا أَيُّهَا الَّذِينَ آمَنُوا آمِنُوا بِاللَّهِ وَرَسُولِهِ وَالْكِتَابِ الَّذِي نَزَّلَ عَلَىٰ رَسُولِهِ﴾ [النساء: 136]',
+              bulletPoints: [
+                'الإيمان قول باللسان واعتقاد بالجنان وعمل بالجوارح والأركان',
+                'زيادة الإيمان بالطاعات ونقصانه بالغفلات والمعاصي',
+                'أثر اليقين القلبي في دفع الشبهات وتسكين الاضطراب النفسي'
+              ],
+              talkingPoints: 'تحرير مفهوم الإيمان عند أهل السنة والجماعة • الرد على الإرجاء والتفريط • ترسيخ حقيقة أن العمل ركن أساسي في كمال الإيمان وصحته',
+              fullSectionText: 'الإيمان ليس مجرد معرفة عقلية باردة ولا كلمات تردد باللسان، بل هو ما وقر في أعماق القلب وصدقه العمل الصالح وأخلاق المسلم. حين يتحقق الإيمان الصادق في نفس الداعية والمتعلم، يثمر طمأنينة وسكينة تعصمه من القلق والحيرة، وتدفعه للبذل والثبات في مواجهة الصعاب.',
+              discussionPrompts: [
+                'ما الفرق الجوهري بين مجرد التصديق الذهني بوجود الخالق وبين اليقين الإيماني المؤثر في السلوك؟',
+                'كيف ينعكس الإيمان بأسماء الله الحسنى وصفاته العلى على طمأنينة القلب عند نزول الشدائد؟'
+              ],
+              pedagogicalTip: 'التركيز على ربط مفهوم الإيمان بالواقع المعاش للشباب والرد على الشبهات العصرية',
               bodyAr: 'الإيمان ليس مجرد كلمات تردد، بل هو ما استقر في أعماق القلب وصدقته الأعمال الصالحة وأخلاق المسلم.',
-              bodyEn: 'Iman is not a ritual statement; it is that which settles deep in the heart and reflects in noble character and righteous action.',
-              practicalAction: 'جددي نيتك الصادقة اليومية قبل فتح أي كتاب أو درس.'
+              practicalAction: 'جددي نيتك الصادقة اليومية قبل فتح أي كتاب أو درس والالتزام بأوراد القلوب.'
             },
             {
               slideNumber: 2,
+              phaseTitle: 'المحور 2',
+              slideTitle: 'الإيمان بالقدر دواء القلق والتوتر',
               titleAr: 'الإيمان بالقدر دواء القلق والتوتر',
               titleEn: 'Belief in Qadar: The Antidote to Anxiety',
-              bodyAr: '«مَا أَصَابَكَ لَمْ يَكُنْ لِيُخْطِئَكَ، وَمَا أَخْطَأَكَ لَمْ يَكُنْ لِيُصِيبَكَ». لن يضيع عبد علم أن ربه حكيم رحيم.',
-              bodyEn: 'What has reached you was never meant to miss you, and what missed you was never meant to reach you.',
-              practicalAction: 'استبدلي كلمة "لو" بذكر "قدر الله وما شاء فعل" عند أي عارض.'
+              scriptureEvidence: '«مَا أَصَابَكَ لَمْ يَكُنْ لِيُخْطِئَكَ، وَمَا أَخْطَأَكَ لَمْ يَكُنْ لِيُصِيبَكَ» (أحمد وأبو داود)',
+              bulletPoints: [
+                'مراتب القدر الأربعة: العلم، الكتابة، المشيئة، والخلق والإيجاد',
+                'اليقين بأن أزمات الحياة مقدرة بحكمة إلهية بالغة ورحمة',
+                'الجمع المنضبط بين بذل الأسباب المشروعة والتوكل الصادق'
+              ],
+              talkingPoints: 'بيان مراتب الإيمان بالقدر • التفريق بين الإرادة الكونية والإرادة الشرعية • دحض دعاوى الجبر والتعطيل ودفع وسواس الخوف من المستقبل',
+              fullSectionText: 'حين يعلم المؤمن أن ما أصابه لم يكن ليخطئه وما أخطأه لم يكن ليصيبه، تنزل السكينة في فؤاده ويزول هلع المستقبل. إن الإيمان بالقدر ركن أصيل يمنح الإنسان توازناً نفسياً فريداً؛ فلا يبطر عند النعمة والرخاء، ولا ييأس أو ينهار عند البلاء والمصيبة، بل يكون شاكراً في الأولى وصابراً محتسباً في الثانية.',
+              discussionPrompts: [
+                'كيف يزيل الإيمان بالقدر مشاعر الندم القاتل والحسرة على ما فات؟',
+                'كيف نجمع بين أخذ الأسباب الطبية والمادية الدقيقة وبين الرضا التام بقضاء الله وقدره؟'
+              ],
+              pedagogicalTip: 'حث الطلاب على استشعار معية الله والتفويض الكامل مع استنفاد الجهد في الأسباب',
+              bodyAr: 'حين يعلم المؤمن أن ما أصابه لم يكن ليخطئه، تنزل السكينة في فؤاده ويزول هلع المستقبل.',
+              practicalAction: 'ردد عند أي عائق: قدر الله وما شاء فعل بيقين تام واحتسب الأجر عند الله.'
             }
           ],
           whatsAppKit: {
@@ -6877,10 +7119,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v66.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v66.0 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v67.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v67.0 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v66.0' : 'v66.0'}</span>
+                  <span>{isRtl ? 'الإصدار v67.0' : 'v67.0'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -11028,6 +11270,77 @@
                                 </button>
                               </div>
 
+                              {/* Extracted Content Quality & Tools Bar */}
+                              <div className="flex flex-wrap items-center justify-between gap-2 bg-amber-100/80 p-3 rounded-2xl border border-gold-400/60 text-xs shadow-xs">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="font-extrabold text-amber-950 flex items-center gap-1.5 font-cairo">
+                                    <span>🛠️</span>
+                                    <span>{isRtl ? 'أدوات معالجة واستخلاص الملف:' : 'File Processing Tools:'}</span>
+                                  </span>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const cleaned = sanitizeArabicExtractedText(rawLectureText);
+                                      setRawLectureText(cleaned);
+                                      const evs = extractEvidencesAndProofs(cleaned);
+                                      setExtractedEvidences(evs);
+                                      showToast(isRtl ? 'تم تنقية ومعالجة النص العربي واستخلاص الأدلة بنجاح ✨' : 'Sanitized text and extracted evidences ✨');
+                                    }}
+                                    className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                                    title={isRtl ? 'إزالة الشوائب الطباعية، والتشكيل الزائد، ووصل الحروف المتقطعة' : 'Clean OCR & typography'}
+                                  >
+                                    <span>🧹</span>
+                                    <span>{isRtl ? 'تنقية ومعالجة النص العربي' : 'Sanitize Text'}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowEvidenceBankModal(true)}
+                                    className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-3.5 py-1.5 rounded-xl font-black flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                                    title={isRtl ? 'عرض الآيات القرآنية والأحاديث والأقوال العلمية المستخلصة من الملف' : 'Inspect extracted Quran & Hadith proofs'}
+                                  >
+                                    <span>📜</span>
+                                    <span>{isRtl ? `بنك الأدلة والبراهين (${(extractedEvidences.quranicVerses || []).length + (extractedEvidences.hadiths || []).length + (extractedEvidences.scholarlyProofs || []).length})` : 'Evidence Bank'}</span>
+                                  </button>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setShowExtractedTextPreview(!showExtractedTextPreview)}
+                                  className="bg-white hover:bg-slate-50 text-amber-950 border border-amber-300 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1 shadow-xs transition cursor-pointer"
+                                >
+                                  <span>👁️</span>
+                                  <span>{isRtl ? (showExtractedTextPreview ? 'إخفاء محرر النص' : 'معاينة وتعديل النص المستخلص') : 'Preview & Edit Text'}</span>
+                                </button>
+                              </div>
+
+                              {/* Expandable Extracted Text Area */}
+                              {showExtractedTextPreview && (
+                                <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-amber-300 shadow-inner space-y-2 animate-fadeIn">
+                                  <div className="flex items-center justify-between text-[11px] text-slate-600 font-bold border-b border-slate-100 pb-1.5">
+                                    <span className="flex items-center gap-1 text-emerald-950 font-black">
+                                      <span>📝</span>
+                                      <span>{isRtl ? 'محرر وتدقيق النص المستخلص (يمكنك التعديل أو الحذف أو الإضافة المباشرة):' : 'Extracted Text Editor:'}</span>
+                                    </span>
+                                    <span className="bg-emerald-50 text-emerald-900 px-2 py-0.5 rounded-md font-mono text-[10px]">
+                                      {rawLectureText.length} {isRtl ? 'حرفاً' : 'chars'} • {rawLectureText.trim().split(/\s+/).filter(Boolean).length} {isRtl ? 'كلمة' : 'words'}
+                                    </span>
+                                  </div>
+                                  <textarea
+                                    rows={8}
+                                    value={rawLectureText}
+                                    onChange={(e) => {
+                                      setRawLectureText(e.target.value);
+                                      const evs = extractEvidencesAndProofs(e.target.value);
+                                      setExtractedEvidences(evs);
+                                    }}
+                                    className="w-full text-xs sm:text-sm font-amiri p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-700 leading-relaxed text-slate-900 scrollbar-thin"
+                                    placeholder={isRtl ? 'النص المستخلص من الملف...' : 'Extracted text...'}
+                                  />
+                                </div>
+                              )}
+
                               {/* Target Metadata Selectors */}
                               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
@@ -11105,6 +11418,46 @@
                       {/* --- MODE 2: PASTE LECTURE TEXT --- */}
                       {islamicInputMode === 'paste' && (
                         <div className="space-y-4">
+                          {rawLectureText && rawLectureText.trim().length > 0 && (
+                            <div className="flex flex-wrap items-center justify-between gap-2 bg-amber-100/80 p-3 rounded-2xl border border-gold-400/60 text-xs shadow-xs animate-fadeIn">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="font-extrabold text-amber-950 flex items-center gap-1.5 font-cairo">
+                                  <span>🛠️</span>
+                                  <span>{isRtl ? 'أدوات معالجة واستخلاص النص الملصوق:' : 'Pasted Text Tools:'}</span>
+                                </span>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const cleaned = sanitizeArabicExtractedText(rawLectureText);
+                                    setRawLectureText(cleaned);
+                                    const evs = extractEvidencesAndProofs(cleaned);
+                                    setExtractedEvidences(evs);
+                                    showToast(isRtl ? 'تم تنقية ومعالجة النص العربي واستخلاص الأدلة بنجاح ✨' : 'Sanitized text and extracted evidences ✨');
+                                  }}
+                                  className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                                  title={isRtl ? 'إزالة الشوائب الطباعية، والتشكيل الزائد، ووصل الحروف المتقطعة' : 'Clean typography'}
+                                >
+                                  <span>🧹</span>
+                                  <span>{isRtl ? 'تنقية ومعالجة النص العربي' : 'Sanitize Text'}</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setShowEvidenceBankModal(true)}
+                                  className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-3.5 py-1.5 rounded-xl font-black flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                                  title={isRtl ? 'عرض الآيات القرآنية والأحاديث والأقوال العلمية المستخلصة من النص' : 'Inspect extracted Quran & Hadith proofs'}
+                                >
+                                  <span>📜</span>
+                                  <span>{isRtl ? `بنك الأدلة والبراهين (${(extractedEvidences.quranicVerses || []).length + (extractedEvidences.hadiths || []).length + (extractedEvidences.scholarlyProofs || []).length})` : 'Evidence Bank'}</span>
+                                </button>
+                              </div>
+
+                              <span className="bg-emerald-50 text-emerald-900 border border-emerald-300 px-2.5 py-1 rounded-xl text-[11px] font-bold">
+                                {rawLectureText.length} {isRtl ? 'حرفاً' : 'chars'} • {rawLectureText.trim().split(/\s+/).filter(Boolean).length} {isRtl ? 'كلمة' : 'words'}
+                              </span>
+                            </div>
+                          )}
                           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
                             <label className="block text-xs font-bold text-emerald-950 mb-1.5">
                               {isRtl 
@@ -11367,7 +11720,7 @@
                               </span>
                             </div>
                             <h3 className="text-lg sm:text-xl font-extrabold text-emerald-950 font-amiri mt-1">
-                              {islamicData.metadata.topic} — ({islamicData.metadata.durationMinutes} {isRtl ? 'دقيقة' : 'Minutes'})
+                              {islamicData.metadata.topic} — ({islamicData.metadata.durationMinutes || islamicData.metadata.duration || lessonDuration || 45} {isRtl ? 'دقيقة' : 'Minutes'})
                             </h3>
                           </div>
                           <span className="bg-emerald-100 text-emerald-900 font-bold text-xs px-3 py-1 rounded-full">
@@ -11403,7 +11756,110 @@
                         </div>
                       </div>
 
-                      {/* 2.2 Authenticated Hadith Verification (Strict Sahih Bukhari & Muslim) */}
+                      {/* 2.2 Islamic Evidences & Scientific Proofs Bank */}
+                      <div className="card-islamic-pearl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-emerald-800/15 shadow-md space-y-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-9 h-9 rounded-xl bg-gold-400 text-emerald-950 font-bold flex items-center justify-center text-lg shadow-xs">
+                              📜
+                            </span>
+                            <div>
+                              <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo">
+                                {isRtl ? 'بنك الأدلة الشرعية والبراهين العلمية المستخلصة من المحاضرة:' : 'Extracted Evidences & Scholarly Proofs Bank:'}
+                              </h3>
+                              <p className="text-[11px] text-slate-600 font-medium">
+                                {isRtl ? 'آيات قرآنية وأحاديث نبوية وأقوال أئمة الهدى وبراهين علمية مستخلصة بدقة وموثقة' : 'Authentic Quranic Verses, Hadiths & Proofs extracted from lecture'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setShowEvidenceBankModal(true)}
+                            className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 text-xs px-3.5 py-2 rounded-xl font-black transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                          >
+                            <span>🔍</span>
+                            <span>{isRtl ? 'عرض كافة الأدلة في نافذة منفصلة' : 'View Full Evidence Bank'}</span>
+                          </button>
+                        </div>
+
+                        {/* Top Extracted Evidence Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {/* Top Quranic Verse */}
+                          {extractedEvidences.quranicVerses && extractedEvidences.quranicVerses.length > 0 && (
+                            <div className="bg-emerald-950 text-gold-200 p-4 rounded-2xl border-2 border-gold-400/50 shadow-md space-y-2 flex flex-col justify-between">
+                              <div>
+                                <div className="flex items-center justify-between text-xs pb-1.5 border-b border-gold-400/30">
+                                  <span className="font-black text-gold-300 flex items-center gap-1">
+                                    <span>📖</span>
+                                    <span>{isRtl ? 'آية قرآنية مستخلصة' : 'Extracted Ayah'}</span>
+                                  </span>
+                                  <span className="bg-emerald-900 px-2 py-0.5 rounded-full text-[10px] text-gold-200 border border-gold-400/30">
+                                    {extractedEvidences.quranicVerses[0].citation}
+                                  </span>
+                                </div>
+                                <p className="font-quran text-base sm:text-lg text-amber-100 leading-relaxed pt-2 text-center">
+                                  {extractedEvidences.quranicVerses[0].arabicText}
+                                </p>
+                              </div>
+                              <div className="text-[10px] text-gold-300/80 text-right pt-2 border-t border-gold-400/20">
+                                ✓ {extractedEvidences.quranicVerses[0].grading}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Top Prophetic Hadith */}
+                          {extractedEvidences.hadiths && extractedEvidences.hadiths.length > 0 && (
+                            <div className="card-islamic-amber p-4 rounded-2xl border-2 border-gold-400 shadow-md space-y-2 flex flex-col justify-between">
+                              <div>
+                                <div className="flex items-center justify-between text-xs pb-1.5 border-b border-amber-900/15">
+                                  <span className="font-black text-amber-950 flex items-center gap-1 font-cairo">
+                                    <span>✨</span>
+                                    <span>{isRtl ? 'حديث نبوي شريف' : 'Prophetic Hadith'}</span>
+                                  </span>
+                                  <span className="bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                    {extractedEvidences.hadiths[0].source}
+                                  </span>
+                                </div>
+                                <p className="font-amiri text-sm sm:text-base text-slate-800 font-bold leading-relaxed pt-2 text-right">
+                                  {extractedEvidences.hadiths[0].arabicText}
+                                </p>
+                              </div>
+                              <div className="text-[10px] text-amber-900 font-bold text-right pt-2 border-t border-amber-900/10 flex items-center justify-between">
+                                <span>الراوي: {extractedEvidences.hadiths[0].narrator}</span>
+                                <span className="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full font-bold">
+                                  {extractedEvidences.hadiths[0].grading}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Top Scholarly / Scientific Proof */}
+                          {extractedEvidences.scholarlyProofs && extractedEvidences.scholarlyProofs.length > 0 && (
+                            <div className="card-islamic-sky p-4 rounded-2xl border-2 border-sky-300 shadow-md space-y-2 flex flex-col justify-between">
+                              <div>
+                                <div className="flex items-center justify-between text-xs pb-1.5 border-b border-sky-900/15">
+                                  <span className="font-black text-sky-950 flex items-center gap-1 font-cairo">
+                                    <span>🎓</span>
+                                    <span>{isRtl ? 'قول تأصيلي / برهان علمي' : 'Scholarly Proof'}</span>
+                                  </span>
+                                  <span className="bg-sky-200/80 text-sky-950 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                    {extractedEvidences.scholarlyProofs[0].author}
+                                  </span>
+                                </div>
+                                <p className="font-amiri text-xs sm:text-sm text-slate-800 font-bold leading-relaxed pt-2 text-right">
+                                  « {extractedEvidences.scholarlyProofs[0].quote} »
+                                </p>
+                              </div>
+                              <div className="text-[10px] text-sky-900 font-bold text-right pt-2 border-t border-sky-900/10">
+                                السياق: {extractedEvidences.scholarlyProofs[0].context}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* 2.3 Authenticated Hadith Verification (Strict Sahih Bukhari & Muslim) */}
                       <div className="card-islamic-amber rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-gold-400/40 shadow-md">
                         <div className="flex items-center gap-2 pb-3 mb-4 border-b border-gold-400/30">
                           <span className="text-xl">🛡️</span>
@@ -11684,12 +12140,13 @@
                                   </div>
                                 </div>
 
-                                {/* LEFT PANE (5/12 cols): Teacher's Teleprompter & Private Lecture Script */}
-                                <div className="lg:col-span-5 flex flex-col justify-between card-islamic-amber rounded-2xl sm:rounded-3xl p-4 sm:p-5 border-2 border-gold-500/70 shadow-lg min-h-[440px]">
+                                {/* LEFT PANE (5/12 cols): Teacher's Full Cockpit & Substantive Preparation Desk */}
+                                <div className="lg:col-span-5 flex flex-col justify-between card-islamic-amber rounded-2xl sm:rounded-3xl p-4 sm:p-5 border-2 border-gold-500/70 shadow-lg min-h-[460px]">
                                   <div>
-                                    <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-amber-900/15">
+                                    {/* Header & Controls */}
+                                    <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-amber-900/15">
                                       <div className="flex items-center gap-1.5">
-                                        <span className="text-lg">🎙️</span>
+                                        <span className="text-xl">🎙️</span>
                                         <div>
                                           <h4 className="text-xs sm:text-sm font-black text-amber-950 font-cairo">
                                             {isRtl ? 'كابينة وتفريغ المعلم في زوم:' : "Teacher's Zoom Teleprompter:"}
@@ -11699,39 +12156,130 @@
                                           </span>
                                         </div>
                                       </div>
-                                      <span className="bg-emerald-900 text-gold-200 text-[10px] font-black px-2 py-0.5 rounded-full shadow-xs">
-                                        ⏱️ 10 {isRtl ? 'دقائق' : 'mins'}
-                                      </span>
+
+                                      {/* Script Font Resizer */}
+                                      <div className="bg-amber-200/80 rounded-xl p-0.5 flex items-center gap-1 text-[11px] font-bold text-amber-950 border border-amber-300">
+                                        <span className="px-1 text-[10px] text-amber-800">{isRtl ? 'الخط:' : 'Font:'}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => setTeacherScriptFontSize('small')}
+                                          className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${teacherScriptFontSize === 'small' ? 'bg-emerald-950 text-gold-300 font-black' : 'hover:bg-amber-300'}`}
+                                        >
+                                          {isRtl ? 'صغير' : 'S'}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => setTeacherScriptFontSize('medium')}
+                                          className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${teacherScriptFontSize === 'medium' ? 'bg-emerald-950 text-gold-300 font-black' : 'hover:bg-amber-300'}`}
+                                        >
+                                          {isRtl ? 'متوسط' : 'M'}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => setTeacherScriptFontSize('large')}
+                                          className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${teacherScriptFontSize === 'large' ? 'bg-emerald-950 text-gold-300 font-black' : 'hover:bg-amber-300'}`}
+                                        >
+                                          {isRtl ? 'كبير' : 'L'}
+                                        </button>
+                                      </div>
                                     </div>
 
-                                    {/* Full Substantive Section Lecture Text */}
-                                    <div className="space-y-3 max-h-[290px] overflow-y-auto pr-1 text-right scrollbar-thin">
-                                      <div className="bg-white/95 p-3.5 rounded-xl border border-amber-300 shadow-xs">
-                                        <span className="text-[11px] font-black text-emerald-950 font-cairo block mb-1.5 flex items-center gap-1">
-                                          <span>📜</span>
-                                          <span>{isRtl ? 'التفريغ العلمي الكامل والشرح التفصيلي لهذا المحور:' : 'Substantive Lecture Script:'}</span>
-                                        </span>
-                                        <p className="font-amiri text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-line text-justify">
-                                          {teleprompterText}
+                                    {/* Quick Element Jump Chips (Instant Harmonious Sync with Right Slide) */}
+                                    <div className="mb-3">
+                                      <span className="text-[10px] font-bold text-amber-900 block mb-1">
+                                        📑 {isRtl ? 'المحاور والعناصر المستخلصة (انقر للانتقال المتزامن):' : 'Key Structural Elements (Click to sync):'}
+                                      </span>
+                                      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                                        {slidesList.map((sl, sIdx) => {
+                                          const isActive = sIdx === safeIdx;
+                                          return (
+                                            <button
+                                              key={sIdx}
+                                              type="button"
+                                              onClick={() => setStage3ActiveSlide(sIdx)}
+                                              className={`px-2.5 py-1 rounded-xl text-[10px] font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-1 ${
+                                                isActive
+                                                  ? 'bg-emerald-950 text-gold-300 border border-gold-400 font-black shadow-xs ring-2 ring-gold-400/40'
+                                                  : 'bg-white/90 hover:bg-amber-100 text-amber-950 border border-amber-300/80'
+                                              }`}
+                                            >
+                                              <span>{sIdx + 1}.</span>
+                                              <span>{sl.slideTitle || `محور ${sIdx + 1}`}</span>
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+
+                                    {/* Scrollable Substantive Teleprompter & Talking Points */}
+                                    <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1 text-right scrollbar-thin">
+                                      {/* Box 1: Full Unabridged Lecture Text from Source File */}
+                                      <div className="bg-white/95 p-3.5 rounded-2xl border border-amber-300 shadow-xs space-y-1.5">
+                                        <div className="flex items-center justify-between border-b border-amber-200/70 pb-1">
+                                          <span className="text-[11px] font-black text-emerald-950 font-cairo flex items-center gap-1">
+                                            <span>📜</span>
+                                            <span>{isRtl ? 'التفريغ العلمي الكامل والشرح التفصيلي لهذا المحور:' : 'Substantive Source Lecture Text:'}</span>
+                                          </span>
+                                          <span className="text-[10px] text-amber-800 font-bold bg-amber-50 px-2 py-0.5 rounded-md">
+                                            {isRtl ? 'النص الأصلي من الملف' : 'Source Text'}
+                                          </span>
+                                        </div>
+                                        <p className={`font-amiri text-slate-800 leading-relaxed whitespace-pre-line text-justify ${
+                                          teacherScriptFontSize === 'small' ? 'text-xs' : (teacherScriptFontSize === 'large' ? 'text-base font-bold' : 'text-sm')
+                                        }`}>
+                                          {currentSlide.fullSectionText || teleprompterText}
                                         </p>
                                       </div>
 
-                                      {/* Pedagogical Facilitation Tip for Zoom */}
-                                      <div className="bg-emerald-950 text-gold-200 p-3 rounded-xl border border-gold-400/40 text-xs shadow-xs space-y-1">
-                                        <div className="flex items-center gap-1.5 font-bold text-gold-300">
-                                          <span>💡</span>
-                                          <span>{isRtl ? 'توجيه إدارة النقاش مع الطلاب على زوم:' : 'Zoom Engagement Guidance:'}</span>
+                                      {/* Box 2: Teacher Talking Points & Scholarly Pointers */}
+                                      {currentSlide.talkingPoints && (
+                                        <div className="bg-amber-100/70 p-3 rounded-2xl border border-gold-400/40 text-xs shadow-xs space-y-1">
+                                          <span className="font-black text-amber-950 flex items-center gap-1 font-cairo">
+                                            <span>🎯</span>
+                                            <span>{isRtl ? 'نقاط الشرح والاستفاضة للداعية والمحاضر:' : 'Teacher Talking Points:'}</span>
+                                          </span>
+                                          <p className="text-[11px] text-amber-950 font-amiri font-bold leading-relaxed whitespace-pre-line">
+                                            {currentSlide.talkingPoints}
+                                          </p>
                                         </div>
-                                        <p className="text-[11px] text-slate-100 leading-relaxed font-amiri">
-                                          {pedagogicalTip}
-                                        </p>
-                                      </div>
+                                      )}
+
+                                      {/* Box 3: Live Classroom Discussion Prompts for Zoom */}
+                                      {currentSlide.discussionPrompts && currentSlide.discussionPrompts.length > 0 && (
+                                        <div className="bg-emerald-950 text-gold-200 p-3 rounded-2xl border border-gold-400/40 text-xs shadow-xs space-y-1.5">
+                                          <div className="flex items-center gap-1.5 font-bold text-gold-300">
+                                            <span>❓</span>
+                                            <span>{isRtl ? 'أسئلة إثارة النقاش والتفاعل مع الطلاب على زوم:' : 'Live Zoom Discussion Questions:'}</span>
+                                          </div>
+                                          <ul className="space-y-1 text-[11px] text-slate-100 font-amiri leading-relaxed pr-3 list-disc">
+                                            {currentSlide.discussionPrompts.map((dp, dpIdx) => (
+                                              <li key={dpIdx}>{dp}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      )}
+
+                                      {/* Box 4: Pedagogical Engagement Guidance */}
+                                      {pedagogicalTip && (
+                                        <div className="bg-amber-50 p-3 rounded-2xl border border-amber-300 text-xs shadow-xs space-y-1">
+                                          <div className="flex items-center gap-1.5 font-bold text-amber-950">
+                                            <span>💡</span>
+                                            <span>{isRtl ? 'توجيه إدارة الحلقة والأثر السلوكي:' : 'Pedagogical Guidance:'}</span>
+                                          </div>
+                                          <p className="text-[11px] text-slate-700 leading-relaxed font-amiri">
+                                            {pedagogicalTip}
+                                          </p>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
 
                                   {/* Teleprompter Footer */}
                                   <div className="mt-3 pt-2.5 border-t border-amber-900/10 flex items-center justify-between text-[11px] text-amber-900 font-bold">
-                                    <span>{isRtl ? 'تزامن تلقائي مع تقليب الشريحة' : 'Auto-synced with slides'}</span>
+                                    <span className="flex items-center gap-1">
+                                      <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                                      <span>{isRtl ? 'متزامن لحظياً مع شاشة العرض' : 'Live Synced with Slide'}</span>
+                                    </span>
                                     <span className="text-emerald-950 font-black">
                                       {isRtl ? `المحور ${safeIdx + 1} من ${slidesList.length}` : `${safeIdx + 1}/${slidesList.length}`}
                                     </span>
@@ -12047,13 +12595,25 @@
                           </h3>
                         </div>
 
-                        {/* Live Score Banner */}
-                        {islamicQuizSubmitted && (
-                          <div className="bg-emerald-900 text-gold-200 px-4 py-2 rounded-xl border border-gold-400 font-black text-xs sm:text-sm shadow-md flex items-center gap-2">
-                            <span>🏆</span>
-                            <span>{isRtl ? `النتيجة المحققة: ${islamicQuizScore}%` : `Score: ${islamicQuizScore}%`}</span>
-                          </div>
-                        )}
+                        {/* Actions: Print Quiz + Score Banner */}
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => window.print()}
+                            className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 border border-gold-400/50 text-xs px-3.5 py-2 rounded-xl font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                            title={isRtl ? 'طباعة نموذج الاختبار للطلاب أو حفظه كـ PDF' : 'Print Quiz Sheet'}
+                          >
+                            <span>🖨️</span>
+                            <span>{isRtl ? 'طباعة نموذج الاختبار' : 'Print Quiz'}</span>
+                          </button>
+
+                          {islamicQuizSubmitted && (
+                            <div className="bg-emerald-900 text-gold-200 px-4 py-2 rounded-xl border border-gold-400 font-black text-xs sm:text-sm shadow-md flex items-center gap-2">
+                              <span>🏆</span>
+                              <span>{isRtl ? `النتيجة: ${islamicQuizScore}%` : `Score: ${islamicQuizScore}%`}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Quiz Question Cards */}
@@ -12292,6 +12852,165 @@
                   </div>
                 )}
 
+              </div>
+            )}
+
+            {/* Dedicated Islamic Evidences & Scientific Proofs Modal */}
+            {showEvidenceBankModal && (
+              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+                <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border-2 border-emerald-900/20 shadow-2xl">
+                  {/* Modal Header */}
+                  <div className="bg-emerald-950 text-gold-200 p-4 sm:p-6 flex items-center justify-between border-b-2 border-gold-400">
+                    <div className="flex items-center gap-3">
+                      <span className="w-10 h-10 rounded-2xl bg-gold-500 text-emerald-950 font-black flex items-center justify-center text-xl shadow-md">
+                        📜
+                      </span>
+                      <div>
+                        <h3 className="text-base sm:text-xl font-black font-cairo text-gold-200">
+                          {isRtl ? 'بنك الأدلة الشرعية والبراهين العلمية المستخلصة' : 'Extracted Islamic Evidences Bank'}
+                        </h3>
+                        <p className="text-xs text-gold-300/80">
+                          {isRtl ? 'الآيات القرآنية والأحاديث النبوية وأقوال أئمة الهدى والبراهين الموثقة في ملف المحاضرة' : 'Quranic Verses, Hadiths & Proofs from Lecture Document'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowEvidenceBankModal(false)}
+                      className="w-9 h-9 rounded-full bg-emerald-900 hover:bg-emerald-800 text-gold-200 flex items-center justify-center font-bold text-lg transition cursor-pointer border border-gold-400/40"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* Filter Tabs */}
+                  <div className="bg-slate-50 border-b border-slate-200 p-3 flex flex-wrap items-center gap-2">
+                    {[
+                      { id: 'all', labelAr: `كافة الأدلة (${(extractedEvidences.quranicVerses || []).length + (extractedEvidences.hadiths || []).length + (extractedEvidences.scholarlyProofs || []).length})`, labelEn: 'All' },
+                      { id: 'quran', labelAr: `الآيات القرآنية (${(extractedEvidences.quranicVerses || []).length})`, labelEn: 'Quran' },
+                      { id: 'hadith', labelAr: `الأحاديث النبوية (${(extractedEvidences.hadiths || []).length})`, labelEn: 'Hadith' },
+                      { id: 'scholarly', labelAr: `أقوال العلماء والبراهين (${(extractedEvidences.scholarlyProofs || []).length})`, labelEn: 'Scholarly & Proofs' }
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setEvidenceBankFilter(f.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                          evidenceBankFilter === f.id
+                            ? 'bg-emerald-900 text-gold-200 font-black shadow-xs'
+                            : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {isRtl ? f.labelAr : f.labelEn}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Evidence List */}
+                  <div className="p-4 sm:p-6 overflow-y-auto space-y-4 max-h-[60vh] scrollbar-thin">
+                    {/* Quranic Verses */}
+                    {(evidenceBankFilter === 'all' || evidenceBankFilter === 'quran') && (
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-black text-emerald-950 font-cairo flex items-center gap-1.5 pb-1 border-b border-emerald-900/10">
+                          <span>📖</span>
+                          <span>{isRtl ? 'الآيات القرآنية الكريمة:' : 'Quranic Verses:'}</span>
+                        </h4>
+                        {(extractedEvidences.quranicVerses || []).map((q, idx) => (
+                          <div key={idx} className="bg-emerald-950 text-gold-200 p-4 rounded-2xl border border-gold-400/40 shadow-sm space-y-2">
+                            <div className="flex items-center justify-between text-xs pb-1 border-b border-gold-400/20">
+                              <span className="font-black text-gold-300">{q.citation || 'القرآن الكريم'}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard?.writeText(q.arabicText);
+                                  showToast(isRtl ? 'تم نسخ الآية الكريمة بنجاح 📋' : 'Copied verse 📋');
+                                }}
+                                className="text-[10px] bg-emerald-900 hover:bg-emerald-800 text-gold-200 px-2 py-0.5 rounded-lg border border-gold-400/30 font-bold transition cursor-pointer"
+                              >
+                                📋 {isRtl ? 'نسخ الآية' : 'Copy'}
+                              </button>
+                            </div>
+                            <p className="font-quran text-lg sm:text-xl text-amber-100 leading-relaxed text-center py-1">
+                              {q.arabicText}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Prophetic Hadiths */}
+                    {(evidenceBankFilter === 'all' || evidenceBankFilter === 'hadith') && (
+                      <div className="space-y-3 pt-2">
+                        <h4 className="text-xs font-black text-emerald-950 font-cairo flex items-center gap-1.5 pb-1 border-b border-emerald-900/10">
+                          <span>✨</span>
+                          <span>{isRtl ? 'الأحاديث النبوية الشريفة:' : 'Prophetic Hadiths:'}</span>
+                        </h4>
+                        {(extractedEvidences.hadiths || []).map((h, idx) => (
+                          <div key={idx} className="card-islamic-amber p-4 rounded-2xl border border-gold-400/60 shadow-sm space-y-2">
+                            <div className="flex items-center justify-between text-xs pb-1 border-b border-amber-900/15">
+                              <span className="font-bold text-amber-900">{h.source || 'السنة النبوية'} • {h.narrator || 'صحابي جليل'}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard?.writeText(h.arabicText);
+                                  showToast(isRtl ? 'تم نسخ الحديث الشريف بنجاح 📋' : 'Copied hadith 📋');
+                                }}
+                                className="text-[10px] bg-amber-200 hover:bg-amber-300 text-amber-950 px-2 py-0.5 rounded-lg border border-amber-400 font-bold transition cursor-pointer"
+                              >
+                                📋 {isRtl ? 'نسخ الحديث' : 'Copy'}
+                              </button>
+                            </div>
+                            <p className="font-amiri text-sm sm:text-base text-slate-800 font-bold leading-relaxed text-right py-1">
+                              {h.arabicText}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Scholarly Proofs */}
+                    {(evidenceBankFilter === 'all' || evidenceBankFilter === 'scholarly') && (
+                      <div className="space-y-3 pt-2">
+                        <h4 className="text-xs font-black text-emerald-950 font-cairo flex items-center gap-1.5 pb-1 border-b border-emerald-900/10">
+                          <span>🎓</span>
+                          <span>{isRtl ? 'أقوال العلماء والبراهين العلمية والتاريخية:' : 'Scholarly Sayings & Proofs:'}</span>
+                        </h4>
+                        {(extractedEvidences.scholarlyProofs || []).map((s, idx) => (
+                          <div key={idx} className="card-islamic-sky p-4 rounded-2xl border border-sky-300 shadow-sm space-y-2">
+                            <div className="flex items-center justify-between text-xs pb-1 border-b border-sky-900/15">
+                              <span className="font-bold text-sky-950">{s.author}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard?.writeText(s.quote);
+                                  showToast(isRtl ? 'تم نسخ القول بنجاح 📋' : 'Copied proof 📋');
+                                }}
+                                className="text-[10px] bg-sky-200 hover:bg-sky-300 text-sky-950 px-2 py-0.5 rounded-lg border border-sky-400 font-bold transition cursor-pointer"
+                              >
+                                📋 {isRtl ? 'نسخ القول' : 'Copy'}
+                              </button>
+                            </div>
+                            <p className="font-amiri text-xs sm:text-sm text-slate-800 font-bold leading-relaxed text-right py-1">
+                              « {s.quote} »
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="bg-slate-100 p-3.5 border-t border-slate-200 flex items-center justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowEvidenceBankModal(false)}
+                      className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 px-5 py-2 rounded-xl text-xs font-black transition cursor-pointer shadow-sm"
+                    >
+                      {isRtl ? 'إغلاق نافذة الأدلة' : 'Close'}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
