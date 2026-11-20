@@ -4954,6 +4954,8 @@
       const [suwaydZoomModalOpen, setSuwaydZoomModalOpen] = useState(false);
       const [suwaydZoomSlideIndex, setSuwaydZoomSlideIndex] = useState(0);
       const [suwaydQuizModalOpen, setSuwaydQuizModalOpen] = useState(false);
+      const [suwaydWorksheetModalOpen, setSuwaydWorksheetModalOpen] = useState(false);
+      const [hifzWorksheetModalOpen, setHifzWorksheetModalOpen] = useState(false);
       const [suwaydQuizAnswers, setSuwaydQuizAnswers] = useState({});
       const [suwaydQuizSubmitted, setSuwaydQuizSubmitted] = useState(false);
 
@@ -6865,10 +6867,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v61.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v61.0 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v62.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v62.0 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v61.0' : 'v61.0'}</span>
+                  <span>{isRtl ? 'الإصدار v62.0' : 'v62.0'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -6881,9 +6883,7 @@
               {[
                 { id: 'hifz', icon: '🕋', labelAr: '1. التحفيظ ومصحف المدينة', labelEn: '1. Quran & Mushaf' },
                 { id: 'tajweed', icon: '📖', labelAr: '2. التجويد ومخارج الحروف', labelEn: '2. Tajweed Rules' },
-                { id: 'islamic', icon: '🕌', labelAr: '3. حلقات ومحاضرات العلوم الشرعية', labelEn: '3. Islamic Lectures' },
-                { id: 'worksheet', icon: '📝', labelAr: 'بنك أوراق العمل والطباعة', labelEn: 'Worksheets Bank' },
-                { id: 'quiz', icon: '🎯', labelAr: 'بنك الاختبارات الذاتية', labelEn: 'Quiz Bank' }
+                { id: 'islamic', icon: '🕌', labelAr: '3. حلقات ومحاضرات العلوم الشرعية', labelEn: '3. Islamic Lectures' }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -7140,7 +7140,16 @@
                       </div>
 
                       {/* Quick Shortcut Buttons in Header (Synchronized across both modes) */}
-                      <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => setHifzWorksheetModalOpen(true)}
+                          className="bg-emerald-900 hover:bg-emerald-850 text-gold-200 border border-gold-400/70 px-3 py-1.5 rounded-xl font-bold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                          title={isRtl ? 'عرض وطباعة سجل المتابعة والتقييم الأسبوعي لحلقة التحفيظ' : 'View and print weekly Hifz evaluation sheet'}
+                        >
+                          <span>📝</span>
+                          <span>{isRtl ? 'سجل متابعة التحفيظ (PDF)' : 'Hifz Evaluation Sheet (PDF)'}</span>
+                        </button>
                         <span className="text-gold-300 font-bold ml-1">{isRtl ? 'انتقال سريع:' : 'Quick:'}</span>
                         {[
                           { name: 'الفاتحة', p: 1 },
@@ -8413,6 +8422,107 @@
                   </>
                 )}
 
+                {/* ================= HIFZ BRANCH PRINTABLE EVALUATION WORKSHEET MODAL ================= */}
+                    {hifzWorksheetModalOpen && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
+                        <div className="bg-white text-slate-900 rounded-3xl max-w-4xl w-full border-4 border-gold-400 shadow-2xl p-4 sm:p-8 my-auto relative max-h-[95vh] overflow-y-auto">
+                          
+                          {/* Top Controls Toolbar */}
+                          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b-2 border-emerald-900/15 no-print">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl">🕋</span>
+                              <div>
+                                <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo">
+                                  {isRtl ? HIFZ_BRANCH_WORKSHEET.titleAr : HIFZ_BRANCH_WORKSHEET.titleEn}
+                                </h3>
+                                <p className="text-xs text-slate-600 font-medium">
+                                  {isRtl ? 'سجل تقييم ومتابعة أسبوعي معتمد لحلقات القرآن الكريم وضبط المتشابهات' : 'Official Weekly Quran Memorization & Mutashabihat Evaluation Sheet'}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => window.print()}
+                                className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 border-2 border-gold-400 px-4 py-2 rounded-xl text-xs sm:text-sm font-black shadow-md flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer"
+                              >
+                                <span>🖨️</span>
+                                <span>{isRtl ? 'طباعة السجل / PDF' : 'Print Sheet / PDF'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setHifzWorksheetModalOpen(false)}
+                                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-black flex items-center justify-center transition border border-slate-300 cursor-pointer"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Worksheet Body */}
+                          <div className="space-y-6 text-right font-cairo">
+                            <div className="border-b-2 border-emerald-900 pb-4 flex items-center justify-between">
+                              <div>
+                                <div className="font-amiri text-2xl font-black text-emerald-950">منصة مِشكاة — سجل متابعة وتقييم التحفيظ القرآني</div>
+                                <div className="text-xs font-bold text-gold-800">الفرع الأول: التحفيظ ومصحف المدينة النبوية • AnubisLand</div>
+                              </div>
+                              <div className="text-center p-2 rounded-2xl border-2 border-gold-400 bg-emerald-950 text-gold-200 text-xs font-bold">
+                                <div>سجل رسمي أسبوعي</div>
+                                <div>حلقات الإتقان ۞</div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-300 text-xs font-bold">
+                              <div>اسم الحافظ: <div className="border-b border-dotted border-slate-400 h-5 mt-1"></div></div>
+                              <div>الحلقة / المسجد: <div className="border-b border-dotted border-slate-400 h-5 mt-1"></div></div>
+                              <div>المقدار (السورة/الصفحة): <div className="border-b border-dotted border-slate-400 h-5 mt-1">صفحة {mushafPageNumber}</div></div>
+                              <div>التاريخ: <div className="border-b border-dotted border-slate-400 h-5 mt-1">____ / ____ / 2026م</div></div>
+                            </div>
+
+                            <div className="border border-slate-300 rounded-2xl overflow-hidden text-xs">
+                              <table className="w-full text-right border-collapse">
+                                <thead>
+                                  <tr className="bg-emerald-950 text-gold-200">
+                                    <th className="p-3 font-bold w-12 text-center">#</th>
+                                    <th className="p-3 font-bold font-cairo">المحور ومعيار الإتقان</th>
+                                    <th className="p-3 font-bold font-cairo w-28 text-center">الدرجة العظمى</th>
+                                    <th className="p-3 font-bold font-cairo w-28 text-center">درجة الطالب</th>
+                                    <th className="p-3 font-bold font-cairo">ملاحظات الشيخ والمعلم</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-200">
+                                  {HIFZ_BRANCH_WORKSHEET.criteria.map((cr, idx) => (
+                                    <tr key={idx} className="hover:bg-slate-50">
+                                      <td className="p-3 text-center font-bold text-slate-400">{idx + 1}</td>
+                                      <td className="p-3 text-emerald-950">
+                                        <div className="font-bold text-xs sm:text-sm">{cr.domain}</div>
+                                        <div className="text-[11px] text-slate-600 mt-0.5 leading-snug">{cr.description}</div>
+                                      </td>
+                                      <td className="p-3 text-center font-black text-slate-800 text-sm">{cr.maxScore}</td>
+                                      <td className="p-3 text-center font-black text-emerald-900 border-x border-slate-200">[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]</td>
+                                      <td className="p-3 text-slate-500 font-medium border-b border-dotted border-slate-200"></td>
+                                    </tr>
+                                  ))}
+                                  <tr className="bg-emerald-50 font-black text-emerald-950">
+                                    <td colSpan="2" className="p-3 text-right">المجموع الكلي النهائي:</td>
+                                    <td className="p-3 text-center">100</td>
+                                    <td className="p-3 text-center border-x border-emerald-300 text-sm font-black">[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]</td>
+                                    <td className="p-3 text-center text-xs text-gold-800">ختم إجازة الورد الأسبوعي ۞</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+
+                            <div className="border-t-2 border-emerald-900 pt-4 flex items-center justify-between text-xs font-bold">
+                              <div>توقيع المعلم المشرف: _______________________</div>
+                              <div>التقدير النهائي: [ ممتاز • جيد جداً • جيد • إعادة تسميع ]</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
               </div>
             )}
             {activeTab === 'tajweed' && (
@@ -8897,11 +9007,12 @@
                               </button>
                               <button
                                 type="button"
-                                onClick={handleTransferTajweedToWorksheet}
-                                className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-3.5 py-2 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition"
+                                onClick={() => setSuwaydWorksheetModalOpen(true)}
+                                className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 border border-gold-400 px-4 py-2 rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer"
+                                title={isRtl ? 'فتح ورقة العمل المخصصة لهذا الدرس للطباعة وتصدير PDF' : 'Open dedicated printable worksheet for this lesson'}
                               >
                                 <span>📝</span>
-                                <span>{isRtl ? 'إرسال لورقة العمل' : 'Send to Worksheet'}</span>
+                                <span>{isRtl ? 'ورقة عمل الدرس (جاهزة للطباعة)' : 'Lesson Worksheet (Print PDF)'}</span>
                               </button>
                             </div>
                           </div>
@@ -9462,6 +9573,287 @@
                             >
                               {isRtl ? 'الشريحة التالية ▶' : 'Next ▶'}
                             </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ================= DEDICATED TAJWEED LESSON PRINTABLE WORKSHEET MODAL ================= */}
+                    {suwaydWorksheetModalOpen && (
+                      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
+                        <div className="bg-white text-slate-900 rounded-3xl max-w-4xl w-full border-4 border-gold-400 shadow-2xl p-4 sm:p-8 my-auto relative max-h-[95vh] overflow-y-auto">
+                          
+                          {/* Top Controls Toolbar (Hidden in Print) */}
+                          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b-2 border-emerald-900/15 no-print">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl">📝</span>
+                              <div>
+                                <h3 className="text-base sm:text-lg font-black text-emerald-950 font-cairo">
+                                  {isRtl ? 'ورقة عمل وتطبيق عملي مخصصة للدرس (جاهزة للطباعة وتصدير PDF)' : 'Dedicated Printable Lesson Worksheet'}
+                                </h3>
+                                <p className="text-xs text-slate-600 font-medium">
+                                  {isRtl ? currentSuwaydLesson.titleAr : currentSuwaydLesson.titleEn}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => window.print()}
+                                className="bg-emerald-900 hover:bg-emerald-950 text-gold-200 border-2 border-gold-400 px-4 py-2 rounded-xl text-xs sm:text-sm font-black shadow-md flex items-center gap-1.5 transition transform active:scale-95 cursor-pointer"
+                              >
+                                <span>🖨️</span>
+                                <span>{isRtl ? 'طباعة ورقة العمل / PDF' : 'Print Worksheet / PDF'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSuwaydWorksheetModalOpen(false)}
+                                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-black flex items-center justify-center transition border border-slate-300 cursor-pointer"
+                                title={isRtl ? 'إغلاق والعودة للدرس' : 'Close and return to lesson'}
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* ================= PRINTABLE WORKSHEET DOCUMENT BODY ================= */}
+                          <div id="tajweed-lesson-printable-worksheet" className="space-y-6 text-right font-cairo">
+                            
+                            {/* Institutional Header */}
+                            <div className="border-b-2 border-emerald-900 pb-4">
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="text-right">
+                                  <div className="font-amiri text-2xl font-black text-emerald-950 leading-none">
+                                    {isRtl ? 'منصة مِشكاة لتعليم القرآن الكريم والتجويد' : 'Mishkah Platform for Quran & Tajweed'}
+                                  </div>
+                                  <div className="text-xs font-bold text-gold-800 mt-1">
+                                    {isRtl ? 'نظام التشغيل الشامل للداعية والمعلم الشرعي • AnubisLand' : "Comprehensive OS for Da'wah & Islamic Educators • AnubisLand"}
+                                  </div>
+                                  <div className="text-[11px] text-slate-500 font-medium mt-0.5">
+                                    {isRtl ? 'رواية حفص عن عاصم من طريق الشاطبية' : 'Hafs from Asim via Shatibiyyah'}
+                                  </div>
+                                </div>
+
+                                <div className="text-center p-2 rounded-2xl border-2 border-gold-400 bg-emerald-950 text-gold-200">
+                                  <div className="font-amiri text-lg font-bold">ورقة تطبيق مدرسي</div>
+                                  <div className="text-[10px] font-bold">نموذج معتمد ۞</div>
+                                </div>
+
+                                <div className="text-left text-xs font-bold text-slate-600">
+                                  <div>كتاب التجويد المصور</div>
+                                  <div>د. أيمن رشدي سويد</div>
+                                  <div className="text-[11px] text-emerald-800 font-bold">{isRtl ? currentSuwaydLesson.suwaydRef : (currentSuwaydLesson.suwaydRefEn || currentSuwaydLesson.suwaydRef)}</div>
+                                </div>
+                              </div>
+
+                              <div className="mt-3 text-center bg-emerald-50 py-2 px-4 rounded-xl border border-emerald-200">
+                                <h2 className="text-lg sm:text-xl font-black text-emerald-950 font-amiri">
+                                  {isRtl ? 'ورقة عمل وتطبيق: ' + currentSuwaydLesson.titleAr : 'Worksheet: ' + currentSuwaydLesson.titleEn}
+                                </h2>
+                                <span className="text-xs font-bold text-emerald-900">
+                                  {isRtl ? currentSuwaydLesson.categoryAr : currentSuwaydLesson.categoryEn} • ⏱️ {isRtl ? currentSuwaydLesson.timingLabelAr : (currentSuwaydLesson.timingLabelEn || currentSuwaydLesson.timingLabelAr)}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Student & Ring Evaluation Grid */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-300 text-xs font-bold">
+                              <div>
+                                <span className="text-slate-500 block mb-0.5">اسم الدارس/الطالب:</span>
+                                <div className="border-b-2 border-dotted border-slate-400 h-6"></div>
+                              </div>
+                              <div>
+                                <span className="text-slate-500 block mb-0.5">الحلقة / المجموعة:</span>
+                                <div className="border-b-2 border-dotted border-slate-400 h-6"></div>
+                              </div>
+                              <div>
+                                <span className="text-slate-500 block mb-0.5">تاريخ المدارسة:</span>
+                                <div className="border-b-2 border-dotted border-slate-400 h-6">____ / ____ / 2026م</div>
+                              </div>
+                              <div>
+                                <span className="text-slate-500 block mb-0.5">الدرجة والتقييم:</span>
+                                <div className="border-b-2 border-dotted border-slate-400 h-6 text-emerald-950 font-black">
+                                  [&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; / 100]
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Section 1: Matn Evidence Box */}
+                            <div className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-300">
+                              <div className="text-xs font-bold text-amber-950 mb-1.5 flex items-center justify-between">
+                                <span className="flex items-center gap-1.5 font-black">
+                                  <span>📜</span>
+                                  <span>{isRtl ? 'الشاهد المعتمد من المتن (تحفة الأطفال / الجزرية):' : 'Authentic Matn Citation:'}</span>
+                                </span>
+                                <span className="text-[10px] bg-amber-200/80 px-2 py-0.5 rounded text-amber-950 font-bold">ضبط تام بالشكل</span>
+                              </div>
+                              <div className="font-naskh text-sm sm:text-base text-emerald-950 font-bold leading-relaxed text-center whitespace-pre-line">
+                                {currentSuwaydLesson.matnVerseAr}
+                              </div>
+                            </div>
+
+                            {/* Section 2: Canonical Definition & Biomechanical Mechanism */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/40">
+                                <div className="text-xs font-black text-emerald-950 mb-1 flex items-center gap-1">
+                                  <span>💎</span>
+                                  <span>{isRtl ? 'التعريف العلمي المعتمد:' : 'Canonical Definition:'}</span>
+                                </div>
+                                <p className="text-xs text-slate-800 leading-relaxed font-medium">
+                                  {isRtl ? currentSuwaydLesson.definitionAr : (currentSuwaydLesson.definitionEn || currentSuwaydLesson.definitionAr)}
+                                </p>
+                              </div>
+
+                              <div className="p-3.5 rounded-2xl border border-slate-200 bg-white">
+                                <div className="text-xs font-black text-emerald-950 mb-1 flex items-center gap-1">
+                                  <span>⚙️</span>
+                                  <span>{isRtl ? 'آلية النطق وميكانيكية العضو:' : 'Biomechanical Mechanism:'}</span>
+                                </div>
+                                <p className="text-xs text-slate-800 leading-relaxed font-medium">
+                                  {isRtl ? currentSuwaydLesson.mechanismAr : (currentSuwaydLesson.mechanismEn || currentSuwaydLesson.mechanismAr)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Section 3: Authentic Illustrated Plate Reference */}
+                            {(() => {
+                              const lessonPlates = getSuwaydPlatesForLesson(currentSuwaydLesson.id);
+                              const currentPlate = lessonPlates.find(p => p.id === activeSuwaydPlateId) || lessonPlates[0] || SUWAYD_PLATES[0];
+                              return (
+                                <div className="p-3.5 rounded-2xl border-2 border-gold-300 bg-white">
+                                  <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-slate-200 text-xs">
+                                    <span className="font-black text-emerald-950 flex items-center gap-1.5">
+                                      <span>🖼️</span>
+                                      <span>{isRtl ? 'اللوحة التعليمية والتشريحية المعتمدة (د. أيمن رشدي سويد):' : 'Official Illustrated Anatomical Plate:'}</span>
+                                      <span className="text-gold-700 font-bold">({isRtl ? currentPlate.titleAr : currentPlate.titleEn})</span>
+                                    </span>
+                                    <span className="text-[11px] font-bold text-slate-600">
+                                      {isRtl ? `ص ${currentPlate.pageInBook} • مجلد 1` : `p. ${currentPlate.pageInBook} • Vol. 1`}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex flex-col sm:flex-row items-center gap-4">
+                                    <div className="w-full sm:w-48 h-40 flex items-center justify-center p-1 bg-slate-50 rounded-xl border border-slate-200 shrink-0 overflow-hidden">
+                                      <img
+                                        src={`images/tajweed/${currentPlate.filename}`}
+                                        onError={(e) => {
+                                          e.target.src = `https://image.slidesharecdn.com/1-160316105247/85/1-${currentPlate.slideNum}-638.jpg`;
+                                        }}
+                                        alt={currentPlate.titleAr}
+                                        className="max-h-full max-w-full object-contain rounded"
+                                      />
+                                    </div>
+                                    <div className="text-xs space-y-2 text-slate-800 leading-relaxed">
+                                      <p className="font-medium">
+                                        <strong>التوجيه الصوتي للوحة:</strong> {isRtl ? currentPlate.descAr : currentPlate.descEn}
+                                      </p>
+                                      <div className="p-2 bg-amber-50 rounded-lg border border-amber-200 text-[11px] text-amber-950 font-bold">
+                                        📌 <strong>واجب الدارس العملي:</strong> تأمل الموضع الدقيق لتصادم أو تباعد العضو أثناء النطق، واضبط المخرج دون زيادة أو نقصان.
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })()}
+
+                            {/* Section 4: Quranic Verification & Practical Exercises Table */}
+                            <div className="border border-emerald-900/30 rounded-2xl overflow-hidden">
+                              <div className="bg-emerald-950 text-gold-200 px-4 py-2 font-bold text-xs flex items-center justify-between">
+                                <span className="flex items-center gap-1.5 font-black">
+                                  <span>📖</span>
+                                  <span>جدول التطبيق واستخراج الأحكام بالرسم العثماني المصحفي:</span>
+                                </span>
+                                <span className="text-[11px] text-emerald-200 font-medium">
+                                  {currentSuwaydLesson.examples.length} مواضع قرآنية معتمدة
+                                </span>
+                              </div>
+
+                              <table className="w-full text-right border-collapse text-xs">
+                                <thead>
+                                  <tr className="bg-emerald-50 text-emerald-950 border-b border-emerald-200">
+                                    <th className="p-2.5 w-10 text-center font-bold">#</th>
+                                    <th className="p-2.5 font-bold font-cairo">الكلمة القرآنية</th>
+                                    <th className="p-2.5 font-bold font-cairo w-28">الموضع</th>
+                                    <th className="p-2.5 font-bold font-cairo">الحكم التجويدي والتوجيه الصوتي المعتمد</th>
+                                    <th className="p-2.5 font-bold font-cairo w-36 text-center">تطبيق الطالب / الدرجة</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-200">
+                                  {currentSuwaydLesson.examples.map((ex, idx) => (
+                                    <tr key={idx} className="hover:bg-amber-50/30 transition">
+                                      <td className="p-2.5 text-center text-slate-500 font-bold">{idx + 1}</td>
+                                      <td className="p-2.5 font-quran text-xl text-emerald-950 font-bold leading-none select-all">
+                                        <span className="bg-amber-100/90 text-amber-950 px-2.5 py-1 rounded-lg border border-amber-300 inline-block">
+                                          {ex.word}
+                                        </span>
+                                      </td>
+                                      <td className="p-2.5 text-slate-700 font-bold font-cairo text-[11px]">
+                                        {isRtl ? ex.surah : (ex.surahEn || ex.surah)}
+                                      </td>
+                                      <td className="p-2.5 text-emerald-900 font-medium font-cairo text-xs leading-snug">
+                                        {isRtl ? ex.note : (ex.noteEn || ex.note)}
+                                      </td>
+                                      <td className="p-2.5 text-center border-r border-slate-200">
+                                        <div className="flex items-center justify-center gap-1 text-[11px] text-slate-400 font-bold">
+                                          <span>[&nbsp;&nbsp;&nbsp;&nbsp; / 5]</span>
+                                          <span className="text-emerald-700">✓</span>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Section 5: Common Mistakes & Quiz Question for Ring Discussion */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="p-3.5 rounded-2xl border border-rose-300 bg-rose-50/60 text-xs">
+                                <div className="font-black text-rose-950 mb-1 flex items-center gap-1.5">
+                                  <span>⚠️</span>
+                                  <span>تنبيهات وأخطاء شائعة يجب تجنبها:</span>
+                                </div>
+                                <p className="text-rose-950 font-medium leading-relaxed whitespace-pre-line">
+                                  {isRtl ? currentSuwaydLesson.commonMistakesAr : (currentSuwaydLesson.commonMistakesEn || currentSuwaydLesson.commonMistakesAr)}
+                                </p>
+                              </div>
+
+                              <div className="p-3.5 rounded-2xl border border-amber-300 bg-amber-50/60 text-xs">
+                                <div className="font-black text-amber-950 mb-1 flex items-center gap-1.5">
+                                  <span>🎯</span>
+                                  <span>سؤال تقييمي للمناقشة واختبار الفهم:</span>
+                                </div>
+                                <p className="text-slate-900 font-bold leading-relaxed mb-2">
+                                  {isRtl ? currentSuwaydLesson.quizQuestions[0]?.qAr : (currentSuwaydLesson.quizQuestions[0]?.qEn || currentSuwaydLesson.quizQuestions[0]?.qAr)}
+                                </p>
+                                <div className="border-b border-dotted border-slate-400 pt-3">
+                                  <span className="text-[10px] text-slate-400 font-bold">إجابة الدارس: __________________________________________________</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Section 6: Teacher Notes & Official Seal / Signature */}
+                            <div className="border-t-2 border-emerald-900 pt-4 flex flex-wrap items-center justify-between gap-4 text-xs font-bold text-slate-700">
+                              <div className="flex-1 min-w-[240px]">
+                                <span className="block mb-1 text-emerald-950 font-black">ملاحظات وتوجيهات المعلم للدارس:</span>
+                                <div className="border-b-2 border-dotted border-slate-300 h-6"></div>
+                                <div className="border-b-2 border-dotted border-slate-300 h-6 mt-1"></div>
+                              </div>
+
+                              <div className="flex items-center gap-8">
+                                <div className="text-center">
+                                  <span className="block text-slate-500 mb-2">توقيع المعلم المشرف:</span>
+                                  <div className="border-b-2 border-slate-800 w-32 h-6"></div>
+                                </div>
+
+                                <div className="w-20 h-20 rounded-full border-2 border-dashed border-gold-600 flex flex-col items-center justify-center text-center text-[10px] font-black text-emerald-950 p-1 bg-amber-50/50">
+                                  <span>خاتم الإجازة</span>
+                                  <span className="text-gold-600 text-base leading-none">۞</span>
+                                  <span>والإتقان</span>
+                                </div>
+                              </div>
+                            </div>
+
                           </div>
                         </div>
                       </div>
