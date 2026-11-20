@@ -5756,6 +5756,7 @@
       const [islamicQuizAnswers, setIslamicQuizAnswers] = useState({});
       const [islamicQuizSubmitted, setIslamicQuizSubmitted] = useState(false);
       const [islamicWorksheetViewMode, setIslamicWorksheetViewMode] = useState('student'); // 'student' or 'teacher'
+      const [islamicWorksheetAnswers, setIslamicWorksheetAnswers] = useState({});
       const [extractedEvidences, setExtractedEvidences] = useState(() => {
         try {
           const s = localStorage.getItem('mishkah_active_islamic_evidences');
@@ -6063,20 +6064,51 @@
             secScripture = THEMATIC_SCRIPTURES[idx % THEMATIC_SCRIPTURES.length];
           }
 
-          // B. Varied Pedagogical Worksheet Question (Never a repetitive template!)
-          let studentQ = '';
+          // B. Multiple-Choice Pedagogical Worksheet & Quiz Synthesis (100% Multiple Choice, No Essay Prompts!)
+          let coreCorrectStatement = secBullets[0] || candidateSentences[0] || modelAnswer;
+          if (coreCorrectStatement.length > 95) coreCorrectStatement = coreCorrectStatement.substring(0, 95) + '...';
+
+          // Tailored distractors based on section context (no hardcoded repeated distractors!)
+          const distractorPool = [
+            'الخلط بين تحريف المؤسسات الكنسية وبين الدين الحق المستند للوحي الإلهي المعصوم',
+            'تحكيم العقل المجرد وتقديمه على قطعي الوحي بدعوى مسايرة التطور المعرفي',
+            'نزع القداسة عن الشرائع واعتبار الأحكام الدينية مرحلة تاريخية تجاوزها العصر',
+            'الاعتماد على الظنون والمغالطات المنطقية دون الالتزام بشروط الاستدلال والبرهان',
+            'اعتبار المعرفة الإنسانية مكتفية بذاتها ومستغنية عن هداية النبوات والرسالات',
+            'حصر المسألة في بُعد تاريخي عابر دون إدراك آثارها الممتدة في واقعنا المعاصر',
+            'فصل المقاصد والتحسينيات عن الأصول والنصوص القطعية المحكمة',
+            'الانقياد للأهواء والتبعية الثقافية دون تمحيص أصولها الفلسفية'
+          ];
+
+          // Formulate Multiple-Choice Question for Worksheet Table
           const qType = idx % 5;
+          let worksheetQPrompt = '';
           if (qType === 0) {
-            studentQ = `في ضوء محور (${cleanSecTitle})؛ بيّن القضية المركزية التي يُقررها الشرح، وما وجه الخلل المنهجي الذي حذّر منه؟`;
+            worksheetQPrompt = `ما النتيجة المركزية أو الحكم الشرعي المعتمد في محور: (${cleanSecTitle})؟`;
           } else if (qType === 1) {
-            studentQ = `حرّر المفهوم الأساسي لـ (${cleanSecTitle})؛ وما هو الأثر المعرفي والسلوكي المترتب على إدراكه بدقة؟`;
+            worksheetQPrompt = `وفقاً لمدارسة محور (${cleanSecTitle})؛ ما الضابط الشرعي الأساسي الذي يقرره النص؟`;
           } else if (qType === 2) {
-            studentQ = `استنبط من مدارسة (${cleanSecTitle}) القاعدة المنهجية التي تُميّز الموقف الإسلامي عن غيره من التيارات؟`;
+            worksheetQPrompt = `ما الموقف المنضبط في شأن (${cleanSecTitle}) مقارنة بالخلل المنهجي المعاصر؟`;
           } else if (qType === 3) {
-            studentQ = `ما دلالة ما ذُكر في محور (${cleanSecTitle}) على ضرورة الاعتصام بالوحي ومحاربة الأهواء في واقعنا المعاصر؟`;
+            worksheetQPrompt = `ما التطبيق التربوي والسلوكي الأبرز المستفاد من مدارسة (${cleanSecTitle})؟`;
           } else {
-            studentQ = `كيف تُوظّف الضوابط والنتائج المستفادة من (${cleanSecTitle}) في دفع الشبهات وبناء الوعي الفكري الرشيد؟`;
+            worksheetQPrompt = `كيف يُوجَّه الاستدلال الصحيح ويبنى الوعي الرشيد في قضية (${cleanSecTitle})؟`;
           }
+
+          // Worksheet options with shuffled keys (a, b, c)
+          const targetWsCorrectPos = ['a', 'b', 'c'][idx % 3];
+          const wsDistractors = [
+            distractorPool[(idx * 2) % distractorPool.length],
+            distractorPool[(idx * 2 + 1) % distractorPool.length]
+          ];
+          let wsDIdx = 0;
+          const wsOptionsList = ['a', 'b', 'c'].map(optKey => {
+            if (optKey === targetWsCorrectPos) {
+              return { id: optKey, textAr: coreCorrectStatement, label: optKey === 'a' ? 'أ' : (optKey === 'b' ? 'ب' : 'ج') };
+            } else {
+              return { id: optKey, textAr: wsDistractors[wsDIdx++] || 'مخالفة الأصول المنهجية الثابتة', label: optKey === 'a' ? 'أ' : (optKey === 'b' ? 'ب' : 'ج') };
+            }
+          });
 
           // C. Varied Practical & Behavioral Impact (Never a repetitive template!)
           let practicalImp = '';
@@ -6102,20 +6134,24 @@
             teacherGuidanceAr: modelAnswer,
             teacherFocusAr: modelAnswer,
             keyTakeawayAr: practicalImp,
-            studentQuestion: studentQ,
+            studentQuestion: worksheetQPrompt,
             practicalImpact: practicalImp,
             scripture: secScripture,
             bulletPoints: secBullets,
             talkingPoints: secTalkingPoints
           });
 
-          // Worksheet Row
+          // Worksheet Row (100% Multiple Choice with Interactive Options)
           worksheetRows.push({
             num: secNum,
             topic: sec.title,
             scripture: secScripture,
-            studentQuestion: studentQ,
-            teacherAnswer: modelAnswer,
+            questionPrompt: worksheetQPrompt,
+            studentQuestion: worksheetQPrompt,
+            options: wsOptionsList,
+            correctOptionId: targetWsCorrectPos,
+            teacherAnswer: coreCorrectStatement,
+            teacherRationale: modelAnswer,
             practicalImpact: practicalImp,
             maxScore: 5
           });
@@ -6140,21 +6176,6 @@
           });
 
           // D. Dynamic, Engaging Quiz Question with Content-Specific Options and Shuffled Keys (NEVER repetitive!)
-          let coreCorrectStatement = secBullets[0] || candidateSentences[0] || modelAnswer;
-          if (coreCorrectStatement.length > 95) coreCorrectStatement = coreCorrectStatement.substring(0, 95) + '...';
-
-          // Tailored distractors based on section context (no hardcoded repeated distractors!)
-          const distractorPool = [
-            'الخلط بين تحريف المؤسسات الكنسية وبين الدين الحق المستند للوحي الإلهي المعصوم',
-            'تحكيم العقل المجرد وتقديمه على قطعي الوحي بدعوى مسايرة التطور المعرفي',
-            'نزع القداسة عن الشرائع واعتبار الأحكام الدينية مرحلة تاريخية تجاوزها العصر',
-            'الاعتماد على الظنون والمغالطات المنطقية دون الالتزام بشروط الاستدلال والبرهان',
-            'اعتبار المعرفة الإنسانية مكتفية بذاتها ومستغنية عن هداية النبوات والرسالات',
-            'حصر المسألة في بُعد تاريخي عابر دون إدراك آثارها الممتدة في واقعنا المعاصر',
-            'فصل المقاصد والتحسينيات عن الأصول والنصوص القطعية المحكمة',
-            'الانقياد للأهواء والتبعية الثقافية دون تمحيص أصولها الفلسفية'
-          ];
-
           const d1 = distractorPool[(idx * 3) % distractorPool.length];
           const d2 = distractorPool[(idx * 3 + 1) % distractorPool.length];
           const d3 = distractorPool[(idx * 3 + 2) % distractorPool.length];
@@ -6261,6 +6282,9 @@
         setIslamicData(generatedData);
         setActiveIslamicStage(2);
         setStage3ActiveSlide(0);
+        setIslamicQuizAnswers({});
+        setIslamicQuizSubmitted(false);
+        setIslamicWorksheetAnswers({});
         showToast(isRtl ? `تم تحليل المحاضرة واستخلاص ${processedSections.length} محوراً تفصيلياً مع عناصر العرض بنجاح ✨` : `Parsed lecture into ${processedSections.length} detailed modules ✨`);
       }
 
@@ -6677,6 +6701,18 @@
         text = text.replace(/\bيف\b/g, 'في');
         text = text.replace(/\bمل\b/g, 'لم');
 
+        // 5.5. Document-wide detection for reversed visual-order Arabic (PDFs encoded in visual LTR order)
+        const taaStartMatches = (text.match(/(?:^|[\s\p{P}])ة[\u0600-\u06FF]{2,}/gu) || []).length;
+        const reversedTokenMatches = (text.match(/(?:^|[\s\p{P}])(?:هللا|مسب|ذوعأ|ناطيشرلا|ناطيشتلا|ميحرلا|نمحرلا|ىلإ|ثحبملا|قيبطتلا|رصاعملا|نيمألا)(?:$|[\s\p{P}])/gu) || []).length;
+        const isDocReversed = (taaStartMatches >= 2 || reversedTokenMatches >= 2);
+
+        if (isDocReversed) {
+          const bracketPairs = { '(': ')', ')': '(', '[': ']', ']': '[', '{': '}', '}': '{', '<': '>', '>': '<', '«': '»', '»': '«', '﴿': '﴾', '﴾': '﴿' };
+          text = text.split(/\r?\n/).map(line => {
+            return line.split('').reverse().join('').replace(/[()«»\[\]{}<>﴿﴾]/g, m => bracketPairs[m] || m);
+          }).join('\n');
+        }
+
         // 6. Filter lines to discard Table of Contents remnants
         const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
         const cleanLines = [];
@@ -6812,9 +6848,9 @@
           const evs = extractEvidencesAndProofs(cleanExtracted);
           setExtractedEvidences(evs);
 
-          // Infer topic title
+          // Infer topic title from clean sanitized text
           const cleanName = fname.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
-          const firstLine = extractedText.split('\n').map(l => l.trim()).find(l => l.length > 5 && l.length < 100);
+          const firstLine = cleanExtracted.split('\n').map(l => l.trim()).find(l => l.length > 5 && l.length < 100);
           const suggestedTopic = firstLine || cleanName;
           setLessonTopic(suggestedTopic);
 
@@ -6878,6 +6914,10 @@
         setLessonTopic('');
         setCustomSubjectCategory('');
         setUploadedFileInfo(null);
+        setIslamicQuizAnswers({});
+        setIslamicQuizSubmitted(false);
+        setIslamicWorksheetAnswers({});
+        setActiveIslamicStage(1);
         try {
           localStorage.removeItem('mishkah_active_islamic_data');
         } catch (e) {}
@@ -7423,10 +7463,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v69.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v69.0 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v72.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v72.0 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v69.0' : 'v69.0'}</span>
+                  <span>{isRtl ? 'الإصدار v72.0' : 'v72.0'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -11985,8 +12025,11 @@
                         <button
                           type="button"
                           onClick={() => {
-                            const el = document.getElementById('stage-islamic-4');
-                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            setActiveIslamicStage(4);
+                            setTimeout(() => {
+                              const el = document.getElementById('stage-islamic-4');
+                              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }, 50);
                           }}
                           className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-3.5 py-2 rounded-xl text-xs font-black shadow-xs flex items-center gap-1.5 transition cursor-pointer"
                         >
@@ -11996,8 +12039,11 @@
                         <button
                           type="button"
                           onClick={() => {
-                            const el = document.getElementById('stage-islamic-5');
-                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            setActiveIslamicStage(5);
+                            setTimeout(() => {
+                              const el = document.getElementById('stage-islamic-5');
+                              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }, 50);
                           }}
                           className="bg-emerald-800 hover:bg-emerald-700 text-gold-200 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
                         >
@@ -12803,8 +12849,8 @@
                               <th className="p-3 w-1/4 font-bold">{isRtl ? 'المسألة الشرعية / محور الدرس' : 'Topic / Issue'}</th>
                               <th className="p-3 font-bold">
                                 {islamicWorksheetViewMode === 'teacher' 
-                                  ? (isRtl ? 'نموذج الإجابة والتأصيل الشرعي المعتمد (دليل المعلم)' : 'Teacher Answer Key & Evidences')
-                                  : (isRtl ? 'السؤال المطروح ومساحة إجابة الدارس' : 'Student Question & Response Area')}
+                                  ? (isRtl ? 'سؤال الاختيار من متعدد مع مفتاح الحل المعتمد (دليل المعلم)' : 'Multiple Choice Question & Answer Key')
+                                  : (isRtl ? 'سؤال الاختيار من متعدد وخيارات الإجابة (اختر الإجابة الصحيحة)' : 'Multiple Choice Question & Options')}
                               </th>
                               <th className="p-3 w-1/4 font-bold">{isRtl ? 'الأثر السلوكي والتربوي المستهدف' : 'Behavioral & Spiritual Impact'}</th>
                             </tr>
@@ -12831,25 +12877,81 @@
                                   )}
                                 </td>
                                 <td className="p-3 text-slate-700 font-amiri leading-relaxed">
-                                  {islamicWorksheetViewMode === 'teacher' ? (
-                                    <div className="bg-amber-50/60 p-2.5 rounded-xl border border-amber-200/70">
-                                      <div className="font-bold text-amber-950 mb-1 text-[11px]">
-                                        {row.studentQuestion}
-                                      </div>
-                                      <div className="text-slate-800 text-xs">
-                                        <strong>{isRtl ? 'نموذج الإجابة:' : 'Answer:'}</strong> {row.teacherAnswer}
-                                      </div>
+                                  <div className="space-y-2">
+                                    <div className="font-bold text-emerald-950 font-cairo text-xs sm:text-[13px] flex items-center gap-1.5">
+                                      <span className="w-5 h-5 rounded-full bg-emerald-900 text-gold-200 text-[10px] font-black flex items-center justify-center shrink-0">
+                                        {rIdx + 1}
+                                      </span>
+                                      <span>{row.questionPrompt || row.studentQuestion}</span>
                                     </div>
-                                  ) : (
-                                    <div className="space-y-2">
-                                      <div className="font-bold text-emerald-950">
-                                        {row.studentQuestion}
+
+                                    {islamicWorksheetViewMode === 'teacher' ? (
+                                      <div className="bg-amber-50/70 p-3 rounded-xl border border-amber-200/80 space-y-2">
+                                        <div className="text-xs space-y-1.5">
+                                          {(row.options || [
+                                            { id: 'a', label: 'أ', textAr: row.teacherAnswer || 'القول المعتمد في المسألة' },
+                                            { id: 'b', label: 'ب', textAr: 'خلاف الظاهر ومجانبة الأصل المنهجي' },
+                                            { id: 'c', label: 'ج', textAr: 'مخالفة الأصول المنهجية الثابتة' }
+                                          ]).map(opt => {
+                                            const isCorrect = opt.id === (row.correctOptionId || 'a');
+                                            return (
+                                              <div 
+                                                key={opt.id} 
+                                                className={'p-2 rounded-lg text-xs flex items-center gap-2 border ' + (
+                                                  isCorrect 
+                                                    ? 'bg-emerald-100/90 border-emerald-400 text-emerald-950 font-bold shadow-xs' 
+                                                    : 'bg-white/80 border-slate-200 text-slate-600 opacity-70'
+                                                )}
+                                              >
+                                                <span className={'w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ' + (
+                                                  isCorrect ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-700'
+                                                )}>
+                                                  {opt.label || opt.id.toUpperCase()}
+                                                </span>
+                                                <span className="flex-1">{opt.textAr || opt.text}</span>
+                                                {isCorrect && <span className="text-emerald-800 text-[11px] font-black">✓ الإجابة المعتمدة</span>}
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                        <div className="text-slate-800 text-xs pt-1.5 border-t border-amber-200/60">
+                                          <strong className="text-amber-950">التأصيل والتعليل العلمي: </strong> {row.teacherRationale || row.teacherAnswer}
+                                        </div>
                                       </div>
-                                      <div className="border border-dashed border-slate-300 rounded-xl p-3 bg-slate-50/40 text-slate-400 text-[11px] min-h-[50px]">
-                                        {isRtl ? '.........................................................................................................................................' : 'Write your answer here...'}
+                                    ) : (
+                                      <div className="space-y-1.5">
+                                        {(row.options && row.options.length > 0 ? row.options : [
+                                          { id: 'a', label: 'أ', textAr: row.teacherAnswer || 'القول المعتمد في المسألة' },
+                                          { id: 'b', label: 'ب', textAr: 'خلاف الظاهر ومجانبة الأصل المنهجي' },
+                                          { id: 'c', label: 'ج', textAr: 'مخالفة الأصول المنهجية الثابتة' }
+                                        ]).map(opt => {
+                                          const isSelected = (islamicWorksheetAnswers[row.num || rIdx + 1] === opt.id);
+                                          return (
+                                            <div
+                                              key={opt.id}
+                                              onClick={() => setIslamicWorksheetAnswers(prev => ({ ...prev, [row.num || rIdx + 1]: opt.id }))}
+                                              className={'p-2 sm:p-2.5 rounded-xl border text-xs flex items-center gap-2 cursor-pointer transition select-none ' + (
+                                                isSelected
+                                                  ? 'bg-emerald-900 text-gold-200 border-gold-400 font-bold shadow-xs'
+                                                  : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
+                                              )}
+                                            >
+                                              <span className={'w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ' + (
+                                                isSelected ? 'bg-gold-400 text-emerald-950' : 'bg-slate-200 text-slate-700'
+                                              )}>
+                                                {opt.label || opt.id.toUpperCase()}
+                                              </span>
+                                              <span className="flex-1 font-amiri text-xs sm:text-[13px] leading-snug">{opt.textAr || opt.text}</span>
+                                              <span className="no-print">
+                                                {isSelected ? '✓' : '○'}
+                                              </span>
+                                              <span className="hidden print:inline-block font-mono text-sm ml-1">[ ]</span>
+                                            </div>
+                                          );
+                                        })}
                                       </div>
-                                    </div>
-                                  )}
+                                    )}
+                                  </div>
                                 </td>
                                 <td className="p-3 text-slate-600 font-amiri leading-relaxed">
                                   <span className="text-emerald-900 font-bold">🎯 </span>
