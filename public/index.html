@@ -6198,17 +6198,18 @@
         let lectureOpeningPreamble = null;
         if (processedSections.length > 1) {
           const first = processedSections[0];
-          const firstText = (first.title + ' ' + first.lines.slice(0, 15).join(' ')).trim();
-          const hasOpeningDua = /أعوذ بالله|اعوذ بالله|بسم الله|الحمد لله|اللهم علمنا|اللهم ارزقنا|والصلاة والسلام على رسول الله/.test(firstText);
-          const isNotFormalTeachingModule = !first.isFormalHeading || first.title.includes('مقدمة') || first.title.includes('تمهيد') || first.title.includes('افتتاح') || first.title.includes('قانون التأسيس') || first.title === topic;
+          const firstText = (first.title + ' ' + first.lines.slice(0, 20).join(' ')).trim();
+          const hasOpeningDua = /أعوذ بالله|اعوذ بالله|بسم الله|الحمد لله|اللهم علمنا|اللهم ارزقنا|والصلاة والسلام|رسول الله|أفرغ علينا|ثبت أقدامنا/.test(firstText);
+          const isNotFormalModule = !first.isFormalHeading || first.title.includes('مقدمة') || first.title.includes('تمهيد') || first.title.includes('افتتاح') || first.title.includes('قانون التأسيس') || first.title.includes('كتابي') || first.title === topic;
 
-          if (hasOpeningDua && isNotFormalTeachingModule) {
+          if (hasOpeningDua || (isNotFormalModule && first.lines.some(l => /أعوذ بالله|بسم الله|الحمد لله|اللهم/.test(l)))) {
+            const duaLines = first.lines.filter(l => /أعوذ بالله|بسم الله|الحمد لله|اللهم|ربنا|علمنا|ارزقنا|انفعنا|والصلاة والسلام|رسول الله|أفرغ علينا|ثبت أقدامنا|انصرنا|عافنا|أصلحنا/.test(l));
             lectureOpeningPreamble = {
               title: 'افتتاحية المجلس والدعاء المأثور',
               lines: first.lines,
-              duaExcerpt: first.lines.filter(l => /اللهم|ربنا|بسم الله|الحمد لله|أعوذ بالله|انفعنا/.test(l)).join(' ')
+              duaExcerpt: duaLines.join(' ') || first.lines.slice(0, 8).join(' ')
             };
-            processedSections.shift(); // Remove from instructional modules so it never becomes a question or worksheet row!
+            processedSections.shift(); // Remove from instructional modules so it never becomes an instructional card or worksheet row!
           }
         }
 
@@ -6544,6 +6545,7 @@
           quizQuestions: quizList,
           evidences: allEvidences,
           whatsAppKit: dynamicWhatsAppSummary,
+          openingPreamble: lectureOpeningPreamble,
           discussionPrompts: [
             `ما هو أثر تعظيم مرجعية الوحي وسلطان النص في صيانة الفكر المعاصر؟`,
             `كيف نطبق الضوابط والقواعد المستفادة من (${topic}) في واقعنا وحواراتنا؟`
@@ -7049,84 +7051,142 @@
         text = text.replace(/_{3,}/g, ' ');
         text = text.replace(/[\-]{4,}/g, ' ');
 
-        // 5. Correct common Arabic PDF/OCR reversed or broken ligatures
-        text = text.replace(/\bامل(?=[أ-ي])/g, 'الم');
-        text = text.replace(/\bاحل(?=[أ-ي])/g, 'الح');
-        text = text.replace(/\bإبل\b/g, 'إلى');
-        text = text.replace(/\bأمهية\b/g, 'أهمية');
-        text = text.replace(/\bألوائل\b/g, 'الأوائل');
-        text = text.replace(/\bاختاالف\b/g, 'اختلاف');
-        text = text.replace(/\bاختا/g, 'اخت');
-        text = text.replace(/\bوهللا\b/g, 'والله');
-        text = text.replace(/\bكالم\b/g, 'كلام');
-        text = text.replace(/\bيف\b/g, 'في');
-        text = text.replace(/\bمل\b/g, 'لم');
-
+        // 5. Systemic Arabic Sacred Names & Inversion Normalization (Reversed PDF font ligatures)
         // Clean reversed or broken PBUH ligatures and common mis-encodings
         text = text.replace(/ملسو\s*هيلع\s*(?:هللا|الله)\s*ىلص/g, 'صلى الله عليه وسلم');
+        text = text.replace(/صلى\s*ه\s*للا\s*علي[هة]\s*وسلم/g, 'صلى الله عليه وسلم');
         text = text.replace(/صلى\s*ه\s*للا/g, 'صلى الله');
-        text = text.replace(/الحمد\s*(?:هلل|لله)والصالة/g, 'الحمد لله والصلاة');
-        text = text.replace(/الحمد\s*هلل/g, 'الحمد لله');
-        text = text.replace(/هللوالصالة/g, ' لله والصلاة');
-        text = text.replace(/والسامعلى/g, ' والسلام على ');
-        text = text.replace(/رسو\s*لهللا/g, 'رسول الله');
+        text = text.replace(/رحمه\s*ه\s*للا/g, 'رحمه الله');
+
+        // Sacred Names (Replace 'هللا' BEFORE 'هلل'!)
+        text = text.replace(/بسم\s*هللا/g, 'بسم الله');
+        text = text.replace(/بسمهلالا/g, 'بسم الله ');
         text = text.replace(/رسول\s*هللا/g, 'رسول الله');
-        text = text.replace(/ورسو\s*له\b/g, 'ورسوله');
+        text = text.replace(/رسو\s*لهللا/g, 'رسول الله');
         text = text.replace(/كتاب\s*هللا/g, 'كتاب الله');
         text = text.replace(/دين\s*هللا/g, 'دين الله');
         text = text.replace(/سبيل\s*هللا/g, 'سبيل الله');
-        text = text.replace(/بسم\s*هللا/g, 'بسم الله');
-        text = text.replace(/بسمهلالا/g, 'بسم الله ');
+        text = text.replace(/بيت\s*هللا/g, 'بيت الله');
+        text = text.replace(/أمر\s*هللا/g, 'أمر الله');
+        text = text.replace(/نهى\s*هللا/g, 'نهى الله');
+        text = text.replace(/رحمة\s*هللا/g, 'رحمة الله');
+        text = text.replace(/قدرة\s*هللا/g, 'قدرة الله');
+        text = text.replace(/عظمة\s*هللا/g, 'عظمة الله');
+        text = text.replace(/إلا\s*هللا/g, 'إلا الله');
         text = text.replace(/باهلل/g, 'بالله');
         text = text.replace(/وهللا/g, 'والله');
         text = text.replace(/فهلل/g, 'فلله');
         text = text.replace(/هللا/g, 'الله');
-        text = text.replace(/(?:^|\s)هلل(?=[\s،\.؛:]|$)/g, ' لله ');
+
+        // Replace 'هلل' -> 'لله' when standalone or in established Islamic formulas
+        text = text.replace(/الحمد\s*(?:هلل|لله)\s*والصالة/g, 'الحمد لله والصلاة');
+        text = text.replace(/الحمد\s*هلل/g, 'الحمد لله');
+        text = text.replace(/هللوالصالة/g, ' لله والصلاة');
+        text = text.replace(/والسامعلى/g, ' والسلام على ');
+        text = text.replace(/الاستسلام\s*هلل/g, 'الاستسلام لله');
+        text = text.replace(/االستسالم\s*هلل/g, 'الاستسلام لله');
+        text = text.replace(/وجهه\s*هلل/g, 'وجهه لله');
+        text = text.replace(/خالصة\s*هلل/g, 'خالصة لله');
+        text = text.replace(/الحب\s*هلل/g, 'الحب لله');
+        text = text.replace(/(?:^|[\s(\[«،.؛!؟:—\-])هلل(?=[\s)\]»،.؛!؟:—\-]|$)/gu, ' لله ');
         text = text.replace(/اعوذ/g, 'أعوذ');
-        text = text.replace(/الخالصكوأ\s*فرغعل\s*ينا/g, 'الخالص لك وأفرغ علينا');
-        text = text.replace(/فرغعل\s*ينا/g, 'أفرغ علينا');
-        text = text.replace(/ًصبرا/g, 'صبراً');
-        text = text.replace(/بماعلمتنا/g, 'بما علمتنا');
-        text = text.replace(/الله به هو التوحيد/g, 'أعظم ما أمر الله به هو التوحيد');
 
-        // Alif-Lam Decomposed Ligatures
-        text = text.replace(/اإل/g, 'الإ').replace(/اإ/g, 'الإ').replace(/األ/g, 'الأ').replace(/اأ/g, 'الأ').replace(/اآل/g, 'الآ').replace(/اآ/g, 'الآ');
-
-        // Systemic Reversed Lam-Alif Inversions (PDF font ligature misencodings)
+        // Specific high-frequency decomposed / inverted PDF terms (NEVER use \b with Arabic!)
+        text = text.replace(/االستسالم/g, 'الاستسلام');
+        text = text.replace(/واالستسالم/g, 'والاستسلام');
+        text = text.replace(/الاستسالم/g, 'الاستسلام');
+        text = text.replace(/واالنقيلد/g, 'والانقياد');
+        text = text.replace(/االنقيلد/g, 'الانقياد');
+        text = text.replace(/واالنقياد/g, 'والانقياد');
+        text = text.replace(/االنقياد/g, 'الانقياد');
+        text = text.replace(/الإس\s*الم/g, 'الإسلام');
+        text = text.replace(/الإسالم/g, 'الإسلام');
+        text = text.replace(/باإلسالم/g, 'بالإسلام');
+        text = text.replace(/بالإسالم/g, 'بالإسلام');
+        text = text.replace(/إسالم/g, 'إسلام');
+        text = text.replace(/اإلسالم/g, 'الإسلام');
+        text = text.replace(/ومالئكته/g, 'وملائكته');
+        text = text.replace(/بمالئكته/g, 'بملائكته');
+        text = text.replace(/المالئكة/g, 'الملائكة');
+        text = text.replace(/مالئكته/g, 'ملائكته');
+        text = text.replace(/مالئكة/g, 'ملائكة');
+        text = text.replace(/أعالها/g, 'أعلاها');
+        text = text.replace(/أعاله/g, 'أعلاه');
         text = text.replace(/الصالة/g, 'الصلاة');
         text = text.replace(/فالصالة/g, 'فالصلاة');
         text = text.replace(/بالصالة/g, 'بالصلاة');
         text = text.replace(/للصالة/g, 'للصلاة');
         text = text.replace(/صالة/g, 'صلاة');
+        text = text.replace(/صالته/g, 'صلاته');
+        text = text.replace(/صالتك/g, 'صلاتك');
+        text = text.replace(/صالتهم/g, 'صلاتهم');
+        text = text.replace(/صالتنا/g, 'صلاتنا');
+        text = text.replace(/صالتكم/g, 'صلاتكم');
         text = text.replace(/السالم/g, 'السلام');
         text = text.replace(/والسالم/g, 'والسلام');
         text = text.replace(/بالسالم/g, 'بالسلام');
+        text = text.replace(/للسالم/g, 'للسلام');
         text = text.replace(/إال/g, 'إلا');
         text = text.replace(/وإال/g, 'وإلا');
         text = text.replace(/فإال/g, 'فإلا');
-        text = text.replace(/الإسالم/g, 'الإسلام');
-        text = text.replace(/اإلسالم/g, 'الإسلام');
-        text = text.replace(/إسالم/g, 'إسلام');
+        text = text.replace(/أال/g, 'ألا');
+        text = text.replace(/وأال/g, 'وألا');
+        text = text.replace(/لئال/g, 'لئلا');
         text = text.replace(/الأخالق/g, 'الأخلاق');
         text = text.replace(/األخالق/g, 'الأخلاق');
         text = text.replace(/أخالق/g, 'أخلاق');
         text = text.replace(/الإخالص/g, 'الإخلاص');
         text = text.replace(/اإلخالص/g, 'الإخلاص');
         text = text.replace(/إخالص/g, 'إخلاص');
-        text = text.replace(/ثالث\s+(?=مراتب|أصول|سنوات|أيام|خصال|شروط|مسائل|ركعات)/g, 'ثلاث ');
-        text = text.replace(/ثالثة/g, 'ثلاثة');
-        text = text.replace(/الثالثة/g, 'الثلاثة');
-        text = text.replace(/مضالت/g, 'مضلات');
-        text = text.replace(/هؤالء/g, 'هؤلاء');
-        text = text.replace(/وتسويه/g, 'وتسوية');
         text = text.replace(/بطالن/g, 'بطلان');
+        text = text.replace(/البطالن/g, 'البطلان');
         text = text.replace(/كالم/g, 'كلام');
         text = text.replace(/الكالم/g, 'الكلام');
         text = text.replace(/عالنية/g, 'علانية');
         text = text.replace(/إعالن/g, 'إعلان');
         text = text.replace(/إعالم/g, 'إعلام');
         text = text.replace(/تالوة/g, 'تلاوة');
+        text = text.replace(/تالوته/g, 'تلاوته');
         text = text.replace(/القرأن/g, 'القرآن');
+        text = text.replace(/هؤالء/g, 'هؤلاء');
+        text = text.replace(/غالمها/g, 'غلامها');
+        text = text.replace(/الخالف/g, 'الخلاف');
+        text = text.replace(/الخالفة/g, 'الخلافة');
+        text = text.replace(/اختالف/g, 'اختلاف');
+        text = text.replace(/اختاالف/g, 'اختلاف');
+        text = text.replace(/الماليين/g, 'الملايين');
+        text = text.replace(/ماليين/g, 'ملايين');
+        text = text.replace(/احبل/g, 'حبلاً');
+
+        // Generic Word-initial double Alif 'االـ' -> 'الـ' (e.g. االنحراف -> الانحراف)
+        text = text.replace(/(?:^|[\s(\[«])اال(?=[أ-ي])/gu, (m) => m.replace('اال', 'ال'));
+        text = text.replace(/(?:^|[\s(\[«])واال(?=[أ-ي])/gu, (m) => m.replace('واال', 'وال'));
+        text = text.replace(/(?:^|[\s(\[«])فاال(?=[أ-ي])/gu, (m) => m.replace('فاال', 'فال'));
+        text = text.replace(/(?:^|[\s(\[«])باال(?=[أ-ي])/gu, (m) => m.replace('باال', 'بال'));
+
+        // Isolated negative particles: ' ال ' is NEVER a valid standalone word in Arabic; it is 100% ' لا '!
+        text = text.replace(/(?:^|[\s(\[«])ال(?=[\s)\.،؛!؟»\]]|$)/gu, (m) => m.replace('ال', 'لا'));
+        text = text.replace(/(?:^|[\s(\[«])وال(?=[\s)\.،؛!؟»\]]|$)/gu, (m) => m.replace('وال', 'ولا'));
+        text = text.replace(/(?:^|[\s(\[«])فال(?=[\s)\.،؛!؟»\]]|$)/gu, (m) => m.replace('فال', 'فلا'));
+        text = text.replace(/(?:^|[\s(\[«])بال(?=[\s)\.،؛!؟»\]]|$)/gu, (m) => m.replace('بال', 'بلا'));
+
+        // Numeral 'ثلاث' corrections
+        text = text.replace(/ثالث\s+(?=مراتب|أصول|سنوات|أيام|خصال|شروط|مسائل|ركعات|درجات|نقاط|مرات|كلمات|وقفات|محاور|أركان)/g, 'ثلاث ');
+        text = text.replace(/(?:على|إلى|من|بين)\s+ثالث(?=[\s،\.؛!؟]|$)/gu, (m) => m.replace('ثالث', 'ثلاث'));
+        text = text.replace(/يقوم على ثالث/g, 'يقوم على ثلاث');
+        text = text.replace(/ثالثة/g, 'ثلاثة');
+        text = text.replace(/الثالثة/g, 'الثلاثة');
+
+        // Clean religious phrase spacing
+        text = text.replace(/الخالصكوأ\s*فرغعل\s*ينا/g, 'الخالص لك وأفرغ علينا');
+        text = text.replace(/فرغعل\s*ينا/g, 'أفرغ علينا');
+        text = text.replace(/ًصبرا/g, 'صبراً');
+        text = text.replace(/بماعلمتنا/g, 'بما علمتنا');
+        text = text.replace(/ماينفعنا/g, 'ما ينفعنا');
+        text = text.replace(/الله به هو التوحيد/g, 'أعظم ما أمر الله به هو التوحيد');
+
+        // Alif-Lam Decomposed Ligatures
+        text = text.replace(/اإل/g, 'الإ').replace(/اإ/g, 'الإ').replace(/األ/g, 'الأ').replace(/اأ/g, 'الأ').replace(/اآل/g, 'الآ').replace(/اآ/g, 'الآ');
 
         // Fix glued religious phrases & formulas
         text = text.replace(/(أعوذ)(بالله)/g, '$1 $2');
@@ -7985,10 +8045,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v74.1 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.1 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v74.2 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.2 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v74.1' : 'v74.1'}</span>
+                  <span>{isRtl ? 'الإصدار v74.2' : 'v74.2'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -12851,6 +12911,24 @@
                             {islamicData.metadata.category}
                           </span>
                         </div>
+
+                        {/* Dedicated Opening Du'aa & Supplication Banner if present in lecture */}
+                        {islamicData.openingPreamble && (
+                          <div className="card-islamic-amber rounded-2xl p-4 sm:p-5 border-2 border-amber-500/40 shadow-sm space-y-2 mb-4 animate-fadeIn">
+                            <div className="flex items-center justify-between pb-2 border-b border-amber-900/10">
+                              <span className="flex items-center gap-2 font-black text-amber-950 text-xs sm:text-sm font-cairo">
+                                <span className="text-base sm:text-lg">🤲</span>
+                                <span>{isRtl ? 'افتتاحية المجلس والدعاء المأثور (مقدمة المحاضرة والاستفتاح):' : 'Opening Supplication & Lecture Preamble:'}</span>
+                              </span>
+                              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+                                {isRtl ? 'دعاء واستفتاح المجلس' : 'Opening Du\'aa'}
+                              </span>
+                            </div>
+                            <p className="text-xs sm:text-sm font-amiri text-slate-800 leading-relaxed font-semibold">
+                              {islamicData.openingPreamble.duaExcerpt || (islamicData.openingPreamble.lines && islamicData.openingPreamble.lines.join(' '))}
+                            </p>
+                          </div>
+                        )}
 
                         {/* Timeline Phases */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
