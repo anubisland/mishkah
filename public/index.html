@@ -5867,13 +5867,14 @@
         return bullets.slice(0, 3);
       }
 
-      function handleProcessCustomLecture() {
-        if (!rawLectureText || !rawLectureText.trim()) {
+      function handleProcessCustomLecture(overrideText = null, overrideTopic = null) {
+        const textToUse = overrideText || rawLectureText;
+        if (!textToUse || !textToUse.trim()) {
           showToast(isRtl ? 'يرجى لصق نص المحاضرة أو رفع ملف أولاً' : 'Please provide lecture text or upload file first');
           return;
         }
 
-        const rawClean = sanitizeArabicExtractedText(rawLectureText).trim();
+        const rawClean = sanitizeArabicExtractedText(textToUse).trim();
         const evs = extractEvidencesAndProofs(rawClean);
         setExtractedEvidences(evs);
         const rawLines = rawClean.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -5890,7 +5891,7 @@
         const cleanLines = rawLines.filter(l => !isNoiseLine(l));
 
         // 1. Detect Lecture Title from non-noise initial lines
-        let detectedTopic = (lessonTopic && lessonTopic.trim()) || '';
+        let detectedTopic = (overrideTopic && overrideTopic.trim()) || (lessonTopic && lessonTopic.trim()) || '';
         let startContentIndex = 0;
 
         if (!detectedTopic) {
@@ -6257,6 +6258,22 @@
           });
         }
 
+        // Build Dynamic 10-Line WhatsApp Broadcast Summary from actual lecture modules:
+        const whatsappBullets = processedSections.slice(0, 5).map((sec, i) => {
+          const numEmojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
+          const bullet = (sec.lines && sec.lines[0]) ? sec.lines[0].replace(/^[#*\-•\s\d\.\)\:،]+/, '').substring(0, 85) : cleanSlideTitle(sec.title);
+          return `${numEmojis[i] || '▫️'} *${cleanSlideTitle(sec.title)}:* ${bullet}`;
+        }).join('\n');
+
+        const bestAyah = (allEvidences.find(e => e.type === 'quran')?.arabicText) || '﴿يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَالَّذِينَ أُوتُوا الْعِلْمَ دَرَجَاتٍ﴾ [المجادلة: 11]';
+        const bestAction = blueprintPhases[0]?.practicalImpact || `التطبيق العملي لمسائل (${topic}) في واقعنا اليومي والاعتزاز بالهدي النبوي الشريف.`;
+
+        const dynamicWhatsAppSummary = {
+          headline: `🌿 خلاصة درس اليوم: ${topic} 🌿`,
+          formattedText: `السلام عليكم ورحمة الله وبركاته يا أحبة 🌸\n\n📌 *موضوع حلقتنا اليوم:* ${topic}\n\n✨ *أهم الفوائد والمعالم المستفادة:*\n${whatsappBullets}\n\n📖 *آية اللقاء للتأمل والتدبر:* ${bestAyah}\n\n🎯 *الواجب والتطبيق السلوكي:* ${bestAction}\n\n🔗 *رابط الاختبار الذاتي القصير للمدارسة في منصة مشكاة:* حفظكم الله جميعاً وبارك في أوقاتكم! 🤍`,
+          actionItem: 'شاركونا عبر المجموعة تطبيقكم العملي لدرس اليوم!'
+        };
+
         const generatedData = {
           metadata: {
             topic: topic,
@@ -6273,6 +6290,7 @@
           zoomPresentation: zoomDeck,
           quizQuestions: quizList,
           evidences: allEvidences,
+          whatsAppKit: dynamicWhatsAppSummary,
           discussionPrompts: [
             `ما هو أثر تعظيم مرجعية الوحي وسلطان النص في صيانة الفكر المعاصر؟`,
             `كيف نطبق الضوابط والقواعد المستفادة من (${topic}) في واقعنا وحواراتنا؟`
@@ -6668,10 +6686,94 @@
         return { quranicVerses: quranicVerses, hadiths: hadiths, scholarlyProofs: scholarlyProofs };
       }
 
-      // Comprehensive Arabic Document Cleaner & Sanitizer
+            // Unicode Presentation Forms Normalizer for Arabic PDF & OCR
+      function normalizeArabicPresentationForms(str) {
+        if (!str) return '';
+        const presentationMap = {
+          '\uFE80': '\u0621', '\uFE81': '\u0622', '\uFE82': '\u0622', '\uFE83': '\u0623', '\uFE84': '\u0623',
+          '\uFE85': '\u0624', '\uFE86': '\u0624', '\uFE87': '\u0625', '\uFE88': '\u0625', '\uFE89': '\u0626',
+          '\uFE8A': '\u0626', '\uFE8B': '\u0626', '\uFE8C': '\u0626', '\uFE8D': '\u0627', '\uFE8E': '\u0627',
+          '\uFE8F': '\u0628', '\uFE90': '\u0628', '\uFE91': '\u0628', '\uFE92': '\u0628', '\uFE93': '\u0629',
+          '\uFE94': '\u0629', '\uFE95': '\u062A', '\uFE96': '\u062A', '\uFE97': '\u062A', '\uFE98': '\u062A',
+          '\uFE99': '\u062B', '\uFE9A': '\u062B', '\uFE9B': '\u062B', '\uFE9C': '\u062B', '\uFE9D': '\u062C',
+          '\uFE9E': '\u062C', '\uFE9F': '\u062C', '\uFEA0': '\u062C', '\uFEA1': '\u062D', '\uFEA2': '\u062D',
+          '\uFEA3': '\u062D', '\uFEA4': '\u062D', '\uFEA5': '\u062E', '\uFEA6': '\u062E', '\uFEA7': '\u062E',
+          '\uFEA8': '\u062E', '\uFEA9': '\u062F', '\uFEAA': '\u062F', '\uFEAB': '\u0630', '\uFEAC': '\u0630',
+          '\uFEAD': '\u0631', '\uFEAE': '\u0631', '\uFEAF': '\u0632', '\uFEB0': '\u0632', '\uFEB1': '\u0633',
+          '\uFEB2': '\u0633', '\uFEB3': '\u0633', '\uFEB4': '\u0633', '\uFEB5': '\u0634', '\uFEB6': '\u0634',
+          '\uFEB7': '\u0634', '\uFEB8': '\u0634', '\uFEB9': '\u0635', '\uFEBA': '\u0635', '\uFEBB': '\u0635',
+          '\uFEBC': '\u0635', '\uFEBD': '\u0636', '\uFEBE': '\u0636', '\uFEBF': '\u0636', '\uFEC0': '\u0636',
+          '\uFEC1': '\u0637', '\uFEC2': '\u0637', '\uFEC3': '\u0637', '\uFEC4': '\u0637', '\uFEC5': '\u0638',
+          '\uFEC6': '\u0638', '\uFEC7': '\u0638', '\uFEC8': '\u0638', '\uFEC9': '\u0639', '\uFECA': '\u0639',
+          '\uFECB': '\u0639', '\uFECC': '\u0639', '\uFECD': '\u063A', '\uFECE': '\u063A', '\uFECF': '\u063A',
+          '\uFED0': '\u063A', '\uFED1': '\u0641', '\uFED2': '\u0641', '\uFED3': '\u0641', '\uFED4': '\u0641',
+          '\uFED5': '\u0642', '\uFED6': '\u0642', '\uFED7': '\u0642', '\uFED8': '\u0642', '\uFED9': '\u0643',
+          '\uFEDA': '\u0643', '\uFEDB': '\u0643', '\uFEDC': '\u0643', '\uFEDD': '\u0644', '\uFEDE': '\u0644',
+          '\uFEDF': '\u0644', '\uFEE0': '\u0644', '\uFEE1': '\u0645', '\uFEE2': '\u0645', '\uFEE3': '\u0645',
+          '\uFEE4': '\u0645', '\uFEE5': '\u0646', '\uFEE6': '\u0646', '\uFEE7': '\u0646', '\uFEE8': '\u0646',
+          '\uFEE9': '\u0647', '\uFEEA': '\u0647', '\uFEEB': '\u0647', '\uFEEC': '\u0647', '\uFEED': '\u0648',
+          '\uFEEE': '\u0648', '\uFEEF': '\u0649', '\uFEF0': '\u0649', '\uFEF1': '\u064A', '\uFEF2': '\u064A',
+          '\uFEF3': '\u064A', '\uFEF4': '\u064A', '\uFEF5': '\u0644\u0622', '\uFEF6': '\u0644\u0622',
+          '\uFEF7': '\u0644\u0623', '\uFEF8': '\u0644\u0623', '\uFEF9': '\u0644\u0625', '\uFEFA': '\u0644\u0625',
+          '\uFEFB': '\u0644\u0627', '\uFEFC': '\u0644\u0627',
+          '\uFDF2': 'الله',
+          '\uFDFD': 'بسم الله الرحمن الرحيم',
+          '\uFDFA': 'صلى الله عليه وسلم',
+          '\uFDFB': 'جل جلاله'
+        };
+        return str.replace(/[\uFE70-\uFEFC\uFDF0-\uFDFD]/g, ch => presentationMap[ch] || ch);
+      }
+
+      // Detection & Inversion of Reversed Visual-Order Arabic (LTR encoded PDFs)
+      function detectAndInvertReversedArabic(text) {
+        if (!text) return text;
+        const taaStartMatches = (text.match(/(?:^|[\s\p{P}])ة[\u0600-\u06FF]{1,}/gu) || []).length;
+        const laEndMatches = (text.match(/[\u0600-\u06FF]{2,}لا(?:$|[\s\p{P}])/gu) || []).length;
+        const reversedKeywords = (text.match(/(?:^|[\s\p{P}])(?:هللا|مسب|ذوعا|ذوعأ|للهاب|ناطيشرلا|ناطيشلا|ميجرلا|نمحرلا|ميحرلا|ىلإ|ثحبملا|قيبطتلا|رصاعملا|نيمألا|ملسو|هيلع|ىلاعت|لاق|ةلاسر|ةعيرش)(?:$|[\s\p{P}])/gu) || []).length;
+
+        const totalWords = text.trim().split(/\s+/).length || 1;
+        const isReversed = (taaStartMatches >= 2 || reversedKeywords >= 2 || (laEndMatches / totalWords > 0.15));
+
+        if (!isReversed) return text;
+
+        const bracketPairs = { '(': ')', ')': '(', '[': ']', ']': '[', '{': '}', '}': '{', '<': '>', '>': '<', '«': '»', '»': '«', '﴿': '﴾', '﴾': '﴿' };
+        const lines = text.split(/\r?\n/);
+        return lines.map(line => {
+          const trimmed = line.trim();
+          if (!trimmed) return line;
+
+          const revWhole = trimmed.split('').reverse().join('').replace(/[()«»\[\]{}<>﴿﴾]/g, m => bracketPairs[m] || m);
+          if (/^(?:أعوذ|اعوذ|بسم|الحمد|قال|روى|المبحث|المحور|الفصل|الباب|أولاً|ثانياً|مقدمة)/.test(revWhole.trim()) ||
+              revWhole.includes('بسم الله') || revWhole.includes('أعوذ بالله') || revWhole.includes('الحمد لله')) {
+            return revWhole;
+          }
+
+          const words = trimmed.split(/(\s+|[،.؛:!؟\(\)«»\[\]])/);
+          const wordReversed = words.map(w => {
+            if (/[\u0600-\u06FF]{2,}/.test(w)) {
+              return w.split('').reverse().join('');
+            }
+            return w;
+          }).join('');
+
+          const normalAlCount = (wordReversed.match(/(?:^|[\s\p{P}])ال[\u0600-\u06FF]{2,}/gu) || []).length;
+          const revAlCount = (revWhole.match(/(?:^|[\s\p{P}])ال[\u0600-\u06FF]{2,}/gu) || []).length;
+
+          if (revAlCount >= normalAlCount) {
+            return revWhole;
+          }
+          return wordReversed;
+        }).join('\n');
+      }
+
+      // Comprehensive Arabic Document Cleaner, Ligature Repair & Word Disentangler
       function sanitizeArabicExtractedText(rawText) {
         if (!rawText) return '';
-        let text = rawText;
+        let text = normalizeArabicPresentationForms(rawText);
+        text = detectAndInvertReversedArabic(text);
+
+        // Normalize ornate Quranic brackets if flipped by visual PDF fonts: ﴾...﴿ -> ﴿...﴾
+        text = text.replace(/﴾([^﴾\n]{3,250})﴿/g, '﴿$1﴾');
 
         // 1. Strip all Tatweel/Kashida characters
         text = text.replace(/[\u0640]+/g, '');
@@ -6701,17 +6803,43 @@
         text = text.replace(/\bيف\b/g, 'في');
         text = text.replace(/\bمل\b/g, 'لم');
 
-        // 5.5. Document-wide detection for reversed visual-order Arabic (PDFs encoded in visual LTR order)
-        const taaStartMatches = (text.match(/(?:^|[\s\p{P}])ة[\u0600-\u06FF]{2,}/gu) || []).length;
-        const reversedTokenMatches = (text.match(/(?:^|[\s\p{P}])(?:هللا|مسب|ذوعأ|ناطيشرلا|ناطيشتلا|ميحرلا|نمحرلا|ىلإ|ثحبملا|قيبطتلا|رصاعملا|نيمألا)(?:$|[\s\p{P}])/gu) || []).length;
-        const isDocReversed = (taaStartMatches >= 2 || reversedTokenMatches >= 2);
+        // Specific common OCR / PDF broken ligatures & clumped words
+        text = text.replace(/بسمهلالا/g, 'بسم الله ');
+        text = text.replace(/هللوالصالة/g, ' لله والصلاة ');
+        text = text.replace(/والسامعلى/g, ' والسلام على ');
+        text = text.replace(/رسو\s*لهللا/g, 'رسول الله');
+        text = text.replace(/رسول\s*هللا/g, 'رسول الله');
+        text = text.replace(/باهلل/g, 'بالله');
+        text = text.replace(/هللا/g, 'الله');
+        text = text.replace(/الخالصكوأ\s*فرغعل\s*ينا/g, 'الخالص وأفرغ علينا');
+        text = text.replace(/فرغعل\s*ينا/g, 'أفرغ علينا');
 
-        if (isDocReversed) {
-          const bracketPairs = { '(': ')', ')': '(', '[': ']', ']': '[', '{': '}', '}': '{', '<': '>', '>': '<', '«': '»', '»': '«', '﴿': '﴾', '﴾': '﴿' };
-          text = text.split(/\r?\n/).map(line => {
-            return line.split('').reverse().join('').replace(/[()«»\[\]{}<>﴿﴾]/g, m => bracketPairs[m] || m);
-          }).join('\n');
-        }
+        // Fix glued religious phrases & formulas
+        text = text.replace(/(أعوذ)(بالله)/g, '$1 $2');
+        text = text.replace(/(بالله)(من)/g, '$1 $2');
+        text = text.replace(/(من)(الشيطان)/g, '$1 $2');
+        text = text.replace(/(الشيطان)(الرجيم)/g, '$1 $2');
+        text = text.replace(/(بسم)(الله)/g, '$1 $2');
+        text = text.replace(/(الله)(الرحمن)/g, '$1 $2');
+        text = text.replace(/(الرحمن)(الرحيم)/g, '$1 $2');
+        text = text.replace(/(الحمد)(لله)/g, '$1 $2');
+        text = text.replace(/(رب)(العالمين)/g, '$1 $2');
+        text = text.replace(/(صلى)(الله)/g, '$1 $2');
+        text = text.replace(/(الله)(عليه)/g, '$1 $2');
+        text = text.replace(/(عليه)(وسلم)/g, '$1 $2');
+        text = text.replace(/(رضي)(الله)/g, '$1 $2');
+        text = text.replace(/(قال)(تعالى)/g, '$1 $2');
+        text = text.replace(/(قوله)(تعالى)/g, '$1 $2');
+        text = text.replace(/(قال)(رسول)/g, '$1 $2');
+        text = text.replace(/(رسول)(الله)/g, '$1 $2');
+        text = text.replace(/(ما)(ينفعنا)/g, '$1 $2');
+        text = text.replace(/(وا)(نصرنا)/g, 'وانصرنا');
+
+        // Separate prepositions glued to words starting with 'ال'
+        text = text.replace(/(\b(?:في|من|عن|إلى|على|مع|بين|كل|عند|دون|أهل|أثر|أصل|حكم|باب|فصل|كتاب|بيان|نحو|مثل|ضد|غير|قبل|بعد|فوق|تحت))(ال[\u0600-\u06FF]{2,})/gu, '$1 $2');
+
+        // Separate double definite nouns glued together: e.g. "القومالكافرين" -> "القوم الكافرين"
+        text = text.replace(/(ال[\u0600-\u06FF]{2,}?)(ال[\u0600-\u06FF]{2,})/gu, '$1 $2');
 
         // 6. Filter lines to discard Table of Contents remnants
         const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -6726,38 +6854,18 @@
           }
           if (insideTOC) {
             if (/\.{2,}|_{2,}|\b\d+\s*$/.test(l) && l.length < 90) {
-              continue; // skip TOC entry line
+              continue;
             } else if (l.length > 90 || /^(?:المقدمة|تمهيد|مدخل|الباب|الفصل|المبحث|المحور)/i.test(l)) {
               insideTOC = false;
             }
           }
-          // Skip pure numbers or isolated dot lines
           if (/^\d+$/.test(l) || /^[\.\-\s]+$/.test(l)) continue;
           cleanLines.push(l);
         }
 
         let sanitized = cleanLines.join('\n');
 
-        // Automatic repair for religious formulas if ever clumped without spaces:
-        sanitized = sanitized.replace(/أعوذبالله/g, 'أعوذ بالله');
-        sanitized = sanitized.replace(/منالشيطان/g, 'من الشيطان');
-        sanitized = sanitized.replace(/الشيطانالرجيم/g, 'الشيطان الرجيم');
-        sanitized = sanitized.replace(/بسمالله/g, 'بسم الله');
-        sanitized = sanitized.replace(/الرحمنالرحيم/g, 'الرحمن الرحيم');
-        sanitized = sanitized.replace(/الحمدلله/g, 'الحمد لله');
-        sanitized = sanitized.replace(/ربالعالمين/g, 'رب العالمين');
-        sanitized = sanitized.replace(/صلىالله/g, 'صلى الله');
-        sanitized = sanitized.replace(/عليهوسلم/g, 'عليه وسلم');
-        sanitized = sanitized.replace(/رضيالله/g, 'رضي الله');
-        sanitized = sanitized.replace(/قالتعالى/g, 'قال تعالى');
-        sanitized = sanitized.replace(/قولهتعالى/g, 'قوله تعالى');
-        sanitized = sanitized.replace(/قالرسول/g, 'قال رسول');
-        sanitized = sanitized.replace(/رسولالله/g, 'رسول الله');
-
-        // Repair prepositions accidentally glued to definite article 'ال':
-        sanitized = sanitized.replace(/(\b(?:في|من|عن|إلى|مع|بين|كل|عند|دون|أهل|أثر|أصل|حكم|باب|فصل|كتاب|بيان))([ال][\u0600-\u06FF]{2,})/g, '$1 $2');
-
-        // Normalize multiple spaces
+        // Normalize spaces
         sanitized = sanitized.replace(/[ \t]+/g, ' ');
         sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
 
@@ -6848,11 +6956,19 @@
           const evs = extractEvidencesAndProofs(cleanExtracted);
           setExtractedEvidences(evs);
 
-          // Infer topic title from clean sanitized text
+          // Infer authentic topic title (skipping Istiadha, Basmalah, Hamdalah, and blessings)
+          const isNotTitle = (l) => {
+            if (!l) return true;
+            if (/^(?:أعوذ|اعوذ|بسم|الحمد|صلى|اللهم|السلام|قال|روى|مقدمة|تمهيد)/.test(l)) return true;
+            if (l.includes('بسم الله') || l.includes('أعوذ بالله') || l.includes('الحمد لله') || l.includes('رسول الله')) return true;
+            return false;
+          };
           const cleanName = fname.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
-          const firstLine = cleanExtracted.split('\n').map(l => l.trim()).find(l => l.length > 5 && l.length < 100);
-          const suggestedTopic = firstLine || cleanName;
+          const titleLine = cleanExtracted.split('\n').map(l => l.trim()).find(l => l.length >= 4 && l.length <= 80 && !isNotTitle(l));
+          const suggestedTopic = titleLine || cleanName;
           setLessonTopic(suggestedTopic);
+          // Automatically parse and process lecture immediately so all stages are ready!
+          handleProcessCustomLecture(cleanExtracted, suggestedTopic);
 
           const words = extractedText.trim().split(/\s+/).length;
           const sizeKb = Math.round(file.size / 1024);
@@ -7177,6 +7293,68 @@
               ]
             }
           ],
+          worksheetItems: [
+            {
+              num: 1,
+              topic: 'المقدمة وعنصر التشويق: حقيقة الإيمان واليقين',
+              scripture: '﴿يَا أَيُّهَا الَّذِينَ آمَنُوا آمِنُوا بِاللَّهِ وَرَسُولِهِ﴾ [النساء: 136]',
+              questionPrompt: 'ما الفرق الجوهري بين مجرد التصديق الذهني بوجود الله وبين اليقين الإيماني المثمر للطمأنينة؟',
+              options: [
+                { id: 'a', label: 'أ', textAr: 'اليقين الإيماني يستقر في القلب ويصدقه العمل والسلوك بينما التصديق الذهني مجرد معلومة' },
+                { id: 'b', label: 'ب', textAr: 'التصديق الذهني كافٍ لتحقيق السعادة دون حاجة لأعمال الجوارح والأخلاق' },
+                { id: 'c', label: 'ج', textAr: 'لا فرق بينهما فكلاهما مصطلح مترادف في المعاجم اللغوية' }
+              ],
+              correctOptionId: 'a',
+              teacherAnswer: 'اليقين الإيماني يستقر في القلب ويصدقه العمل والسلوك بينما التصديق الذهني مجرد معلومة',
+              teacherRationale: 'الإيمان عند أهل السنة والجماعة قول واعتقاد وعمل، يزيد بالطاعة وينقص بالمعصية.',
+              practicalImpact: 'استشعار معية الله وتجديد النية الصادقة في كافة الأنشطة اليومية.'
+            },
+            {
+              num: 2,
+              topic: 'التأصيل الشرعي: مراتب الدين وأركان الإيمان الستة',
+              scripture: '«أَنْ تُؤْمِنَ بِاللَّهِ، وَمَلاَئِكَتِهِ، وَكُتُبِهِ، وَرُسُلِهِ، وَاليَوْمِ الآخِرِ، وَتُؤْمِنَ بِالقَدَرِ خَيْرِهِ وَشَرِّهِ» (صحيح مسلم)',
+              questionPrompt: 'وفقاً لحديث جبريل عليه السلام؛ أي من التالي يُمثل الركن السادس من أركان الإيمان؟',
+              options: [
+                { id: 'a', label: 'أ', textAr: 'إيتاء الزكاة المفروضة' },
+                { id: 'b', label: 'ب', textAr: 'الإيمان بالقضاء والقدر خيره وشره' },
+                { id: 'c', label: 'ج', textAr: 'حج البيت لمن استطاع إليه سبيلاً' }
+              ],
+              correctOptionId: 'b',
+              teacherAnswer: 'الإيمان بالقضاء والقدر خيره وشره',
+              teacherRationale: 'بين النبي ﷺ في حديث جبريل أن أركان الإيمان ستة بينما الزكاة والحج من أركان الإسلام الخمسة.',
+              practicalImpact: 'ترسيخ استسلام القلب لحكمة الله البالغة في تدبير الكون والأرزاق.'
+            },
+            {
+              num: 3,
+              topic: 'التطبيق العملي: الإيمان بالقدر وعلاج القلق والندم',
+              scripture: '«مَا أَصَابَكَ لَمْ يَكُنْ لِيُخْطِئَكَ، وَمَا أَخْطَأَكَ لَمْ يَكُنْ لِيُصِيبَكَ» (أحمد وأبو داود)',
+              questionPrompt: 'ما الهدي النبوي الرشيد عند وقوع ما يكرهه الإنسان لتفادي مشاعر الإحباط والندم القاتل؟',
+              options: [
+                { id: 'a', label: 'أ', textAr: 'لوم النفس المستمر وترديد كلمة "لو أني فعلت كذا لكان كذا"' },
+                { id: 'b', label: 'ب', textAr: 'استشعار الرضا وترديد: "قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ" مع الأخذ بالأسباب' },
+                { id: 'c', label: 'ج', textAr: 'التوقف التام عن المحاولة والقعود عن طلب المعاش' }
+              ],
+              correctOptionId: 'b',
+              teacherAnswer: 'استشعار الرضا وترديد: "قَدَرُ اللَّهِ وَمَا شَاءَ فَعَلَ" مع الأخذ بالأسباب',
+              teacherRationale: 'نهى النبي ﷺ عن فتح عمل الشيطان بكلمة "لو" وأمر بالرضا والاحتساب.',
+              practicalImpact: 'تحويل الصدمات والأزمات إلى منازل للصبر والاحتساب واليقين.'
+            },
+            {
+              num: 4,
+              topic: 'الخاتمة والواجب السلوكي: دوام الذكر وحفظ القلب',
+              scripture: '﴿أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ﴾ [الرعد: 28]',
+              questionPrompt: 'ما الأثر السلوكي المستهدف من ملازمة أذكار الصباح والمساء بحضور قلب؟',
+              options: [
+                { id: 'a', label: 'أ', textAr: 'الحصانة الإيمانية وسكينة النفس ودفع وساوس القلق والخوف' },
+                { id: 'b', label: 'ب', textAr: 'مجرد أداء طقس روتيني سريع دون تفكر في معاني الألفاظ' },
+                { id: 'c', label: 'ج', textAr: 'الاستغناء عن الأسباب المادية المشروعة' }
+              ],
+              correctOptionId: 'a',
+              teacherAnswer: 'الحصانة الإيمانية وسكينة النفس ودفع وساوس القلق والخوف',
+              teacherRationale: 'الذكر الحقيقي يربط العبد بخالقه وينزل الطمأنينة في الشدائد والرخاء.',
+              practicalImpact: 'المحافظة على ورد الذكر اليومي وترديد "رضيت بالله رباً وبالإسلام ديناً وبمحمد ﷺ نبياً".'
+            }
+          ],
           evidences: [
             {
               type: 'hadith',
@@ -7463,10 +7641,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v72.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v72.0 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v73.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v73.0 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v72.0' : 'v72.0'}</span>
+                  <span>{isRtl ? 'الإصدار v73.0' : 'v73.0'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -11635,7 +11813,40 @@
                                     title={isRtl ? 'إزالة الشوائب الطباعية، والتشكيل الزائد، ووصل الحروف المتقطعة' : 'Clean OCR & typography'}
                                   >
                                     <span>🧹</span>
-                                    <span>{isRtl ? 'تنقية ومعالجة النص العربي' : 'Sanitize Text'}</span>
+                                    <span>{isRtl ? 'تنقية ومعالجة النص' : 'Sanitize Text'}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (!rawLectureText) return;
+                                      const bracketPairs = { '(': ')', ')': '(', '[': ']', ']': '[', '{': '}', '}': '{', '<': '>', '>': '<', '«': '»', '»': '«', '﴿': '﴾', '﴾': '﴿' };
+                                      const inverted = rawLectureText.split(/\r?\n/).map(line => {
+                                        return line.split('').reverse().join('').replace(/[()«»\[\]{}<>﴿﴾]/g, m => bracketPairs[m] || m);
+                                      }).join('\n');
+                                      setRawLectureText(inverted);
+                                      showToast(isRtl ? 'تم عكس اتجاه النص والحروف المقلوبة 🔄' : 'Inverted text direction 🔄');
+                                    }}
+                                    className="bg-slate-800 hover:bg-slate-900 text-gold-200 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                                    title={isRtl ? 'عكس اتجاه الحروف إذا ظهر النص مقلوباً من اليسار لليمين' : 'Invert character direction'}
+                                  >
+                                    <span>🔄</span>
+                                    <span>{isRtl ? 'عكس النص المقلوب' : 'Invert Reversed'}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (!rawLectureText) return;
+                                      const fixed = sanitizeArabicExtractedText(rawLectureText);
+                                      setRawLectureText(fixed);
+                                      showToast(isRtl ? 'تم فك تشابك الكلمات وضبط المسافات ✂️' : 'Disentangled words ✂️');
+                                    }}
+                                    className="bg-amber-800 hover:bg-amber-900 text-amber-100 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                                    title={isRtl ? 'فك الكلمات المتلاصقة وتصحيح العبارات' : 'Fix glued words'}
+                                  >
+                                    <span>✂️</span>
+                                    <span>{isRtl ? 'فك تشابك الكلمات' : 'Disentangle Words'}</span>
                                   </button>
 
                                   <button
@@ -12888,11 +13099,21 @@
                                     {islamicWorksheetViewMode === 'teacher' ? (
                                       <div className="bg-amber-50/70 p-3 rounded-xl border border-amber-200/80 space-y-2">
                                         <div className="text-xs space-y-1.5">
-                                          {(row.options || [
-                                            { id: 'a', label: 'أ', textAr: row.teacherAnswer || 'القول المعتمد في المسألة' },
-                                            { id: 'b', label: 'ب', textAr: 'خلاف الظاهر ومجانبة الأصل المنهجي' },
-                                            { id: 'c', label: 'ج', textAr: 'مخالفة الأصول المنهجية الثابتة' }
-                                          ]).map(opt => {
+                                          {(() => {
+                                            const distractorPool = [
+                                              'الخلط بين المفاهيم العقلية وبين الأصول الشرعية الثابتة',
+                                              'تقديم الآراء الظنية المجردة على النصوص القطعية',
+                                              'حصر الحكم في نطاق تاريخي دون إدراك أثره الممتد في واقعنا',
+                                              'الاعتماد على القياس مع الفارق وإغفال مقاصد الشريعة',
+                                              'فصل الالتزام السلوكي عن اليقين الاعتقادي القلبي',
+                                              'الانقياد للظنون والاتباع بغير دليل وبرهان صحيح'
+                                            ];
+                                            const optionsList = (row.options && row.options.length > 0) ? row.options : [
+                                              { id: 'a', label: 'أ', textAr: row.teacherAnswer || 'القول المعتمد المستند إلى الأدلة الشرعية والمنهج الرشيد' },
+                                              { id: 'b', label: 'ب', textAr: distractorPool[(rIdx * 2) % distractorPool.length] },
+                                              { id: 'c', label: 'ج', textAr: distractorPool[(rIdx * 2 + 1) % distractorPool.length] }
+                                            ];
+                                            return optionsList.map(opt => {
                                             const isCorrect = opt.id === (row.correctOptionId || 'a');
                                             return (
                                               <div 
@@ -12912,7 +13133,8 @@
                                                 {isCorrect && <span className="text-emerald-800 text-[11px] font-black">✓ الإجابة المعتمدة</span>}
                                               </div>
                                             );
-                                          })}
+                                          });
+                                        })()}
                                         </div>
                                         <div className="text-slate-800 text-xs pt-1.5 border-t border-amber-200/60">
                                           <strong className="text-amber-950">التأصيل والتعليل العلمي: </strong> {row.teacherRationale || row.teacherAnswer}
@@ -12920,11 +13142,21 @@
                                       </div>
                                     ) : (
                                       <div className="space-y-1.5">
-                                        {(row.options && row.options.length > 0 ? row.options : [
-                                          { id: 'a', label: 'أ', textAr: row.teacherAnswer || 'القول المعتمد في المسألة' },
-                                          { id: 'b', label: 'ب', textAr: 'خلاف الظاهر ومجانبة الأصل المنهجي' },
-                                          { id: 'c', label: 'ج', textAr: 'مخالفة الأصول المنهجية الثابتة' }
-                                        ]).map(opt => {
+                                        {(() => {
+                                          const distractorPool = [
+                                            'الخلط بين المفاهيم العقلية وبين الأصول الشرعية الثابتة',
+                                            'تقديم الآراء الظنية المجردة على النصوص القطعية',
+                                            'حصر الحكم في نطاق تاريخي دون إدراك أثره الممتد في واقعنا',
+                                            'الاعتماد على القياس مع الفارق وإغفال مقاصد الشريعة',
+                                            'فصل الالتزام السلوكي عن اليقين الاعتقادي القلبي',
+                                            'الانقياد للظنون والاتباع بغير دليل وبرهان صحيح'
+                                          ];
+                                          const optionsList = (row.options && row.options.length > 0) ? row.options : [
+                                            { id: 'a', label: 'أ', textAr: row.teacherAnswer || 'القول المعتمد المستند إلى الأدلة الشرعية والمنهج الرشيد' },
+                                            { id: 'b', label: 'ب', textAr: distractorPool[(rIdx * 2) % distractorPool.length] },
+                                            { id: 'c', label: 'ج', textAr: distractorPool[(rIdx * 2 + 1) % distractorPool.length] }
+                                          ];
+                                          return optionsList.map(opt => {
                                           const isSelected = (islamicWorksheetAnswers[row.num || rIdx + 1] === opt.id);
                                           return (
                                             <div
@@ -12948,7 +13180,8 @@
                                               <span className="hidden print:inline-block font-mono text-sm ml-1">[ ]</span>
                                             </div>
                                           );
-                                        })}
+                                        });
+                                      })()}
                                       </div>
                                     )}
                                   </div>
@@ -13234,7 +13467,11 @@
                       </div>
 
                       <div className="bg-slate-900 text-emerald-200 rounded-2xl p-4 sm:p-5 font-mono text-xs sm:text-sm leading-relaxed whitespace-pre-wrap border border-slate-700">
-                        {islamicData.whatsAppKit.formattedText}
+                        {islamicData?.whatsAppKit?.formattedText || (
+                          `السلام عليكم ورحمة الله وبركاته يا أحبة 🌸\n\n📌 *موضوع حلقتنا اليوم:* ${islamicData?.metadata?.topic || 'مدارسة شرعية'}\n\n✨ *أهم الفوائد والمعالم المستفادة:*\n` +
+                          (islamicData?.blueprint || []).slice(0, 4).map((b, i) => `${i + 1}️⃣ *${b.phaseNameAr}:* ${b.keyTakeawayAr || b.teacherGuidanceAr || ''}`).join('\n') +
+                          `\n\n🎯 *الواجب والتطبيق السلوكي:* ${islamicData?.blueprint?.[0]?.practicalImpact || 'تطبيق ما تعلمناه في حياتنا اليومية.'}\n\n🔗 رابط الاختبار الذاتي في منصة مشكاة. حفظكم الله جميعاً! 🤍`
+                        )}
                       </div>
 
                       {/* Success completion banner */}
