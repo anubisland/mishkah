@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مِشكاة | نظام التشغيل الشامل للداعية والمعلم الشرعي</title>
+  <title>منصة مشكاة | نظام التشغيل الشامل للداعية والمعلم الشرعي</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/jpeg" href="icons/mishkah-app-icon.jpg">
   <meta name="theme-color" content="#064E3B">
-  <meta name="description" content="مِشكاة — نظام التشغيل الشامل للداعية والمعلم الشرعي: القرآن الكريم، أحكام التجويد، والعلوم الشرعية عبر زوم وحلقات العلم.">
+  <meta name="description" content="منصة مشكاة — نظام التشغيل الشامل للداعية والمعلم الشرعي: القرآن الكريم، أحكام التجويد، والعلوم الشرعية عبر زوم وحلقات العلم.">
 
   <!-- Google Fonts: Cairo, Amiri, Amiri Quran, Tajawal, Almarai, Noto Naskh Arabic -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -4199,6 +4199,7 @@
         document.documentElement.style.fontSize = '16px';
         document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
         document.documentElement.lang = lang;
+        document.title = isRtl ? 'منصة مشكاة | نظام التشغيل الشامل للداعية والمعلم الشرعي' : 'منصة مشكاة — Mishkah';
         const fontConfig = FONT_MAP[appFont] || FONT_MAP.cairo;
         document.documentElement.style.setProperty('--active-app-font', fontConfig.css);
         document.body.style.fontFamily = fontConfig.css;
@@ -6443,7 +6444,7 @@
                   </div>
                   <div>
                     <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-normal text-gold-300 font-amiri drop-shadow-lg leading-none" style={{ fontSize: 'clamp(2.6rem, 7vw, 4.2rem)' }}>
-                      {isRtl ? 'مِشكاة' : 'Mishkah'}
+                      منصة مِشكاة
                     </h1>
                     <p className="text-xs sm:text-sm text-emerald-100/90 font-medium hidden sm:block mt-1 font-cairo">
                       {isRtl ? 'نظام التشغيل الشامل للداعية والمعلم الشرعي' : "Comprehensive OS for Da'wah & Islamic Educators"}
