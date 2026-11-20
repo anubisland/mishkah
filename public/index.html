@@ -99,8 +99,18 @@
     header p {
       font-size: 12px !important;
     }
-    header button, header select, header input {
+    header select, header input, header .header-compact-btn {
       font-size: 12px !important;
+    }
+    /* Core Foundation Branches Primary Typography (Immune to 12px rule) */
+    .branch-tab-btn {
+      font-size: clamp(1.05rem, 1.25vw, 1.25rem) !important;
+      line-height: 1.2 !important;
+    }
+    .branch-tab-label {
+      font-size: clamp(1.05rem, 1.25vw, 1.25rem) !important;
+      line-height: 1.2 !important;
+      font-weight: 800 !important;
     }
 
     /* Fixed Invariant Hero Banner Frame (Immune to Content Zoom) */
@@ -6867,10 +6877,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v64.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v64.0 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v66.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v66.0 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v64.0' : 'v64.0'}</span>
+                  <span>{isRtl ? 'الإصدار v66.0' : 'v66.0'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -6878,8 +6888,8 @@
               </div>
             </div>
 
-            {/* Navigation Tabs Bar — 3 Core Foundation Branches (Primary Level 2 Typography) */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t-2 border-emerald-800/90 flex overflow-x-auto py-2.5 sm:py-3.5 gap-2.5 sm:gap-4 scrollbar-none justify-start sm:justify-center items-center">
+            {/* Navigation Tabs Bar — 3 Core Foundation Branches (Substantially Enlarged & Dignified Typography) */}
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 border-t-2 border-emerald-800/90 flex overflow-x-auto py-3 sm:py-4 gap-3 sm:gap-5 scrollbar-none justify-start sm:justify-center items-center">
               {[
                 { id: 'hifz', icon: '🕋', labelAr: '1. التحفيظ ومصحف المدينة', labelEn: '1. Quran & Mushaf' },
                 { id: 'tajweed', icon: '📖', labelAr: '2. التجويد ومخارج الحروف', labelEn: '2. Tajweed Rules' },
@@ -6895,14 +6905,14 @@
                       setSuwaydViewMode('catalog');
                     }
                   }}
-                  className={`flex items-center gap-2.5 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl text-sm sm:text-base lg:text-lg font-black font-cairo tracking-wide whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                  className={`branch-tab-btn flex items-center gap-2.5 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl font-extrabold font-cairo whitespace-nowrap transition-all duration-200 cursor-pointer ${
                     activeTab === tab.id 
-                      ? 'bg-gradient-to-r from-gold-400 via-amber-300 to-gold-400 text-emerald-950 shadow-lg border-2 border-gold-200 transform scale-[1.03] ring-2 ring-gold-400/60' 
-                      : 'bg-emerald-900/60 hover:bg-emerald-800/80 text-emerald-100 hover:text-white border border-emerald-700/60 shadow-xs hover:border-gold-400/50'
+                      ? 'bg-gradient-to-r from-gold-400 via-amber-300 to-gold-400 text-emerald-950 shadow-xl border-3 border-gold-200 transform scale-[1.03] ring-4 ring-gold-400/50' 
+                      : 'bg-emerald-900/85 hover:bg-emerald-800 text-emerald-100 hover:text-white border-2 border-emerald-700/80 shadow-md hover:border-gold-400/60'
                   }`}
                 >
-                  <span className="text-xl sm:text-2xl drop-shadow leading-none">{tab.icon}</span>
-                  <span className="leading-none">{isRtl ? tab.labelAr : tab.labelEn}</span>
+                  <span className="text-xl sm:text-2xl drop-shadow leading-none shrink-0">{tab.icon}</span>
+                  <span className="branch-tab-label font-black font-cairo leading-none drop-shadow-xs">{isRtl ? tab.labelAr : tab.labelEn}</span>
                 </button>
               ))}
             </div>
