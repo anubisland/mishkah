@@ -33,6 +33,8 @@
   <!-- Client-side PowerPoint (.pptx) Presentation Engine -->
   <script src="libs/jszip.min.js"></script>
   <script src="libs/pptxgen.bundle.js"></script>
+  <!-- Dr. Ayman Suwayd Illustrated Tajweed Plates Catalog -->
+  <script src="data/suwayd_plates.js"></script>
 
   <script>
     tailwind.config = {
@@ -3198,6 +3200,675 @@
 ];
 
     // Professional Vocal Tract & Tongue Anatomical Cross-Section Renderer (Dr. Ayman Suwayd Certified)
+    
+    // Authentic 39 Plates from Illustrated Tajweed (التجويد المصور - د. أيمن رشدي سويد)
+    const SUWAYD_PLATES_DATA = [
+  {
+    "id": "overview_vocal_tract",
+    "slideNum": 73,
+    "titleAr": "المخارج الرئيسة لجهاز النطق الإنساني",
+    "titleEn": "Main Articulation Points of the Human Vocal Tract",
+    "category": "anatomy",
+    "organAr": "جهاز النطق العام",
+    "organEn": "General Vocal Tract",
+    "letters": [],
+    "filename": "overview_vocal_tract.jpg",
+    "pageInBook": 71,
+    "descAr": "المقطع التشريحي العام لجهاز النطق: الجوف، الحلق، الفم (الحنك، اللسان، الأسنان، الشفتان)، والخيشوم.",
+    "descEn": "General anatomical cross-section showing Al-Jawf, Al-Halq, Oral Cavity (Palate, Tongue, Teeth, Lips), and Al-Khayshoom."
+  },
+  {
+    "id": "halq_sections_vocal_cords",
+    "slideNum": 76,
+    "titleAr": "أقسام الحلق والأوتار الصوتية",
+    "titleEn": "Sections of the Throat & Vocal Cords",
+    "category": "anatomy",
+    "organAr": "الحلق",
+    "organEn": "The Throat (Al-Halq)",
+    "letters": [
+      "ء",
+      "هـ",
+      "ع",
+      "ح",
+      "غ",
+      "خ"
+    ],
+    "filename": "halq_sections_vocal_cords.jpg",
+    "pageInBook": 74,
+    "descAr": "تبيين أقصى الحلق (الأوتار الصوتية)، وسط الحلق (لسان المزمار)، وأدنى الحلق (جذر اللسان).",
+    "descEn": "Anatomical divisions: Deep Throat (Vocal Cords), Mid Throat (Epiglottis), and Closest Throat (Root of Tongue)."
+  },
+  {
+    "id": "palate_anatomy",
+    "slideNum": 77,
+    "titleAr": "الحنك الأعلى وأقسامه التشريحية",
+    "titleEn": "The Upper Palate Anatomy",
+    "category": "anatomy",
+    "organAr": "الحنك الأعلى",
+    "organEn": "Upper Palate",
+    "letters": [],
+    "filename": "palate_anatomy.jpg",
+    "pageInBook": 75,
+    "descAr": "اللثة، مقدم الحنك، الحنك العظمي (الصلب)، الحنك اللحمي (الرخو)، واللهاة.",
+    "descEn": "Gums (Alveolar Ridge), Hard Palate, Soft Palate (Velum), and Uvula."
+  },
+  {
+    "id": "tongue_divisions",
+    "slideNum": 78,
+    "titleAr": "أقسام اللسان ومواضع مخارجه العشرة",
+    "titleEn": "Anatomical Divisions of the Tongue",
+    "category": "anatomy",
+    "organAr": "اللسان",
+    "organEn": "The Tongue (Al-Lisan)",
+    "letters": [],
+    "filename": "tongue_divisions.jpg",
+    "pageInBook": 76,
+    "descAr": "جذر اللسان، أقصى اللسان، وسط اللسان، طرف اللسان، رأس اللسان، وحافتا اللسان (أقصى وأدنى ومنتهى الحافة).",
+    "descEn": "Root, Deep Tongue (Back), Middle, Tip, Blade/Apex, and Edges of the tongue."
+  },
+  {
+    "id": "teeth_overview",
+    "slideNum": 80,
+    "titleAr": "الأسنان الـ 32 وتوزيعها التجويدي",
+    "titleEn": "The 32 Teeth and Their Tajweed Placement",
+    "category": "anatomy",
+    "organAr": "الأسنان",
+    "organEn": "The Teeth",
+    "letters": [],
+    "filename": "teeth_overview.jpg",
+    "pageInBook": 78,
+    "descAr": "الثنايا الأربع، الرباعيات الأربع، الأنياب الأربعة، والضواحك والطواحن والنواجذ.",
+    "descEn": "Incisors (Central & Lateral), Canines, Premolars, Molars, and Wisdom Teeth."
+  },
+  {
+    "id": "makharij_overview",
+    "slideNum": 95,
+    "titleAr": "المخارج العامة الخمسة للحروف العربية",
+    "titleEn": "The 5 General Articulation Points",
+    "category": "makharij",
+    "organAr": "المخارج العامة",
+    "organEn": "General Articulation Points",
+    "letters": [],
+    "filename": "makharij_overview.jpg",
+    "pageInBook": 93,
+    "descAr": "المخارج الخمسة الكبرى: 1- الجوف 2- الحلق 3- اللسان 4- الشفتان 5- الخيشوم.",
+    "descEn": "The 5 major areas: Al-Jawf, Al-Halq, Al-Lisan, Ash-Shafatayn, Al-Khayshoom."
+  },
+  {
+    "id": "jawf_overview",
+    "slideNum": 96,
+    "titleAr": "مخرج الجوف (خلاء الفم والحلق)",
+    "titleEn": "Al-Jawf: Oral & Pharyngeal Cavity",
+    "category": "makharij",
+    "organAr": "الجوف",
+    "organEn": "Al-Jawf (Oral & Pharyngeal Cavity)",
+    "letters": [
+      "ا",
+      "و",
+      "ي"
+    ],
+    "filename": "jawf_overview.jpg",
+    "pageInBook": 94,
+    "descAr": "يشمل تجويف الحلق + تجويف الفم الممتد لخروج حروف المد الثلاثة دون اعتراض عائق.",
+    "descEn": "The empty space within the pharynx and mouth where elongated medial vowel letters flow freely."
+  },
+  {
+    "id": "jawf_three_letters",
+    "slideNum": 97,
+    "titleAr": "مقارنة خروج حروف المد الثلاثة من الجوف",
+    "titleEn": "Comparison of the 3 Madd Letters in Al-Jawf",
+    "category": "makharij",
+    "organAr": "الجوف",
+    "organEn": "Al-Jawf",
+    "letters": [
+      "ا",
+      "و",
+      "ي"
+    ],
+    "filename": "jawf_three_letters.jpg",
+    "pageInBook": 95,
+    "descAr": "الألف المدية (بانفتاح الفم)، الواو المدية (بانضمام الشفتين)، والياء المدية (بانخفاض الفك وارتفاع وسط اللسان).",
+    "descEn": "Medial Alif (neutral open), Medial Waw (lip rounding), and Medial Yaa (jaw drop with mid-tongue elevation)."
+  },
+  {
+    "id": "makhraj_hamzah_haa",
+    "slideNum": 100,
+    "titleAr": "أقصى الحلق: مخرج الهمزة والهاء",
+    "titleEn": "Deep Throat: Makhraj of Hamzah (ء) and Haa (هـ)",
+    "category": "makharij",
+    "organAr": "أقصى الحلق",
+    "organEn": "Deepest Throat (Vocal Cords)",
+    "letters": [
+      "ء",
+      "هـ"
+    ],
+    "filename": "makhraj_hamzah_haa.jpg",
+    "pageInBook": 98,
+    "descAr": "تخرج الهمزة الساكنة بانطباق الوترين، والمتحركة بتباعدهما، وتخرج الهاء بانفتاحهما الجزئي.",
+    "descEn": "Hamzah forms by closing or opening the vocal cords; Haa forms with partial separation."
+  },
+  {
+    "id": "makhraj_ayn_haa",
+    "slideNum": 101,
+    "titleAr": "وسط الحلق: مخرج العين والحاء",
+    "titleEn": "Mid Throat: Makhraj of Ayn (ع) and Haa (ح)",
+    "category": "makharij",
+    "organAr": "وسط الحلق",
+    "organEn": "Mid Throat (Epiglottis)",
+    "letters": [
+      "ع",
+      "ح"
+    ],
+    "filename": "makhraj_ayn_haa.jpg",
+    "pageInBook": 99,
+    "descAr": "منطقة لسان المزمار: تخرج العين برجوع لسان المزمار للخلف، وتخرج الحاء بانفتاح أوسع وجريان هواء ورخاوة.",
+    "descEn": "Epiglottis region: Ayn retracts the epiglottis; Haa allows wider frictionless breath flow."
+  },
+  {
+    "id": "makhraj_ghayn_khaa",
+    "slideNum": 102,
+    "titleAr": "أدنى الحلق: مخرج الغين والخاء",
+    "titleEn": "Closest Throat: Makhraj of Ghayn (غ) and Khaa (خ)",
+    "category": "makharij",
+    "organAr": "أدنى الحلق",
+    "organEn": "Closest Throat (Root of Tongue & Soft Palate)",
+    "letters": [
+      "غ",
+      "خ"
+    ],
+    "filename": "makhraj_ghayn_khaa.jpg",
+    "pageInBook": 100,
+    "descAr": "منطقة جذر اللسان مع الحنك اللحمي: مخرج الغين المجهورة المستعلية، ومخرج الخاء المهموسة الرخوة.",
+    "descEn": "Root of the tongue with soft palate: Ghayn (voiced) and Khaa (whispered & fricative)."
+  },
+  {
+    "id": "makhraj_qaaf",
+    "slideNum": 103,
+    "titleAr": "أقصى اللسان: مخرج القاف",
+    "titleEn": "Deep Tongue: Makhraj of Qaaf (ق)",
+    "category": "makharij",
+    "organAr": "أقصى اللسان",
+    "organEn": "Deepest Tongue",
+    "letters": [
+      "ق"
+    ],
+    "filename": "makhraj_qaaf.jpg",
+    "pageInBook": 101,
+    "descAr": "أقصى اللسان مع ما يحاذيه من الحنك اللحمي (الرخو) فقط، بحبس تام للصوت وقلقلة عند السكون.",
+    "descEn": "Deep tongue contacts the soft palate only, producing an explosive stop with Qalqalah when saakin."
+  },
+  {
+    "id": "makhraj_kaaf",
+    "slideNum": 104,
+    "titleAr": "أقصى اللسان: مخرج الكاف",
+    "titleEn": "Deep Tongue: Makhraj of Kaaf (ك)",
+    "category": "makharij",
+    "organAr": "أقصى اللسان",
+    "organEn": "Deep Tongue",
+    "letters": [
+      "ك"
+    ],
+    "filename": "makhraj_kaaf.jpg",
+    "pageInBook": 102,
+    "descAr": "أقصى اللسان مع ما يحاذيه من الحنك اللحمي والعظمي معاً (تحت مخرج القاف وأقرب لجهة الفم).",
+    "descEn": "Deep tongue contacts both soft and hard palates below Qaaf with distinct whisper (Hams)."
+  },
+  {
+    "id": "makhraj_jeem",
+    "slideNum": 105,
+    "titleAr": "وسط اللسان: مخرج الجيم",
+    "titleEn": "Middle Tongue: Makhraj of Jeem (ج)",
+    "category": "makharij",
+    "organAr": "وسط اللسان",
+    "organEn": "Middle Tongue",
+    "letters": [
+      "ج"
+    ],
+    "filename": "makhraj_jeem.jpg",
+    "pageInBook": 103,
+    "descAr": "وسط اللسان مع ما يحاذيه من وسط الحنك الأعلى بانقفال تام للمخرج دون تسريب هواء أو رخاوة.",
+    "descEn": "Middle tongue firmly seals against the middle hard palate preventing air leakage."
+  },
+  {
+    "id": "makhraj_sheen",
+    "slideNum": 106,
+    "titleAr": "وسط اللسان: مخرج الشين",
+    "titleEn": "Middle Tongue: Makhraj of Sheen (ش)",
+    "category": "makharij",
+    "organAr": "وسط اللسان",
+    "organEn": "Middle Tongue",
+    "letters": [
+      "ش"
+    ],
+    "filename": "makhraj_sheen.jpg",
+    "pageInBook": 104,
+    "descAr": "وسط اللسان مع ما يحاذيه من وسط الحنك الأعلى مع انفتاح جزئي يسمح بانتشار الريح (التفشي).",
+    "descEn": "Middle tongue approaches the palate without complete closure, allowing air dispersal (Tafashshi)."
+  },
+  {
+    "id": "makhraj_yaa",
+    "slideNum": 107,
+    "titleAr": "وسط اللسان: مخرج الياء غير المدية",
+    "titleEn": "Middle Tongue: Makhraj of Non-Medial Yaa (ي)",
+    "category": "makharij",
+    "organAr": "وسط اللسان",
+    "organEn": "Middle Tongue",
+    "letters": [
+      "ي"
+    ],
+    "filename": "makhraj_yaa.jpg",
+    "pageInBook": 105,
+    "descAr": "وسط اللسان مع وسط الحنك الأعلى مع تضيّق المجرى وجريان الصوت والرخاوة والجهر.",
+    "descEn": "Middle tongue elevates toward the hard palate with voice flow (Rikhawah & Jahr)."
+  },
+  {
+    "id": "compare_jeem_sheen_yaa",
+    "slideNum": 108,
+    "titleAr": "مقارنة ثلاثية بين مخارج الجيم والشين والياء",
+    "titleEn": "Tri-comparison: Jeem, Sheen, and Yaa",
+    "category": "comparison",
+    "organAr": "وسط اللسان (الحروف الشجرية)",
+    "organEn": "Middle Tongue (Tree Letters)",
+    "letters": [
+      "ج",
+      "ش",
+      "ي"
+    ],
+    "filename": "compare_jeem_sheen_yaa.jpg",
+    "pageInBook": 106,
+    "descAr": "توضح انقفال المخرج في الجيم، وانفتاحه لانتشار الهواء في الشين، وتضيقه مع جريان الصوت في الياء.",
+    "descEn": "Shows complete closure in Jeem, air dispersal in Sheen, and voice channel narrowing in Yaa."
+  },
+  {
+    "id": "makhraj_daad_pressure_contact",
+    "slideNum": 109,
+    "titleAr": "مخرج الضاد: منطقتا الضغط والاتكاء والتلامس",
+    "titleEn": "Makhraj of Daad: Pressure & Contact Zones",
+    "category": "makharij",
+    "organAr": "حافة اللسان",
+    "organEn": "Tongue Edge",
+    "letters": [
+      "ض"
+    ],
+    "filename": "makhraj_daad_pressure_contact.jpg",
+    "pageInBook": 107,
+    "descAr": "حافة اللسان مع الأضراس العليا: منطقة الضغط والاتكاء (أزرق)، ومنطقة التلامس دون ضغط عند الطرف (أصفر).",
+    "descEn": "Tongue edge with upper molars: Primary pressure zone (blue) vs gentle contact zone at tip (yellow)."
+  },
+  {
+    "id": "daad_tongue_edges",
+    "slideNum": 110,
+    "titleAr": "الحيز الذي تشغله الضاد من حافتي اللسان",
+    "titleEn": "Lateral Edge Area Occupied by Daad",
+    "category": "makharij",
+    "organAr": "حافتا اللسان",
+    "organEn": "Tongue Lateral Edges",
+    "letters": [
+      "ض"
+    ],
+    "filename": "daad_tongue_edges.jpg",
+    "pageInBook": 108,
+    "descAr": "تبيين أدنى الحافة وأقصى الحافة مع خريطة الحنك الأعلى لتوضيح ميكانيكية الاستطالة.",
+    "descEn": "Shows deepest edge to lower edge alignment with palate explaining sound elongation (Istitālah)."
+  },
+  {
+    "id": "makhraj_laam",
+    "slideNum": 111,
+    "titleAr": "مخرج اللام وحيزها من أدنى الحافة",
+    "titleEn": "Makhraj of Laam from Lower Tongue Edges",
+    "category": "makharij",
+    "organAr": "حافة وطرف اللسان",
+    "organEn": "Lower Tongue Edge to Tip",
+    "letters": [
+      "ل"
+    ],
+    "filename": "makhraj_laam.jpg",
+    "pageInBook": 109,
+    "descAr": "من أدنى حافتي اللسان إلى منتهى طرفه مع ما يحاذيهما من لثة الأسنان العليا وانحراف الصوت عن الجانبين.",
+    "descEn": "From lower edge of tongue to the tip contacting upper gums with sound divergence (Inhiraf)."
+  },
+  {
+    "id": "laam_tongue_region",
+    "slideNum": 112,
+    "titleAr": "الحيز الذي تشغله اللام من الحنك الأعلى",
+    "titleEn": "Upper Palate Contact Area for Laam",
+    "category": "makharij",
+    "organAr": "الحنك الأعلى وطرف اللسان",
+    "organEn": "Upper Palate & Tongue Tip",
+    "letters": [
+      "ل"
+    ],
+    "filename": "laam_tongue_region.jpg",
+    "pageInBook": 110,
+    "descAr": "امتداد منطقة التلامس على لثة الأسنان العليا الثمانية (الضاحك والناب والرباعية والثنية من الجانبين).",
+    "descEn": "Contact span across upper gums encompassing 8 teeth (incisors, canines, premolars)."
+  },
+  {
+    "id": "compare_laam_tafkheem_tarqeeq",
+    "slideNum": 113,
+    "titleAr": "مقارنة بين اللام المفخمة واللام المرققة",
+    "titleEn": "Comparison: Heavy (Mufakhkhamah) vs Light Laam",
+    "category": "comparison",
+    "organAr": "اللسان والحلق",
+    "organEn": "Tongue & Pharynx",
+    "letters": [
+      "ل"
+    ],
+    "filename": "compare_laam_tafkheem_tarqeeq.jpg",
+    "pageInBook": 111,
+    "descAr": "يصاحب اللام المفخمة (في لفظ الجلالة) تقعر لوسط اللسان وتضيق في الحلق بخلاف المرققة.",
+    "descEn": "Shows tongue concavity and pharyngeal narrowing for velarized/heavy Laam vs relaxed light Laam."
+  },
+  {
+    "id": "makhraj_noon",
+    "slideNum": 114,
+    "titleAr": "مخرج النون: النصف اللساني والنصف الخيشومي",
+    "titleEn": "Makhraj of Noon: Lingual & Nasal Halves",
+    "category": "makharij",
+    "organAr": "طرف اللسان والخيشوم",
+    "organEn": "Tongue Tip & Nasal Cavity",
+    "letters": [
+      "ن"
+    ],
+    "filename": "makhraj_noon.jpg",
+    "pageInBook": 112,
+    "descAr": "طرف اللسان مع لثة الثنيتين العلييين (النصف المكمَّل) مصحوباً بغنة خيشومية (النصف المكمِّل).",
+    "descEn": "Tongue tip touches gums of central incisors while sound simultaneously resonates through the nasal cavity."
+  },
+  {
+    "id": "makhraj_raa",
+    "slideNum": 115,
+    "titleAr": "مخرج الراء من طرف اللسان مع اللثة",
+    "titleEn": "Makhraj of Raa from Tongue Tip with Gums",
+    "category": "makharij",
+    "organAr": "طرف اللسان",
+    "organEn": "Tongue Tip",
+    "letters": [
+      "ر"
+    ],
+    "filename": "makhraj_raa.jpg",
+    "pageInBook": 113,
+    "descAr": "طرف اللسان مع ما يحاذيه من اللثة قريباً من مخرج النون مع تقعر خفيف يمر منه الصوت.",
+    "descEn": "Tongue tip contacts the upper gums near Noon with a minute channel for acoustic flow."
+  },
+  {
+    "id": "raa_gap_takreer",
+    "slideNum": 116,
+    "titleAr": "فجوة الراء الصوتية المانعة للتكرير المحرم",
+    "titleEn": "The Acoustic Gap of Raa Preventing Excessive Trilling",
+    "category": "makharij",
+    "organAr": "رأس طرف اللسان",
+    "organEn": "Tongue Apex",
+    "letters": [
+      "ر"
+    ],
+    "filename": "raa_gap_takreer.jpg",
+    "pageInBook": 114,
+    "descAr": "منظر أمامي للفم يوضح الفجوة الدقيقة التي يمر منها جزء الصوت ولولاها لانقفل المخرج وتكررت الراء.",
+    "descEn": "Frontal view highlighting the vital small opening that lets partial sound escape, preventing excessive roll."
+  },
+  {
+    "id": "compare_raa_tafkheem_tarqeeq",
+    "slideNum": 117,
+    "titleAr": "مقارنة تشريحية بين الراء المفخمة والمرققة",
+    "titleEn": "Comparison: Heavy vs Light Raa",
+    "category": "comparison",
+    "organAr": "طرف وجذر اللسان",
+    "organEn": "Tip & Root of Tongue",
+    "letters": [
+      "ر"
+    ],
+    "filename": "compare_raa_tafkheem_tarqeeq.jpg",
+    "pageInBook": 115,
+    "descAr": "ارتفاع أقصى اللسان وتراجع لسان المزمار في الراء المفخمة، مقابل انحدار اللسان واستفاله في المرققة.",
+    "descEn": "Shows elevation of back of tongue in heavy Raa vs lowered neutral position in light Raa."
+  },
+  {
+    "id": "makhraj_taa_daal_taa",
+    "slideNum": 118,
+    "titleAr": "الحروف النطعية: الطاء والدال والتاء",
+    "titleEn": "Alveolar Stops: Taa (ط), Daal (د), Taa (ت)",
+    "category": "makharij",
+    "organAr": "طرف اللسان مع أصول الثنايا العليا",
+    "organEn": "Tongue Tip with Roots of Upper Incisors",
+    "letters": [
+      "ط",
+      "د",
+      "ت"
+    ],
+    "filename": "makhraj_taa_daal_taa.jpg",
+    "pageInBook": 116,
+    "descAr": "طرف اللسان العريض مع أصول الثنايا العليا مع بيان الإطباق والاستعلاء في الطاء، والانفتاح في الدال والتاء.",
+    "descEn": "Tongue tip touches the roots of upper incisors; contrasts velarized Taa (ط) with open Daal and Taa (ت)."
+  },
+  {
+    "id": "makhraj_saad_seen_zay",
+    "slideNum": 119,
+    "titleAr": "حروف الصفير: الصاد والسين والزاي",
+    "titleEn": "Sibilant Letters: Saad (ص), Seen (س), Zay (ز)",
+    "category": "makharij",
+    "organAr": "طرف اللسان مع الثنايا السفلى",
+    "organEn": "Tongue Tip with Lower Incisors",
+    "letters": [
+      "ص",
+      "س",
+      "ز"
+    ],
+    "filename": "makhraj_saad_seen_zay.jpg",
+    "pageInBook": 117,
+    "descAr": "منتهى طرف اللسان مع أسفل الصفحة الداخلية للثنايا السفلى وخروج الصوت ماراً بين الثنايا العليا والسفلى.",
+    "descEn": "Tip rests against lower incisors; acoustic stream shoots out through the narrow gap between upper/lower teeth."
+  },
+  {
+    "id": "makhraj_zaa_zaal_thaa",
+    "slideNum": 120,
+    "titleAr": "الحروف اللثوية: الظاء والذال والثاء",
+    "titleEn": "Dental Letters: Dhaa (ظ), Dhaal (ذ), Thaa (ث)",
+    "category": "makharij",
+    "organAr": "طرف اللسان مع أطراف الثنايا العليا",
+    "organEn": "Tongue Tip with Edges of Upper Incisors",
+    "letters": [
+      "ظ",
+      "ذ",
+      "ث"
+    ],
+    "filename": "makhraj_zaa_zaal_thaa.jpg",
+    "pageInBook": 118,
+    "descAr": "رأس طرف اللسان يخرج قليلاً ليمس أطراف الثنايا العليا مع إطباق الظاء واستفال الذال والثاء.",
+    "descEn": "Tongue tip protrudes slightly to contact the upper incisor edges; contrasts heavy Dhaa with light Dhaal/Thaa."
+  },
+  {
+    "id": "makhraj_faa",
+    "slideNum": 121,
+    "titleAr": "مخرج الفاء من بطن الشفة السفلى",
+    "titleEn": "Makhraj of Faa (ف) from Lower Lip",
+    "category": "makharij",
+    "organAr": "الشفة السفلى والثنايا العليا",
+    "organEn": "Lower Lip with Upper Incisors",
+    "letters": [
+      "ف"
+    ],
+    "filename": "makhraj_faa.jpg",
+    "pageInBook": 119,
+    "descAr": "باطن الشفة السفلى مع أطراف الثنايا العليا مع جريان النفس الرخو الواسع.",
+    "descEn": "Inside wet border of the lower lip contacts the edges of upper incisors with continuous breath (Hams)."
+  },
+  {
+    "id": "makhraj_waw",
+    "slideNum": 122,
+    "titleAr": "مخرج الواو غير المدية (المتحركة واللينية)",
+    "titleEn": "Makhraj of Non-Medial Waw (و)",
+    "category": "makharij",
+    "organAr": "الشفتان",
+    "organEn": "The Lips",
+    "letters": [
+      "و"
+    ],
+    "filename": "makhraj_waw.jpg",
+    "pageInBook": 120,
+    "descAr": "انضمام الشفتين إلى الأمام مع إبقاء فتحة دائرية يمر منها الصوت وارتفاع أقصى اللسان.",
+    "descEn": "Protrusion and rounding of lips leaving a circular aperture, with passive elevation of back of tongue."
+  },
+  {
+    "id": "makhraj_baa",
+    "slideNum": 123,
+    "titleAr": "مخرج الباء بانطباق الشفتين",
+    "titleEn": "Makhraj of Baa (ب) Lip Closure",
+    "category": "makharij",
+    "organAr": "الشفتان",
+    "organEn": "The Lips",
+    "letters": [
+      "ب"
+    ],
+    "filename": "makhraj_baa.jpg",
+    "pageInBook": 121,
+    "descAr": "انطباق الشفتين على بعضهما انطباقاً تاماً مع انحباس الصوت الشديد ثم تباعد ارتدادي عند القلقلة.",
+    "descEn": "Complete bilabial stop closure completely arresting sound and breath, released with Qalqalah when saakin."
+  },
+  {
+    "id": "makhraj_meem",
+    "slideNum": 124,
+    "titleAr": "مخرج الميم: الشفوي والخيشومي",
+    "titleEn": "Makhraj of Meem: Labial & Nasal Halves",
+    "category": "makharij",
+    "organAr": "الشفتان والخيشوم",
+    "organEn": "Lips & Nasal Cavity",
+    "letters": [
+      "م"
+    ],
+    "filename": "makhraj_meem.jpg",
+    "pageInBook": 122,
+    "descAr": "انطباق الشفتين (الجزء الشفوي المكمَّل) مع تدفق الغنة الرنانة من الخيشوم (الجزء الخيشومي المكمِّل).",
+    "descEn": "Bilabial lip contact (complete closing) paired with open resonance through nasal passage."
+  },
+  {
+    "id": "ghunnah_nasal_cavity",
+    "slideNum": 125,
+    "titleAr": "مخرج الخيشوم والغنة في النون والميم",
+    "titleEn": "Al-Khayshoom: The Nasal Chamber & Ghunnah",
+    "category": "makharij",
+    "organAr": "الخيشوم",
+    "organEn": "Al-Khayshoom (Nasal Cavity)",
+    "letters": [
+      "ن",
+      "م"
+    ],
+    "filename": "ghunnah_nasal_cavity.jpg",
+    "pageInBook": 123,
+    "descAr": "صوت أرغن رخيم يخرج من الخيشوم (التجويف الأنفي) ملازم لجسم النون والميم في كافة أحوالهما.",
+    "descEn": "Nasal resonance chamber inherent in Noon and Meem across all assimilation and hidden states."
+  },
+  {
+    "id": "sifat_mutadaddah_intro",
+    "slideNum": 130,
+    "titleAr": "الصفات المتضادة للحروف العربية",
+    "titleEn": "The Opposite Characteristics of Letters",
+    "category": "sifat",
+    "organAr": "صفات الحروف",
+    "organEn": "Phonetic Characteristics",
+    "letters": [],
+    "filename": "sifat_mutadaddah_intro.jpg",
+    "pageInBook": 128,
+    "descAr": "الجهر والهمس، الشدة والرخاوة والبينية، الاستعلاء والاستفال، والإطباق والانفتاح.",
+    "descEn": "Voice vs Whisper, Stop vs Fricative vs Intermediate, Elevation vs Lowering, and Adhesion vs Openness."
+  },
+  {
+    "id": "sifat_kaaf_taa_breath_release",
+    "slideNum": 140,
+    "titleAr": "ميكانيكية انطلاق النفس في الكاف والتاء (الشدة ثم الهمس)",
+    "titleEn": "Acoustic Mechanism in Kaaf & Taa: Stop then Whisper",
+    "category": "sifat",
+    "organAr": "اللسان والحنك الأعلى",
+    "organEn": "Tongue & Upper Palate",
+    "letters": [
+      "ك",
+      "ت"
+    ],
+    "filename": "sifat_kaaf_taa_breath_release.jpg",
+    "pageInBook": 138,
+    "descAr": "انحباس الصوت التام في أول الحرف (الشدة)، يعقبه تباعد لطيف وانطلاق دفعة النفس (الهمس).",
+    "descEn": "Total acoustic stoppage initially (Shiddah), immediately followed by release of whispered air burst (Hams)."
+  },
+  {
+    "id": "bayniyyah_noon_meem",
+    "slideNum": 145,
+    "titleAr": "صفة البينية والتوسط في النون والميم",
+    "titleEn": "The Intermediate Quality (Bayniyyah) in Noon & Meem",
+    "category": "sifat",
+    "organAr": "الفم والخيشوم",
+    "organEn": "Oral & Nasal Tract",
+    "letters": [
+      "ن",
+      "م"
+    ],
+    "filename": "bayniyyah_noon_meem.jpg",
+    "pageInBook": 143,
+    "descAr": "انحباس الصوت في المخرج الفموي وانفتاحه في المخرج الخيشومي مما يجعلهما حرفي توسط.",
+    "descEn": "Partial stoppage at mouth complemented by open nasal passage creating the moderate duration (Bayniyyah)."
+  },
+  {
+    "id": "bayniyyah_ayn",
+    "slideNum": 146,
+    "titleAr": "صفة البينية في حرف العين",
+    "titleEn": "The Intermediate Quality (Bayniyyah) in Ayn (ع)",
+    "category": "sifat",
+    "organAr": "وسط الحلق",
+    "organEn": "Mid Throat (Epiglottis)",
+    "letters": [
+      "ع"
+    ],
+    "filename": "bayniyyah_ayn.jpg",
+    "pageInBook": 144,
+    "descAr": "رجوع لسان المزمار إلى الجدار الخلفي للبلعوم دون انغلاق كامل، مما يعطي العين زمنها البيني الصحيح.",
+    "descEn": "Epiglottis moves back narrowing the airway without full occlusion, producing moderate duration."
+  },
+  {
+    "id": "letter_timing_measurements",
+    "slideNum": 147,
+    "titleAr": "ميزان أزمنة الحروف الصحيحة (المتحركة والساكنة)",
+    "titleEn": "Phonetic Timing & Duration of Letters",
+    "category": "sifat",
+    "organAr": "الميزان الصوتي",
+    "organEn": "Acoustic Metric",
+    "letters": [],
+    "filename": "letter_timing_measurements.jpg",
+    "pageInBook": 145,
+    "descAr": "أزمنة الحروف المتحركة متساوية دائماً، وأزمنة الحروف الساكنة تتفاوت بحسب جريان الصوت (الرخو أطول من البيني أطول من الشديد).",
+    "descEn": "All vowels have equal duration; consonants vary: Fricative (longest) > Intermediate > Plosive/Stop (shortest)."
+  }
+];
+    const SUWAYD_PLATES = (typeof window !== 'undefined' && window.SUWAYD_PLATES) ? window.SUWAYD_PLATES : SUWAYD_PLATES_DATA;
+
+    // Helper to get matching authentic plates for any lesson
+    function getSuwaydPlatesForLesson(lessonId) {
+      const plates = (typeof window !== 'undefined' && window.SUWAYD_PLATES) ? window.SUWAYD_PLATES : SUWAYD_PLATES_DATA;
+      if (!lessonId) return plates;
+      switch (lessonId) {
+        case 'makharij_jawf':
+          return plates.filter(p => p.id === 'jawf_overview' || p.id === 'jawf_three_letters');
+        case 'makharij_halq':
+          return plates.filter(p => p.id === 'halq_sections_vocal_cords' || p.id === 'makhraj_hamzah_haa' || p.id === 'makhraj_ayn_haa' || p.id === 'makhraj_ghayn_khaa');
+        case 'makharij_lisan':
+          return plates.filter(p => p.id === 'tongue_divisions' || p.id === 'makhraj_qaaf' || p.id === 'makhraj_kaaf' || p.id === 'makhraj_jeem' || p.id === 'makhraj_sheen' || p.id === 'makhraj_yaa' || p.id === 'compare_jeem_sheen_yaa' || p.id === 'makhraj_daad_pressure_contact' || p.id === 'daad_tongue_edges' || p.id === 'makhraj_laam' || p.id === 'laam_tongue_region' || p.id === 'compare_laam_tafkheem_tarqeeq' || p.id === 'makhraj_noon' || p.id === 'makhraj_raa' || p.id === 'raa_gap_takreer' || p.id === 'compare_raa_tafkheem_tarqeeq' || p.id === 'makhraj_taa_daal_taa' || p.id === 'makhraj_saad_seen_zay' || p.id === 'makhraj_zaa_zaal_thaa');
+        case 'makharij_shafatayn_khayshoom':
+          return plates.filter(p => p.id === 'makhraj_faa' || p.id === 'makhraj_waw' || p.id === 'makhraj_baa' || p.id === 'makhraj_meem' || p.id === 'ghunnah_nasal_cavity');
+        case 'sifat_mutadaddah':
+          return plates.filter(p => p.id === 'sifat_mutadaddah_intro' || p.id === 'sifat_kaaf_taa_breath_release' || p.id === 'bayniyyah_noon_meem' || p.id === 'bayniyyah_ayn' || p.id === 'letter_timing_measurements');
+        case 'sifat_ghayr_mutadaddah':
+          return plates.filter(p => p.id === 'makhraj_sheen' || p.id === 'daad_tongue_edges' || p.id === 'makhraj_saad_seen_zay' || p.id === 'raa_gap_takreer');
+        case 'noon_sakinah_ahkam':
+          return plates.filter(p => p.id === 'makhraj_noon' || p.id === 'ghunnah_nasal_cavity' || p.id === 'bayniyyah_noon_meem');
+        case 'meem_sakinah_mushaddadatayn':
+          return plates.filter(p => p.id === 'makhraj_meem' || p.id === 'ghunnah_nasal_cavity' || p.id === 'bayniyyah_noon_meem');
+        case 'tafkheem_tarqeeq':
+          return plates.filter(p => p.id === 'compare_laam_tafkheem_tarqeeq' || p.id === 'compare_raa_tafkheem_tarqeeq' || p.id === 'makhraj_taa_daal_taa');
+        case 'madd_asli_fari':
+          return plates.filter(p => p.id === 'jawf_overview' || p.id === 'jawf_three_letters');
+        default:
+          return plates.filter(p => p.id === 'overview_vocal_tract' || p.id === 'makharij_overview');
+      }
+    }
+
     function renderSuwaydAnatomySvg(type, lessonId) {
       // Determine anatomical focus based on lesson
       const isHalq = lessonId === 'makharij_halq' || type === 'halq';
@@ -3961,6 +4632,15 @@
       const [tajweedSubTab, setTajweedSubTab] = useState('generator'); // 'generator', 'makhaarij', 'metronome'
       const [suwaydLessonId, setSuwaydLessonId] = useState('ikhfaa_haqiqi');
       const [suwaydFilterCategory, setSuwaydFilterCategory] = useState('all');
+      // Dr. Ayman Suwayd Authentic Illustrated Plates State
+      const [activeSuwaydPlateId, setActiveSuwaydPlateId] = useState(null);
+      const [suwaydPlateZoomModal, setSuwaydPlateZoomModal] = useState(null);
+      const [suwaydAnatomyMode, setSuwaydAnatomyMode] = useState('plate'); // 'plate' or 'svg'
+      const [suwaydCatalogSubTab, setSuwaydCatalogSubTab] = useState('lessons'); // 'lessons' or 'atlas'
+      const [atlasCategory, setAtlasCategory] = useState('all');
+      const [atlasSearch, setAtlasSearch] = useState('');
+      const [plateZoomLevel, setPlateZoomLevel] = useState(1);
+
       const [suwaydViewMode, setSuwaydViewMode] = useState('catalog'); // 'catalog' (Lesson Grid) | 'details' (Dedicated Fullscreen Lesson Screen)
       const [suwaydZoomModalOpen, setSuwaydZoomModalOpen] = useState(false);
       const [suwaydZoomSlideIndex, setSuwaydZoomSlideIndex] = useState(0);
@@ -5827,11 +6507,11 @@
                       className="bg-transparent text-gold-100 font-bold text-[11px] focus:outline-none cursor-pointer"
                       title={isRtl ? 'اختيار خط واجهة التطبيق' : 'Choose Interface Font'}
                     >
-                      <option value="cairo" className="bg-emerald-950 text-gold-100">خط كايرو (Cairo)</option>
-                      <option value="amiri" className="bg-emerald-950 text-gold-100">خط أميري (Amiri)</option>
-                      <option value="tajawal" className="bg-emerald-950 text-gold-100">خط تجوال (Tajawal)</option>
-                      <option value="almarai" className="bg-emerald-950 text-gold-100">خط المراعي (Almarai)</option>
-                      <option value="naskh" className="bg-emerald-950 text-gold-100">خط النسخ (Noto Naskh)</option>
+                      <option value="cairo" className="bg-emerald-950 text-gold-100">{isRtl ? "خط كايرو (Cairo)" : "Cairo Font"}</option>
+                      <option value="amiri" className="bg-emerald-950 text-gold-100">{isRtl ? "خط أميري (Amiri)" : "Amiri Font"}</option>
+                      <option value="tajawal" className="bg-emerald-950 text-gold-100">{isRtl ? "خط تجوال (Tajawal)" : "Tajawal Font"}</option>
+                      <option value="almarai" className="bg-emerald-950 text-gold-100">{isRtl ? "خط المراعي (Almarai)" : "Almarai Font"}</option>
+                      <option value="naskh" className="bg-emerald-950 text-gold-100">{isRtl ? "خط النسخ (Noto Naskh)" : "Noto Naskh Font"}</option>
                     </select>
                   </div>
 
@@ -5876,10 +6556,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v58.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v58.0 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v59.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v59.0 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v58.0' : 'v58.0'}</span>
+                  <span>{isRtl ? 'الإصدار v59.0' : 'v59.0'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -6202,7 +6882,7 @@
                           >
                             {MUSHAF_SURAHS_PAGE_MAP.map(s => (
                               <option key={s.id} value={s.id}>
-                                {s.id}. سورة {s.name} (صفحة {s.startPage})
+                                {s.id}. {isRtl ? 'سورة ' + s.name : 'Surah ' + (s.englishName || s.name)} ({isRtl ? 'صفحة ' : 'Page '} {s.startPage})
                               </option>
                             ))}
                           </select>
@@ -7491,7 +8171,7 @@
                 {tajweedSubTab === 'generator' && (
                   <div className="space-y-8 animate-fadeIn">
                     {/* VIEW 1: LESSONS CATALOG (INDEX) */}
-                    {suwaydViewMode === 'catalog' && (
+                    {suwaydCatalogSubTab === 'lessons' && suwaydViewMode === 'catalog' && (
                       <div className="space-y-6">
                         {/* Header Banner - Dr. Ayman Suwayd Certified Workbench */}
                         <div className="card-islamic-pearl rounded-3xl p-6 border-2 border-emerald-900/15 shadow-md">
@@ -7518,42 +8198,71 @@
                             </div>
 
                             {/* Hafs badge */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <span className="bg-gold-500/15 text-emerald-950 border border-gold-400 font-black text-xs px-3 py-1.5 rounded-xl shadow-xs">
-                                رواية حفص عن عاصم من طريق الشاطبية
+                                {isRtl ? 'رواية حفص عن عاصم من طريق الشاطبية' : 'Hafs from Asim via Shatibiyyah'}
                               </span>
+                              {/* SubTab Switcher: Lessons Catalog vs Illustrated Atlas */}
+                              <div className="bg-slate-100 p-0.5 rounded-xl border border-slate-300 flex items-center text-xs font-bold">
+                                <button
+                                  type="button"
+                                  onClick={() => setSuwaydCatalogSubTab('lessons')}
+                                  className={'px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ' + (
+                                    suwaydCatalogSubTab === 'lessons'
+                                      ? 'bg-emerald-900 text-gold-200 font-black shadow-xs'
+                                      : 'text-slate-600 hover:text-slate-900'
+                                  )}
+                                >
+                                  <span>📖</span>
+                                  <span>{isRtl ? 'فهرس الدروس (16)' : 'Lessons (16)'}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setSuwaydCatalogSubTab('atlas')}
+                                  className={'px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ' + (
+                                    suwaydCatalogSubTab === 'atlas'
+                                      ? 'bg-gold-500 text-emerald-950 font-black shadow-xs'
+                                      : 'text-slate-600 hover:text-slate-900'
+                                  )}
+                                >
+                                  <span>🏛️</span>
+                                  <span>{isRtl ? 'أطلس التجويد المصور (39 لوحة)' : 'Illustrated Atlas (39 Plates)'}</span>
+                                </button>
+                              </div>
                             </div>
                           </div>
 
-                          {/* Category Filter Pills */}
-                          <div className="flex flex-wrap items-center gap-2 pt-1">
-                            <span className="text-xs font-bold text-slate-500 ml-1">
-                              {isRtl ? 'أبواب التجويد:' : 'Chapters:'}
-                            </span>
-                            {[
-                              { id: 'all', labelAr: 'كافة أبواب الكتاب (16)', count: 16 },
-                              { id: 'makharij', labelAr: 'مخارج الحروف (4)', count: 4 },
-                              { id: 'sifat', labelAr: 'صفات الحروف والقلقلة (2)', count: 2 },
-                              { id: 'noon_and_meem', labelAr: 'النون والميم والغنن (2)', count: 2 },
-                              { id: 'lamat', labelAr: 'اللامات وعلاقات الحروف (2)', count: 2 },
-                              { id: 'madd', labelAr: 'أحكام المد والقصر (1)', count: 1 },
-                              { id: 'tafkheem', labelAr: 'التفخيم والترقيق والراءات (1)', count: 1 },
-                              { id: 'rasm_waqf', labelAr: 'الوقف والابتداء والهمزات (3)', count: 3 },
-                              { id: 'intro_tajweed', labelAr: 'المقدمات واللحن (1)', count: 1 }
-                            ].map(cat => (
-                              <button
-                                key={cat.id}
-                                onClick={() => setSuwaydFilterCategory(cat.id)}
-                                className={'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ' + (
-                                  suwaydFilterCategory === cat.id
-                                    ? 'bg-emerald-900 text-gold-200 border-gold-400 font-black shadow-sm ring-1 ring-gold-400'
-                                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-                                )}
-                              >
-                                <span>{cat.labelAr}</span>
-                              </button>
-                            ))}
-                          </div>
+                          {/* Category Filter Pills (Shown in Lessons mode) */}
+                          {suwaydCatalogSubTab === 'lessons' && (
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              <span className="text-xs font-bold text-slate-500 ml-1">
+                                {isRtl ? 'أبواب التجويد:' : 'Chapters:'}
+                              </span>
+                              {[
+                                { id: 'all', labelAr: 'كافة أبواب الكتاب (16)', labelEn: 'All Chapters (16)' },
+                                { id: 'makharij', labelAr: 'مخارج الحروف (4)', labelEn: 'Articulation (4)' },
+                                { id: 'sifat', labelAr: 'صفات الحروف والقلقلة (2)', labelEn: 'Sifat & Qalqalah (2)' },
+                                { id: 'noon_and_meem', labelAr: 'النون والميم والغنن (2)', labelEn: 'Noon & Meem (2)' },
+                                { id: 'lamat', labelAr: 'اللامات وعلاقات الحروف (2)', labelEn: 'Lamat (2)' },
+                                { id: 'madd', labelAr: 'أحكام المد والقصر (1)', labelEn: 'Madd Rules (1)' },
+                                { id: 'tafkheem', labelAr: 'التفخيم والترقيق والراءات (1)', labelEn: 'Tafkheem & Raa (1)' },
+                                { id: 'rasm_waqf', labelAr: 'الوقف والابتداء والهمزات (3)', labelEn: 'Stop & Waqf (3)' },
+                                { id: 'intro_tajweed', labelAr: 'المقدمات واللحن (1)', labelEn: 'Foundations (1)' }
+                              ].map(cat => (
+                                <button
+                                  key={cat.id}
+                                  onClick={() => setSuwaydFilterCategory(cat.id)}
+                                  className={'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ' + (
+                                    suwaydFilterCategory === cat.id
+                                      ? 'bg-emerald-900 text-gold-200 border-gold-400 font-black shadow-sm ring-1 ring-gold-400'
+                                      : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                                  )}
+                                >
+                                  <span>{isRtl ? cat.labelAr : cat.labelEn}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
 
                           {/* Lessons Grid: Rich, Inviting Cards */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5 pt-4 border-t border-slate-200/80">
@@ -7592,10 +8301,10 @@
 
                                     <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between">
                                       <span className="text-[10px] text-slate-400 font-medium">
-                                        {lesson.examples?.length || 3} أمثلة عثمانية
+                                        {lesson.examples?.length || 3} {isRtl ? 'أمثلة عثمانية' : 'Uthmani Examples'}
                                       </span>
                                       <span className="bg-emerald-900 text-gold-200 text-xs font-black px-3 py-1 rounded-xl shadow-xs group-hover:bg-gold-500 group-hover:text-emerald-950 transition flex items-center gap-1">
-                                        <span>فتح الدرس</span>
+                                        <span>{isRtl ? 'فتح الدرس' : 'Open Lesson'}</span>
                                         <span>⬅️</span>
                                       </span>
                                     </div>
@@ -7603,6 +8312,145 @@
                                 );
                               })}
                           </div>
+                        </div>
+                      </div>
+                    )}
+
+                    
+                    {/* VIEW 3: FULL ILLUSTRATED TAJWEED ATLAS (39 PLATES) */}
+                    {suwaydCatalogSubTab === 'atlas' && (
+                      <div className="space-y-6 animate-fadeIn">
+                        {/* Atlas Header & Search */}
+                        <div className="card-islamic-pearl rounded-3xl p-6 border-2 border-gold-400 shadow-md">
+                          <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-200">
+                            <div>
+                              <h3 className="text-xl font-black text-emerald-950 font-cairo flex items-center gap-2">
+                                <span>🏛️</span>
+                                <span>{isRtl ? 'أطلس التجويد المصور — لوحات د. أيمن رشدي سويد الكاملة' : 'Illustrated Tajweed Atlas — Dr. Ayman Suwayd'}</span>
+                              </h3>
+                              <p className="text-xs text-slate-600 mt-1">
+                                {isRtl 
+                                  ? 'المجموعة المعتمدة تشريحياً لمخارج وصفات الحروف العربية (39 لوحة ملونة عالية الدقة مجهزة للشرح والمقارنة مع عزو أرقام الصفحات من المجلد الأول)' 
+                                  : 'Complete 39 certified pedagogical plates of Arabic letter articulation & phonetic qualities (Vol. 1).'}
+                              </p>
+                            </div>
+
+                            {/* Search Input */}
+                            <div className="relative">
+                              <input
+                                type="text"
+                                value={atlasSearch}
+                                onChange={(e) => setAtlasSearch(e.target.value)}
+                                placeholder={isRtl ? 'ابحث باسم الحرف أو المخرج...' : 'Search by letter or organ...'}
+                                className="bg-white border-2 border-emerald-700/30 rounded-xl px-3.5 py-2 text-xs font-bold text-emerald-950 focus:outline-none focus:ring-2 focus:ring-gold-400 w-64 shadow-xs"
+                              />
+                              {atlasSearch && (
+                                <button
+                                  type="button"
+                                  onClick={() => setAtlasSearch('')}
+                                  className="absolute left-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Category Filter Buttons */}
+                          <div className="flex flex-wrap items-center gap-2">
+                            {[
+                              { id: 'all', labelAr: 'جميع اللوحات (39)', labelEn: 'All Plates (39)' },
+                              { id: 'anatomy', labelAr: 'أعضاء النطق العامة (5)', labelEn: 'Vocal Tract Anatomy (5)' },
+                              { id: 'makharij', labelAr: 'مخارج الحروف الخاصة (22)', labelEn: 'Letter Articulation (22)' },
+                              { id: 'comparison', labelAr: 'مقارنات الحروف (5)', labelEn: 'Letter Comparisons (5)' },
+                              { id: 'sifat', labelAr: 'صفات الحروف وميكانيكا النطق (7)', labelEn: 'Phonetic Sifat & Acoustics (7)' }
+                            ].map(cat => (
+                              <button
+                                key={cat.id}
+                                type="button"
+                                onClick={() => setAtlasCategory(cat.id)}
+                                className={'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ' + (
+                                  atlasCategory === cat.id
+                                    ? 'bg-gold-500 text-emerald-950 border-gold-400 font-black shadow-sm ring-1 ring-gold-400'
+                                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                                )}
+                              >
+                                <span>{isRtl ? cat.labelAr : cat.labelEn}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Plates Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                          {SUWAYD_PLATES
+                            .filter(plate => atlasCategory === 'all' || plate.category === atlasCategory)
+                            .filter(plate => {
+                              if (!atlasSearch.trim()) return true;
+                              const q = atlasSearch.trim().toLowerCase();
+                              return (
+                                plate.titleAr.toLowerCase().includes(q) ||
+                                plate.titleEn.toLowerCase().includes(q) ||
+                                plate.descAr.toLowerCase().includes(q) ||
+                                plate.descEn.toLowerCase().includes(q) ||
+                                (plate.letters && plate.letters.some(l => l.includes(q)))
+                              );
+                            })
+                            .map(plate => (
+                              <div
+                                key={plate.id}
+                                className="bg-white rounded-2xl p-3 border-2 border-slate-200 hover:border-gold-400 transition shadow-xs hover:shadow-lg flex flex-col justify-between group cursor-pointer"
+                                onClick={() => {
+                                  setPlateZoomLevel(1);
+                                  setSuwaydPlateZoomModal(plate);
+                                }}
+                              >
+                                <div>
+                                  {/* Thumbnail */}
+                                  <div className="w-full bg-slate-50 rounded-xl p-2 border border-slate-100 flex items-center justify-center relative overflow-hidden group-hover:bg-amber-50/40 transition">
+                                    <img
+                                      src={`images/tajweed/${plate.filename}`}
+                                      onError={(e) => {
+                                        e.target.src = `https://image.slidesharecdn.com/1-160316105247/85/1-${plate.slideNum}-638.jpg`;
+                                      }}
+                                      alt={plate.titleAr}
+                                      className="w-full h-40 object-contain rounded-lg transition duration-200 group-hover:scale-105"
+                                      loading="lazy"
+                                    />
+                                    <span className="absolute top-2 right-2 bg-emerald-950/80 text-gold-300 text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-xs">
+                                      {isRtl ? `ص ${plate.pageInBook}` : `p. ${plate.pageInBook}`}
+                                    </span>
+                                    {plate.letters && plate.letters.length > 0 && (
+                                      <span className="absolute bottom-2 left-2 bg-gold-400 text-emerald-950 text-xs font-quran font-bold px-2 py-0.5 rounded-md shadow-xs">
+                                        {plate.letters.join(' ')}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <div className="mt-3">
+                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                      {isRtl ? plate.organAr : plate.organEn}
+                                    </span>
+                                    <h4 className="font-bold text-emerald-950 text-xs mt-1.5 leading-snug line-clamp-2 font-cairo group-hover:text-gold-600 transition">
+                                      {isRtl ? plate.titleAr : plate.titleEn}
+                                    </h4>
+                                    <p className="text-[11px] text-slate-500 line-clamp-2 mt-1 leading-relaxed">
+                                      {isRtl ? plate.descAr : plate.descEn}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="pt-2 mt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
+                                  <span className="text-gold-600 group-hover:text-gold-700 flex items-center gap-1">
+                                    <span>🔍</span>
+                                    <span>{isRtl ? 'عرض وتكبير' : 'Enlarge'}</span>
+                                  </span>
+                                  <span className="text-[10px] text-slate-400 font-medium">
+                                    {isRtl ? 'د. أيمن سويد' : 'Dr. Suwayd'}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
                         </div>
                       </div>
                     )}
@@ -7840,9 +8688,9 @@
                                   {/* Speed Selector */}
                                   <div className="flex items-center gap-1 bg-white/80 rounded-xl p-1 border border-amber-300">
                                     {[
-                                      { id: 'tahqeeq', labelAr: 'تحقيق (بطيء)' },
-                                      { id: 'tadweer', labelAr: 'تدوير (معتدل)' },
-                                      { id: 'hadr', labelAr: 'حدر (سريع)' }
+                                      { id: 'tahqeeq', labelAr: 'تحقيق (بطيء)', labelEn: 'Tahqeeq (Slow)' },
+                                      { id: 'tadweer', labelAr: 'تدوير (معتدل)', labelEn: 'Tadweer (Medium)' },
+                                      { id: 'hadr', labelAr: 'حدر (سريع)', labelEn: 'Hadr (Fast)' }
                                     ].map(sp => (
                                       <button
                                         key={sp.id}
@@ -7876,7 +8724,7 @@
                                           )}
                                         >
                                           <span className="leading-none">{beatNum}</span>
-                                          <span className="text-[9px] font-medium leading-none mt-0.5">حركة</span>
+                                          <span className="text-[9px] font-medium leading-none mt-0.5">{isRtl ? "حركة" : "Beats"}</span>
                                         </div>
                                       );
                                     })}
@@ -7899,7 +8747,7 @@
                                       )}
                                     >
                                       <span>{metronomePlaying ? '⏸️' : '▶️'}</span>
-                                      <span>{metronomePlaying ? 'إيقاف الميزان' : 'تشغيل النبض التجويدي'}</span>
+                                      <span>{metronomePlaying ? (isRtl ? 'إيقاف الميزان' : 'Stop Metronome') : (isRtl ? 'تشغيل النبض التجويدي' : 'Play Metronome')}</span>
                                     </button>
 
                                     <button
@@ -7920,25 +8768,141 @@
                             {/* Left Column: Anatomical Cross-Section & Articulation Mechanism (5 cols) */}
                             <div className="lg:col-span-5 space-y-5">
                               {/* SVG Anatomical Diagram Card */}
-                              <div className="bg-white rounded-2xl p-4 border border-emerald-900/10 shadow-xs">
-                                <div className="flex items-center justify-between mb-2">
-                                  <h4 className="text-xs font-extrabold text-emerald-900 flex items-center gap-1.5">
-                                    <span>🗣️</span>
-                                    <span>{isRtl ? 'المقطع التشريحي التوضيحي:' : 'Anatomical Cross-Section:'}</span>
-                                  </h4>
-                                  <span className="text-[10px] bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded-md border border-emerald-200">
-                                    التجويد المصور
-                                  </span>
-                                </div>
+                              {/* Authentic Dr. Ayman Suwayd Illustrated Plate & Interactive Letter Viewer */}
+                              {(() => {
+                                const lessonPlates = getSuwaydPlatesForLesson(currentSuwaydLesson.id);
+                                const currentPlate = lessonPlates.find(p => p.id === activeSuwaydPlateId) || lessonPlates[0] || SUWAYD_PLATES[0];
 
-                                {/* Render Vector SVG with High-Clarity Tongue & Vocal Tract */}
-                                <div className="w-full flex items-center justify-center p-1 bg-slate-950 rounded-xl border border-gold-500/40">
-                                  {renderSuwaydAnatomySvg(currentSuwaydLesson.svgType, currentSuwaydLesson.id)}
-                                </div>
-                                <p className="text-[10px] text-center text-slate-500 font-medium mt-2">
-                                  {isRtl ? 'مخطط تشريحي بياني دقيق مستوحى من كتاب التجويد المصور لفضيلة د. أيمن سويد' : 'Diagrammatic vector illustration inspired by Dr. Ayman Suwayd'}
-                                </p>
-                              </div>
+                                return (
+                                  <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-gold-400/60 shadow-md space-y-4">
+                                    {/* Plate Header with Title, Book Page, and Mode Switcher */}
+                                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-emerald-900/10">
+                                      <div>
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-base">🖼️</span>
+                                          <h4 className="text-sm font-black text-emerald-950 font-cairo">
+                                            {isRtl ? 'اللوحة التعليمية المعتمدة (د. أيمن سويد)' : 'Official Plate (Dr. Ayman Suwayd)'}
+                                          </h4>
+                                        </div>
+                                        <p className="text-[11px] font-bold text-gold-700 mt-0.5">
+                                          {isRtl ? currentPlate.titleAr : currentPlate.titleEn}
+                                        </p>
+                                      </div>
+
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="text-[10px] bg-emerald-50 text-emerald-900 font-black px-2.5 py-1 rounded-lg border border-emerald-300">
+                                          {isRtl ? `ص ${currentPlate.pageInBook} • مجلد 1` : `p. ${currentPlate.pageInBook} • Vol. 1`}
+                                        </span>
+                                        {/* Mode Switcher: Plate vs SVG */}
+                                        <div className="bg-slate-100 p-0.5 rounded-lg border border-slate-300 flex items-center text-[10px] font-bold">
+                                          <button
+                                            type="button"
+                                            onClick={() => setSuwaydAnatomyMode('plate')}
+                                            className={`px-2 py-1 rounded-md transition ${suwaydAnatomyMode === 'plate' ? 'bg-gold-500 text-emerald-950 font-black shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                                            title={isRtl ? 'عرض اللوحة الأصلية الملونة' : 'View Authentic Color Plate'}
+                                          >
+                                            🖼️ {isRtl ? 'اللوحة المصورة' : 'Color Plate'}
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => setSuwaydAnatomyMode('svg')}
+                                            className={`px-2 py-1 rounded-md transition ${suwaydAnatomyMode === 'svg' ? 'bg-emerald-900 text-gold-200 font-black shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                                            title={isRtl ? 'عرض المخطط التخطيطي' : 'View Vector Diagram'}
+                                          >
+                                            📐 {isRtl ? 'المخطط' : 'Vector'}
+                                          </button>
+                                        </div>
+                                        {/* Fullscreen Zoom Lightbox Button */}
+                                        {suwaydAnatomyMode === 'plate' && (
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              setPlateZoomLevel(1);
+                                              setSuwaydPlateZoomModal(currentPlate);
+                                            }}
+                                            className="bg-gold-500 hover:bg-gold-400 text-emerald-950 px-2.5 py-1 rounded-lg text-xs font-black shadow-xs flex items-center gap-1 transition"
+                                            title={isRtl ? 'تكبير ملء الشاشة للشرح على زوم' : 'Zoom Fullscreen for Zoom Teaching'}
+                                          >
+                                            <span>🔍</span>
+                                            <span className="hidden sm:inline">{isRtl ? 'تكبير' : 'Zoom'}</span>
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {/* Horizontal Letter / Plate Selector Tabs if Multiple Plates in this Lesson */}
+                                    {lessonPlates.length > 1 && (
+                                      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+                                        <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap">
+                                          {isRtl ? 'اختر الحرف / اللوحة:' : 'Select Plate:'}
+                                        </span>
+                                        {lessonPlates.map(lp => {
+                                          const isSelected = lp.id === currentPlate.id;
+                                          const letterLabel = lp.letters && lp.letters.length > 0 ? lp.letters.join('، ') : '';
+                                          return (
+                                            <button
+                                              key={lp.id}
+                                              type="button"
+                                              onClick={() => setActiveSuwaydPlateId(lp.id)}
+                                              className={`px-3 py-1 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 border ${
+                                                isSelected
+                                                  ? 'bg-emerald-900 text-gold-200 border-gold-400 font-black shadow-xs ring-1 ring-gold-400 scale-102'
+                                                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                                              }`}
+                                            >
+                                              {letterLabel && <span className="font-quran text-gold-400 text-sm">{letterLabel}</span>}
+                                              <span>{isRtl ? lp.titleAr.replace(/^.*:\s*/, '') : lp.titleEn.replace(/^.*:\s*/, '')}</span>
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+
+                                    {/* Main Display: Authentic Plate vs SVG */}
+                                    {suwaydAnatomyMode === 'plate' ? (
+                                      <div className="space-y-3">
+                                        <div 
+                                          className="w-full flex items-center justify-center p-2 bg-gradient-to-br from-amber-50/50 via-white to-emerald-50/50 rounded-2xl border-2 border-gold-300 shadow-inner group relative cursor-zoom-in overflow-hidden"
+                                          onClick={() => {
+                                            setPlateZoomLevel(1);
+                                            setSuwaydPlateZoomModal(currentPlate);
+                                          }}
+                                          title={isRtl ? 'انقر لتكبير اللوحة بحجم هائل للشرح على زوم' : 'Click to zoom high-resolution for Zoom sharing'}
+                                        >
+                                          <img
+                                            src={`images/tajweed/${currentPlate.filename}`}
+                                            onError={(e) => {
+                                              e.target.src = `https://image.slidesharecdn.com/1-160316105247/85/1-${currentPlate.slideNum}-638.jpg`;
+                                            }}
+                                            alt={currentPlate.titleAr}
+                                            className="w-full max-h-80 sm:max-h-96 object-contain rounded-xl drop-shadow-md transition duration-200 group-hover:scale-[1.02]"
+                                            loading="lazy"
+                                          />
+                                          <div className="absolute bottom-3 right-3 bg-emerald-950/80 text-gold-300 text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition backdrop-blur-xs flex items-center gap-1">
+                                            <span>🔍</span>
+                                            <span>{isRtl ? 'انقر للتكبير والشرح' : 'Click to enlarge'}</span>
+                                          </div>
+                                        </div>
+
+                                        {/* Description & Pedagogical Notes */}
+                                        <div className="bg-amber-50/80 rounded-xl p-3 border border-amber-200 text-xs text-amber-950 leading-relaxed font-cairo">
+                                          <div className="font-bold mb-1 flex items-center gap-1.5 text-emerald-900">
+                                            <span>📌</span>
+                                            <span>{isRtl ? currentPlate.titleAr : currentPlate.titleEn}</span>
+                                          </div>
+                                          <p className="font-medium text-slate-800">
+                                            {isRtl ? currentPlate.descAr : currentPlate.descEn}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="w-full flex items-center justify-center p-1 bg-slate-950 rounded-xl border border-gold-500/40">
+                                        {renderSuwaydAnatomySvg(currentSuwaydLesson.svgType, currentSuwaydLesson.id)}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
 
                               {/* Anatomical Mechanism Card */}
                               <div className="bg-emerald-50/60 rounded-2xl p-4 sm:p-5 border border-emerald-200/80 shadow-xs">
@@ -8692,7 +9656,7 @@
                             type="button"
                             onClick={handleResetIslamicForm}
                             className="bg-white hover:bg-slate-50 text-emerald-950 border border-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs transition shadow-xs flex items-center gap-1"
-                            title="البدء بدرس جديد على نظافة"
+                            title={isRtl ? "البدء بدرس جديد على نظافة" : "Start with a new blank lecture"}
                           >
                             <span>➕</span>
                             <span>{isRtl ? 'درس جديد' : 'New Clean'}</span>
@@ -8701,7 +9665,7 @@
                             type="button"
                             onClick={handleLoadDemoIslamic}
                             className="bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-bold px-3 py-1.5 rounded-xl text-xs transition shadow-xs flex items-center gap-1"
-                            title="استيراد نموذج استرشادي تجريبي للتوضيح"
+                            title={isRtl ? "استيراد نموذج استرشادي تجريبي للتوضيح" : "Load demo illustrative lesson"}
                           >
                             <span>💡</span>
                             <span>{isRtl ? 'نموذج تجريبي' : 'Demo'}</span>
@@ -8744,7 +9708,7 @@
                               type="button"
                               onClick={handleExportLibrary}
                               className="bg-white hover:bg-slate-50 text-emerald-950 border border-slate-300 font-bold px-3.5 py-1.5 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5"
-                              title="تصدير ملف احتياطي لمكتبتك"
+                              title={isRtl ? "تصدير ملف احتياطي لمكتبتك" : "Export backup file"}
                             >
                               <span>📤</span>
                               <span>{isRtl ? 'تصدير نسخة احتياطية' : 'Backup Library'}</span>
@@ -8869,12 +9833,12 @@
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs flex-1">
                             {[
-                              { id: 'stage-islamic-1', num: 1, labelAr: '1. إدخال المحاضرة', icon: '📁', active: true },
-                              { id: 'stage-islamic-2', num: 2, labelAr: '2. الخطة والأدلة', icon: '⏱️', active: !!islamicData },
-                              { id: 'stage-islamic-3', num: 3, labelAr: '3. العرض وبوربوينت', icon: '📽️', active: !!islamicData },
-                              { id: 'stage-islamic-4', num: 4, labelAr: '4. ورقة العمل', icon: '📝', active: !!islamicData },
-                              { id: 'stage-islamic-5', num: 5, labelAr: '5. الاختبار الذاتي', icon: '🎯', active: !!islamicData },
-                              { id: 'stage-islamic-6', num: 6, labelAr: '6. الواتساب والمكتبة', icon: '💬', active: !!islamicData }
+                              { id: 'stage-islamic-1', num: 1, labelAr: '1. إدخال المحاضرة', labelEn: '1. Lecture Input', icon: '📁', active: true },
+                              { id: 'stage-islamic-2', num: 2, labelAr: '2. الخطة والأدلة', labelEn: '2. Plan & Evidence', icon: '⏱️', active: !!islamicData },
+                              { id: 'stage-islamic-3', num: 3, labelAr: '3. العرض وبوربوينت', labelEn: '3. Slides & PPTX', icon: '📽️', active: !!islamicData },
+                              { id: 'stage-islamic-4', num: 4, labelAr: '4. ورقة العمل', labelEn: '4. Worksheet', icon: '📝', active: !!islamicData },
+                              { id: 'stage-islamic-5', num: 5, labelAr: '5. الاختبار الذاتي', labelEn: '5. Self-Quiz', icon: '🎯', active: !!islamicData },
+                              { id: 'stage-islamic-6', num: 6, labelAr: '6. الواتساب والمكتبة', labelEn: '6. WhatsApp & Library', icon: '💬', active: !!islamicData }
                             ].map(st => {
                               const isCurrent = activeIslamicStage === st.num;
                               return (
@@ -8902,7 +9866,7 @@
                                     {st.num}
                                   </span>
                                   <span>{st.icon}</span>
-                                  <span>{st.labelAr}</span>
+                                  <span>{isRtl ? st.labelAr : st.labelEn}</span>
                                 </button>
                               );
                             })}
@@ -10801,11 +11765,11 @@
                                           )}
                                         </div>
                                         <p className="text-xs text-slate-700 font-amiri mt-1 leading-snug">
-                                          <strong>السؤال:</strong> {it.studentQuestion}
+                                          <strong>{isRtl ? 'السؤال:' : 'Question:'}</strong> {it.studentQuestion}
                                         </p>
                                         {it.teacherAnswer && (
                                           <p className="text-[11px] text-slate-500 font-amiri mt-0.5 line-clamp-1">
-                                            <strong>نموذج الإجابة:</strong> {it.teacherAnswer}
+                                            <strong>{isRtl ? 'نموذج الإجابة:' : 'Model Answer:'}</strong> {it.teacherAnswer}
                                           </p>
                                         )}
                                       </div>
