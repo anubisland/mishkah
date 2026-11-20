@@ -33,8 +33,9 @@
   <!-- Client-side PowerPoint (.pptx) Presentation Engine -->
   <script src="libs/jszip.min.js"></script>
   <script src="libs/pptxgen.bundle.js"></script>
-  <!-- Dr. Ayman Suwayd Illustrated Tajweed Plates Catalog -->
+  <!-- Dr. Ayman Suwayd Illustrated Tajweed Plates & Detailed Expert Curriculum -->
   <script src="data/suwayd_plates.js"></script>
+  <script src="data/suwayd_expert_curriculum.js"></script>
 
   <script>
     tailwind.config = {
@@ -2046,7 +2047,7 @@
 
 
   // ================= BRANCH 2: DR. AYMAN SUWAYD TAJWEED CURRICULUM =================
-  const SUWAYD_TAJWEED_CURRICULUM = [
+  const SUWAYD_TAJWEED_CURRICULUM = (typeof window !== 'undefined' && window.SUWAYD_EXPERT_CURRICULUM && window.SUWAYD_EXPERT_CURRICULUM.length > 0) ? window.SUWAYD_EXPERT_CURRICULUM : [
   {
     "id": "mabadi_tajweed",
     "categoryId": "intro_tajweed",
@@ -5812,11 +5813,15 @@
       // Helper to clean book metadata & author names from slide titles
       function cleanSlideTitle(rawTitle) {
         if (!rawTitle) return 'محور الدرس ومسائله';
+        let t = sanitizeArabicExtractedText(rawTitle);
         // Strip leading phase prefixes but KEEP the substantive title!
-        let t = rawTitle.replace(/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|المحور \d+|المبحث \d+|المطلب \d+|الفصل \d+|\d+[\-\.\)]|Theme \d+)[:\s–—]*/i, '').trim();
+        t = t.replace(/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|المحور \d+|المبحث \d+|المطلب \d+|الفصل \d+|\d+[\-\.\)]|Theme \d+)[:\s–—]*/i, '').trim();
         t = t.replace(/(?:تأليف|للمؤلف|دار|نشر|صفحة|طبعة|تحقيق|إعداد|ردمك|ISBN)[\s\S]*$/, '').trim();
         // Remove trailing open parentheses or broken punctuation
         t = t.replace(/[\(（\[]\s*$/, '').trim();
+        if ((t.includes('(') || t.includes('（')) && !t.includes(')') && !t.includes('）')) {
+          t = t.replace(/[\(（].*$/, '').trim();
+        }
         if (t.length > 65) t = t.substring(0, 62) + '...';
         return t || rawTitle || 'محور الدرس ومسائله';
       }
@@ -5915,13 +5920,16 @@
               if (cleaned.startsWith('الله به هو التوحيد')) {
                 cleaned = 'أعظم ما أمر ' + cleaned;
               }
+              if (cleaned.startsWith('استقامت العقيدة')) {
+                cleaned = 'إذا ' + cleaned;
+              }
               return cleaned;
             }).filter(s => {
               if (s.length < 35 || s.length > 130) return false;
               if (s.includes('؟') || s.includes('?') || /^\(?\s*(?:س |هل |ماذا |كيف |لماذا |أين |متى )/i.test(s)) return false;
               if (s.includes('﴿') || s.includes('﴾') || s.includes('»') || s.includes('«') || /\d+\s*[\]\)]/.test(s)) return false;
               if (/^(?:اعوذ|أعوذ|بسم|الحمد|صلى|اللهم|فالعلم بالعقيدة|كأنك|ودليل|وجحدوا|عليه وسلم|قال الزهري|روى الزهري)/.test(s)) return false;
-              if (/(?:من|في|أن|إلى|على|و|أو|أنه|وهو|وهي|التي|الذي|عن|مع|كأنك|مثل|ألن|لأن|فال|فلا|بل|حيث)$/.test(s)) return false;
+              if (/(?:من|في|أن|إلى|على|و|أو|أنه|وهو|وهي|التي|الذي|عن|مع|كأنك|مثل|ألن|لأن|فال|فلا|بل|حيث|[:：])$/.test(s)) return false;
               return true;
             });
 
@@ -5931,8 +5939,9 @@
                 const sp = s.substring(0, 100).lastIndexOf(' ');
                 s = (sp > 45 ? s.substring(0, sp) : s.substring(0, 95)).trim();
               }
-              // Strip any dangling conjunctions or prepositions at the end
-              s = s.replace(/[,،؛\s]+(?:فال|فلا|بل|حيث|و|أو|أن|إن|من|على|إلى|عن|في)?$/, '').trim();
+              // Strip any dangling conjunctions or prepositions at the end, and trailing colons or commas
+              s = s.replace(/[:：,،؛\s]+(?:فال|فلا|بل|حيث|و|أو|أن|إن|من|على|إلى|عن|في)?$/, '').trim();
+              s = s.replace(/[:：,،؛\s]+$/, '').trim();
               return s;
             }
 
@@ -6073,6 +6082,24 @@
                 lines: chunkLines
               });
             }
+          }
+        }
+
+        // Detect and isolate Opening Du'a & Preamble: A lecture starts with Istiftah and Du'a; this is not an educational module!
+        let lectureOpeningPreamble = null;
+        if (processedSections.length > 1) {
+          const first = processedSections[0];
+          const firstText = (first.title + ' ' + first.lines.slice(0, 15).join(' ')).trim();
+          const hasOpeningDua = /أعوذ بالله|اعوذ بالله|بسم الله|الحمد لله|اللهم علمنا|اللهم ارزقنا|والصلاة والسلام على رسول الله/.test(firstText);
+          const isNotFormalTeachingModule = !first.isFormalHeading || first.title.includes('مقدمة') || first.title.includes('تمهيد') || first.title.includes('افتتاح') || first.title.includes('قانون التأسيس') || first.title === topic;
+
+          if (hasOpeningDua && isNotFormalTeachingModule) {
+            lectureOpeningPreamble = {
+              title: 'افتتاحية المجلس والدعاء المأثور',
+              lines: first.lines,
+              duaExcerpt: first.lines.filter(l => /اللهم|ربنا|بسم الله|الحمد لله|أعوذ بالله|انفعنا/.test(l)).join(' ')
+            };
+            processedSections.shift(); // Remove from instructional modules so it never becomes a question or worksheet row!
           }
         }
 
@@ -6290,6 +6317,35 @@
             explanationAr: `المستفاد المنهجي من محور (${cleanSecTitle}): يؤكد الشرح على (${coreCorrectStatement})، مع التنبيه على ضرورة صيانة الفكر والاعتزاز بمرجعية الوحي.`
           });
         });
+
+        // Insert Opening Du'a / Preamble as dedicated Presentation Slide 1 (never a worksheet or quiz question)
+        if (lectureOpeningPreamble) {
+          zoomDeck.unshift({
+            slideNumber: 1,
+            phaseTitle: 'افتتاحية اللقاء',
+            slideTitle: 'افتتاحية المجلس والدعاء المأثور',
+            scriptureEvidence: '﴿رَبِّ اشْرَحْ لِي صَدْرِي ۝ وَيَسِّرْ لِي أَمْرِي﴾ [طه: 25-26]',
+            bulletPoints: [
+              'الاستفتاح بحمد الله تعالى والثناء العاطر عليه بما هو أهله',
+              'الصلاة والسلام على نبينا محمد ﷺ وسؤال الإعانة والتوفيق',
+              'سؤال الله العلم النافع والرزق الطيب والعمل المتقبل'
+            ],
+            talkingPoints: 'افتتاح المجلس بذكر الله والدعاء المأثور، وتهيئة قلوب الدارسين للإقبال على العلم الشرعي بإخلاص ويقين',
+            fullSectionText: lectureOpeningPreamble.lines.join('\n\n'),
+            pedagogicalTip: 'تذكير الطلاب بتجديد النية واستشعار بركة مجالس الذكر والصلة بالله',
+            discussionPrompts: [
+              'ما أثر استحضار النية الصالحة في مجلس العلم على بركة الفهم ورسوخ الأثر؟'
+            ],
+            titleAr: 'افتتاحية المجلس والدعاء المأثور',
+            bodyAr: lectureOpeningPreamble.duaExcerpt || 'اللهم علمنا ما ينفعنا وانفعنا بما علمتنا وزدنا علماً، اللهم ارزقنا التوحيد الخالص لك وأفرغ علينا صبراً.',
+            practicalAction: 'تجديد النية الصالحة في طلب العلم والاستعاذة من علم لا ينفع.'
+          });
+          // Re-number subsequent slides 1, 2, 3...
+          zoomDeck.forEach((s, idx) => {
+            s.slideNumber = idx + 1;
+            if (idx > 0) s.phaseTitle = `المحور ${idx}`;
+          });
+        }
 
         // 6. Evidences list for verification banner
         const allEvidences = [];
@@ -6898,34 +6954,70 @@
         text = text.replace(/\bمل\b/g, 'لم');
 
         // Clean reversed or broken PBUH ligatures and common mis-encodings
-        text = text.replace(/ملسو\s*هيلع\s*الله\s*ىلص/g, 'صلى الله عليه وسلم');
+        text = text.replace(/ملسو\s*هيلع\s*(?:هللا|الله)\s*ىلص/g, 'صلى الله عليه وسلم');
         text = text.replace(/صلى\s*ه\s*للا/g, 'صلى الله');
-        text = text.replace(/\bهلل\b/g, 'لله');
-        text = text.replace(/\bباهلل\b/g, 'بالله');
-        text = text.replace(/\bوهللا\b/g, 'والله');
-        text = text.replace(/\bهللا\b/g, 'الله');
-        text = text.replace(/اإل/g, 'الإ');
-        text = text.replace(/اإ/g, 'الإ');
-        text = text.replace(/األ/g, 'الأ');
-        text = text.replace(/اأ/g, 'الأ');
-        text = text.replace(/اآل/g, 'الآ');
-        text = text.replace(/اآ/g, 'الآ');
-        text = text.replace(/\bمضالت\b/g, 'مضلات');
-        text = text.replace(/\bهؤالء\b/g, 'هؤلاء');
-        text = text.replace(/ًصبرا/g, 'صبراً');
-        text = text.replace(/بماعلمتنا/g, 'بما علمتنا');
-
-        // Specific common OCR / PDF broken ligatures & clumped words
-        text = text.replace(/بسمهلالا/g, 'بسم الله ');
-        text = text.replace(/هللوالصالة/g, ' لله والصلاة ');
+        text = text.replace(/الحمد\s*(?:هلل|لله)والصالة/g, 'الحمد لله والصلاة');
+        text = text.replace(/الحمد\s*هلل/g, 'الحمد لله');
+        text = text.replace(/هللوالصالة/g, ' لله والصلاة');
         text = text.replace(/والسامعلى/g, ' والسلام على ');
         text = text.replace(/رسو\s*لهللا/g, 'رسول الله');
         text = text.replace(/رسول\s*هللا/g, 'رسول الله');
         text = text.replace(/ورسو\s*له\b/g, 'ورسوله');
+        text = text.replace(/كتاب\s*هللا/g, 'كتاب الله');
+        text = text.replace(/دين\s*هللا/g, 'دين الله');
+        text = text.replace(/سبيل\s*هللا/g, 'سبيل الله');
+        text = text.replace(/بسم\s*هللا/g, 'بسم الله');
+        text = text.replace(/بسمهلالا/g, 'بسم الله ');
         text = text.replace(/باهلل/g, 'بالله');
+        text = text.replace(/وهللا/g, 'والله');
+        text = text.replace(/فهلل/g, 'فلله');
         text = text.replace(/هللا/g, 'الله');
-        text = text.replace(/الخالصكوأ\s*فرغعل\s*ينا/g, 'الخالص وأفرغ علينا');
+        text = text.replace(/(?:^|\s)هلل(?=[\s،\.؛:]|$)/g, ' لله ');
+        text = text.replace(/اعوذ/g, 'أعوذ');
+        text = text.replace(/الخالصكوأ\s*فرغعل\s*ينا/g, 'الخالص لك وأفرغ علينا');
         text = text.replace(/فرغعل\s*ينا/g, 'أفرغ علينا');
+        text = text.replace(/ًصبرا/g, 'صبراً');
+        text = text.replace(/بماعلمتنا/g, 'بما علمتنا');
+        text = text.replace(/الله به هو التوحيد/g, 'أعظم ما أمر الله به هو التوحيد');
+
+        // Alif-Lam Decomposed Ligatures
+        text = text.replace(/اإل/g, 'الإ').replace(/اإ/g, 'الإ').replace(/األ/g, 'الأ').replace(/اأ/g, 'الأ').replace(/اآل/g, 'الآ').replace(/اآ/g, 'الآ');
+
+        // Systemic Reversed Lam-Alif Inversions (PDF font ligature misencodings)
+        text = text.replace(/الصالة/g, 'الصلاة');
+        text = text.replace(/فالصالة/g, 'فالصلاة');
+        text = text.replace(/بالصالة/g, 'بالصلاة');
+        text = text.replace(/للصالة/g, 'للصلاة');
+        text = text.replace(/صالة/g, 'صلاة');
+        text = text.replace(/السالم/g, 'السلام');
+        text = text.replace(/والسالم/g, 'والسلام');
+        text = text.replace(/بالسالم/g, 'بالسلام');
+        text = text.replace(/إال/g, 'إلا');
+        text = text.replace(/وإال/g, 'وإلا');
+        text = text.replace(/فإال/g, 'فإلا');
+        text = text.replace(/الإسالم/g, 'الإسلام');
+        text = text.replace(/اإلسالم/g, 'الإسلام');
+        text = text.replace(/إسالم/g, 'إسلام');
+        text = text.replace(/الأخالق/g, 'الأخلاق');
+        text = text.replace(/األخالق/g, 'الأخلاق');
+        text = text.replace(/أخالق/g, 'أخلاق');
+        text = text.replace(/الإخالص/g, 'الإخلاص');
+        text = text.replace(/اإلخالص/g, 'الإخلاص');
+        text = text.replace(/إخالص/g, 'إخلاص');
+        text = text.replace(/ثالث\s+(?=مراتب|أصول|سنوات|أيام|خصال|شروط|مسائل|ركعات)/g, 'ثلاث ');
+        text = text.replace(/ثالثة/g, 'ثلاثة');
+        text = text.replace(/الثالثة/g, 'الثلاثة');
+        text = text.replace(/مضالت/g, 'مضلات');
+        text = text.replace(/هؤالء/g, 'هؤلاء');
+        text = text.replace(/وتسويه/g, 'وتسوية');
+        text = text.replace(/بطالن/g, 'بطلان');
+        text = text.replace(/كالم/g, 'كلام');
+        text = text.replace(/الكالم/g, 'الكلام');
+        text = text.replace(/عالنية/g, 'علانية');
+        text = text.replace(/إعالن/g, 'إعلان');
+        text = text.replace(/إعالم/g, 'إعلام');
+        text = text.replace(/تالوة/g, 'تلاوة');
+        text = text.replace(/القرأن/g, 'القرآن');
 
         // Fix glued religious phrases & formulas
         text = text.replace(/(أعوذ)(بالله)/g, '$1 $2');
@@ -7784,10 +7876,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v73.5 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v73.5 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v73.8 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v73.8 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v73.5' : 'v73.5'}</span>
+                  <span>{isRtl ? 'الإصدار v73.8' : 'v73.8'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -10031,6 +10123,79 @@
                                   {isRtl ? currentSuwaydLesson.definitionAr : (currentSuwaydLesson.definitionEn || currentSuwaydLesson.definitionAr)}
                                 </p>
                               </div>
+
+                              {/* Detailed Letter-by-Letter Pedagogical Explorer (from Dr. Ayman Suwayd's Illustrated Tajweed) */}
+                              {currentSuwaydLesson.ruleBreakdown && currentSuwaydLesson.ruleBreakdown.length > 0 && (
+                                <div className="card-islamic-sage rounded-2xl p-4 sm:p-5 border-2 border-emerald-300 shadow-sm space-y-4">
+                                  <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-emerald-200">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xl">💎</span>
+                                      <div>
+                                        <h4 className="text-xs sm:text-sm font-black text-emerald-950 font-cairo">
+                                          {isRtl ? 'التفصيل المنهجي لكل حرف وحكم (من كتاب التجويد المصور):' : 'Systematic Breakdown by Letter & Rule:'}
+                                        </h4>
+                                        <p className="text-[11px] text-emerald-800 font-medium">
+                                          {isRtl ? 'بيان مخرج كل حرف، آلية النطق التجويدية، وأمثلته القرآنية في (كلمة، كلمتين، ومع التنوين):' : 'Articulation point, phonetic mechanism, and verified Quranic examples:'}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <span className="text-xs font-black bg-emerald-900 text-gold-200 px-2.5 py-1 rounded-full">
+                                      {currentSuwaydLesson.ruleBreakdown.length} {isRtl ? 'حروف / فروع مفصلة' : 'Detailed Items'}
+                                    </span>
+                                  </div>
+
+                                  {/* Letter Cards Grid */}
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                    {currentSuwaydLesson.ruleBreakdown.map((rb, rIdx) => (
+                                      <div key={rIdx} className="bg-white/95 rounded-xl p-3.5 border border-emerald-200/80 shadow-xs space-y-2 hover:border-gold-400 transition">
+                                        <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100">
+                                          <div className="flex items-center gap-2">
+                                            <span className="w-7 h-7 rounded-lg bg-emerald-900 text-gold-300 font-quran font-bold flex items-center justify-center text-base shrink-0">
+                                              {rb.letter || (rIdx + 1)}
+                                            </span>
+                                            <span className="font-bold text-xs text-emerald-950 font-cairo">
+                                              {rb.titleAr}
+                                            </span>
+                                          </div>
+                                          {rb.tagAr && (
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                              rb.tagType === 'tafkheem' ? 'bg-amber-100 text-amber-900 border border-amber-300' :
+                                              rb.tagType === 'tarqeeq' ? 'bg-sky-100 text-sky-900 border border-sky-300' :
+                                              'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                                            }`}>
+                                              {rb.tagAr}
+                                            </span>
+                                          )}
+                                        </div>
+
+                                        <p className="text-[11px] text-slate-700 leading-relaxed font-cairo">
+                                          <strong className="text-emerald-950">{isRtl ? 'آلية النطق والمخرج: ' : 'Mechanism: '}</strong>
+                                          {rb.explanationAr}
+                                        </p>
+
+                                        {rb.examples && rb.examples.length > 0 && (
+                                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 pt-1">
+                                            {rb.examples.map((exItem, eIdx) => (
+                                              <div key={eIdx} className="bg-amber-50/80 rounded-lg p-1.5 text-center border border-amber-200/60">
+                                                <span className="block text-[9px] text-slate-500 font-bold mb-0.5">{exItem.type}</span>
+                                                <span className="font-quran text-base text-emerald-950 font-bold block leading-snug">{exItem.word}</span>
+                                                <span className="block text-[9px] text-amber-900 font-medium">{exItem.surah}</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
+
+                                        {rb.warningAr && (
+                                          <div className="text-[10px] text-rose-800 bg-rose-50/80 rounded-lg p-1.5 border border-rose-200 flex items-start gap-1">
+                                            <span className="shrink-0">⚠️</span>
+                                            <span><strong>{isRtl ? 'تنبيه المعلم: ' : 'Warning: '}</strong>{rb.warningAr}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
 
                               {/* Quranic Examples in Uthmani Script */}
                               <div className="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-900/10 shadow-xs">
