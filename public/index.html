@@ -4607,7 +4607,7 @@
       const safeIdx = Math.max(0, Math.min(slides.length - 1, slideIdx));
       const currentSlide = slides[safeIdx] || slides[0] || {};
       const currentSlideTitle = currentSlide.slideTitle || currentSlide.titleAr || currentSlide.phaseTitle || currentSlide.phaseNameAr || (`المحور ${safeIdx + 1}`);
-      const scriptureText = currentSlide.scriptureEvidence || currentSlide.scripture;
+      const scriptureText = normalizeIslamicSacredTerms(currentSlide.scriptureEvidence || currentSlide.scripture);
       const bodyText = currentSlide.talkingPoints || currentSlide.bodyAr || currentSlide.teacherFocusAr;
       const practicalImpact = currentSlide.pedagogicalTip || currentSlide.practicalAction || 'التركيز على ربط المعنى بالسلوك العملي للدارس';
       const bullets = currentSlide.bulletPoints || (currentSlide.talkingPoints ? currentSlide.talkingPoints.split(' • ') : [bodyText]);
@@ -5808,6 +5808,8 @@
           return;
         }
         setActiveIslamicStage(targetNum);
+        // Scroll immediately near top so that view switches from taller stages (like stage 6) never leave viewport past the bottom
+        window.scrollTo({ top: 120, behavior: 'smooth' });
         setTimeout(() => {
           const el = document.getElementById('stage-islamic-' + targetNum);
           if (el) {
@@ -5818,10 +5820,8 @@
               top: Math.max(0, offsetPosition),
               behavior: 'smooth'
             });
-          } else {
-            window.scrollTo({ top: 260, behavior: 'smooth' });
           }
-        }, 60);
+        }, 100);
       };
 
       // Intelligent Slide Condenser Tool: Condenses any slide into ultra-crisp golden bullet points
@@ -6460,8 +6460,9 @@
 
           // Substantive teacher synthesis extracted directly from actual section text:
           const candidateSentences = sec.lines.filter(l => l.length > 25 && !l.startsWith('#') && !isNoiseLine(l));
-          let modelAnswer = candidateSentences.slice(0, 3).join(' ') || secText.substring(0, 220);
-          if (modelAnswer.length > 280) modelAnswer = modelAnswer.substring(0, 280) + '...';
+          let rawModelAnswer = candidateSentences.slice(0, 3).join(' ') || secText.substring(0, 220);
+          rawModelAnswer = normalizeIslamicSacredTerms(rawModelAnswer);
+          let modelAnswer = trimToCompleteSentence(rawModelAnswer, 260);
 
           // Extract 2 to 3 concise, distilled golden bullets (under 80 chars each, no clutter)
           const secBullets = extractConciseSlideBullets(sec.lines, sec.title);
@@ -6496,6 +6497,25 @@
           } else {
             // Rotate through distinct authentic scriptures
             secScripture = THEMATIC_SCRIPTURES[idx % THEMATIC_SCRIPTURES.length];
+          }
+
+          // Infallible Sanctification & Length Distillation for Presentation Slides
+          secScripture = normalizeIslamicSacredTerms(secScripture);
+          if (secScripture.length > 190) {
+            // Distill down to inner quote, ayah, or concise prophetic witness
+            const innerQuote = secScripture.match(/«([^»]{15,180})»/) || secScripture.match(/"([^"]{15,180})"/);
+            const innerAyah = secScripture.match(/﴿([^﴾]{15,180})﴾/);
+            if (innerQuote) {
+              secScripture = `« ${innerQuote[1].trim()} »`;
+            } else if (innerAyah) {
+              secScripture = `﴿${innerAyah[1].trim()}﴾`;
+            } else if (secScripture.includes('يا مقلب القلوب') || secScripture.includes('مقلب القلوب')) {
+              secScripture = '«يَا مُقَلِّبَ الْقُلُوبِ ثَبِّتْ قَلْبِي عَلَى دِينِكَ» (حديث شريف)';
+            } else {
+              const lastSpace = secScripture.substring(0, 160).lastIndexOf(' ');
+              secScripture = secScripture.substring(0, lastSpace > 50 ? lastSpace : 160).trim() + '...»';
+              if (!secScripture.startsWith('«')) secScripture = '« ' + secScripture;
+            }
           }
 
           // B. Multiple-Choice Pedagogical Worksheet & Quiz Synthesis (100% Multiple Choice, No Essay Prompts!)
@@ -6595,10 +6615,10 @@
             slideNumber: secNum,
             phaseTitle: `المحور ${secNum}`,
             slideTitle: cleanSecTitle,
-            scriptureEvidence: secScripture,
+            scriptureEvidence: normalizeIslamicSacredTerms(secScripture),
             bulletPoints: secBullets,
             talkingPoints: secTalkingPoints,
-            fullSectionText: sec.lines.join('\n\n') || secText,
+            fullSectionText: normalizeIslamicSacredTerms(sec.lines.join('\n\n') || secText),
             pedagogicalTip: practicalImp,
             discussionPrompts: [
               `في ضوء مدارسة (${cleanSecTitle})؛ كيف نترجم هذا الأصل الشرعي إلى أثر سلوكي في واقعنا؟`,
@@ -7261,6 +7281,127 @@
         return merged.join('\n');
       }
 
+      // Supreme Islamic Sacred Words & Majesty Name Sanitizer (Guarantees zero corruptions of Allah, PBUH, and Sacred Names)
+      function normalizeIslamicSacredTerms(text) {
+        if (!text || typeof text !== 'string') return '';
+        let t = text;
+
+        // 0. Double alef fix with definite article
+        t = t.replace(/(?:^|\s)اال(?=[ابتثجحخدذرزسشصضطظعغفقكلمنهوي])/gu, (m) => m.replace('اال', 'ال'));
+
+        // 1. Transposed Lam-Alif in core religious & common words
+        t = t.replace(/الصالة/gu, 'الصلاة');
+        t = t.replace(/والصالة/gu, 'والصلاة');
+        t = t.replace(/بالصالة/gu, 'بالصلاة');
+        t = t.replace(/فالصالة/gu, 'فالصلاة');
+        t = t.replace(/والسام/gu, 'والسلام');
+        t = t.replace(/والسامعلى/gu, 'والسلام على ');
+
+        t = t.replace(/اإلسالم/gu, 'الإسلام');
+        t = t.replace(/الإسالم/gu, 'الإسلام');
+        t = t.replace(/باإلسالم/gu, 'بالإسلام');
+        t = t.replace(/إسالم/gu, 'إسلام');
+
+        t = t.replace(/أعالها/gu, 'أعلاها');
+        t = t.replace(/ومالئكته/gu, 'وملائكته');
+        t = t.replace(/مالئكة/gu, 'ملائكة');
+        t = t.replace(/المالئكة/gu, 'الملائكة');
+
+        t = t.replace(/(^|[\s«\(])إال(?=[\s»\)،.؛!؟\-]|$)/gu, '$1إلا');
+        t = t.replace(/(^|[\s«\(])أال(?=[\s»\)،.؛!؟\-]|$)/gu, '$1ألا');
+
+        // Restore accidentally split definite nouns: e.g. "ال حديث" -> "الحديث"
+        t = t.replace(/(?:^|\s)ال\s+(حديث|قرآن|كتاب|سنة|نبي|صلاة|زكاة|صوم|حج|قبر|أرض|سماء|كون|حق|باطل)/gu, ' ال$1');
+        // Standalone 'ال' before words/verbs or at clause ends is transposed 'لا':
+        t = t.replace(/(^|[\s«\(])ال(?=[\s»\)])/gu, '$1لا');
+        t = t.replace(/(^|[\s«\(])ا\s+ل(?=[\s»\)])/gu, '$1لا');
+
+        // 2. PBUH reversed / decomposed font ligatures
+        t = t.replace(/ملسو\s*هيلع\s*(?:هللا|الله)\s*ىلص/gu, 'صلى الله عليه وسلم');
+        t = t.replace(/ص[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*[ىي][\s\u064B-\u065F\u0670]*ه?[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*ا[\s\u064B-\u065F\u0670]*ع[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*ي[\s\u064B-\u065F\u0670]*[هة][\s\u064B-\u065F\u0670]*و[\s\u064B-\u065F\u0670]*س[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*م/gu, 'صلى الله عليه وسلم');
+        t = t.replace(/صلَّ?ى[\s\u064B-\u065F\u0670]*ُ?[\s\u064B-\u065F\u0670]*ه[\s\u064B-\u065F\u0670]*للا[\s\u064B-\u065F\u0670]*عليْ?ه[\s\u064B-\u065F\u0670]*وسلَّ?مَ?/gu, 'صلى الله عليه وسلم');
+        t = t.replace(/صلَّ?ى[\s\u064B-\u065F\u0670]*ُ?[\s\u064B-\u065F\u0670]*ه[\s\u064B-\u065F\u0670]*للا/gu, 'صلى الله');
+        t = t.replace(/صلى\s*ه\s*للا\s*علي[هة]\s*وسلم/gu, 'صلى الله عليه وسلم');
+        t = t.replace(/صلى\s*ه\s*للا/gu, 'صلى الله');
+        t = t.replace(/رحمه\s*ه\s*للا/gu, 'رحمه الله');
+
+        // 3. Inverted Baa + Allah: 'استَعيذوا ِ ّللَه با' or 'استعيذوا ّبالله' or 'باهلل'
+        t = t.replace(/استَ?عيذوا[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللَ?ه[\s\u064B-\u065F\u0670]*با/gu, 'استعيذوا بالله');
+        t = t.replace(/استَ?عيذوا[\s\u064B-\u065F\u0670]*ّ?بالله/gu, 'استعيذوا بالله');
+        t = t.replace(/[\u064B-\u065F\u0670]*ّللَ?ه[\s\u064B-\u065F\u0670]*با/gu, 'بالله');
+        t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:ب|با)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1بالله');
+        t = t.replace(/[\u064B-\u065F\u0670]*ب[\u064B-\u065F\u0670]*الله/gu, 'بالله');
+        t = t.replace(/باهلل/gu, 'بالله');
+
+        // 4. Specific Prophetic Formulas:
+        t = t.replace(/ربِّ?ي[\s\u064B-\u065F\u0670]*َّ?للا?ه[\s\u064B-\u065F\u0670]*ُ?/gu, 'ربي الله');
+        t = t.replace(/ربِّ?ي[\s\u064B-\u065F\u0670]*هللا/gu, 'ربي الله');
+        t = t.replace(/رسول[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'رسول الله');
+        t = t.replace(/رسول[\s\u064B-\u065F\u0670]*هللا/gu, 'رسول الله');
+        t = t.replace(/كتاب[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'كتاب الله');
+        t = t.replace(/كتاب[\s\u064B-\u065F\u0670]*هللا/gu, 'كتاب الله');
+        t = t.replace(/قول[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'قول الله');
+        t = t.replace(/قول[\s\u064B-\u065F\u0670]*هللا/gu, 'قول الله');
+        t = t.replace(/يُ?ثبِّ?ت[\s\u064B-\u065F\u0670]*ُ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'يثبت الله');
+        t = t.replace(/يُ?ثبِّ?ت[\s\u064B-\u065F\u0670]*هللا/gu, 'يثبت الله');
+
+        // 5. Allah with other prefixes: Lam, Waw, Fa
+        t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:ل)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1لله');
+        t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:و)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1والله');
+        t = t.replace(/وهللا/gu, 'والله');
+        t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:ف)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1فلله');
+        t = t.replace(/فهلل/gu, 'فلله');
+
+        // 6. Standalone and compound font ligatures: ّللاَه / َّللاه / هللا
+        t = t.replace(/[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, ' الله');
+        t = t.replace(/هللا/gu, 'الله');
+
+        // 7. Inverted 'هلل' -> 'لله'
+        t = t.replace(/الحمد\s*(?:هلل|لله)\s*والص[لا]ة/gu, 'الحمد لله والصلاة');
+        t = t.replace(/الحمد\s*هلل/gu, 'الحمد لله');
+        t = t.replace(/هللوالص[لا]ة/gu, ' لله والصلاة');
+        t = t.replace(/الاستسلام\s*هلل/gu, 'الاستسلام لله');
+        t = t.replace(/االستسالم\s*هلل/gu, 'الاستسلام لله');
+        t = t.replace(/وجهه\s*هلل/gu, 'وجهه لله');
+        t = t.replace(/خالصة\s*هلل/gu, 'خالصة لله');
+        t = t.replace(/الحب\s*هلل/gu, 'الحب لله');
+        t = t.replace(/(?:^|[\s(\[«،.؛!؟:—\-])هلل(?=[\s)\]»،.؛!؟:—\-]|$)/gu, ' لله ');
+
+        // 8. Common Islamic compound formulas:
+        t = t.replace(/بسم\s*(?:هللا|الله)/gu, 'بسم الله');
+        t = t.replace(/رسول\s*الله/gu, 'رسول الله');
+        t = t.replace(/كتاب\s*الله/gu, 'كتاب الله');
+        t = t.replace(/دين\s*الله/gu, 'دين الله');
+        t = t.replace(/سبيل\s*الله/gu, 'سبيل الله');
+        t = t.replace(/بيت\s*الله/gu, 'بيت الله');
+        t = t.replace(/أمر\s*الله/gu, 'أمر الله');
+        t = t.replace(/نهى\s*الله/gu, 'نهى الله');
+        t = t.replace(/رحمة\s*الله/gu, 'رحمة الله');
+        t = t.replace(/قدرة\s*الله/gu, 'قدرة الله');
+        t = t.replace(/عظمة\s*الله/gu, 'عظمة الله');
+        t = t.replace(/إلا\s*الله/gu, 'إلا الله');
+        t = t.replace(/عز\s*وجل/gu, 'عز وجل');
+
+        t = t.replace(/\s{2,}/gu, ' ');
+        return t;
+      }
+
+      function trimToCompleteSentence(text, maxLen = 240) {
+        if (!text || text.length <= maxLen) return text;
+        const sub = text.substring(0, maxLen);
+        const lastPunct = Math.max(sub.lastIndexOf('.'), sub.lastIndexOf('!'), sub.lastIndexOf('؟'), sub.lastIndexOf('؛'), sub.lastIndexOf(':\n'));
+        if (lastPunct > 80) {
+          return sub.substring(0, lastPunct + 1).trim();
+        }
+        const lastSpace = sub.lastIndexOf(' ');
+        if (lastSpace > 60) {
+          let cleanSub = sub.substring(0, lastSpace).trim();
+          cleanSub = cleanSub.replace(/\s+(?:ال|كل|على|من|في|أن|إن|أو|ثم|مع|إلى|ثالث|عن|بين|وهو|وهي|التي|الذي|هذا|هذه)$/u, '');
+          return cleanSub + '...';
+        }
+        return sub + '...';
+      }
+
       function sanitizeArabicExtractedText(rawText) {
         if (!rawText) return '';
         let text = joinWrappedArabicLines(rawText);
@@ -7298,43 +7439,7 @@
         text = text.replace(/الْعَالَمِين(?=[^َ]|$)/g, 'الْعَالَمِينَ');
 
         // 5. Systemic Arabic Sacred Names & Inversion Normalization (Reversed PDF font ligatures)
-        // Clean reversed or broken PBUH ligatures and common mis-encodings
-        text = text.replace(/ملسو\s*هيلع\s*(?:هللا|الله)\s*ىلص/g, 'صلى الله عليه وسلم');
-        text = text.replace(/صلى\s*ه\s*للا\s*علي[هة]\s*وسلم/g, 'صلى الله عليه وسلم');
-        text = text.replace(/صلى\s*ه\s*للا/g, 'صلى الله');
-        text = text.replace(/رحمه\s*ه\s*للا/g, 'رحمه الله');
-
-        // Sacred Names (Replace 'هللا' BEFORE 'هلل'!)
-        text = text.replace(/بسم\s*هللا/g, 'بسم الله');
-        text = text.replace(/بسمهلالا/g, 'بسم الله ');
-        text = text.replace(/رسول\s*هللا/g, 'رسول الله');
-        text = text.replace(/رسو\s*لهللا/g, 'رسول الله');
-        text = text.replace(/كتاب\s*هللا/g, 'كتاب الله');
-        text = text.replace(/دين\s*هللا/g, 'دين الله');
-        text = text.replace(/سبيل\s*هللا/g, 'سبيل الله');
-        text = text.replace(/بيت\s*هللا/g, 'بيت الله');
-        text = text.replace(/أمر\s*هللا/g, 'أمر الله');
-        text = text.replace(/نهى\s*هللا/g, 'نهى الله');
-        text = text.replace(/رحمة\s*هللا/g, 'رحمة الله');
-        text = text.replace(/قدرة\s*هللا/g, 'قدرة الله');
-        text = text.replace(/عظمة\s*هللا/g, 'عظمة الله');
-        text = text.replace(/إلا\s*هللا/g, 'إلا الله');
-        text = text.replace(/باهلل/g, 'بالله');
-        text = text.replace(/وهللا/g, 'والله');
-        text = text.replace(/فهلل/g, 'فلله');
-        text = text.replace(/هللا/g, 'الله');
-
-        // Replace 'هلل' -> 'لله' when standalone or in established Islamic formulas
-        text = text.replace(/الحمد\s*(?:هلل|لله)\s*والصالة/g, 'الحمد لله والصلاة');
-        text = text.replace(/الحمد\s*هلل/g, 'الحمد لله');
-        text = text.replace(/هللوالصالة/g, ' لله والصلاة');
-        text = text.replace(/والسامعلى/g, ' والسلام على ');
-        text = text.replace(/الاستسلام\s*هلل/g, 'الاستسلام لله');
-        text = text.replace(/االستسالم\s*هلل/g, 'الاستسلام لله');
-        text = text.replace(/وجهه\s*هلل/g, 'وجهه لله');
-        text = text.replace(/خالصة\s*هلل/g, 'خالصة لله');
-        text = text.replace(/الحب\s*هلل/g, 'الحب لله');
-        text = text.replace(/(?:^|[\s(\[«،.؛!؟:—\-])هلل(?=[\s)\]»،.؛!؟:—\-]|$)/gu, ' لله ');
+        text = normalizeIslamicSacredTerms(text);
         text = text.replace(/اعوذ/g, 'أعوذ');
 
         // Specific high-frequency decomposed / inverted PDF terms (NEVER use \b with Arabic!)
@@ -8312,10 +8417,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v74.5 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.5 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v74.6 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.6 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v74.5' : 'v74.5'}</span>
+                  <span>{isRtl ? 'الإصدار v74.6' : 'v74.6'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -13512,7 +13617,7 @@
                         const safeIdx = Math.max(0, Math.min(slidesList.length - 1, stage3ActiveSlide));
                         const currentSlide = slidesList[safeIdx] || slidesList[0] || {};
                         const currentSlideTitle = currentSlide.slideTitle || currentSlide.titleAr || currentSlide.phaseTitle || currentSlide.phaseNameAr || (`المحور ${safeIdx + 1}`);
-                        const scriptureText = currentSlide.scriptureEvidence || currentSlide.scripture;
+                        const scriptureText = normalizeIslamicSacredTerms(currentSlide.scriptureEvidence || currentSlide.scripture);
                         const bodyText = currentSlide.talkingPoints || currentSlide.bodyAr || currentSlide.teacherFocusAr;
                         const pedagogicalTip = currentSlide.pedagogicalTip || currentSlide.practicalAction || 'التركيز على ربط المعنى بالسلوك العملي للدارس';
                         const teleprompterText = currentSlide.fullSectionText || currentSlide.lectureNotes || currentSlide.bodyAr || currentSlide.teacherGuidanceAr || bodyText;
@@ -13836,7 +13941,7 @@
                                   </h4>
                                   {(slide.scriptureEvidence) && (
                                     <p className="font-quran text-base sm:text-lg text-amber-100 leading-relaxed my-3 bg-emerald-900/60 p-3 rounded-xl border border-gold-400/30">
-                                      {slide.scriptureEvidence}
+                                      {normalizeIslamicSacredTerms(slide.scriptureEvidence)}
                                     </p>
                                   )}
                                   <p className="font-amiri text-xs text-slate-200 leading-relaxed">
@@ -16190,7 +16295,7 @@
                   : (islamicData.blueprint || []);
                 const currentSlide = slidesList[activeSlideIndex] || slidesList[0] || {};
                 const slideTitleText = currentSlide.slideTitle || currentSlide.phaseTitle || currentSlide.phaseNameAr || (`المحور ${activeSlideIndex + 1}`);
-                const scriptureText = currentSlide.scriptureEvidence || currentSlide.scripture;
+                const scriptureText = normalizeIslamicSacredTerms(currentSlide.scriptureEvidence || currentSlide.scripture);
                 const bodyText = currentSlide.bodyAr || currentSlide.talkingPoints || currentSlide.teacherFocusAr || currentSlide.teacherGuidanceAr;
                 const impactText = currentSlide.pedagogicalTip || currentSlide.practicalAction || currentSlide.keyTakeawayAr || currentSlide.practicalImpact;
 
