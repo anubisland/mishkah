@@ -7286,13 +7286,27 @@
         if (!text || typeof text !== 'string') return '';
         let t = text;
 
-        // 0. Double alef fix with definite article
+        // 0. Double alef and omitted alef restoration in roots: الاستسلام, الاستعداد, الانحراف, الانشغال, إلخ
+        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)ست([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الاست' + p3);
+        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نت([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانت' + p3);
+        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نح([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانح' + p3);
+        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نش([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانش' + p3);
+        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)تب([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الاتب' + p3);
+        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نق([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانق' + p3);
         t = t.replace(/(?:^|\s)اال(?=[ابتثجحخدذرزسشصضطظعغفقكلمنهوي])/gu, (m) => m.replace('اال', 'ال'));
 
         // 1. Transposed Lam-Alif in core religious & common words
+        t = t.replace(/الاستسالم/gu, 'الاستسلام');
+        t = t.replace(/بالاستسالم/gu, 'بالاستسلام');
         t = t.replace(/الصالة/gu, 'الصلاة');
         t = t.replace(/والصالة/gu, 'والصلاة');
         t = t.replace(/بالصالة/gu, 'بالصلاة');
+        t = t.replace(/فالصالة/gu, 'فالصلاة');
+        t = t.replace(/والسام/gu, 'والسلام');
+        t = t.replace(/والسامعلى/gu, 'والسلام على ');
+        t = t.replace(/ابتالء/gu, 'ابتلاء');
+        t = t.replace(/وبتالء/gu, 'وابتلاء');
+        t = t.replace(/ثالث\s+(خصائص|مراتب|أصول|سنوات|نقاط|ركائز|مرات)/gu, (m, p1) => 'ثلاث ' + p1);
         t = t.replace(/فالصالة/gu, 'فالصلاة');
         t = t.replace(/والسام/gu, 'والسلام');
         t = t.replace(/والسامعلى/gu, 'والسلام على ');
