@@ -5988,7 +5988,7 @@
         t = t.split(/(?:\s+(?:يُ?ثبت\s+الوحي|بحيث|والحاصل|وفي هذا المحور|وهو\s+دين|وهذا\s+القسم)|\s*\(\s*سواء)/)[0].trim();
 
         // Clean publishing metadata if any leaked in
-        t = t.replace(/(?:تأليف|للمؤلف|دار|نشر|صفحة|طبعة|تحقيق|إعداد|ردمك|ISBN)[\s\S]*$/, '').trim();
+        t = t.replace(/(?:تأليف\s*[:：]|للمؤلف\s*[:：]|دار\s+(?:النشر|الوعي|الفكر)|تحقيق\s*[:：]|إعداد\s*[:：]|طبعة\s*[:：]|صفحة\s*\d+|ردمك|ISBN)[\s\S]*$/, '').trim();
 
         // Remove trailing punctuation or open brackets
         t = t.replace(/[\(（\[:\-\s،؛.]+$/, '').trim();
