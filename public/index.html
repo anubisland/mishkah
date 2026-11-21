@@ -5974,9 +5974,9 @@
         if (!rawTitle) return 'محور الدرس ومسائله';
         let t = sanitizeArabicExtractedText(rawTitle);
 
-        // Strip leading numbers, symbols, and heading markers
-        t = t.replace(/^[#*\-•\s\d\.\)\:،=]+/, '').replace(/[*#]/g, '').trim();
-        t = t.replace(/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|حادي عشر|ثاني عشر|المحور \d+|المبحث \d+|المطلب \d+|الفصل \d+|\d+[\-\.\)]|Theme \d+)[:\s–—]*/i, '').trim();
+        // Strip leading diacritics, numbers, symbols, and heading markers
+        t = t.replace(/^[\u064B-\u065F\u0670\u06D6-\u06ED\s#*\-•\d\.\)\:،=]+/, '').replace(/[*#]/g, '').trim();
+        t = t.replace(/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|حادي عشر|ثاني عشر|المحور \d+|المبحث \d+|المطلب \d+|الفصل \d+|\d+[\-\.\)]|Theme \d+)[:\s–—.-]*/i, '').trim();
 
         // If title contains an inline delimiter like colon ':' or dash '–' or '—', extract strictly what is before it!
         const delimiterMatch = t.match(/^([^:\-\—–\n]{3,50})[:\-\—–]\s*(.+)$/);
@@ -5995,6 +5995,14 @@
         const openP = (t.match(/[\(（]/g) || []).length;
         const closeP = (t.match(/[\)）]/g) || []).length;
         if (openP > closeP) t += ')';
+
+        // Strip again if any stray leading diacritics remained
+        t = t.replace(/^[\u064B-\u065F\u0670\u06D6-\u06ED]+/, '').trim();
+
+        // If title is just a bare ordinal, return standard title
+        if (/^(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|أولا|ثانيا|ثالثا|رابعا)$/.test(t) || t.length < 4) {
+          return 'محور الدرس ومسائله';
+        }
 
         // Cap length at 48 characters to keep presentation titles elegant and uncluttered
         if (t.length > 48) {
@@ -6320,7 +6328,15 @@
             if (currentSec && currentSec.lines.length > 0) {
               rawSections.push(currentSec);
             }
-            let strippedLine = line.replace(/^[#*\-•\s\d\.\)\:،]+/, '').replace(/[*#]/g, '').trim();
+            let strippedLine = line.replace(/^[\u064B-\u065F\u0670\u06D6-\u06ED\s#*\-•\d\.\)\:،=]+/, '').replace(/[*#]/g, '').trim();
+
+            // Strip leading ordinal prefixes so "الأول: تحقيق العبودية..." becomes "تحقيق العبودية..."
+            const ordinalPrefixRegex = /^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|حادي عشر|ثاني عشر|المحور \d+|المطلب \d+|المسألة \d+|الوجه \d+)[\s:–—.-]*/i;
+            const withoutOrdinal = strippedLine.replace(ordinalPrefixRegex, '').trim();
+            if (withoutOrdinal.length >= 4) {
+              strippedLine = withoutOrdinal;
+            }
+
             let parsedTitle = strippedLine;
             let initialLineContent = '';
 
@@ -6331,7 +6347,10 @@
               initialLineContent = delimMatch[2].trim();
             }
 
-            const cleanT = cleanSlideTitle(parsedTitle);
+            let cleanT = cleanSlideTitle(parsedTitle);
+            if (cleanT.length <= 4 || /^(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر)$/.test(cleanT)) {
+              cleanT = withoutOrdinal.length >= 4 ? cleanSlideTitle(withoutOrdinal) : ('المحور ' + (rawSections.length + 1));
+            }
             currentSec = {
               title: cleanT.length > 3 ? cleanT : ('المحور ' + (rawSections.length + 1)),
               isFormalHeading: isHeadingMatch,
