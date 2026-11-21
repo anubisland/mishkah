@@ -5928,10 +5928,15 @@
         t = t.replace(/(?:تأليف|للمؤلف|دار|نشر|صفحة|طبعة|تحقيق|إعداد|ردمك|ISBN)[\s\S]*$/, '').trim();
         // Remove trailing open parentheses or broken punctuation
         t = t.replace(/[\(（\[]\s*$/, '').trim();
-        if ((t.includes('(') || t.includes('（')) && !t.includes(')') && !t.includes('）')) {
-          t = t.replace(/[\(（].*$/, '').trim();
+        const openP = (t.match(/[\(（]/g) || []).length;
+        const closeP = (t.match(/[\)）]/g) || []).length;
+        if (openP > closeP) {
+          t = t + ')';
         }
-        if (t.length > 65) t = t.substring(0, 62) + '...';
+        if (t.length > 75) {
+          const sp = t.substring(0, 70).lastIndexOf(' ');
+          t = (sp > 30 ? t.substring(0, sp) : t.substring(0, 68)).trim() + '...';
+        }
         return t || rawTitle || 'محور الدرس ومسائله';
       }
 
@@ -5940,32 +5945,44 @@
         const bullets = [];
         const isNoiseLine = (t) => /^(?:ملاحظة منهجية|هذا الملخص|نسخة ممسوحة|التعرف على نصوصها|أخطاء طباعية|دار النشر|دار الوعي|طبعة ورقية|ملحق تعقيبي|ردمك|ISBN|\(?\d+\s*صفحة\)?)/i.test(t);
 
-        for (const line of lines) {
-          const clean = line.replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
-          if (!clean || isNoiseLine(clean)) continue;
+        // Join lines into continuous text to ensure complete sentences across line wraps!
+        const fullSecText = lines.filter(l => !isNoiseLine(l)).join(' ');
 
-          // Split on periods, semicolons, or newlines
-          const sentences = clean.split(/[.\n؛]/).map(s => s.trim()).filter(s => s.length >= 18 && s.length <= 160);
-          for (let s of sentences) {
-            if (isNoiseLine(s)) continue;
-            if (/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|المبحث|المطلب|الفصل|الباب|المحور)/.test(s)) continue;
+        // Split on sentence terminators: period, exclamation, question mark, or semicolon
+        const rawSentences = fullSecText.split(/(?<=[.؛!؟])\s+/).map(s => s.trim()).filter(s => s.length >= 18);
 
-            // Distill long sentences to crisp thesis statements (under 80 chars)
-            if (s.length > 85) {
-              const subClauses = s.split(/(?:\s+بل\s+|\s+حيث\s+|\s+كما\s+|\s+إذ\s+|\s+بحيث\s+)/).map(c => c.trim()).filter(c => c.length >= 18 && c.length <= 85);
-              if (subClauses.length > 0) {
-                s = subClauses[0];
-              } else {
-                const sp = s.substring(0, 80).lastIndexOf(' ');
-                s = (sp > 35 ? s.substring(0, sp) : s.substring(0, 78)).trim();
-              }
+        for (let s of rawSentences) {
+          if (isNoiseLine(s)) continue;
+          if (/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|المبحث|المطلب|الفصل|الباب|المحور)/.test(s)) continue;
+
+          let clean = s.replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
+
+          // If sentence is excessively long, distill to high-impact statement (up to 160 chars) without mid-word chops
+          if (clean.length > 160) {
+            const subClauses = clean.split(/(?:\s+بل\s+|\s+حيث\s+|\s+كما\s+|\s+إذ\s+|\s+بحيث\s+|،\s+)/).map(c => c.trim()).filter(c => c.length >= 20 && c.length <= 150);
+            if (subClauses.length > 0) {
+              clean = subClauses[0];
+            } else {
+              const sp = clean.substring(0, 150).lastIndexOf(' ');
+              clean = (sp > 40 ? clean.substring(0, sp) : clean.substring(0, 140)).trim();
             }
-            if (s.includes('؟') || s.includes('?') || /^\(?\s*(?:س |هل |ماذا |كيف |لماذا )/i.test(s)) continue;
+          }
 
-            if (!bullets.includes(s) && bullets.length < 3) {
-              bullets.push(s);
-            }
-            if (bullets.length >= 3) break;
+          // Strip trailing prepositions/connectors so a sentence never ends with "من" or "إلى" etc.
+          clean = clean.replace(/\s+(?:من|إلى|عن|على|في|مع|بين|أن|إن|بأن|حيث|كما|إذ|دون|و|أو|التي|الذي|ما|لا|كل|عند|قبل|بعد|نحو|ضد|مثل|غير|أثر)$/, '').trim();
+
+          // Balance unclosed parentheses
+          const openP = (clean.match(/[\(（]/g) || []).length;
+          const closeP = (clean.match(/[\)）]/g) || []).length;
+          if (openP > closeP) clean += ')';
+
+          // Balance unclosed quotes
+          const openQ = (clean.match(/[«"]/g) || []).length;
+          const closeQ = (clean.match(/[»"]/g) || []).length;
+          if (openQ > closeQ) clean += '»';
+
+          if (clean.length >= 15 && !bullets.includes(clean)) {
+            bullets.push(clean);
           }
           if (bullets.length >= 3) break;
         }
@@ -6072,6 +6089,7 @@
         // Helper to identify OCR scan notices and publishing noise
         const isNoiseLine = (line) => {
           if (!line) return true;
+          if (/^[=\-\._\s]{3,}$/.test(line)) return true;
           if (/^(?:ملاحظة منهجية|هذا الملخص معد|نسخة ممسوحة|التعرف على نصوصها|أخطاء طباعية|دار النشر|دار الوعي|طبعة ورقية|ملحق تعقيبي|ردمك|ISBN)/i.test(line)) return true;
           if (/^\(?\s*\d+\s*(?:صفحة|ص)?\s*\)?$/i.test(line)) return true;
           if (line.includes('نسخة ممسوحة ضوئيا') || line.includes('359 صفحة')) return true;
@@ -6086,7 +6104,7 @@
 
         if (!detectedTopic) {
           for (let i = 0; i < Math.min(6, cleanLines.length); i++) {
-            const line = cleanLines[i].replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
+            const line = cleanLines[i].replace(/^[#*\-•\s\d\.\)\:،=]+/, '').trim();
             if (line.includes('ملخص') || line.includes('كتاب') || line.includes('تأليف') || line.includes('دراسة')) {
               detectedTopic = line
                 .replace(/^(?:ملخص شامل ل?|ملخص ك?تاب:?\s*)+/, '')
@@ -6102,6 +6120,7 @@
             }
           }
         }
+        detectedTopic = detectedTopic.replace(/^[#*\-•\s\d\.\)\:،=]+/, '').trim();
         const topic = detectedTopic || (isRtl ? 'محاضرة شرعية وتأصيل علمي' : 'Islamic Lecture');
         const contentLines = cleanLines.slice(startContentIndex);
 
@@ -6127,17 +6146,22 @@
         // 3. Extract Quranic Verses and Hadiths / Citations across text (excluding noise)
         const detectedAyahs = [];
         const detectedHadiths = [];
-        contentLines.forEach(l => {
-          if (isNoiseLine(l)) return;
-          if ((l.includes('قال تعالى') || l.includes('قوله تعالى') || l.includes('﴿')) && !l.includes('صفحة')) {
-            detectedAyahs.push(l);
-          } else if (l.includes('قال رسول الله') || l.includes('قال ﷺ') || l.includes('صحيح مسلم') || l.includes('صحيح البخاري') || l.includes('رواه')) {
-            detectedHadiths.push(l);
-          }
-        });
+        const fullContentText = contentLines.join('\n');
+        const ayahMatches = fullContentText.match(/(?:قال تعالى[:\s]*)?﴿[^﴾]{5,350}﴾/g);
+        if (ayahMatches) {
+          ayahMatches.forEach(m => {
+            if (!m.includes('صفحة') && !detectedAyahs.includes(m)) detectedAyahs.push(m);
+          });
+        }
+        const hadithMatches = fullContentText.match(/(?:قال رسول الله|قال النبي|روى|أخرجه|حديث)[\s\S]*?(?:«[^»]{5,350}»|"[^"]{5,350}")/g);
+        if (hadithMatches) {
+          hadithMatches.forEach(m => {
+            if (!m.includes('صفحة') && !detectedHadiths.includes(m)) detectedHadiths.push(m);
+          });
+        }
 
         // 4. Intelligent Dynamic Section Segmentation Engine (Supports up to 20 slides naturally)
-        const headingRegex = /^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|حادي عشر|ثاني عشر|ثالث عشر|رابع عشر|خامس عشر|سادس عشر|المبحث|المطلب|الفصل|الباب|المحور|المسألة|الوقفة|القسم|الأصل|القاعدة|الضابط|العنصر|النقطة)\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+|[\u0660-\u0669]+|[أ-ي])?[:\.\-\s]|^[#]{1,4}\s+|^(?:\d+|[\u0660-\u0669]+)[\.\-\)]\s+/i;
+        const headingRegex = /^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|حادي عشر|ثاني عشر|ثالث عشر|رابع عشر|خامس عشر|سادس عشر|المبحث|المطلب|الفصل|الباب|المحور|المسألة|الوقفة|القسم|الأصل|القاعدة|الضابط|العنصر|النقطة)\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+|[\u0660-\u0669]+|[أ-ي])?[:\.\-\s]|^[#]{1,4}\s+|^(?:\d+|[\u0660-\u0669]+)\s*[\.\-\)]\s+/i;
 
         const rawSections = [];
         let currentSec = null;
@@ -6258,8 +6282,8 @@
 
           // A. Distinct Scripture Assignment (Prioritize inline, then detected, then rotating thematic pool)
           let secScripture = '';
-          const vMatch = secText.match(/(?:قال تعالى[:\s]*)?﴿[^﴾]+﴾/);
-          const hMatch = secText.match(/(?:قال رسول الله|قال النبي|روى البخاري|حديث)[\s\S]*?(?:«[^»]+»|"[^"]+")/);
+          const vMatch = secText.match(/(?:قال تعالى[:\s]*)?﴿[^﴾]{5,350}﴾/);
+          const hMatch = secText.match(/(?:قال رسول الله|قال النبي|روى البخاري|حديث)[\s\S]*?(?:«[^»]{5,350}»|"[^"]{5,350}")/);
 
           if (vMatch && !vMatch[0].includes('صفحة') && !vMatch[0].includes('ممسوحة')) {
             secScripture = vMatch[0];
@@ -6269,6 +6293,9 @@
             secScripture = detectedAyahs[idx % detectedAyahs.length];
           } else if (detectedHadiths.length > 0 && detectedHadiths[idx % detectedHadiths.length]) {
             secScripture = detectedHadiths[idx % detectedHadiths.length];
+          } else if (evs && evs.quranicVerses && evs.quranicVerses.length > 0) {
+            const ev = evs.quranicVerses[idx % evs.quranicVerses.length];
+            secScripture = `« ${ev.arabicText} » (${ev.citation || 'القرآن الكريم'})`;
           } else {
             // Rotate through distinct authentic scriptures
             secScripture = THEMATIC_SCRIPTURES[idx % THEMATIC_SCRIPTURES.length];
@@ -6427,35 +6454,6 @@
             explanationAr: `المستفاد المنهجي من محور (${cleanSecTitle}): يؤكد الشرح على (${coreCorrectStatement})، مع التنبيه على ضرورة صيانة الفكر والاعتزاز بمرجعية الوحي.`
           });
         });
-
-        // Insert Opening Du'a / Preamble as dedicated Presentation Slide 1 (never a worksheet or quiz question)
-        if (lectureOpeningPreamble) {
-          zoomDeck.unshift({
-            slideNumber: 1,
-            phaseTitle: 'افتتاحية اللقاء',
-            slideTitle: 'افتتاحية المجلس والدعاء المأثور',
-            scriptureEvidence: '﴿رَبِّ اشْرَحْ لِي صَدْرِي ۝ وَيَسِّرْ لِي أَمْرِي﴾ [طه: 25-26]',
-            bulletPoints: [
-              'الاستفتاح بحمد الله تعالى والثناء العاطر عليه بما هو أهله',
-              'الصلاة والسلام على نبينا محمد ﷺ وسؤال الإعانة والتوفيق',
-              'سؤال الله العلم النافع والرزق الطيب والعمل المتقبل'
-            ],
-            talkingPoints: 'افتتاح المجلس بذكر الله والدعاء المأثور، وتهيئة قلوب الدارسين للإقبال على العلم الشرعي بإخلاص ويقين',
-            fullSectionText: lectureOpeningPreamble.lines.join('\n\n'),
-            pedagogicalTip: 'تذكير الطلاب بتجديد النية واستشعار بركة مجالس الذكر والصلة بالله',
-            discussionPrompts: [
-              'ما أثر استحضار النية الصالحة في مجلس العلم على بركة الفهم ورسوخ الأثر؟'
-            ],
-            titleAr: 'افتتاحية المجلس والدعاء المأثور',
-            bodyAr: lectureOpeningPreamble.duaExcerpt || 'اللهم علمنا ما ينفعنا وانفعنا بما علمتنا وزدنا علماً، اللهم ارزقنا التوحيد الخالص لك وأفرغ علينا صبراً.',
-            practicalAction: 'تجديد النية الصالحة في طلب العلم والاستعاذة من علم لا ينفع.'
-          });
-          // Re-number subsequent slides 1, 2, 3...
-          zoomDeck.forEach((s, idx) => {
-            s.slideNumber = idx + 1;
-            if (idx > 0) s.phaseTitle = `المحور ${idx}`;
-          });
-        }
 
         // 6. Evidences list for verification banner
         const allEvidences = [];
@@ -7028,9 +7026,48 @@
         }).join('\n');
       }
 
+      // Intelligent Arabic Line Joiner: Heuristically joins wrapped lines across PDF column breaks, unclosed brackets, and trailing prepositions
+      function joinWrappedArabicLines(rawText) {
+        if (!rawText) return '';
+        const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        const merged = [];
+
+        for (let i = 0; i < lines.length; i++) {
+          const cur = lines[i];
+          if (merged.length === 0) {
+            merged.push(cur);
+            continue;
+          }
+
+          const prev = merged[merged.length - 1];
+
+          // Check if prev line was incomplete and cur continues it:
+          const openQuran = (prev.match(/﴿/g) || []).length > (prev.match(/﴾/g) || []).length;
+          const openParen = (prev.match(/[\(（]/g) || []).length > (prev.match(/[\)）]/g) || []).length;
+          const openBracket = (prev.match(/\[/g) || []).length > (prev.match(/\]/g) || []).length;
+          const openQuote = (prev.match(/[«"]/g) || []).length > (prev.match(/[»"]/g) || []).length;
+
+          const trailingConnector = /(?:من|إلى|عن|على|في|مع|بين|أن|إن|بأن|حيث|كما|إذ|دون|و|أو|التي|الذي|الذين|اللاتي|اللواتي|ما|لا|كل|عند|قبل|بعد|نحو|ضد|مثل|غير|أثر|حتى|لئلا|لكن|أم|بل|ثم|سواء)$/.test(prev);
+
+          const startsWithCloser = /^[»\)）\]﴾\.،؛!؟]/.test(cur);
+          const isHeading = /^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|المبحث|المطلب|الفصل|الباب|المحور|المسألة|الوقفة|القسم|الأصل|القاعدة|الضابط|العنصر|النقطة)\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|\d+|[\u0660-\u0669]+|[أ-ي])?[:\.\-\s]|^[#]{1,4}\s+|^(?:\d+|[\u0660-\u0669]+)\s*[\.\-\)]\s+/i.test(cur);
+
+          const prevEndsWithTerminator = /[.؛!؟:—\-]$/.test(prev);
+
+          if (openQuran || openParen || openBracket || openQuote || trailingConnector || startsWithCloser || (!prevEndsWithTerminator && !isHeading && cur.length > 0 && prev.length < 85)) {
+            merged[merged.length - 1] = prev + ' ' + cur;
+          } else {
+            merged.push(cur);
+          }
+        }
+
+        return merged.join('\n');
+      }
+
       function sanitizeArabicExtractedText(rawText) {
         if (!rawText) return '';
-        let text = normalizeArabicPresentationForms(rawText);
+        let text = joinWrappedArabicLines(rawText);
+        text = normalizeArabicPresentationForms(text);
         text = detectAndInvertReversedArabic(text);
 
         // Normalize ornate Quranic brackets if flipped by visual PDF fonts: ﴾...﴿ -> ﴿...﴾
@@ -7050,6 +7087,10 @@
         text = text.replace(/\.{3,}/g, ' ');
         text = text.replace(/_{3,}/g, ' ');
         text = text.replace(/[\-]{4,}/g, ' ');
+        text = text.replace(/={2,}/g, ' ');
+        text = text.replace(/ألن\s+القلب/g, 'لأن القلب');
+        text = text.replace(/الْعَ\s+الَمِين/g, 'الْعَالَمِينَ');
+        text = text.replace(/الْعَالَمِين(?=[^َ]|$)/g, 'الْعَالَمِينَ');
 
         // 5. Systemic Arabic Sacred Names & Inversion Normalization (Reversed PDF font ligatures)
         // Clean reversed or broken PBUH ligatures and common mis-encodings
@@ -7101,10 +7142,16 @@
         text = text.replace(/االنقياد/g, 'الانقياد');
         text = text.replace(/الإس\s*الم/g, 'الإسلام');
         text = text.replace(/الإسالم/g, 'الإسلام');
+        text = text.replace(/الإبالم/g, 'الإسلام');
+        text = text.replace(/اإلبالم/g, 'الإسلام');
+        text = text.replace(/بإبالم/g, 'بالإسلام');
+        text = text.replace(/إبالم/g, 'إسلام');
         text = text.replace(/باإلسالم/g, 'بالإسلام');
         text = text.replace(/بالإسالم/g, 'بالإسلام');
         text = text.replace(/إسالم/g, 'إسلام');
         text = text.replace(/اإلسالم/g, 'الإسلام');
+        text = text.replace(/إقام\s+الصالة/g, 'إقام الصلاة');
+        text = text.replace(/إقام\s+الصلاة/g, 'إقام الصلاة');
         text = text.replace(/ومالئكته/g, 'وملائكته');
         text = text.replace(/بمالئكته/g, 'بملائكته');
         text = text.replace(/المالئكة/g, 'الملائكة');
@@ -7157,6 +7204,11 @@
         text = text.replace(/الماليين/g, 'الملايين');
         text = text.replace(/ماليين/g, 'ملايين');
         text = text.replace(/احبل/g, 'حبلاً');
+        text = text.replace(/ً\s*ا\s+حبل/g, 'حبلاً');
+        text = text.replace(/ا\s+ل\s+يُ?نقض/g, 'لا يُنقض');
+        text = text.replace(/ا\s+ل\s+يخاف/g, 'لا يخاف');
+        text = text.replace(/(?:^|[\s(\[«])ا\s+ل(?=[\s)\.،؛!؟»\]]|$)/gu, ' لا ');
+        text = text.replace(/(?:^|[\s(\[«])ا\s+ل\s+(?=[أ-ي])/gu, ' لا ');
 
         // Generic Word-initial double Alif 'االـ' -> 'الـ' (e.g. االنحراف -> الانحراف)
         text = text.replace(/(?:^|[\s(\[«])اال(?=[أ-ي])/gu, (m) => m.replace('اال', 'ال'));
@@ -8045,10 +8097,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v74.2 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.2 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v74.3 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.3 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v74.2' : 'v74.2'}</span>
+                  <span>{isRtl ? 'الإصدار v74.3' : 'v74.3'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
