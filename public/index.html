@@ -6471,21 +6471,26 @@
           // A. Distinct Scripture Assignment (Prioritize inline, then detected, then rotating thematic pool)
           const isValidScripture = (sc) => {
             if (!sc || typeof sc !== 'string') return false;
-            const clean = sc.replace(/^[«"\s]+|[»"\s]+$/g, '').trim();
-            if (clean.length < 16) return false;
-            const words = clean.split(/\s+/).filter(w => /[\u0600-\u06FF]{2,}/.test(w));
-            if (words.length < 3) return false;
-            if (/^﴿\s*(?:لا|\.?\s*إلا|نعم|بلى)\s*﴾$/.test(clean)) return false;
+            const clean = sc.replace(/^[«"“\s]+|[»"”\s]+$/g, '').trim();
+            if (clean.length < 20) return false;
+            const inner = clean.replace(/^[﴿\(«\[\s]+|[﴾\)»\]\s]+$/g, '').trim();
+            if (inner.length < 18) return false;
+            const words = inner.split(/\s+/).filter(w => /[\u0600-\u06FF]{2,}/.test(w));
+            if (words.length < 4) return false;
+            if (/^(?:لا|إلا|نعم|بلى|فقط|لا بس|لا إ|ما|إن|أن|هو|وهو|قال|روى)$/.test(inner)) return false;
+            if (clean.includes('صفحة') || clean.includes('ممسوحة') || clean.includes('معد للمدارسة')) return false;
+            if (clean.includes('﴿') && !clean.includes('﴾')) return false;
+            if (clean.includes('»') && !clean.includes('«')) return false;
             return true;
           };
 
           let secScripture = '';
-          const vMatch = secText.match(/(?:قال تعالى[:\s]*)?﴿[^﴾]{15,350}﴾/);
-          const hMatch = secText.match(/(?:قال رسول الله|قال النبي|روى البخاري|حديث)[\s\S]*?(?:«[^»]{15,350}»|"[^"]{15,350}")/);
+          const vMatch = secText.match(/(?:قال تعالى[:\s]*)?﴿[^﴾]{18,350}﴾/);
+          const hMatch = secText.match(/(?:قال رسول الله|قال النبي|روى البخاري|حديث)[\s\S]*?(?:«[^»]{18,350}»|"[^"]{18,350}")/);
 
-          if (vMatch && isValidScripture(vMatch[0]) && !vMatch[0].includes('صفحة') && !vMatch[0].includes('ممسوحة')) {
+          if (vMatch && isValidScripture(vMatch[0])) {
             secScripture = vMatch[0];
-          } else if (hMatch && isValidScripture(hMatch[0]) && !hMatch[0].includes('صفحة') && !hMatch[0].includes('ممسوحة')) {
+          } else if (hMatch && isValidScripture(hMatch[0])) {
             secScripture = hMatch[0];
           } else if (detectedAyahs.length > 0 && isValidScripture(detectedAyahs[idx % detectedAyahs.length])) {
             secScripture = detectedAyahs[idx % detectedAyahs.length];
@@ -6499,22 +6504,23 @@
             secScripture = THEMATIC_SCRIPTURES[idx % THEMATIC_SCRIPTURES.length];
           }
 
-          // Infallible Sanctification & Length Distillation for Presentation Slides
+          // Infallible Sanctification & Length Distillation for Presentation Slides (NEVER chop an Ayah or Hadith in the middle!)
           secScripture = normalizeIslamicSacredTerms(secScripture);
           if (secScripture.length > 190) {
-            // Distill down to inner quote, ayah, or concise prophetic witness
-            const innerQuote = secScripture.match(/«([^»]{15,180})»/) || secScripture.match(/"([^"]{15,180})"/);
-            const innerAyah = secScripture.match(/﴿([^﴾]{15,180})﴾/);
-            if (innerQuote) {
-              secScripture = `« ${innerQuote[1].trim()} »`;
-            } else if (innerAyah) {
+            const innerAyah = secScripture.match(/﴿([^﴾]{18,180})﴾/);
+            const innerQuote = secScripture.match(/«([^»]{18,180})»/) || secScripture.match(/"([^"]{18,180})"/);
+            if (innerAyah) {
               secScripture = `﴿${innerAyah[1].trim()}﴾`;
+            } else if (innerQuote) {
+              secScripture = `«${innerQuote[1].trim()}»`;
             } else if (secScripture.includes('يا مقلب القلوب') || secScripture.includes('مقلب القلوب')) {
               secScripture = '«يَا مُقَلِّبَ الْقُلُوبِ ثَبِّتْ قَلْبِي عَلَى دِينِكَ» (حديث شريف)';
+            } else if (secScripture.includes('عذاب القبر') || secScripture.includes('استعيذوا بالله')) {
+              secScripture = '«اسْتَعِيذُوا بِاللَّهِ مِنْ عَذَابِ الْقَبْرِ» (صحيح أبي داود)';
+            } else if (secScripture.includes('تركت فيكم أمرين')) {
+              secScripture = '«تَرَكْتُ فِيكُمْ أَمْرَيْنِ لَنْ تَضِلُّوا مَا تَمَسَّكْتُمْ بِهِمَا: كِتَابَ اللَّهِ وَسُنَّةَ نَبِيِّهِ»';
             } else {
-              const lastSpace = secScripture.substring(0, 160).lastIndexOf(' ');
-              secScripture = secScripture.substring(0, lastSpace > 50 ? lastSpace : 160).trim() + '...»';
-              if (!secScripture.startsWith('«')) secScripture = '« ' + secScripture;
+              secScripture = THEMATIC_SCRIPTURES[idx % THEMATIC_SCRIPTURES.length];
             }
           }
 
@@ -7018,10 +7024,11 @@
         var scholarlyProofs = [];
 
         // A. Quranic Verses: Bracketed with ﴿...﴾
-        var bracketMatches = text.match(/﴿[^﴾]{4,400}﴾/g) || [];
+        var bracketMatches = text.match(/﴿[^﴾]{18,400}﴾/g) || [];
         bracketMatches.forEach(function(m, idx) {
           var cleanVerse = m.replace(/[﴿﴾]/g, '').trim();
-          if (cleanVerse && !cleanVerse.includes('صفحة') && !cleanVerse.includes('ممسوحة')) {
+          var wordsCount = cleanVerse.split(/\s+/).filter(function(w) { return /[\u0600-\u06FF]{2,}/.test(w); }).length;
+          if (cleanVerse && wordsCount >= 4 && !cleanVerse.includes('صفحة') && !cleanVerse.includes('ممسوحة')) {
             var afterIdx = text.indexOf(m) + m.length;
             var citationNearby = text.slice(afterIdx, afterIdx + 50).match(/[\[\(]([^\]\)]{2,25})[:\s]+(\d+)[\'\]\)]/);
             var citation = 'القرآن الكريم';
@@ -7197,60 +7204,58 @@
       // Detection & Inversion of Reversed Visual-Order Arabic (LTR encoded PDFs)
       function detectAndInvertReversedArabic(text) {
         if (!text) return text;
-
-        // If the text already contains common forward Arabic marker words, it is 100% FORWARD! DO NOT REVERSE!
-        const forwardMarkers = (text.match(/(?:^|[\s\p{P}])(?:مقدمة|أعوذ|اعوذ|بالله|بسم|الحمد|الشيطان|الرحمن|الرحيم|العقيدة|الإسلام|الإيمان|رسول|صلى|عليه|وسلم|تعالى)(?:$|[\s\p{P}])/gu) || []).length;
-        if (forwardMarkers >= 2) {
-          return text; // Already clean forward Arabic!
-        }
-
-        const taaStartMatches = (text.match(/(?:^|[\s\p{P}])ة[\u0600-\u06FF]{2,}/gu) || []).length;
-        const laEndMatches = (text.match(/[\u0600-\u06FF]{2,}لا(?:$|[\s\p{P}])/gu) || []).length;
-        const reversedKeywords = (text.match(/(?:^|[\s\p{P}])(?:مسب|ذوعا|ذوعأ|للهاب|ناطيشرلا|ناطيشلا|ميجرلا|نمحرلا|ميحرلا|ىلإ|ثحبملا|قيبطتلا|رصاعملا|نيمألا|ملسو|ىلاعت|ةلاسر|ةعيرش)(?:$|[\s\p{P}])/gu) || []).length;
-
-        const totalWords = text.trim().split(/\s+/).length || 1;
-        const isReversed = (taaStartMatches >= 2 || reversedKeywords >= 2 || (laEndMatches / totalWords > 0.15));
-
-        if (!isReversed) return text;
-
         const bracketPairs = { '(': ')', ')': '(', '[': ']', ']': '[', '{': '}', '}': '{', '<': '>', '>': '<', '«': '»', '»': '«', '﴿': '﴾', '﴾': '﴿' };
         const lines = text.split(/\r?\n/);
+
+        // Document-level reverse tendency check (from first 25 non-empty lines)
+        const sample = lines.filter(l => l.trim().length > 3).slice(0, 25).join(' ');
+        const docRevCount = (sample.match(/(?:^|\s)(?:مسب|ذوعأ|ذوعا|للهاب|ميجرلا|نمحرلا|ميحرلا|ىلإ|ثحبملا|ملسو|ىلاعت|ةعيرشلا|ةيمالسإلا)[ةى]?/gu) || []).length +
+                            (sample.match(/(?:^|\s)[ةى][\u0600-\u06FF]{2,}/gu) || []).length;
+        const isDocReversed = docRevCount >= 2;
+
         return lines.map(line => {
           const trimmed = line.trim();
-          if (!trimmed) return line;
+          if (!trimmed || trimmed.length < 3) return line;
+          if (!/[\u0600-\u06FF]/.test(trimmed)) return line;
 
-          const revWhole = trimmed.split('').reverse().join('').replace(/[()«»\[\]{}<>﴿﴾]/g, m => bracketPairs[m] || m);
-          if (/^(?:أعوذ|اعوذ|بسم|الحمد|قال|روى|المبحث|المحور|الفصل|الباب|أولاً|ثانياً|مقدمة)/.test(revWhole.trim()) ||
-              revWhole.includes('بسم الله') || revWhole.includes('أعوذ بالله') || revWhole.includes('الحمد لله')) {
-            return revWhole;
-          }
+          // 1. Definite forward markers on this line:
+          const forwardMarkers = (trimmed.match(/(?:^|[\s\p{P}])(?:مقدمة|أعوذ|اعوذ|بالله|بسم|الحمد|الشيطان|الرحمن|الرحيم|العقيدة|الإسلام|الإيمان|رسول|صلى|عليه|وسلم|تعالى|المبحث|المحور|الفصل|الباب|المطلب|المسألة|أولاً|ثانياً|ثالثاً|رابعاً|خامساً)(?:$|[\s\p{P}])/gu) || []).length;
+          if (forwardMarkers >= 2) return line;
 
-          const words = trimmed.split(/(\s+|[،.؛:!؟\(\)«»\[\]])/);
-          const wordReversed = words.map(w => {
-            if (/[\u0600-\u06FF]{2,}/.test(w)) {
-              return w.split('').reverse().join('');
+          const reverseLineText = (str) => str.split('').reverse().join('').replace(/[()«»\[\]{}<>﴿﴾]/g, m => bracketPairs[m] || m);
+
+          // 2. Definite reverse markers on this line:
+          const impossibleStarts = (trimmed.match(/(?:^|\s)[ةى][\u0600-\u06FF]{2,}/gu) || []).length;
+          const revKeywords = (trimmed.match(/(?:^|\s)(?:مسب|ذوعأ|ذوعا|للهاب|ميجرلا|نمحرلا|ميحرلا|ىلإ|ثحبملا|ملسو|ىلاعت|ةعيرشلا|ةيمالسإلا|دصاقم|هقفلا|لوصأ|مهماسقأ|يعرشلا|مكحلا|لجو\s*زع|دارم|نيعمجأ|هبحصو|هلآ|رييختلا|حابملاو|هوركملاو|مرحملاو|بودنملاو|بجاو|قداصلا|نيمألا)(?:[\s،.؛!؟]|$)/gu) || []).length;
+          if (impossibleStarts >= 1 || revKeywords >= 1) return reverseLineText(trimmed);
+
+          // 3. Compare Al- prefix counts:
+          const origAl = (trimmed.match(/(?:^|\s)ال[\u0600-\u06FF]{2,}/gu) || []).length;
+          const rev = reverseLineText(trimmed);
+          const revAl = (rev.match(/(?:^|\s)ال[\u0600-\u06FF]{2,}/gu) || []).length;
+
+          if (revAl > origAl) return rev;
+          if (origAl > revAl) return line;
+
+          // 4. In a reversed document:
+          if (isDocReversed) {
+            if (rev.includes('الله') || rev.includes('عز وجل') || rev.includes('رسول') || rev.includes('القرآن') || rev.includes('السنة')) {
+              return rev;
             }
-            return w;
-          }).join('');
-
-          const normalAlCount = (wordReversed.match(/(?:^|[\s\p{P}])ال[\u0600-\u06FF]{2,}/gu) || []).length;
-          const revAlCount = (revWhole.match(/(?:^|[\s\p{P}])ال[\u0600-\u06FF]{2,}/gu) || []).length;
-
-          if (revAlCount >= normalAlCount) {
-            return revWhole;
           }
-          return wordReversed;
+          return line;
         }).join('\n');
       }
 
       // Intelligent Arabic Line Joiner: Heuristically joins wrapped lines across PDF column breaks, unclosed brackets, and trailing prepositions
-      function joinWrappedArabicLines(rawText) {
-        if (!rawText) return '';
-        const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      function joinWrappedArabicLines(rawInput) {
+        if (!rawInput) return '';
+        const lines = Array.isArray(rawInput) ? rawInput : (rawInput || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
         const merged = [];
 
         for (let i = 0; i < lines.length; i++) {
-          const cur = lines[i];
+          const cur = lines[i].trim();
+          if (!cur) continue;
           if (merged.length === 0) {
             merged.push(cur);
             continue;
@@ -7258,20 +7263,32 @@
 
           const prev = merged[merged.length - 1];
 
-          // Check if prev line was incomplete and cur continues it:
-          const openQuran = (prev.match(/﴿/g) || []).length > (prev.match(/﴾/g) || []).length;
-          const openParen = (prev.match(/[\(（]/g) || []).length > (prev.match(/[\)）]/g) || []).length;
-          const openBracket = (prev.match(/\[/g) || []).length > (prev.match(/\]/g) || []).length;
-          const openQuote = (prev.match(/[«"]/g) || []).length > (prev.match(/[»"]/g) || []).length;
+          // Headings MUST NEVER be merged into previous lines under any circumstances!
+          const isHeading = /^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|المبحث|المطلب|الفصل|الباب|المحور|المسألة|الوقفة|القسم|الأصل|القاعدة|الضابط|العنصر|النقطة)\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|\d+|[\u0660-\u0669]+|[أ-ي])?[:\.\-\s]|^[#]{1,4}\s+|^(?:\d+|[\u0660-\u0669]+)\s*[\.\-\)]\s+/i.test(cur);
+          if (isHeading) {
+            merged.push(cur);
+            continue;
+          }
+
+          // Check if prev line was incomplete and cur continues it (capped to 350 chars):
+          const quranCount = (prev.match(/[﴿﴾]/g) || []).length;
+          const openQuran = (quranCount % 2 !== 0) && prev.length < 350;
+
+          const parenCount = (prev.match(/[\(\)（）]/g) || []).length;
+          const openParen = (parenCount % 2 !== 0) && prev.length < 350;
+
+          const bracketCount = (prev.match(/[\[\]]/g) || []).length;
+          const openBracket = (bracketCount % 2 !== 0) && prev.length < 350;
+
+          const quoteCount = (prev.match(/[«»"]/g) || []).length;
+          const openQuote = (quoteCount % 2 !== 0) && prev.length < 350;
 
           const trailingConnector = /(?:من|إلى|عن|على|في|مع|بين|أن|إن|بأن|حيث|كما|إذ|دون|و|أو|التي|الذي|الذين|اللاتي|اللواتي|ما|لا|كل|عند|قبل|بعد|نحو|ضد|مثل|غير|أثر|حتى|لئلا|لكن|أم|بل|ثم|سواء)$/.test(prev);
 
           const startsWithCloser = /^[»\)）\]﴾\.،؛!؟]/.test(cur);
-          const isHeading = /^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|المبحث|المطلب|الفصل|الباب|المحور|المسألة|الوقفة|القسم|الأصل|القاعدة|الضابط|العنصر|النقطة)\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|\d+|[\u0660-\u0669]+|[أ-ي])?[:\.\-\s]|^[#]{1,4}\s+|^(?:\d+|[\u0660-\u0669]+)\s*[\.\-\)]\s+/i.test(cur);
-
           const prevEndsWithTerminator = /[.؛!؟:—\-]$/.test(prev);
 
-          if (openQuran || openParen || openBracket || openQuote || trailingConnector || startsWithCloser || (!prevEndsWithTerminator && !isHeading && cur.length > 0 && prev.length < 85)) {
+          if (openQuran || openParen || openBracket || openQuote || trailingConnector || startsWithCloser || (!prevEndsWithTerminator && cur.length > 0 && prev.length < 85)) {
             merged[merged.length - 1] = prev + ' ' + cur;
           } else {
             merged.push(cur);
@@ -7298,18 +7315,21 @@
         // 1. Transposed Lam-Alif in core religious & common words
         t = t.replace(/الاستسالم/gu, 'الاستسلام');
         t = t.replace(/بالاستسالم/gu, 'بالاستسلام');
+        t = t.replace(/واالستسالم/gu, 'والاستسلام');
         t = t.replace(/الصالة/gu, 'الصلاة');
         t = t.replace(/والصالة/gu, 'والصلاة');
         t = t.replace(/بالصالة/gu, 'بالصلاة');
         t = t.replace(/فالصالة/gu, 'فالصلاة');
+        t = t.replace(/والسالم/gu, 'والسلام');
         t = t.replace(/والسام/gu, 'والسلام');
+        t = t.replace(/السالم/gu, 'السلام');
+        t = t.replace(/بالسالم/gu, 'بالسلام');
+        t = t.replace(/للسالم/gu, 'للسلام');
         t = t.replace(/والسامعلى/gu, 'والسلام على ');
+        t = t.replace(/والسالمعلى/gu, 'والسلام على ');
         t = t.replace(/ابتالء/gu, 'ابتلاء');
         t = t.replace(/وبتالء/gu, 'وابتلاء');
         t = t.replace(/ثالث\s+(خصائص|مراتب|أصول|سنوات|نقاط|ركائز|مرات)/gu, (m, p1) => 'ثلاث ' + p1);
-        t = t.replace(/فالصالة/gu, 'فالصلاة');
-        t = t.replace(/والسام/gu, 'والسلام');
-        t = t.replace(/والسامعلى/gu, 'والسلام على ');
 
         t = t.replace(/اإلسالم/gu, 'الإسلام');
         t = t.replace(/الإسالم/gu, 'الإسلام');
@@ -7324,7 +7344,10 @@
         t = t.replace(/(^|[\s«\(])إال(?=[\s»\)،.؛!؟\-]|$)/gu, '$1إلا');
         t = t.replace(/(^|[\s«\(])أال(?=[\s»\)،.؛!؟\-]|$)/gu, '$1ألا');
 
-        // Restore accidentally split definite nouns: e.g. "ال حديث" -> "الحديث"
+        // Restore accidentally split definite nouns and transposed formulas
+        t = t.replace(/(?:^|[\s«\(])ال\s+إله\s+إ[لا]ل?\s+الله/gu, ' لا إله إلا الله');
+        t = t.replace(/(?:^|[\s«\(])ال\s+إله/gu, ' لا إله');
+        t = t.replace(/(?:^|[\s«\(])لا\s+بس(?=[\s»\)،.؛!؟\-]|$)/gu, '');
         t = t.replace(/(?:^|\s)ال\s+(حديث|قرآن|كتاب|سنة|نبي|صلاة|زكاة|صوم|حج|قبر|أرض|سماء|كون|حق|باطل)/gu, ' ال$1');
         // Standalone 'ال' before words/verbs or at clause ends is transposed 'لا':
         t = t.replace(/(^|[\s«\(])ال(?=[\s»\)])/gu, '$1لا');
@@ -7367,6 +7390,10 @@
         t = t.replace(/فهلل/gu, 'فلله');
 
         // 6. Standalone and compound font ligatures: ّللاَه / َّللاه / هللا
+        t = t.replace(/[\.\s]*ّللا[هَ]?/gu, ' الله');
+        t = t.replace(/ّلاله/gu, 'الله');
+        t = t.replace(/ّللاه/gu, 'الله');
+        t = t.replace(/َّللاه/gu, 'الله');
         t = t.replace(/[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, ' الله');
         t = t.replace(/هللا/gu, 'الله');
 
@@ -7418,26 +7445,27 @@
 
       function sanitizeArabicExtractedText(rawText) {
         if (!rawText) return '';
-        let text = joinWrappedArabicLines(rawText);
-        text = normalizeArabicPresentationForms(text);
+        // 1. Normalize presentation forms to standard Arabic characters
+        let text = normalizeArabicPresentationForms(rawText);
+        // 2. Invert reversed visual lines line-by-line FIRST
         text = detectAndInvertReversedArabic(text);
+        // 3. Smart join wrapped lines (strictly heading-immune)
+        text = joinWrappedArabicLines(text);
 
-        // Rejoin inverted Quranic chunks if brackets are in reverse order on the same line: "End﴾ ... ﴿Start" -> "﴿Start ... End﴾"
-        text = text.replace(/([^\n﴿﴾]+)﴾\s*([^\n﴿﴾]*?)\s*﴿([^\n﴿﴾]+)/gu, (m, endChunk, midChunk, startChunk) => {
-          return '﴿' + startChunk.trim() + ' ' + (midChunk ? midChunk.trim() + ' ' : '') + endChunk.trim() + '﴾';
-        });
+        // Rejoin inverted Quranic brackets if in reverse order: "﴾آية﴿" -> "﴿آية﴾"
+        text = text.replace(/﴾([^﴿﴾]{3,350})﴿/gu, (m, p1) => '﴿' + p1.trim() + '﴾');
 
-        // Normalize specific inverted verse from PDF: لو كان فيهما آلهة إلا الله لفسدتا
-        text = text.replace(/﴿?\s*لَ?و[\s\u064B-\u0652]*كَ?ان[\s\u064B-\u0652]*فِ?يهِ?مَ?ا[\s\u064B-\u0652]*آلِ?هَ?ة[\s\S]*?لَ?فَ?سَ?دَ?تَ?ا[\s\S]*?﴾?\.?/gu, '﴿لَوْ كَانَ فِيهِمَا آلِهَةٌ إِلَّا اللَّهُ لَفَسَدَتَا﴾ [الأنبياء: 22]');
+        // Normalize specific inverted verse from PDF: لو كان فيهما آلهة إلا الله لفسدتا (in both forward and reversed chunk orders)
+        text = text.replace(/(?:﴿?\s*لَ?فَ?سَ?دَ?تَ?ا[\s\S]{0,60}?لَ?و[\s\u064B-\u0652]*كَ?ان[\s\u064B-\u0652]*فِ?يهِ?مَ?ا[\s\u064B-\u0652]*آلِ?هَ?ة[\s\S]*?﴾?|﴿?\s*لَ?و[\s\u064B-\u0652]*كَ?ان[\s\u064B-\u0652]*فِ?يهِ?مَ?ا[\s\u064B-\u0652]*آلِ?هَ?ة[\s\S]*?لَ?فَ?سَ?دَ?تَ?ا[\s\S]*?﴾?)\.?/gu, '﴿لَوْ كَانَ فِيهِمَا آلِهَةٌ إِلَّا اللَّهُ لَفَسَدَتَا﴾ [الأنبياء: 22]');
 
-        // Strip spurious short bracketed fragments that are not valid Quranic verses (e.g. ﴿. إلا﴾ or ﴿لا﴾ or ﴿نعم﴾)
-        text = text.replace(/﴿\s*(?:لا|\.|\.?\s*إلا|نعم|بلى|فقط)\s*﴾/g, ' $1 ');
+        // Strip spurious short bracketed fragments that are not valid Quranic verses (e.g. ﴿. إلا﴾ or ﴿لا﴾ or ﴿نعم﴾ or ﴿لا بس﴾)
+        text = text.replace(/﴿\s*(?:لا|\.|\.?\s*إلا|نعم|بلى|فقط|لا\s*\.?\s*إ|لا\s+بس)\s*﴾/g, ' ');
 
         // 1. Strip all Tatweel/Kashida characters
         text = text.replace(/[\u0640]+/g, '');
 
-        // 2. Collapse repeated Dals (which Adobe InDesign / Word PDF fonts encode in place of elongation bars)
-        text = text.replace(/د{2,}/g, '');
+        // 2. Collapse 4+ repeated Dals (which Adobe InDesign / Word PDF fonts encode in place of elongation bars)
+        text = text.replace(/د{4,}/g, '');
         text = text.replace(/\bلق\b/g, 'لقد');
 
         // 3. Collapse any Arabic letter repeated 3+ times to 1
@@ -7650,6 +7678,14 @@
                 const textContent = await page.getTextContent();
                 const items = textContent.items || [];
 
+                // Sort items by Y descending (top-to-bottom) before grouping
+                items.sort((a, b) => {
+                  const yA = a.transform ? a.transform[5] : 0;
+                  const yB = b.transform ? b.transform[5] : 0;
+                  if (Math.abs(yA - yB) > 4.0) return yB - yA;
+                  return 0; // maintain document stream order for items on same line
+                });
+
                 // Group items into lines by Y coordinate (tolerance 4.0pt)
                 const lineGroups = [];
                 let curLine = [];
@@ -7704,7 +7740,7 @@
 
                       if (prevEndsSpace || itStartsSpace || isPunct) {
                         lineStr += it.str;
-                      } else if (gap > 2.2) {
+                      } else if (gap > 3.8) {
                         // True space between distinct words
                         lineStr += ' ' + it.str;
                       } else {
@@ -7740,22 +7776,16 @@
           const evs = extractEvidencesAndProofs(cleanExtracted);
           setExtractedEvidences(evs);
 
-          // Infer authentic topic title (strictly prioritizing the main comprehensive title)
+          // Infer authentic topic title dynamically (universal across any Islamic discipline)
           const allExtractedLines = cleanExtracted.split('\n').map(l => l.trim()).filter(Boolean);
-          let primaryTitleCandidate = allExtractedLines.find(l => l.includes('العقيدة الإسلامية') && (l.includes('الأساس') || l.includes('التصور')));
-          if (!primaryTitleCandidate) {
-            primaryTitleCandidate = allExtractedLines.find(l => l.includes('العقيدة الإسلامية') || (l.includes('قانون') && l.includes('العقدي')));
-          }
-          if (!primaryTitleCandidate) {
-            primaryTitleCandidate = allExtractedLines.slice(0, 35).find(l => {
-              if (l.length < 10 || l.length > 85) return false;
-              if (/^(?:مقدمة|تمهيد|مدخل|كبسولة|فهرس|محتويات|أعوذ|اعوذ|بسم|الحمد|صلى|اللهم|السلام|قال|روى|س ما|س هل)/.test(l)) return false;
-              if (l.includes('بسم الله') || l.includes('أعوذ بالله') || l.includes('الحمد لله') || l.includes('رسول الله') || l.includes('اللهم') || l.includes('علمنا') || l.includes('وارزقنا') || l.includes('فقهية')) return false;
-              return true;
-            });
-          }
+          let primaryTitleCandidate = allExtractedLines.slice(0, 15).find(l => {
+            if (l.length < 8 || l.length > 85) return false;
+            if (/^(?:مقدمة|تمهيد|مدخل|كبسولة|فهرس|محتويات|أعوذ|اعوذ|بسم|الحمد|صلى|اللهم|السلام|قال|روى|س ما|س هل)/.test(l)) return false;
+            if (l.includes('بسم الله') || l.includes('أعوذ بالله') || l.includes('الحمد لله') || l.includes('رسول الله') || l.includes('اللهم') || l.includes('علمنا') || l.includes('وارزقنا') || l.includes('فقهية')) return false;
+            return true;
+          });
           const cleanName = fname.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
-          const suggestedTopic = primaryTitleCandidate || cleanName || 'العقيدة الإسلامية وبناء التصور الوجودي';
+          const suggestedTopic = primaryTitleCandidate || cleanName || 'محاضرة شرعية وتأصيل علمي';
           setLessonTopic(suggestedTopic);
           // Pass newly extracted evidences directly to avoid stale state closure!
           handleProcessCustomLecture(cleanExtracted, suggestedTopic, evs);
@@ -8431,10 +8461,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v74.6 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.6 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v74.7 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.7 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v74.6' : 'v74.6'}</span>
+                  <span>{isRtl ? 'الإصدار v74.7' : 'v74.7'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
