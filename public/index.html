@@ -6331,7 +6331,7 @@
             let strippedLine = line.replace(/^[\u064B-\u065F\u0670\u06D6-\u06ED\s#*\-•\d\.\)\:،=]+/, '').replace(/[*#]/g, '').trim();
 
             // Strip leading ordinal prefixes so "الأول: تحقيق العبودية..." becomes "تحقيق العبودية..."
-            const ordinalPrefixRegex = /^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|حادي عشر|ثاني عشر|المحور \d+|المطلب \d+|المسألة \d+|الوجه \d+)[\s:–—.-]*/i;
+            const ordinalPrefixRegex = /^[\u064B-\u065F\u0670\u06D6-\u06ED]*(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|حادي عشر|ثاني عشر|المحور \d+|المطلب \d+|المسألة \d+|الوجه \d+)[\s:–—.-]*/i;
             const withoutOrdinal = strippedLine.replace(ordinalPrefixRegex, '').trim();
             if (withoutOrdinal.length >= 4) {
               strippedLine = withoutOrdinal;
@@ -6348,11 +6348,23 @@
             }
 
             let cleanT = cleanSlideTitle(parsedTitle);
-            if (cleanT.length <= 4 || /^(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر)$/.test(cleanT)) {
-              cleanT = withoutOrdinal.length >= 4 ? cleanSlideTitle(withoutOrdinal) : ('المحور ' + (rawSections.length + 1));
+            // If the extracted title was just a generic fallback or ordinal, look into initialLineContent:
+            if (cleanT === 'محور الدرس ومسائله' || cleanT.length <= 4 || /^(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر)$/.test(cleanT)) {
+              if (initialLineContent && initialLineContent.length >= 4) {
+                const subDelim = initialLineContent.match(/^([^:\-\—–\n]{3,50})[:\-\—–]\s*(.+)$/);
+                if (subDelim) {
+                  cleanT = cleanSlideTitle(subDelim[1]);
+                  initialLineContent = subDelim[2].trim();
+                } else {
+                  cleanT = cleanSlideTitle(initialLineContent);
+                  initialLineContent = '';
+                }
+              } else if (withoutOrdinal.length >= 4) {
+                cleanT = cleanSlideTitle(withoutOrdinal);
+              }
             }
             currentSec = {
-              title: cleanT.length > 3 ? cleanT : ('المحور ' + (rawSections.length + 1)),
+              title: (cleanT && cleanT.length > 3 && cleanT !== 'محور الدرس ومسائله') ? cleanT : ('المحور ' + (rawSections.length + 1)),
               isFormalHeading: isHeadingMatch,
               lines: initialLineContent ? [initialLineContent] : []
             };
