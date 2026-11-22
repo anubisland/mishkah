@@ -242,7 +242,7 @@
       border-image: linear-gradient(to right, #C59B27, #FDE68A, #C59B27) 1;
     }
 
-    /* Presentation Zoom Mode */
+    /* Presentation Zoom Mode (Strict Viewport Containment, No Cropping) */
     .zoom-slide-fullscreen {
       position: fixed;
       inset: 0;
@@ -250,9 +250,11 @@
       background: #021F17;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      padding: 2.5rem;
+      padding: 0.5rem 1rem;
+      overflow-y: auto;
+      box-sizing: border-box;
     }
 
     /* Print Stylesheet for Worksheets */
@@ -4613,27 +4615,27 @@
       const bullets = currentSlide.bulletPoints || (currentSlide.talkingPoints ? currentSlide.talkingPoints.split(' • ') : [bodyText]);
 
       return (
-        <div className="min-h-screen bg-[#021f17] text-white flex flex-col justify-between p-4 sm:p-8 select-none relative overflow-hidden" dir="rtl">
+        <div className="h-screen max-h-screen bg-[#021f17] text-white flex flex-col justify-between p-3 sm:p-5 select-none relative overflow-hidden box-border" dir="rtl">
           {/* Top Bar for Student Display */}
-          <div className="flex items-center justify-between border-b border-gold-400/30 pb-3 mb-4">
+          <div className="flex items-center justify-between border-b border-gold-400/30 pb-2 mb-2 shrink-0">
             <div className="flex items-center gap-3">
-              <span className="w-9 h-9 rounded-xl bg-gold-500 text-emerald-950 font-black flex items-center justify-center text-sm shadow-md">
+              <span className="w-8 h-8 rounded-xl bg-gold-500 text-emerald-950 font-black flex items-center justify-center text-xs shadow-md">
                 {safeIdx + 1}
               </span>
               <div>
-                <h1 className="text-base sm:text-xl font-black font-cairo text-gold-200">
+                <h1 className="text-sm sm:text-lg font-black font-cairo text-gold-200 leading-tight">
                   {data ? (data.metadata?.topic || 'محاضرة شرعية وتأصيل علمي') : 'منصة مشكاة | شاشة العرض للطلاب'}
                 </h1>
-                <span className="text-[11px] text-gold-300/80 font-bold">
+                <span className="text-[10px] sm:text-xs text-gold-300/80 font-bold">
                   {currentSlide.phaseTitle || `المحور ${safeIdx + 1} من ${slides.length || 1}`}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="bg-emerald-900/90 text-gold-300 border border-gold-400/40 text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-xs">
+              <span className="bg-emerald-900/90 text-gold-300 border border-gold-400/40 text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>بث مباشر متزامن مع المعلم 🔴</span>
+                <span>بث مباشر متزامن 🔴</span>
               </span>
               <button
                 type="button"
@@ -4641,7 +4643,7 @@
                   if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
                   else document.exitFullscreen().catch(() => {});
                 }}
-                className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 text-xs px-3 py-1.5 rounded-xl border border-gold-400/30 transition cursor-pointer"
+                className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 text-xs px-2.5 py-1 rounded-xl border border-gold-400/30 transition cursor-pointer"
                 title="شاشة كاملة"
               >
                 ⛶
@@ -4649,28 +4651,28 @@
             </div>
           </div>
 
-          {/* Main Slide Card (Distilled, Uncluttered, Pure High-Impact Islamic Presentation) */}
-          <div className="my-auto max-w-5xl mx-auto w-full bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 rounded-3xl p-6 sm:p-10 border-2 border-gold-400 shadow-2xl relative overflow-hidden space-y-6">
+          {/* Main Slide Card (Responsive Fit: strictly contained within viewport, zero top/bottom cropping) */}
+          <div className="my-auto max-w-5xl mx-auto w-full max-h-[calc(100vh-5.5rem)] flex flex-col justify-between overflow-y-auto bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 border-2 border-gold-400 shadow-2xl relative space-y-3 sm:space-y-4">
             {/* Title */}
-            <h2 className="font-amiri text-2xl sm:text-4xl lg:text-5xl font-black text-gold-200 leading-snug text-center">
+            <h2 className="font-amiri text-lg sm:text-2xl lg:text-3xl font-black text-gold-200 leading-snug text-center">
               {currentSlideTitle}
             </h2>
 
             {/* Golden Scripture Frame */}
             {scriptureText && (
-              <div className="font-quran text-lg sm:text-2xl lg:text-3xl text-amber-100 leading-relaxed bg-emerald-900/80 p-5 sm:p-6 rounded-2xl border-2 border-gold-400/50 shadow-inner text-center">
-                {scriptureText}
+              <div className="font-quran text-base sm:text-lg lg:text-xl text-amber-100 leading-relaxed bg-emerald-900/80 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gold-400/50 shadow-inner text-center">
+                « {scriptureText} »
               </div>
             )}
 
             {/* 2 to 3 Distilled Golden Bullets */}
-            <div className="space-y-3 pt-2">
+            <div className="space-y-2 sm:space-y-2.5 pt-1">
               {bullets.map((pt, pIdx) => (
-                <div key={pIdx} className="flex items-center gap-3.5 bg-emerald-900/60 p-4 sm:p-5 rounded-2xl border border-gold-400/30 shadow-md">
-                  <span className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gold-500 text-emerald-950 font-black flex items-center justify-center text-xs sm:text-base shrink-0 shadow-sm">
+                <div key={pIdx} className="flex items-center gap-3 bg-emerald-900/60 p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-gold-400/30 shadow-md">
+                  <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gold-500 text-emerald-950 font-black flex items-center justify-center text-xs shrink-0 shadow-sm">
                     {pIdx + 1}
                   </span>
-                  <p className="font-amiri text-base sm:text-2xl text-slate-100 font-bold leading-relaxed">
+                  <p className="font-amiri text-xs sm:text-base lg:text-lg text-slate-100 font-bold leading-relaxed">
                     {pt}
                   </p>
                 </div>
@@ -4679,7 +4681,7 @@
 
             {/* Behavioral Impact Footer */}
             {practicalImpact && (
-              <div className="mt-4 pt-3 border-t border-gold-400/30 flex items-center gap-2 text-xs sm:text-base text-gold-300 font-bold bg-emerald-900/40 p-3.5 rounded-xl">
+              <div className="mt-2 pt-2 border-t border-gold-400/30 flex items-center gap-2 text-[11px] sm:text-xs text-gold-300 font-bold bg-emerald-900/40 p-2 sm:p-2.5 rounded-lg">
                 <span>💡</span>
                 <span>الأثر السلوكي والعملي: {practicalImpact}</span>
               </div>
@@ -4687,7 +4689,7 @@
           </div>
 
           {/* Watermark & Slide Dots */}
-          <div className="flex items-center justify-between text-xs text-gold-300/60 pt-3 border-t border-gold-400/20">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs text-gold-300/60 pt-2 shrink-0 border-t border-gold-400/20">
             <span>منصة مشكاة | نظام التشغيل الشامل للداعية والمعلم الشرعي — AnubisLand</span>
             <div className="flex items-center gap-1.5">
               {slides.map((_, dotIdx) => (
@@ -8461,10 +8463,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v74.7 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.7 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v74.8 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.8 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v74.7' : 'v74.7'}</span>
+                  <span>{isRtl ? 'الإصدار v74.8' : 'v74.8'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -13673,7 +13675,7 @@
                               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
                                 
                                 {/* RIGHT PANE (7/12 cols): Zoom Student Presentation Slide */}
-                                <div className="lg:col-span-7 flex flex-col justify-between bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 text-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 border-2 border-gold-400 shadow-xl relative overflow-hidden min-h-[440px]">
+                                <div className="lg:col-span-7 flex flex-col justify-between bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-gold-400 shadow-xl relative overflow-y-auto min-h-[380px] max-h-[580px]">
                                   
                                   {/* Slide Top Header */}
                                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gold-400/30 pb-3 mb-4">
@@ -13789,7 +13791,7 @@
                                 </div>
 
                                 {/* LEFT PANE (5/12 cols): Teacher's Full Cockpit & Substantive Preparation Desk */}
-                                <div className="lg:col-span-5 flex flex-col justify-between card-islamic-amber rounded-2xl sm:rounded-3xl p-4 sm:p-5 border-2 border-gold-500/70 shadow-lg min-h-[460px]">
+                                <div className="lg:col-span-5 flex flex-col justify-between card-islamic-amber rounded-2xl sm:rounded-3xl p-4 sm:p-5 border-2 border-gold-500/70 shadow-lg min-h-[380px] max-h-[580px] overflow-y-auto">
                                   <div>
                                     {/* Header & Controls */}
                                     <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-amber-900/15">
@@ -16250,38 +16252,38 @@
             )}
           </main>
 
-          {/* ================= FULLSCREEN PRESENTATION OVERLAY ================= */}
+          {/* ================= FULLSCREEN PRESENTATION OVERLAY (Strict Viewport-Fit 16:9, Zero Cropping) ================= */}
           {isFullscreenZoom && (presentationTarget === 'islamic' ? islamicData : tajweedData) && (
             <div className="zoom-slide-fullscreen select-none">
               {/* Top Control Bar */}
-              <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 z-50 px-2 pointer-events-auto">
+              <div className="w-full max-w-5xl flex flex-wrap items-center justify-between gap-2 z-50 py-1.5 px-2 shrink-0 border-b border-gold-400/20">
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => setIsFullscreenZoom(false)}
-                    className="bg-red-600/90 hover:bg-red-600 text-white text-xs px-3.5 py-2 rounded-xl font-bold transition shadow-lg flex items-center gap-1.5 cursor-pointer"
+                    className="bg-red-600/90 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-xl font-bold transition shadow-lg flex items-center gap-1.5 cursor-pointer"
                   >
                     <span>✕</span>
                     <span>{isRtl ? 'إنهاء العرض' : 'Exit'}</span>
                   </button>
 
                   {/* Font Size Adjuster */}
-                  <div className="bg-emerald-950/90 border border-gold-400/40 rounded-xl p-1 flex items-center gap-1 text-xs text-gold-300">
-                    <span className="px-1.5 text-[10px] text-slate-400">{isRtl ? 'الخط:' : 'Font:'}</span>
+                  <div className="bg-emerald-950/90 border border-gold-400/40 rounded-xl p-0.5 flex items-center gap-1 text-xs text-gold-300">
+                    <span className="px-1 text-[10px] text-slate-400">{isRtl ? 'الخط:' : 'Font:'}</span>
                     <button 
                       onClick={() => setPresentationFontSize('normal')}
-                      className={`px-2 py-1 rounded-lg font-bold transition cursor-pointer ${presentationFontSize === 'normal' ? 'bg-gold-500 text-emerald-950' : 'hover:bg-emerald-800'}`}
+                      className={`px-2 py-0.5 rounded-lg font-bold transition cursor-pointer text-xs ${presentationFontSize === 'normal' ? 'bg-gold-500 text-emerald-950' : 'hover:bg-emerald-800'}`}
                     >
                       {isRtl ? 'صغير' : 'Sm'}
                     </button>
                     <button 
                       onClick={() => setPresentationFontSize('large')}
-                      className={`px-2 py-1 rounded-lg font-bold transition cursor-pointer ${presentationFontSize === 'large' ? 'bg-gold-500 text-emerald-950' : 'hover:bg-emerald-800'}`}
+                      className={`px-2 py-0.5 rounded-lg font-bold transition cursor-pointer text-xs ${presentationFontSize === 'large' ? 'bg-gold-500 text-emerald-950' : 'hover:bg-emerald-800'}`}
                     >
                       {isRtl ? 'متوسط' : 'Md'}
                     </button>
                     <button 
                       onClick={() => setPresentationFontSize('xl')}
-                      className={`px-2 py-1 rounded-lg font-bold transition cursor-pointer ${presentationFontSize === 'xl' ? 'bg-gold-500 text-emerald-950' : 'hover:bg-emerald-800'}`}
+                      className={`px-2 py-0.5 rounded-lg font-bold transition cursor-pointer text-xs ${presentationFontSize === 'xl' ? 'bg-gold-500 text-emerald-950' : 'hover:bg-emerald-800'}`}
                     >
                       {isRtl ? 'كبير' : 'Lg'}
                     </button>
@@ -16291,7 +16293,7 @@
                   {presentationTarget === 'islamic' && (
                     <button
                       onClick={() => setShowSpeakerNotes(prev => !prev)}
-                      className={`text-xs px-3 py-2 rounded-xl font-bold transition border flex items-center gap-1.5 shadow-md cursor-pointer ${
+                      className={`text-xs px-2.5 py-1.5 rounded-xl font-bold transition border flex items-center gap-1 shadow-md cursor-pointer ${
                         showSpeakerNotes 
                           ? 'bg-gold-500 text-emerald-950 border-gold-300' 
                           : 'bg-emerald-950/80 text-gold-300 border-gold-400/30 hover:bg-emerald-900'
@@ -16309,7 +16311,7 @@
                     <button
                       onClick={handleExportIslamicPowerPoint}
                       disabled={isExportingPptx}
-                      className="bg-gold-500 hover:bg-gold-400 text-emerald-950 text-xs px-3 py-2 rounded-xl font-black transition shadow-lg flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                      className="bg-gold-500 hover:bg-gold-400 text-emerald-950 text-xs px-3 py-1.5 rounded-xl font-black transition shadow-lg flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                     >
                       <span>📥</span>
                       <span>{isExportingPptx ? (isRtl ? 'جاري التحميل...' : 'Exporting...') : (isRtl ? 'تحميل كبوربوينت (.pptx)' : 'PowerPoint (.pptx)')}</span>
@@ -16325,7 +16327,7 @@
                         document.exitFullscreen().catch(() => {});
                       }
                     }}
-                    className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 text-xs px-3 py-2 rounded-xl font-bold transition border border-gold-400/30 shadow-md cursor-pointer"
+                    className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 text-xs px-2.5 py-1.5 rounded-xl font-bold transition border border-gold-400/30 shadow-md cursor-pointer"
                   >
                     ⛶ {isRtl ? 'شاشة كاملة' : 'Fullscreen'}
                   </button>
@@ -16343,52 +16345,46 @@
                 const bodyText = currentSlide.bodyAr || currentSlide.talkingPoints || currentSlide.teacherFocusAr || currentSlide.teacherGuidanceAr;
                 const impactText = currentSlide.pedagogicalTip || currentSlide.practicalAction || currentSlide.keyTakeawayAr || currentSlide.practicalImpact;
 
-                const textScaleClass = presentationFontSize === 'normal' 
-                  ? 'text-base sm:text-lg leading-relaxed' 
-                  : presentationFontSize === 'xl' 
-                  ? 'text-xl sm:text-3xl leading-loose font-bold' 
-                  : 'text-lg sm:text-2xl leading-relaxed';
-
                 return (
-                  <div className="w-full max-w-5xl flex flex-col justify-between items-center text-white px-4 my-auto pt-16 pb-6">
-                    {/* Slide Container 16:9 Aspect with Grand Emerald Styling */}
-                    <div className="w-full bg-emerald-950/90 rounded-3xl p-6 sm:p-10 border-2 border-gold-400 shadow-2xl relative overflow-hidden backdrop-blur-md">
+                  <div className="w-full max-w-5xl flex flex-col justify-between items-center text-white px-2 sm:px-4 my-auto flex-1 min-h-0 py-1.5 sm:py-2">
+                    {/* Slide Container (Viewport-bounded, never cut from top or bottom) */}
+                    <div className="w-full max-h-[calc(100vh-6.5rem)] flex flex-col justify-between overflow-y-auto bg-emerald-950/90 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 border-2 border-gold-400 shadow-2xl relative backdrop-blur-md space-y-2.5 sm:space-y-3">
                       
                       {/* Top Meta Header */}
-                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-gold-400/30">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pb-2 mb-1 border-b border-gold-400/30 shrink-0">
                         <div className="flex items-center gap-2 text-gold-300 font-bold text-xs sm:text-sm">
-                          <span className="w-7 h-7 rounded-full bg-gold-500 text-emerald-950 font-black flex items-center justify-center text-xs">
+                          <span className="w-6 h-6 rounded-full bg-gold-500 text-emerald-950 font-black flex items-center justify-center text-xs">
                             {activeSlideIndex + 1}
                           </span>
                           <span>{islamicData.metadata.topic}</span>
                         </div>
-                        <span className="bg-emerald-900 px-3 py-1 rounded-full text-gold-300 text-xs font-bold border border-gold-400/30">
+                        <span className="bg-emerald-900 px-2.5 py-0.5 rounded-full text-gold-300 text-xs font-bold border border-gold-400/30">
                           {islamicData.metadata.category}
                         </span>
                       </div>
 
                       {/* Section Heading */}
-                      <h3 className="font-amiri text-2xl sm:text-4xl font-extrabold text-gold-200 mb-6 leading-snug text-right">
+                      <h3 className="font-amiri text-lg sm:text-2xl lg:text-3xl font-extrabold text-gold-200 mb-1 leading-snug text-right shrink-0">
                         {slideTitleText}
                       </h3>
 
                       {/* Scripture Box */}
                       {scriptureText && (
-                        <div className="my-4 p-4 sm:p-5 rounded-2xl bg-emerald-900/70 border-2 border-gold-400/50 shadow-inner text-center">
-                          <p className="font-quran text-xl sm:text-3xl text-amber-100 leading-relaxed drop-shadow-sm">
-                            {scriptureText}
+                        <div className="my-1.5 p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-emerald-900/70 border border-gold-400/50 shadow-inner text-center shrink-0">
+                          <p className="font-quran text-base sm:text-xl lg:text-2xl text-amber-100 leading-relaxed drop-shadow-sm">
+                            « {scriptureText} »
                           </p>
                         </div>
                       )}
 
                       {/* Body Content - 3 Focus Cards */}
-                      <div className="my-4 space-y-3 w-full">
+                      <div className="my-1.5 space-y-2 sm:space-y-2.5 w-full">
                         {(currentSlide.bulletPoints || (currentSlide.talkingPoints ? currentSlide.talkingPoints.split(' • ') : [bodyText])).map((pt, pIdx) => (
-                          <div key={pIdx} className="flex items-start gap-3 bg-emerald-900/60 p-3.5 sm:p-4 rounded-2xl border border-gold-400/30 shadow-md text-right">
-                            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gold-500 text-emerald-950 font-black flex items-center justify-center text-xs sm:text-sm shrink-0 mt-0.5 shadow-sm">
+                          <div key={pIdx} className="flex items-center gap-3 bg-emerald-900/60 p-2 sm:p-3 rounded-xl border border-gold-400/30 shadow-sm text-right">
+                            <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gold-500 text-emerald-950 font-black flex items-center justify-center text-xs shrink-0 shadow-sm">
                               {pIdx + 1}
                             </span>
-                            <p className="font-amiri text-base sm:text-xl lg:text-2xl text-slate-100 font-bold leading-relaxed">
+                            <p className="font-amiri text-xs sm:text-base lg:text-lg text-slate-100 font-bold leading-relaxed">
                               {pt}
                             </p>
                           </div>
@@ -16397,7 +16393,7 @@
 
                       {/* Behavioral Impact Footer */}
                       {impactText && (
-                        <div className="mt-6 pt-4 border-t border-gold-400/30 flex items-center gap-2 text-xs sm:text-sm text-gold-300 font-bold bg-emerald-900/40 p-3 rounded-xl text-right">
+                        <div className="mt-2 pt-2 border-t border-gold-400/30 flex items-center gap-2 text-[11px] sm:text-xs text-gold-300 font-bold bg-emerald-900/40 p-2 sm:p-2.5 rounded-lg text-right shrink-0">
                           <span>💡</span>
                           <span>{isRtl ? 'الأثر السلوكي والتطبيقي:' : 'Practical Impact:'} {impactText}</span>
                         </div>
@@ -16405,7 +16401,7 @@
 
                       {/* Speaker Notes Drawer (Toggled by Presenter) */}
                       {showSpeakerNotes && (
-                        <div className="mt-4 p-4 rounded-xl bg-amber-950/80 border border-gold-400/60 text-right animate-fadeIn">
+                        <div className="mt-2 p-3 rounded-xl bg-amber-950/80 border border-gold-400/60 text-right animate-fadeIn shrink-0">
                           <span className="block text-gold-300 font-bold text-xs mb-1">
                             📝 {isRtl ? 'ملاحظات وتوجيهات الشرح للمحاضر (خاص بالمعلم):' : 'Presenter Notes:'}
                           </span>
@@ -16417,11 +16413,11 @@
                     </div>
 
                     {/* Bottom Navigation Toolbar */}
-                    <div className="flex items-center gap-3 pt-6">
+                    <div className="flex items-center gap-3 pt-2 pb-1 shrink-0">
                       <button 
                         disabled={activeSlideIndex === 0}
                         onClick={() => setActiveSlideIndex(prev => prev - 1)}
-                        className="bg-emerald-800 disabled:opacity-25 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2 rounded-xl text-sm transition shadow-md flex items-center gap-1.5 cursor-pointer"
+                        className="bg-emerald-800 disabled:opacity-25 hover:bg-emerald-700 text-gold-200 font-bold px-4 py-1.5 rounded-xl text-xs sm:text-sm transition shadow-md flex items-center gap-1.5 cursor-pointer"
                       >
                         <span>◀</span>
                         <span>{isRtl ? 'السابق' : 'Previous'}</span>
@@ -16429,7 +16425,7 @@
 
                       {/* Slide Indicator Dots / Count */}
                       <div className="flex items-center gap-2 px-3">
-                        <span className="text-gold-300 font-bold text-sm sm:text-base">
+                        <span className="text-gold-300 font-bold text-xs sm:text-sm">
                           {activeSlideIndex + 1} / {slidesList.length}
                         </span>
                       </div>
@@ -16437,30 +16433,30 @@
                       <button 
                         disabled={activeSlideIndex === slidesList.length - 1}
                         onClick={() => setActiveSlideIndex(prev => prev + 1)}
-                        className="bg-emerald-800 disabled:opacity-25 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2 rounded-xl text-sm transition shadow-md flex items-center gap-1.5 cursor-pointer"
+                        className="bg-emerald-800 disabled:opacity-25 hover:bg-emerald-700 text-gold-200 font-bold px-4 py-1.5 rounded-xl text-xs sm:text-sm transition shadow-md flex items-center gap-1.5 cursor-pointer"
                       >
                         <span>{isRtl ? 'التالي' : 'Next'}</span>
                         <span>▶</span>
                       </button>
                     </div>
 
-                    <div className="text-[11px] text-slate-400 pt-2 font-mono">
+                    <div className="text-[10px] text-slate-400 pt-0.5 font-mono shrink-0">
                       {isRtl ? 'يمكنك التنقل بالأسهم ◄ ► أو المسافة (Space)، والخروج بزر Esc' : 'Use arrow keys or space to navigate, Esc to exit'}
                     </div>
                   </div>
                 );
               })() : (() => {
-                // Tajweed presentation code (preserves existing functionality)
+                // Tajweed presentation code (Responsive Viewport Containment)
                 const cardsList = tajweedData.presentationCards || [];
                 const card = cardsList[activeSlideIndex] || cardsList[0] || {};
                 return (
-                  <div className="w-full max-w-5xl flex flex-col justify-between items-center text-center text-white space-y-6 pt-16">
-                    <div className="text-gold-300 text-sm font-bold tracking-widest uppercase">
+                  <div className="w-full max-w-5xl flex flex-col justify-between items-center text-center text-white my-auto flex-1 min-h-0 py-2 space-y-3">
+                    <div className="text-gold-300 text-xs sm:text-sm font-bold tracking-widest uppercase shrink-0">
                       {isRtl ? card.titleAr : card.titleEn}
                     </div>
 
-                    <div className="my-8 px-6">
-                      <p className="font-quran text-3xl sm:text-6xl text-amber-100 leading-relaxed drop-shadow-md">
+                    <div className="my-2 sm:my-4 px-4 shrink-0">
+                      <p className="font-quran text-2xl sm:text-4xl lg:text-5xl text-amber-100 leading-relaxed drop-shadow-md">
                         {(() => {
                           const text = card.ayahTextUthmani || '';
                           const target = card.highlightedPortion || '';
@@ -16471,7 +16467,7 @@
                             <React.Fragment key={i}>
                               {part}
                               {i < arr.length - 1 && (
-                                <span className="bg-emerald-600/80 text-gold-200 font-bold border-b-8 border-gold-400 px-4 py-1 rounded-2xl shadow-2xl">
+                                <span className="bg-emerald-600/80 text-gold-200 font-bold border-b-4 sm:border-b-8 border-gold-400 px-3 sm:px-4 py-0.5 sm:py-1 rounded-xl sm:rounded-2xl shadow-xl">
                                   {target}
                                 </span>
                               )}
@@ -16481,25 +16477,25 @@
                       </p>
                     </div>
 
-                    <div className="bg-emerald-950/90 rounded-2xl p-6 border-2 border-gold-400/50 max-w-3xl text-right font-amiri text-lg sm:text-xl text-slate-100 leading-relaxed shadow-2xl">
+                    <div className="bg-emerald-950/90 rounded-2xl p-4 sm:p-5 border border-gold-400/50 max-w-3xl text-right font-amiri text-sm sm:text-base lg:text-lg text-slate-100 leading-relaxed shadow-xl max-h-[35vh] overflow-y-auto">
                       <p>{isRtl ? card.explanationAr : card.explanationEn}</p>
                     </div>
 
-                    <div className="flex items-center gap-2 pt-4">
+                    <div className="flex items-center gap-2 pt-2 shrink-0">
                       <button 
                         disabled={activeSlideIndex === 0}
                         onClick={() => setActiveSlideIndex(prev => prev - 1)}
-                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-sm cursor-pointer"
+                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2 rounded-xl text-xs sm:text-sm cursor-pointer"
                       >
                         {isRtl ? 'السابق' : 'Previous'}
                       </button>
-                      <span className="text-gold-300 font-bold text-base px-3">
+                      <span className="text-gold-300 font-bold text-xs sm:text-sm px-3">
                         {activeSlideIndex + 1} / {cardsList.length}
                       </span>
                       <button 
                         disabled={activeSlideIndex === cardsList.length - 1}
                         onClick={() => setActiveSlideIndex(prev => prev + 1)}
-                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-6 py-2.5 rounded-xl text-sm cursor-pointer"
+                        className="bg-emerald-800 disabled:opacity-20 hover:bg-emerald-700 text-gold-200 font-bold px-5 py-2 rounded-xl text-xs sm:text-sm cursor-pointer"
                       >
                         {isRtl ? 'التالي' : 'Next'}
                       </button>
