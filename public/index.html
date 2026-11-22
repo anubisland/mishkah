@@ -6224,6 +6224,7 @@
       function cleanSlideTitle(rawTitle) {
         if (!rawTitle) return 'محور الدرس ومسائله';
         let t = sanitizeArabicExtractedText(rawTitle);
+        t = t.replace(/(?:ة\s+الَّ?\s*صلا\s+اوُماَقَأ|اوُماَقَأ\s+صلا\s+الَّ?\s*ة|اوُماَقَأ\s+الصَّ?\s*لا\s*ةَ?|أَقَامُوا\s+الصَّ?\s*لا\s*ةَ?|ةَ?\s*ال\s*َّصلا\s*اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
 
         // Strip leading diacritics, numbers, symbols, and heading markers
         t = t.replace(/^[\u064B-\u065F\u0670\u06D6-\u06ED\s#*\-•\d\.\)\:،=]+/, '').replace(/[*#]/g, '').trim();
@@ -6612,11 +6613,17 @@
             let parsedTitle = strippedLine;
             let initialLineContent = '';
 
-            // Split on colon ':' or dash if the heading contains inline paragraph explanation
+            // Split on colon ':' or dash or continuation phrase if heading contains inline explanation
             const delimMatch = strippedLine.match(/^([^:\-\—–\n]{3,50})[:\-\—–]\s*(.+)$/);
             if (delimMatch) {
               parsedTitle = delimMatch[1].trim();
               initialLineContent = delimMatch[2].trim();
+            } else {
+              const contMatch = strippedLine.match(/^(.{3,45}?)\s+(يُ?ثبت\s+الوحي[\s\S]*|\(\s*سواء[\s\S]*|وهو\s+دين[\s\S]*)$/);
+              if (contMatch) {
+                parsedTitle = contMatch[1].trim();
+                initialLineContent = contMatch[2].trim();
+              }
             }
 
             let cleanT = cleanSlideTitle(parsedTitle);
@@ -6755,6 +6762,7 @@
             if (clean.includes('صفحة') || clean.includes('ممسوحة') || clean.includes('معد للمدارسة')) return false;
             if (clean.includes('﴿') && !clean.includes('﴾')) return false;
             if (clean.includes('»') && !clean.includes('«')) return false;
+            if (inner.replace(/[\s\.\u064B-\u065F]+/g, '') === 'لا') return false;
             return true;
           };
 
@@ -7480,7 +7488,11 @@
       function detectAndInvertReversedArabic(text) {
         if (!text) return text;
         // Pre-normalize decomposed ligatures and known reversed clusters BEFORE reversal checks!
+        text = text.replace(/(?:ة\s+الَّ?\s*صلا\s+اوُماَقَأ|اوُماَقَأ\s+صلا\s+الَّ?\s*ة|اوُماَقَأ\s+الصَّ?\s*لا\s*ةَ?|أَقَامُوا\s+الصَّ?\s*لا\s*ةَ?|ةَ?\s*ال\s*َّصلا\s*اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/اوُماَقَأ/gu, 'أَقَامُوا');
         text = text.replace(/الصَّ?\s*لا\s*ةَ?/gu, 'الصَّلَاةَ');
+        text = text.replace(/ولا\s+ضرا\s+اول/gu, 'ولا ضراً');
+        text = text.replace(/ولا\s+ضرا\s+ا\s+ول/gu, 'ولا ضراً');
         text = text.replace(/ربدتب\s+أرقا-?/gu, '-اقرأ بتدبر');
         text = text.replace(/أرقا\s+ربدتب-?/gu, '-اقرأ بتدبر');
 
@@ -8737,10 +8749,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v76.1 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.1 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v76.2 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.2 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v76.1' : 'v76.1'}</span>
+                  <span>{isRtl ? 'الإصدار v76.2' : 'v76.2'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -13636,7 +13648,7 @@
                                   </span>
                                 </div>
                                 <h4 className="font-bold text-emerald-950 text-sm mb-2 font-cairo">
-                                  {isRtl ? (sanitizeArabicExtractedText(phase.phaseNameAr) || phase.phaseNameAr) : phase.phaseNameEn}
+                                  {isRtl ? (sanitizeArabicExtractedText(phase.phaseNameAr) || phase.phaseNameAr).replace(/(?:ة\s+الَّ?\s*صلا\s+اوُماَقَأ|اوُماَقَأ\s+صلا\s+الَّ?\s*ة|اوُماَقَأ\s+الصَّ?\s*لا\s*ةَ?|أَقَامُوا\s+الصَّ?\s*لا\s*ةَ?|ةَ?\s*ال\s*َّصلا\s*اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ') : phase.phaseNameEn}
                                 </h4>
                                 <p className="text-xs text-slate-600 font-amiri leading-relaxed mb-3">
                                   {isRtl ? sanitizeArabicExtractedText(phase.teacherFocusAr || phase.teacherGuidanceAr) : (phase.teacherFocusEn || phase.teacherGuidanceEn)}
