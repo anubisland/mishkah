@@ -7806,6 +7806,7 @@
         // Missing preposition Lam before أوامره
         text = text.replace(/الامتثال\s+أوامره/gu, 'الامتثال لأوامره');
         text = text.replace(/المتثال\s+ألوامره/gu, 'الامتثال لأوامره');
+        text = text.replace(/ألوامره/gu, 'لأوامره');
         text = text.replace(/المتثال/gu, 'الامتثال');
 
         // Inverted 'لا' into 'ال' (Transposed Lam-Alef OCR defect):
