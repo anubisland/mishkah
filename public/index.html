@@ -6224,6 +6224,8 @@
       function cleanSlideTitle(rawTitle) {
         if (!rawTitle) return 'محور الدرس ومسائله';
         let t = sanitizeArabicExtractedText(rawTitle);
+        t = t.replace(/(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)\s*(?:أَقَامُوا|اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
+        t = t.replace(/(?:أَقَامُوا|اوُماَقَأ)\s*(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)/gu, 'أَقَامُوا الصَّلَاةَ');
         t = t.replace(/(?:ة\s+الَّ?\s*صلا\s+اوُماَقَأ|اوُماَقَأ\s+صلا\s+الَّ?\s*ة|اوُماَقَأ\s+الصَّ?\s*لا\s*ةَ?|أَقَامُوا\s+الصَّ?\s*لا\s*ةَ?|ةَ?\s*ال\s*َّصلا\s*اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
 
         // Strip leading diacritics, numbers, symbols, and heading markers
@@ -6613,16 +6615,17 @@
             let parsedTitle = strippedLine;
             let initialLineContent = '';
 
-            // Split on colon ':' or dash or continuation phrase if heading contains inline explanation
+            // Universal Intelligent Heading & Inline Content Disaggregator
             const delimMatch = strippedLine.match(/^([^:\-\—–\n]{3,50})[:\-\—–]\s*(.+)$/);
             if (delimMatch) {
               parsedTitle = delimMatch[1].trim();
               initialLineContent = delimMatch[2].trim();
             } else {
-              const contMatch = strippedLine.match(/^(.{3,45}?)\s+(يُ?ثبت\s+الوحي[\s\S]*|\(\s*سواء[\s\S]*|وهو\s+دين[\s\S]*)$/);
-              if (contMatch) {
-                parsedTitle = contMatch[1].trim();
-                initialLineContent = contMatch[2].trim();
+              // Match when heading line continues directly with explanation verbs or clauses (never swallow opening sentences!)
+              const starterMatch = strippedLine.match(/^(.{3,45}?)\s+((?:ترك|عدم|أدوا|ادوا|يُ?ثبت\s+الوحي|هو|وهو|وهي|يقصد\s+به|المراد\s+به|\(\s*سواء)[\s\S]*)$/);
+              if (starterMatch) {
+                parsedTitle = starterMatch[1].trim();
+                initialLineContent = starterMatch[2].trim();
               }
             }
 
@@ -7488,7 +7491,10 @@
       function detectAndInvertReversedArabic(text) {
         if (!text) return text;
         // Pre-normalize decomposed ligatures and known reversed clusters BEFORE reversal checks!
+        text = text.replace(/(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)\s*(?:أَقَامُوا|اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:أَقَامُوا|اوُماَقَأ)\s*(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)/gu, 'أَقَامُوا الصَّلَاةَ');
         text = text.replace(/(?:ة\s+الَّ?\s*صلا\s+اوُماَقَأ|اوُماَقَأ\s+صلا\s+الَّ?\s*ة|اوُماَقَأ\s+الصَّ?\s*لا\s*ةَ?|أَقَامُوا\s+الصَّ?\s*لا\s*ةَ?|ةَ?\s*ال\s*َّصلا\s*اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:^|[\s«\("])(?:ةَ?\s+الَّ?\s*صلا|صلا\s+الَّ?\s*ةَ?)(?=[\s»\)"،.؛!؟]|$)/gu, ' الصَّلَاةَ ');
         text = text.replace(/اوُماَقَأ/gu, 'أَقَامُوا');
         text = text.replace(/الصَّ?\s*لا\s*ةَ?/gu, 'الصَّلَاةَ');
         text = text.replace(/ولا\s+ضرا\s+اول/gu, 'ولا ضراً');
@@ -8749,10 +8755,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v76.2 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.2 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v76.3 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.3 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v76.2' : 'v76.2'}</span>
+                  <span>{isRtl ? 'الإصدار v76.3' : 'v76.3'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
