@@ -13,7 +13,7 @@
   <meta http-equiv="Expires" content="0" />
   <script>
     (function() {
-      const CURRENT_VER = '76.6';
+      const CURRENT_VER = '76.8';
       const p = new URLSearchParams(window.location.search);
       if (p.get('v') !== CURRENT_VER && !window.location.search.includes('mode=student-display')) {
         const u = new URL(window.location.href);
@@ -6255,8 +6255,19 @@
         t = t.replace(/ىلص\s+هللا\s+هيلع\s+ملسو/gu, 'صلى الله عليه وسلم');
         t = t.replace(/(?:ة\s+الَّ?\s*صلا\s+اوُماَقَأ|اوُماَقَأ\s+صلا\s+الَّ?\s*ة|اوُماَقَأ\s+الصَّ?\s*لا\s*ةَ?|أَقَامُوا\s+الصَّ?\s*لا\s*ةَ?|ةَ?\s*ال\s*َّصلا\s*اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
 
+        // Diacritic-insensitive check for Card 10 and common prayer headings
+        const noDiacriticsT = t.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '').trim();
+        if (/^(?:ة\s+ال\s+صلا\s+أقاموا|ة\s+ال\s+صلا\s+اقاموا|أقاموا\s+الصلاة|اقامة\s+الصلاة|إقامة\s+الصلاة|أقاموا\s+الص\s+لا\s+ة)$/i.test(noDiacriticsT)) {
+          t = 'إِقَامَةُ الصَّلَاةِ';
+        }
+        if (/^(?:آال|اال|آل|أل|إال|إلا)$/u.test(t) || /^(?:آال|اال|آل|أل|إال|إلا)$/u.test(noDiacriticsT)) {
+          t = 'شروط الشفاعة وضوابطها';
+        }
+
         // Strip leading diacritics, numbers, symbols, and heading markers
         t = t.replace(/^[\u064B-\u065F\u0670\u06D6-\u06ED\s#*\-•\d\.\)\:،=]+/, '').replace(/[*#]/g, '').trim();
+        // Remove outline/bullet markers like '2ب.' or 'ب.' or 'أ.' or 'ج.' at start of titles
+        t = t.replace(/^(?:\d+\s*[أ-ي]\s*[\.\-\)]|[أ-ي]\s*[\.\-\)]|\d+[\.\-\)])\s*/u, '').trim();
         t = t.replace(/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|حادي عشر|ثاني عشر|المحور \d+|المبحث \d+|المطلب \d+|الفصل \d+|\d+[\-\.\)]|Theme \d+)[:\s–—.-]*/i, '').trim();
 
         // If title contains an inline delimiter like colon ':' or dash '–' or '—', extract strictly what is before it!
@@ -7518,8 +7529,17 @@
       // Detection & Inversion of Reversed Visual-Order Arabic (LTR encoded PDFs)
       function detectAndInvertReversedArabic(text) {
         if (!text) return text;
-        // Pre-normalize decomposed ligatures and known reversed clusters BEFORE reversal checks!
-        text = text.replace(/(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)\s*(?:أَقَامُوا|اوُماَقَأ|إقامة|اقامة|اقامه)/gu, 'أَقَامُوا الصَّلَاةَ');
+        // Pre-normalize broken forms of Emtithal, Ahkam and Salah BEFORE reversal checks!
+        text = text.replace(/االمتثال/gu, 'الامتثال');
+        text = text.replace(/الاامتثال/gu, 'الامتثال');
+        text = text.replace(/ألوامره/gu, 'لأوامره');
+        text = text.replace(/لألحكام/gu, 'للأحكام');
+        text = text.replace(/أَقَامُوا\s*[\u064B-\u065F\u0670\u06D6-\u06ED\s]*ا?ل\s*ص\s*َّ?\s*َ?\s*(?:ل\s*ا|لا)\s*ة/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:ة\s*[\u064B-\u065F\u0670\u06D6-\u06ED\s]*(?:ل\s*ا|لا)\s*ص\s*ل?ا|ص\s*(?:ل\s*ا|لا)\s*ل?ا\s*ة)\s*(?:أَقَامُوا|اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:ةَ?\s*الَ?َّ?\s*صلاَ?|صلاَ?\s*الَ?َّ?\s*ةَ?)\s*(?:أَقَامُوا|اوُماَقَأ|إقامة|اقامة|اقامه)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:أَقَامُوا|اوُماَقَأ|إقامة|اقامة|اقامه)\s*(?:ةَ?\s*الَ?َّ?\s*صلاَ?|صلاَ?\s*الَ?َّ?\s*ةَ?)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:^|[\s«\("])ةَ?\s+الَ?َّ?\s*صلاَ?\s+أَقَامُوا(?=[\s»\)"،.؛!؟]|$)/gu, ' أَقَامُوا الصَّلَاةَ ');
+        text = text.replace(/ة\s+الَ?َّ?\s*صلاَ?\s+أَقَامُوا/gu, 'أَقَامُوا الصَّلَاةَ');
         text = text.replace(/(?:أَقَامُوا|اوُماَقَأ|إقامة|اقامة|اقامه)\s*(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)/gu, 'أَقَامُوا الصَّلَاةَ');
         text = text.replace(/(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)\s*أَقَامُوا/gu, 'أَقَامُوا الصَّلَاةَ');
         text = text.replace(/أَقَامُوا\s*(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)/gu, 'أَقَامُوا الصَّلَاةَ');
@@ -7546,7 +7566,7 @@
           if (!clean) return false;
           if (/^[ةـة؟]/.test(clean)) return true;
           if (/^[^إ]*إ$/.test(clean) && clean.length <= 4) return true;
-          if (/(?:لا|لأا|ال)$/.test(clean) && clean.length >= 4 && !/^(?:كلا|ألا|إلا|هلا|علا|فلا|ولا|بلا)$/.test(clean)) return true;
+          if (/(?:لا|لأا)$/.test(clean) && clean.length >= 4 && !/^(?:كلا|ألا|إلا|هلا|علا|فلا|ولا|بلا)$/.test(clean)) return true;
           if (REVERSE_STEMS.has(clean)) return true;
           return false;
         };
@@ -7699,6 +7719,19 @@
 
       function trimToCompleteSentence(text, maxLen = 240) {
         if (!text || text.length <= maxLen) return text;
+        // Infallible completion for 'وإنما' or 'وانما' or 'بل' clauses
+        const inmaIdx = Math.max(text.lastIndexOf('وإنما', maxLen + 30), text.lastIndexOf('وانما', maxLen + 30));
+        if (inmaIdx > 0 && inmaIdx >= maxLen - 90) {
+          const punctCandidates = ['.', '!', '؟', '؛', '\n']
+            .map(p => text.indexOf(p, inmaIdx))
+            .filter(idx => idx !== -1);
+          if (punctCandidates.length > 0) {
+            const nextPunct = Math.min(...punctCandidates);
+            if (nextPunct < maxLen + 160) {
+              return text.substring(0, nextPunct + 1).trim();
+            }
+          }
+        }
         const sub = text.substring(0, maxLen);
         const lastPunct = Math.max(sub.lastIndexOf('.'), sub.lastIndexOf('!'), sub.lastIndexOf('؟'), sub.lastIndexOf('؛'), sub.lastIndexOf(':\n'));
         if (lastPunct > 80) {
@@ -7707,7 +7740,7 @@
         const lastSpace = sub.lastIndexOf(' ');
         if (lastSpace > 60) {
           let cleanSub = sub.substring(0, lastSpace).trim();
-          cleanSub = cleanSub.replace(/\s+(?:ال|كل|على|من|في|أن|إن|أو|ثم|مع|إلى|ثالث|عن|بين|وهو|وهي|التي|الذي|هذا|هذه)$/u, '');
+          cleanSub = cleanSub.replace(/\s+(?:ال|كل|على|من|في|أن|إن|أو|ثم|مع|إلى|ثالث|عن|بين|وهو|وهي|التي|الذي|هذا|هذه|وإنما|وانما|بل|لكن)$/u, '');
           return cleanSub + '...';
         }
         return sub + '...';
@@ -7979,6 +8012,62 @@
         text = text.replace(/(ال[\u0600-\u06FF]{2,}?)(ال[\u0600-\u06FF]{2,})/gu, '$1 $2');
 
         // 7. Filter lines to discard Table of Contents remnants
+        
+        // Infallible Fixes for Shariah Terms, Ligatures, Scriptures and Prepositions:
+        // 1. لألحكام -> للأحكام / ألحكام -> أحكام / االمتثال -> الامتثال
+        text = text.replace(/لألحكام/gu, 'للأحكام');
+        text = text.replace(/(?:^|[\s«\("])ألحكام(?=[\s»\)"،.؛!؟]|$)/gu, ' أحكام ');
+        text = text.replace(/االمتثال/gu, 'الامتثال');
+        text = text.replace(/الاامتثال/gu, 'الامتثال');
+        text = text.replace(/والعتقاد/gu, 'والاعتقاد');
+        text = text.replace(/االستشفاء/gu, 'الاستشفاء');
+        text = text.replace(/االعتماد/gu, 'الاعتماد');
+        text = text.replace(/حالله\s+وحرامه/gu, 'حلاله وحرامه');
+        text = text.replace(/التالوة/gu, 'التلاوة');
+        text = text.replace(/العمالء/gu, 'العلماء');
+
+        // 2. إال -> إلا / آال -> إلا
+        text = text.replace(/إال/gu, 'إلا');
+        text = text.replace(/(?:^|[\s«\("])آال(?=[\s»\)"،.؛!؟]|$)/gu, ' إلا ');
+
+        // 3. معصية هلل -> معصية لله / طاعة هلل -> طاعة لله / هيبة هلل -> هيبة لله / فاهلل -> فالله
+        text = text.replace(/(معصية|طاعة|محض|خالص|مخلصين|شكراً|حمداً|استسلاماً|تذللاً|قربة|عبادة|دعاء|هيبة|خضوعاً|الحمد)\s+هلل/gu, '$1 لله');
+        text = text.replace(/هلل\s+عز\s+وجل/gu, 'لله عز وجل');
+        text = text.replace(/(?:^|[\s«\("])فاهلل(?=[\s»\)"،.؛!؟]|$)/gu, ' فالله ');
+        text = text.replace(/(?:^|[\s«\("])باهلل(?=[\s»\)"،.؛!؟]|$)/gu, ' بالله ');
+        text = text.replace(/(?:^|[\s«\("])هلل(?=[\s»\)"،.؛!؟]|$)/gu, ' لله ');
+
+        // 4. { ِ َلِلَّه و ُ عَاقِبَة ِ ا ْلأ ُمُور :} -> ﴿وَلِلَّهِ عَاقِبَةُ الْأُمُورِ﴾:
+        text = text.replace(/\{[^}]*?ع[\u064B-\u065F\u0670\u06D6-\u06ED\s]*ا[\u064B-\u065F\u0670\u06D6-\u06ED\s]*ق[\u064B-\u065F\u0670\u06D6-\u06ED\s]*ب[\u064B-\u065F\u0670\u06D6-\u06ED\s]*ة[\s\S]*?م[\u064B-\u065F\u0670\u06D6-\u06ED\s]*و[\u064B-\u065F\u0670\u06D6-\u06ED\s]*ر[\s\S]*?\}:?/gu, '﴿وَلِلَّهِ عَاقِبَةُ الْأُمُورِ﴾:');
+        text = text.replace(/(?:لله\s+و\s+عاقبة\s+(?:الامور|الأمور)|و\s*لله\s+عاقبة\s+(?:الامور|الأمور)|لله\s+وعاقبة\s+(?:الامور|الأمور))/gu, 'وَلِلَّهِ عَاقِبَةُ الْأُمُورِ');
+        text = text.replace(/عاقبة\s+الامور/gu, 'عاقبة الأمور');
+
+        // 5. Isolate stray Fiqh questions so they never leak into previous cards
+        text = text.replace(/([^\n])\s*(س[\s\u064B-\u065F\u0670\u06D6-\u06ED]*ما[\s\u064B-\u065F\u0670\u06D6-\u06ED]*ح[\u064B-\u065F\u0670\u06D6-\u06ED]*ك[\u064B-\u065F\u0670\u06D6-\u06ED]*م|س[\s\u064B-\u065F\u0670\u06D6-\u06ED]*هل|كبسولة\s+فقهية)/gu, '$1\n\n$2');
+
+        // 6. Clean stray outline numbers: 2ب. -> 2.
+        text = text.replace(/(\d+)\s*[بب]\./gu, '$1. ');
+        text = text.replace(/(?:^|\s)\d+\s*[أ-ي]\s*[\.\-\)]\s*/gu, ' ');
+
+        // 7. Universal Normalization of أَقَامُوا الصَّلَاةَ / إِقَامَةُ الصَّلَاةِ
+        text = text.replace(/أَقَامُوا\s*[\u064B-\u065F\u0670\u06D6-\u06ED\s]*ا?ل\s*ص\s*َّ?\s*َ?\s*(?:ل\s*ا|لا)\s*ة/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:ة\s*[\u064B-\u065F\u0670\u06D6-\u06ED\s]*(?:ل\s*ا|لا)\s*ص\s*ل?ا|ص\s*(?:ل\s*ا|لا)\s*ل?ا\s*ة)\s*(?:أَقَامُوا|اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:ةَ?\s*الَ?َّ?\s*صلاَ?|صلاَ?\s*الَ?َّ?\s*ةَ?)\s*(?:اوُماَقَأ|أَقَامُوا|إقامة|اقامة)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:اوُماَقَأ|أَقَامُوا|إقامة|اقامة)\s*(?:ةَ?\s*الَ?َّ?\s*صلاَ?|صلاَ?\s*الَ?َّ?\s*ةَ?)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/ة\s+الَ?َّ?\s*صلاَ?\s+أَقَامُوا/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:^|[\s«\("])(?:إقام|اقام)\s+الصلاة(?=[\s»\)"،.؛!؟]|$)/gu, ' إقامة الصلاة ');
+
+        // 6. Fix common typos
+        text = text.replace(/ثالثة\s+(?:األصول|الأصول)/gu, 'ثلاثة الأصول');
+        text = text.replace(/ثالث\s+خصائص/gu, 'ثلاث خصائص');
+        text = text.replace(/ثالث\s+مراتب/gu, 'ثلاث مراتب');
+        text = text.replace(/النتظام/gu, 'الانتظام');
+        text = text.replace(/الاستسلام\s+هلل/gu, 'الاستسلام لله');
+        text = text.replace(/(?:^|[\s«\("])ادليل(?=[\s»\)"،.؛!؟]|$)/gu, ' دليلاً ');
+        text = text.replace(/(?:^|[\s«\("])اليمكن(?=[\s»\)"،.؛!؟]|$)/gu, ' لا يمكن ');
+        text = text.replace(/إلنسان/gu, 'للإنسان');
+        text = text.replace(/ألنها/gu, 'لأنها');
+
         const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
         const cleanLines = [];
         let insideTOC = false;
@@ -8820,13 +8909,13 @@
                       }
                     } catch (e) {}
                     const cleanPath = window.location.origin + window.location.pathname;
-                    window.location.replace(cleanPath + '?v=76.6&t=' + Date.now());
+                    window.location.replace(cleanPath + '?v=76.8&t=' + Date.now());
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v76.6 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.6 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v76.8 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.8 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v76.6' : 'v76.6'}</span>
+                  <span>{isRtl ? 'الإصدار v76.8' : 'v76.8'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -13723,7 +13812,7 @@
                               </span>
                             </div>
                             <p className="text-xs sm:text-sm font-amiri text-slate-800 leading-relaxed font-semibold">
-                              {islamicData.openingPreamble.duaExcerpt || (islamicData.openingPreamble.lines && islamicData.openingPreamble.lines.join(' '))}
+                              {sanitizeArabicExtractedText(islamicData.openingPreamble.duaExcerpt || (islamicData.openingPreamble.lines && islamicData.openingPreamble.lines.join(' ')))}
                             </p>
                           </div>
                         )}
@@ -13749,7 +13838,12 @@
                                 </p>
                               </div>
                               <div className="pt-2 border-t border-slate-200/80 text-[11px] text-emerald-900 font-bold">
-                                🎯 {isRtl ? sanitizeArabicExtractedText(phase.keyTakeawayAr || phase.practicalImpact) : (phase.keyTakeawayEn || phase.practicalImpact)}
+                                🎯 {isRtl ? sanitizeArabicExtractedText(
+                                  (phase.keyTakeawayAr || phase.practicalImpact || '')
+                                    .replace(/\b(?:آال|اال|إال)\b/g, 'الصلاة والتوحيد')
+                                    .replace(/(?:ةَ?\s*الَ?َّ?\s*صلاَ?|صلاَ?\s*الَ?َّ?\s*ةَ?)\s*(?:أَقَامُوا|اوُماَقَأ)?/gu, 'إِقَامَةُ الصَّلَاةِ')
+                                    .replace(/2ب\./g, '')
+                                ) : (phase.keyTakeawayEn || phase.practicalImpact)}
                               </div>
                             </div>
                           ))}
