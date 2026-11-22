@@ -6734,7 +6734,7 @@
           const candidateSentences = sec.lines.filter(l => l.length > 25 && !l.startsWith('#') && !isNoiseLine(l));
           let rawModelAnswer = candidateSentences.slice(0, 3).join(' ') || secText.substring(0, 220);
           rawModelAnswer = normalizeIslamicSacredTerms(rawModelAnswer);
-          let modelAnswer = trimToCompleteSentence(rawModelAnswer, 260);
+          let modelAnswer = trimToCompleteSentence(sanitizeArabicExtractedText(rawModelAnswer), 260);
 
           // Extract 2 to 3 concise, distilled golden bullets (under 80 chars each, no clutter)
           const secBullets = extractConciseSlideBullets(sec.lines, sec.title);
@@ -7486,7 +7486,7 @@
           'نإف', 'نكت', 'نوعبسو', 'اهلاعأ', 'اهاندأو', 'لدت', 'هتيبوبرو', 'هتردقو',
           'نقوتو', 'نلأ', '؛لضفلأا', 'لضفلأا', 'كرت', 'كلذب', 'هنكل', 'هنع', 'قولخم',
           'زجاع', 'كلمي', 'ليحتسي', 'نوكي', 'يلاتلابو', 'ءاوس', 'ناكأ', 'نود', 'ادمحم',
-          'هيبناً', 'لقثأ', 'نإ', 'ديري', 'اذاَم', 'اظام', 'كسفن', 'لأسا', 'ينم', 'أمناد', 'دانمأ'
+          'هيبناً', 'لقثأ', 'نإ', 'ديري', 'اذاَم', 'اظام', 'كسفن', 'لأسا', 'ينم', 'أمناد', 'دانمأ', 'ربدتب', 'أرقا'
         ]);
 
         const isTokenReversed = (word) => {
@@ -7782,11 +7782,79 @@
         text = text.replace(/(?:^|[\s(\[«])ا\s+ل(?=[\s)\.،؛!؟»\]]|$)/gu, ' لا ');
         text = text.replace(/(?:^|[\s(\[«])ا\s+ل\s+(?=[أ-ي])/gu, ' لا ');
 
-        // Generic Word-initial double Alif 'االـ' -> 'الـ'
-        text = text.replace(/(?:^|[\s(\[«])اال(?=[أ-ي])/gu, (m) => m.replace('اال', 'ال'));
-        text = text.replace(/(?:^|[\s(\[«])واال(?=[أ-ي])/gu, (m) => m.replace('واال', 'وال'));
-        text = text.replace(/(?:^|[\s(\[«])فاال(?=[أ-ي])/gu, (m) => m.replace('فاال', 'فال'));
-        text = text.replace(/(?:^|[\s(\[«])باال(?=[أ-ي])/gu, (m) => m.replace('باال', 'بال'));
+        // Generic Word-initial double Alif 'االـ' -> 'الاـ' (Transposed Lam-Alef ligature at start of words)
+        text = text.replace(/(?:^|[\s(\[«\-])اال(?=[أ-ي])/gu, (m) => m.replace('اال', 'الا'));
+        text = text.replace(/(?:^|[\s(\[«\-])واال(?=[أ-ي])/gu, (m) => m.replace('واال', 'والا'));
+        text = text.replace(/(?:^|[\s(\[«\-])فاال(?=[أ-ي])/gu, (m) => m.replace('فاال', 'فالا'));
+        text = text.replace(/(?:^|[\s(\[«\-])باال(?=[أ-ي])/gu, (m) => m.replace('باال', 'بالا'));
+        text = text.replace(/(?:^|[\s(\[«\-])كاال(?=[أ-ي])/gu, (m) => m.replace('كاال', 'كالا'));
+
+        // Spaced-out / fragmented ligatures inside words (PDF font decomposition)
+        text = text.replace(/الصَّ?\s*لا\s*ةَ?/gu, 'الصَّلَاةَ');
+        text = text.replace(/(?:^|[\s«\("])الص\s*لا\s*ة(?=[\s»\)"،.؛!؟]|$)/gu, ' الصلاة ');
+        text = text.replace(/إس\s*لا\s*م/gu, 'إسلام');
+        text = text.replace(/إص\s*لا\s*ح/gu, 'إصلاح');
+        text = text.replace(/خ\s*لا\s*ف/gu, 'خلاف');
+        text = text.replace(/ع\s*لا\s*ق/gu, 'علاق');
+        text = text.replace(/ت\s*لا\s*و/gu, 'تلاو');
+        text = text.replace(/ك\s*لا\s*م/gu, 'كلام');
+
+        // Missing preposition Lam before أوامره
+        text = text.replace(/الامتثال\s+أوامره/gu, 'الامتثال لأوامره');
+        text = text.replace(/المتثال\s+ألوامره/gu, 'الامتثال لأوامره');
+        text = text.replace(/المتثال/gu, 'الامتثال');
+
+        // Inverted 'لا' into 'ال' (Transposed Lam-Alef OCR defect):
+        // تالوة / التالوة -> تلاوة / التلاوة
+        text = text.replace(/(^|[\s«\("])تالوة(?=[\s»\)"،.؛!؟]|$)/gu, '$1تلاوة');
+        text = text.replace(/(^|[\s«\("])التالوة(?=[\s»\)"،.؛!؟]|$)/gu, '$1التلاوة');
+        text = text.replace(/هجر\s+التالوة/gu, 'هجر التلاوة');
+        text = text.replace(/هجر\s+تالوة/gu, 'هجر تلاوة');
+        text = text.replace(/تالوة\s+الحروف/gu, 'تلاوة الحروف');
+
+        // كالم -> كلام
+        text = text.replace(/(^|[\s«\("])كالم\s+الله(?=[\s»\)"،.؛!؟]|$)/gu, '$1كلام الله');
+        text = text.replace(/(^|[\s«\("])كالم(?=[\s»\)"،.؛!؟]|$)/gu, '$1كلام');
+        text = text.replace(/(^|[\s«\("])الكالم(?=[\s»\)"،.؛!؟]|$)/gu, '$1الكلام');
+
+        // عالج -> علاج
+        text = text.replace(/في\s+عالج/gu, 'في علاج');
+        text = text.replace(/عالج\s+علل/gu, 'علاج علل');
+        text = text.replace(/عالج\s+الأمراض/gu, 'علاج الأمراض');
+        text = text.replace(/عالج\s+المرض/gu, 'علاج المرض');
+        text = text.replace(/عالج\s+النفوس/gu, 'علاج النفوس');
+
+        // عالقة / عالقتهم / عالقتك / عالقتنا / عالقات -> علاقة / علاقتهم / علاقتك / علاقتنا / علاقات
+        text = text.replace(/إصالح\s+عالقتهم/gu, 'إصلاح علاقتهم');
+        text = text.replace(/(^|[\s«\("])إصالح(?=[\s»\)"،.؛!؟]|$)/gu, '$1إصلاح');
+        text = text.replace(/(^|[\s«\("])عالقتهم(?=[\s»\)"،.؛!؟]|$)/gu, '$1علاقتهم');
+        text = text.replace(/(^|[\s«\("])عالقتك(?=[\s»\)"،.؛!؟]|$)/gu, '$1علاقتك');
+        text = text.replace(/(^|[\s«\("])عالقتنا(?=[\s»\)"،.؛!؟]|$)/gu, '$1علاقتنا');
+        text = text.replace(/(^|[\s«\("])عالقة(?=[\s»\)"،.؛!؟]|$)/gu, '$1علاقة');
+        text = text.replace(/(^|[\s«\("])عالقات(?=[\s»\)"،.؛!؟]|$)/gu, '$1علاقات');
+
+        // حالله وحرامه -> حلاله وحرامه
+        text = text.replace(/حالله\s+وحرامه/gu, 'حلاله وحرامه');
+        text = text.replace(/(^|[\s«\("])حالله(?=[\s»\)"،.؛!؟]|$)/gu, '$1حلاله');
+
+        // Words where 'باال' was reduced to 'بال' without Alef:
+        text = text.replace(/بالستمرار/gu, 'بالاستمرار');
+        text = text.replace(/بالنشغال/gu, 'بالانشغال');
+        text = text.replace(/بالستسلام/gu, 'بالاستسلام');
+        text = text.replace(/بالستشفاء/gu, 'بالاستشفاء');
+        text = text.replace(/بالعتزاز/gu, 'بالاعتزاز');
+        text = text.replace(/بالعتقاد/gu, 'بالاعتقاد');
+        text = text.replace(/باللتزام/gu, 'بالالتزام');
+        text = text.replace(/بالمتثال/gu, 'بالامتثال');
+        text = text.replace(/بالنقياد/gu, 'بالانقياد');
+
+        // Inverted quote and reversed phrases (Card 9)
+        text = text.replace(/["“«]?\s*ينم[؟\?]?\s+الله\s+ديري\s+(?:اذاَم|اذاَم|اظام|إذاَم|اذا م)\s*["”»]?/gu, '"ماذا يريد الله مني؟"');
+        text = text.replace(/["“«]?\s*ينم[؟\?]?\s+ديري\s+الله\s+(?:اذاَم|اذاَم|اظام|إذاَم|اذا م)\s*["”»]?/gu, '"ماذا يريد الله مني؟"');
+        text = text.replace(/ربدتب\s+أرقا-?/gu, '-اقرأ بتدبر');
+        text = text.replace(/أرقا\s+ربدتب-?/gu, '-اقرأ بتدبر');
+        text = text.replace(/["“«]?ماذا يريد الله مني؟["”»]?\s*:\s*-اقرأ بتدبر/gu, '-اقرأ بتدبر: "ماذا يريد الله مني؟"');
+        text = text.replace(/(?:-اقرأ بتدبر\s*:\s*)?["“«]?ماذا يريد الله مني؟["”»]?\s*:\s*-اقرأ بتدبر/gu, '-اقرأ بتدبر: "ماذا يريد الله مني؟"');
 
         // Isolated negative particles: ' ال ' is NEVER a valid standalone word in Arabic; it is 100% ' لا '!
         text = text.replace(/(?:^|[\s(\[«])ال(?=[\s)\.،؛!؟»\]]|$)/gu, (m) => m.replace('ال', 'لا'));
@@ -8664,10 +8732,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v75.9 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v75.9 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v76.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.0 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v75.9' : 'v75.9'}</span>
+                  <span>{isRtl ? 'الإصدار v76.0' : 'v76.0'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -13563,14 +13631,14 @@
                                   </span>
                                 </div>
                                 <h4 className="font-bold text-emerald-950 text-sm mb-2 font-cairo">
-                                  {isRtl ? phase.phaseNameAr : phase.phaseNameEn}
+                                  {isRtl ? (sanitizeArabicExtractedText(phase.phaseNameAr) || phase.phaseNameAr) : phase.phaseNameEn}
                                 </h4>
                                 <p className="text-xs text-slate-600 font-amiri leading-relaxed mb-3">
-                                  {isRtl ? (phase.teacherFocusAr || phase.teacherGuidanceAr) : (phase.teacherFocusEn || phase.teacherGuidanceEn)}
+                                  {isRtl ? sanitizeArabicExtractedText(phase.teacherFocusAr || phase.teacherGuidanceAr) : (phase.teacherFocusEn || phase.teacherGuidanceEn)}
                                 </p>
                               </div>
                               <div className="pt-2 border-t border-slate-200/80 text-[11px] text-emerald-900 font-bold">
-                                🎯 {isRtl ? (phase.keyTakeawayAr || phase.practicalImpact) : (phase.keyTakeawayEn || phase.practicalImpact)}
+                                🎯 {isRtl ? sanitizeArabicExtractedText(phase.keyTakeawayAr || phase.practicalImpact) : (phase.keyTakeawayEn || phase.practicalImpact)}
                               </div>
                             </div>
                           ))}
