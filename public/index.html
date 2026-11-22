@@ -6597,7 +6597,7 @@
           const isShortHeaderCandidate = line.length < 55 && !line.endsWith('.') && !line.endsWith('،') && !line.endsWith('؛') && (line.startsWith('**') || line.startsWith('•') || /^[^\s]{3,25}:/.test(line));
 
           if ((isHeadingMatch || isShortHeaderCandidate) && rawSections.length < 24) {
-            if (currentSec && currentSec.lines.length > 0) {
+            if (currentSec && (currentSec.lines.length > 0 || currentSec.title)) {
               rawSections.push(currentSec);
             }
             let strippedLine = line.replace(/^[\u064B-\u065F\u0670\u06D6-\u06ED\s#*\-•\d\.\)\:،=]+/, '').replace(/[*#]/g, '').trim();
@@ -6651,7 +6651,7 @@
             currentSec.lines.push(line);
           }
         }
-        if (currentSec && currentSec.lines.length > 0) {
+        if (currentSec && (currentSec.lines.length > 0 || currentSec.title)) {
           rawSections.push(currentSec);
         }
 
@@ -7479,6 +7479,10 @@
       // Detection & Inversion of Reversed Visual-Order Arabic (LTR encoded PDFs)
       function detectAndInvertReversedArabic(text) {
         if (!text) return text;
+        // Pre-normalize decomposed ligatures and known reversed clusters BEFORE reversal checks!
+        text = text.replace(/الصَّ?\s*لا\s*ةَ?/gu, 'الصَّلَاةَ');
+        text = text.replace(/ربدتب\s+أرقا-?/gu, '-اقرأ بتدبر');
+        text = text.replace(/أرقا\s+ربدتب-?/gu, '-اقرأ بتدبر');
 
         const REVERSE_STEMS = new Set([
           'ةبعش', 'ةطامإ', 'ةينادحو', 'ةفرعم', 'ةنسلا', 'ةتباثلا', 'لصلأا', 'ثلاثلا',
@@ -7546,7 +7550,7 @@
             if (isTokenReversed(w)) revCount++;
             if (isTokenForward(w)) fwdCount++;
           });
-          if (words.some(w => /^[ةـة؟]/.test(w.replace(/^[^\u0600-\u06FF]+/, '')))) return true;
+          if (words.some(w => /^[ةـة؟][\u0600-\u06FF]{2,}/.test(w.replace(/^[^\u0600-\u06FF]+/, ''))) && revCount > fwdCount) return true;
           return revCount > fwdCount && revCount >= 1;
         };
 
@@ -7610,9 +7614,9 @@
 
           const prev = merged[merged.length - 1];
 
-          // Headings MUST NEVER be merged into previous lines under any circumstances!
-          const isHeading = /^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|المبحث|المطلب|الفصل|الباب|المحور|المسألة|الوقفة|القسم|الأصل|القاعدة|الضابط|العنصر|النقطة)\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|\d+|[\u0660-\u0669]+|[أ-ي])?[:\.\-\s]|^[#]{1,4}\s+|^(?:\d+|[\u0660-\u0669]+)\s*[\.\-\)]\s*/i.test(cur);
-          if (isHeading) {
+          // Headings MUST NEVER be merged into previous lines, and lines after a heading must NEVER be merged into it!
+          const headingTest = (str) => /^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|المبحث|المطلب|الفصل|الباب|المحور|المسألة|الوقفة|القسم|الأصل|القاعدة|الضابط|العنصر|النقطة|\d+[\.\-\)])\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|\d+|[\u0660-\u0669]+|[أ-ي])?[:\.\-\s]|^[#]{1,4}\s+|^(?:\d+|[\u0660-\u0669]+)\s*[\.\-\)]\s*/i.test(str);
+          if (headingTest(cur) || headingTest(prev)) {
             merged.push(cur);
             continue;
           }
@@ -8732,10 +8736,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v76.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.0 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v76.1 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.1 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v76.0' : 'v76.0'}</span>
+                  <span>{isRtl ? 'الإصدار v76.1' : 'v76.1'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
