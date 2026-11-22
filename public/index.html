@@ -6224,8 +6224,10 @@
       function cleanSlideTitle(rawTitle) {
         if (!rawTitle) return 'محور الدرس ومسائله';
         let t = sanitizeArabicExtractedText(rawTitle);
-        t = t.replace(/(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)\s*(?:أَقَامُوا|اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
-        t = t.replace(/(?:أَقَامُوا|اوُماَقَأ)\s*(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)/gu, 'أَقَامُوا الصَّلَاةَ');
+        t = t.replace(/(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)\s*(?:أَقَامُوا|اوُماَقَأ|إقامة|اقامة|اقامه)/gu, 'أَقَامُوا الصَّلَاةَ');
+        t = t.replace(/(?:أَقَامُوا|اوُماَقَأ|إقامة|اقامة|اقامه)\s*(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)/gu, 'أَقَامُوا الصَّلَاةَ');
+        t = t.replace(/ملسو\s+هيلع\s+هللا\s+ىلص/gu, 'صلى الله عليه وسلم');
+        t = t.replace(/ىلص\s+هللا\s+هيلع\s+ملسو/gu, 'صلى الله عليه وسلم');
         t = t.replace(/(?:ة\s+الَّ?\s*صلا\s+اوُماَقَأ|اوُماَقَأ\s+صلا\s+الَّ?\s*ة|اوُماَقَأ\s+الصَّ?\s*لا\s*ةَ?|أَقَامُوا\s+الصَّ?\s*لا\s*ةَ?|ةَ?\s*ال\s*َّصلا\s*اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
 
         // Strip leading diacritics, numbers, symbols, and heading markers
@@ -7491,8 +7493,10 @@
       function detectAndInvertReversedArabic(text) {
         if (!text) return text;
         // Pre-normalize decomposed ligatures and known reversed clusters BEFORE reversal checks!
-        text = text.replace(/(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)\s*(?:أَقَامُوا|اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
-        text = text.replace(/(?:أَقَامُوا|اوُماَقَأ)\s*(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)\s*(?:أَقَامُوا|اوُماَقَأ|إقامة|اقامة|اقامه)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:أَقَامُوا|اوُماَقَأ|إقامة|اقامة|اقامه)\s*(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)\s*أَقَامُوا/gu, 'أَقَامُوا الصَّلَاةَ');
+        text = text.replace(/أَقَامُوا\s*(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)/gu, 'أَقَامُوا الصَّلَاةَ');
         text = text.replace(/(?:ة\s+الَّ?\s*صلا\s+اوُماَقَأ|اوُماَقَأ\s+صلا\s+الَّ?\s*ة|اوُماَقَأ\s+الصَّ?\s*لا\s*ةَ?|أَقَامُوا\s+الصَّ?\s*لا\s*ةَ?|ةَ?\s*ال\s*َّصلا\s*اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ');
         text = text.replace(/(?:^|[\s«\("])(?:ةَ?\s+الَّ?\s*صلا|صلا\s+الَّ?\s*ةَ?)(?=[\s»\)"،.؛!؟]|$)/gu, ' الصَّلَاةَ ');
         text = text.replace(/اوُماَقَأ/gu, 'أَقَامُوا');
@@ -7729,7 +7733,14 @@
         text = text.replace(/اعوذ/g, 'أعوذ');
 
         // 6. Universal Arabic OCR Ligature & Typo Corrections (NEVER use \b with Arabic!)
+        text = text.replace(/(?:^|[\s«\("])(?:الاامتثال|االامتثال|االمتثال|المتثال)(?=[\s»\)"،.؛!؟]|$)/gu, ' الامتثال ');
+        text = text.replace(/الامتثال\s+ألوامره/gu, 'الامتثال لأوامره');
+        text = text.replace(/الامتثال\s+أوامره/gu, 'الامتثال لأوامره');
         text = text.replace(/المتثال/gu, 'الامتثال');
+        text = text.replace(/ملسو\s+هيلع\s+هللا\s+ىلص/gu, 'صلى الله عليه وسلم');
+        text = text.replace(/ىلص\s+هللا\s+هيلع\s+ملسو/gu, 'صلى الله عليه وسلم');
+        text = text.replace(/(?:^|[\s«\("])باهلل(?=[\s»\)"،.؛!؟]|$)/gu, ' بالله ');
+        text = text.replace(/(?:^|[\s«\("])هللا(?=[\s»\)"،.؛!؟]|$)/gu, ' الله ');
         text = text.replace(/السشفاء/gu, 'الاستشفاء');
         text = text.replace(/السفاء/gu, 'الاستشفاء');
         text = text.replace(/استسفاء/gu, 'استشفاء');
@@ -8755,10 +8766,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v76.3 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.3 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v76.4 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.4 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v76.3' : 'v76.3'}</span>
+                  <span>{isRtl ? 'الإصدار v76.4' : 'v76.4'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
