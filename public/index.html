@@ -4557,7 +4557,136 @@
       );
     }
 
-    // Main Application Component
+    // Supreme Islamic Sacred Words & Majesty Name Sanitizer (Guarantees zero corruptions of Allah, PBUH, and Sacred Names)
+    function normalizeIslamicSacredTerms(text) {
+      if (!text || typeof text !== 'string') return '';
+      let t = text;
+
+      // 0. Double alef and omitted alef restoration in roots: الاستسلام, الاستعداد, الانحراف, الانشغال, إلخ
+      t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)ست([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الاست' + p3);
+      t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نت([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانت' + p3);
+      t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نح([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانح' + p3);
+      t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نش([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانش' + p3);
+      t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)تب([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الاتب' + p3);
+      t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نق([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانق' + p3);
+      t = t.replace(/(?:^|\s)اال(?=[ابتثجحخدذرزسشصضطظعغفقكلمنهوي])/gu, (m) => m.replace('اال', 'ال'));
+
+      // 1. Transposed Lam-Alif in core religious & common words
+      t = t.replace(/الاستسالم/gu, 'الاستسلام');
+      t = t.replace(/بالاستسالم/gu, 'بالاستسلام');
+      t = t.replace(/واالستسالم/gu, 'والاستسلام');
+      t = t.replace(/الصالة/gu, 'الصلاة');
+      t = t.replace(/والصالة/gu, 'والصلاة');
+      t = t.replace(/بالصالة/gu, 'بالصلاة');
+      t = t.replace(/فالصالة/gu, 'فالصلاة');
+      t = t.replace(/والسالم/gu, 'والسلام');
+      t = t.replace(/والسام/gu, 'والسلام');
+      t = t.replace(/السالم/gu, 'السلام');
+      t = t.replace(/بالسالم/gu, 'بالسلام');
+      t = t.replace(/للسالم/gu, 'للسلام');
+      t = t.replace(/والسامعلى/gu, 'والسلام على ');
+      t = t.replace(/والسالمعلى/gu, 'والسلام على ');
+      t = t.replace(/ابتالء/gu, 'ابتلاء');
+      t = t.replace(/وبتالء/gu, 'وابتلاء');
+      t = t.replace(/ثالث\s+(خصائص|مراتب|أصول|سنوات|نقاط|ركائز|مرات)/gu, (m, p1) => 'ثلاث ' + p1);
+
+      t = t.replace(/اإلسالم/gu, 'الإسلام');
+      t = t.replace(/الإسالم/gu, 'الإسلام');
+      t = t.replace(/باإلسالم/gu, 'بالإسلام');
+      t = t.replace(/إسالم/gu, 'إسلام');
+
+      t = t.replace(/أعالها/gu, 'أعلاها');
+      t = t.replace(/ومالئكته/gu, 'وملائكته');
+      t = t.replace(/مالئكة/gu, 'ملائكة');
+      t = t.replace(/المالئكة/gu, 'الملائكة');
+
+      t = t.replace(/(^|[\s«\(])إال(?=[\s»\)،.؛!؟\-]|$)/gu, '$1إلا');
+      t = t.replace(/(^|[\s«\(])أال(?=[\s»\)،.؛!؟\-]|$)/gu, '$1ألا');
+
+      // Restore accidentally split definite nouns and transposed formulas
+      t = t.replace(/(?:^|[\s«\(])ال\s+إله\s+إ[لا]ل?\s+الله/gu, ' لا إله إلا الله');
+      t = t.replace(/(?:^|[\s«\(])ال\s+إله/gu, ' لا إله');
+      t = t.replace(/(?:^|[\s«\(])لا\s+بس(?=[\s»\)،.؛!؟\-]|$)/gu, '');
+      t = t.replace(/(?:^|\s)ال\s+(حديث|قرآن|كتاب|سنة|نبي|صلاة|زكاة|صوم|حج|قبر|أرض|سماء|كون|حق|باطل)/gu, ' ال$1');
+      // Standalone 'ال' before words/verbs or at clause ends is transposed 'لا':
+      t = t.replace(/(^|[\s«\(])ال(?=[\s»\)])/gu, '$1لا');
+      t = t.replace(/(^|[\s«\(])ا\s+ل(?=[\s»\)])/gu, '$1لا');
+
+      // 2. PBUH reversed / decomposed font ligatures
+      t = t.replace(/ملسو\s*هيلع\s*(?:هللا|الله)\s*ىلص/gu, 'صلى الله عليه وسلم');
+      t = t.replace(/ص[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*[ىي][\s\u064B-\u065F\u0670]*ه?[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*ا[\s\u064B-\u065F\u0670]*ع[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*ي[\s\u064B-\u065F\u0670]*[هة][\s\u064B-\u065F\u0670]*و[\s\u064B-\u065F\u0670]*س[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*م/gu, 'صلى الله عليه وسلم');
+      t = t.replace(/صلَّ?ى[\s\u064B-\u065F\u0670]*ُ?[\s\u064B-\u065F\u0670]*ه[\s\u064B-\u065F\u0670]*للا[\s\u064B-\u065F\u0670]*عليْ?ه[\s\u064B-\u065F\u0670]*وسلَّ?مَ?/gu, 'صلى الله عليه وسلم');
+      t = t.replace(/صلَّ?ى[\s\u064B-\u065F\u0670]*ُ?[\s\u064B-\u065F\u0670]*ه[\s\u064B-\u065F\u0670]*للا/gu, 'صلى الله');
+      t = t.replace(/صلى\s*ه\s*للا\s*علي[هة]\s*وسلم/gu, 'صلى الله عليه وسلم');
+      t = t.replace(/صلى\s*ه\s*للا/gu, 'صلى الله');
+      t = t.replace(/رحمه\s*ه\s*للا/gu, 'رحمه الله');
+
+      // 3. Inverted Baa + Allah: 'استَعيذوا ِ ّللَه با' or 'استعيذوا ّبالله' or 'باهلل'
+      t = t.replace(/استَ?عيذوا[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللَ?ه[\s\u064B-\u065F\u0670]*با/gu, 'استعيذوا بالله');
+      t = t.replace(/استَ?عيذوا[\s\u064B-\u065F\u0670]*ّ?بالله/gu, 'استعيذوا بالله');
+      t = t.replace(/[\u064B-\u065F\u0670]*ّللَ?ه[\s\u064B-\u065F\u0670]*با/gu, 'بالله');
+      t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:ب|با)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1بالله');
+      t = t.replace(/[\u064B-\u065F\u0670]*ب[\u064B-\u065F\u0670]*الله/gu, 'بالله');
+      t = t.replace(/باهلل/gu, 'بالله');
+
+      // 4. Specific Prophetic Formulas:
+      t = t.replace(/ربِّ?ي[\s\u064B-\u065F\u0670]*َّ?للا?ه[\s\u064B-\u065F\u0670]*ُ?/gu, 'ربي الله');
+      t = t.replace(/ربِّ?ي[\s\u064B-\u065F\u0670]*هللا/gu, 'ربي الله');
+      t = t.replace(/رسول[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'رسول الله');
+      t = t.replace(/رسول[\s\u064B-\u065F\u0670]*هللا/gu, 'رسول الله');
+      t = t.replace(/كتاب[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'كتاب الله');
+      t = t.replace(/كتاب[\s\u064B-\u065F\u0670]*هللا/gu, 'كتاب الله');
+      t = t.replace(/قول[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'قول الله');
+      t = t.replace(/قول[\s\u064B-\u065F\u0670]*هللا/gu, 'قول الله');
+      t = t.replace(/يُ?ثبِّ?ت[\s\u064B-\u065F\u0670]*ُ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'يثبت الله');
+      t = t.replace(/يُ?ثبِّ?ت[\s\u064B-\u065F\u0670]*هللا/gu, 'يثبت الله');
+
+      // 5. Allah with other prefixes: Lam, Waw, Fa
+      t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:ل)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1لله');
+      t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:و)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1والله');
+      t = t.replace(/وهللا/gu, 'والله');
+      t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:ف)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1فلله');
+      t = t.replace(/فهلل/gu, 'فلله');
+
+      // 6. Standalone and compound font ligatures: ّللاَه / َّللاه / هللا
+      t = t.replace(/[\.\s]*ّللا[هَ]?/gu, ' الله');
+      t = t.replace(/ّلاله/gu, 'الله');
+      t = t.replace(/ّللاه/gu, 'الله');
+      t = t.replace(/َّللاه/gu, 'الله');
+      t = t.replace(/[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, ' الله');
+      t = t.replace(/هللا/gu, 'الله');
+
+      // 7. Inverted 'هلل' -> 'لله'
+      t = t.replace(/الحمد\s*(?:هلل|لله)\s*والص[لا]ة/gu, 'الحمد لله والصلاة');
+      t = t.replace(/الحمد\s*هلل/gu, 'الحمد لله');
+      t = t.replace(/هللوالص[لا]ة/gu, ' لله والصلاة');
+      t = t.replace(/الاستسلام\s*هلل/gu, 'الاستسلام لله');
+      t = t.replace(/االستسالم\s*هلل/gu, 'الاستسلام لله');
+      t = t.replace(/وجهه\s*هلل/gu, 'وجهه لله');
+      t = t.replace(/خالصة\s*هلل/gu, 'خالصة لله');
+      t = t.replace(/الحب\s*هلل/gu, 'الحب لله');
+      t = t.replace(/(?:^|[\s(\[«،.؛!؟:—\-])هلل(?=[\s)\]»،.؛!؟:—\-]|$)/gu, ' لله ');
+
+      // 8. Common Islamic compound formulas:
+      t = t.replace(/بسم\s*(?:هللا|الله)/gu, 'بسم الله');
+      t = t.replace(/رسول\s*الله/gu, 'رسول الله');
+      t = t.replace(/كتاب\s*الله/gu, 'كتاب الله');
+      t = t.replace(/دين\s*الله/gu, 'دين الله');
+      t = t.replace(/سبيل\s*الله/gu, 'سبيل الله');
+      t = t.replace(/بيت\s*الله/gu, 'بيت الله');
+      t = t.replace(/أمر\s*الله/gu, 'أمر الله');
+      t = t.replace(/نهى\s*الله/gu, 'نهى الله');
+      t = t.replace(/رحمة\s*الله/gu, 'رحمة الله');
+      t = t.replace(/قدرة\s*الله/gu, 'قدرة الله');
+      t = t.replace(/عظمة\s*الله/gu, 'عظمة الله');
+      t = t.replace(/إلا\s*الله/gu, 'إلا الله');
+      t = t.replace(/عز\s*وجل/gu, 'عز وجل');
+
+      t = t.replace(/\s{2,}/gu, ' ');
+      return t;
+    }
+
+        // Main Application Component
     // Dedicated Distraction-Free Student Projector Screen (For Zoom Window Sharing)
     function StudentProjectorScreen() {
       const [data, setData] = React.useState(() => {
@@ -4609,7 +4738,7 @@
       const safeIdx = Math.max(0, Math.min(slides.length - 1, slideIdx));
       const currentSlide = slides[safeIdx] || slides[0] || {};
       const currentSlideTitle = currentSlide.slideTitle || currentSlide.titleAr || currentSlide.phaseTitle || currentSlide.phaseNameAr || (`المحور ${safeIdx + 1}`);
-      const scriptureText = normalizeIslamicSacredTerms(currentSlide.scriptureEvidence || currentSlide.scripture);
+      const scriptureText = typeof normalizeIslamicSacredTerms === "function" ? normalizeIslamicSacredTerms(currentSlide.scriptureEvidence || currentSlide.scripture) : (currentSlide.scriptureEvidence || currentSlide.scripture || "");
       const bodyText = currentSlide.talkingPoints || currentSlide.bodyAr || currentSlide.teacherFocusAr;
       const practicalImpact = currentSlide.pedagogicalTip || currentSlide.practicalAction || 'التركيز على ربط المعنى بالسلوك العملي للدارس';
       const bullets = currentSlide.bulletPoints || (currentSlide.talkingPoints ? currentSlide.talkingPoints.split(' • ') : [bodyText]);
@@ -7300,134 +7429,7 @@
         return merged.join('\n');
       }
 
-      // Supreme Islamic Sacred Words & Majesty Name Sanitizer (Guarantees zero corruptions of Allah, PBUH, and Sacred Names)
-      function normalizeIslamicSacredTerms(text) {
-        if (!text || typeof text !== 'string') return '';
-        let t = text;
-
-        // 0. Double alef and omitted alef restoration in roots: الاستسلام, الاستعداد, الانحراف, الانشغال, إلخ
-        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)ست([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الاست' + p3);
-        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نت([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانت' + p3);
-        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نح([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانح' + p3);
-        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نش([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانش' + p3);
-        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)تب([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الاتب' + p3);
-        t = t.replace(/(^|[\s«\(])(و?ف?ب?ل?ك?)(?:اال|ال)نق([^\s،.؛!؟]+)/gu, (m, p1, p2, p3) => p1 + p2 + 'الانق' + p3);
-        t = t.replace(/(?:^|\s)اال(?=[ابتثجحخدذرزسشصضطظعغفقكلمنهوي])/gu, (m) => m.replace('اال', 'ال'));
-
-        // 1. Transposed Lam-Alif in core religious & common words
-        t = t.replace(/الاستسالم/gu, 'الاستسلام');
-        t = t.replace(/بالاستسالم/gu, 'بالاستسلام');
-        t = t.replace(/واالستسالم/gu, 'والاستسلام');
-        t = t.replace(/الصالة/gu, 'الصلاة');
-        t = t.replace(/والصالة/gu, 'والصلاة');
-        t = t.replace(/بالصالة/gu, 'بالصلاة');
-        t = t.replace(/فالصالة/gu, 'فالصلاة');
-        t = t.replace(/والسالم/gu, 'والسلام');
-        t = t.replace(/والسام/gu, 'والسلام');
-        t = t.replace(/السالم/gu, 'السلام');
-        t = t.replace(/بالسالم/gu, 'بالسلام');
-        t = t.replace(/للسالم/gu, 'للسلام');
-        t = t.replace(/والسامعلى/gu, 'والسلام على ');
-        t = t.replace(/والسالمعلى/gu, 'والسلام على ');
-        t = t.replace(/ابتالء/gu, 'ابتلاء');
-        t = t.replace(/وبتالء/gu, 'وابتلاء');
-        t = t.replace(/ثالث\s+(خصائص|مراتب|أصول|سنوات|نقاط|ركائز|مرات)/gu, (m, p1) => 'ثلاث ' + p1);
-
-        t = t.replace(/اإلسالم/gu, 'الإسلام');
-        t = t.replace(/الإسالم/gu, 'الإسلام');
-        t = t.replace(/باإلسالم/gu, 'بالإسلام');
-        t = t.replace(/إسالم/gu, 'إسلام');
-
-        t = t.replace(/أعالها/gu, 'أعلاها');
-        t = t.replace(/ومالئكته/gu, 'وملائكته');
-        t = t.replace(/مالئكة/gu, 'ملائكة');
-        t = t.replace(/المالئكة/gu, 'الملائكة');
-
-        t = t.replace(/(^|[\s«\(])إال(?=[\s»\)،.؛!؟\-]|$)/gu, '$1إلا');
-        t = t.replace(/(^|[\s«\(])أال(?=[\s»\)،.؛!؟\-]|$)/gu, '$1ألا');
-
-        // Restore accidentally split definite nouns and transposed formulas
-        t = t.replace(/(?:^|[\s«\(])ال\s+إله\s+إ[لا]ل?\s+الله/gu, ' لا إله إلا الله');
-        t = t.replace(/(?:^|[\s«\(])ال\s+إله/gu, ' لا إله');
-        t = t.replace(/(?:^|[\s«\(])لا\s+بس(?=[\s»\)،.؛!؟\-]|$)/gu, '');
-        t = t.replace(/(?:^|\s)ال\s+(حديث|قرآن|كتاب|سنة|نبي|صلاة|زكاة|صوم|حج|قبر|أرض|سماء|كون|حق|باطل)/gu, ' ال$1');
-        // Standalone 'ال' before words/verbs or at clause ends is transposed 'لا':
-        t = t.replace(/(^|[\s«\(])ال(?=[\s»\)])/gu, '$1لا');
-        t = t.replace(/(^|[\s«\(])ا\s+ل(?=[\s»\)])/gu, '$1لا');
-
-        // 2. PBUH reversed / decomposed font ligatures
-        t = t.replace(/ملسو\s*هيلع\s*(?:هللا|الله)\s*ىلص/gu, 'صلى الله عليه وسلم');
-        t = t.replace(/ص[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*[ىي][\s\u064B-\u065F\u0670]*ه?[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*ا[\s\u064B-\u065F\u0670]*ع[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*ي[\s\u064B-\u065F\u0670]*[هة][\s\u064B-\u065F\u0670]*و[\s\u064B-\u065F\u0670]*س[\s\u064B-\u065F\u0670]*ل[\s\u064B-\u065F\u0670]*م/gu, 'صلى الله عليه وسلم');
-        t = t.replace(/صلَّ?ى[\s\u064B-\u065F\u0670]*ُ?[\s\u064B-\u065F\u0670]*ه[\s\u064B-\u065F\u0670]*للا[\s\u064B-\u065F\u0670]*عليْ?ه[\s\u064B-\u065F\u0670]*وسلَّ?مَ?/gu, 'صلى الله عليه وسلم');
-        t = t.replace(/صلَّ?ى[\s\u064B-\u065F\u0670]*ُ?[\s\u064B-\u065F\u0670]*ه[\s\u064B-\u065F\u0670]*للا/gu, 'صلى الله');
-        t = t.replace(/صلى\s*ه\s*للا\s*علي[هة]\s*وسلم/gu, 'صلى الله عليه وسلم');
-        t = t.replace(/صلى\s*ه\s*للا/gu, 'صلى الله');
-        t = t.replace(/رحمه\s*ه\s*للا/gu, 'رحمه الله');
-
-        // 3. Inverted Baa + Allah: 'استَعيذوا ِ ّللَه با' or 'استعيذوا ّبالله' or 'باهلل'
-        t = t.replace(/استَ?عيذوا[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللَ?ه[\s\u064B-\u065F\u0670]*با/gu, 'استعيذوا بالله');
-        t = t.replace(/استَ?عيذوا[\s\u064B-\u065F\u0670]*ّ?بالله/gu, 'استعيذوا بالله');
-        t = t.replace(/[\u064B-\u065F\u0670]*ّللَ?ه[\s\u064B-\u065F\u0670]*با/gu, 'بالله');
-        t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:ب|با)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1بالله');
-        t = t.replace(/[\u064B-\u065F\u0670]*ب[\u064B-\u065F\u0670]*الله/gu, 'بالله');
-        t = t.replace(/باهلل/gu, 'بالله');
-
-        // 4. Specific Prophetic Formulas:
-        t = t.replace(/ربِّ?ي[\s\u064B-\u065F\u0670]*َّ?للا?ه[\s\u064B-\u065F\u0670]*ُ?/gu, 'ربي الله');
-        t = t.replace(/ربِّ?ي[\s\u064B-\u065F\u0670]*هللا/gu, 'ربي الله');
-        t = t.replace(/رسول[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'رسول الله');
-        t = t.replace(/رسول[\s\u064B-\u065F\u0670]*هللا/gu, 'رسول الله');
-        t = t.replace(/كتاب[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'كتاب الله');
-        t = t.replace(/كتاب[\s\u064B-\u065F\u0670]*هللا/gu, 'كتاب الله');
-        t = t.replace(/قول[\s\u064B-\u065F\u0670]*ِ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'قول الله');
-        t = t.replace(/قول[\s\u064B-\u065F\u0670]*هللا/gu, 'قول الله');
-        t = t.replace(/يُ?ثبِّ?ت[\s\u064B-\u065F\u0670]*ُ?[\s\u064B-\u065F\u0670]*ّللا?َ?ه/gu, 'يثبت الله');
-        t = t.replace(/يُ?ثبِّ?ت[\s\u064B-\u065F\u0670]*هللا/gu, 'يثبت الله');
-
-        // 5. Allah with other prefixes: Lam, Waw, Fa
-        t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:ل)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1لله');
-        t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:و)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1والله');
-        t = t.replace(/وهللا/gu, 'والله');
-        t = t.replace(/(^|[\s«\(])[\u064B-\u065F\u0670]*(?:ف)[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, '$1فلله');
-        t = t.replace(/فهلل/gu, 'فلله');
-
-        // 6. Standalone and compound font ligatures: ّللاَه / َّللاه / هللا
-        t = t.replace(/[\.\s]*ّللا[هَ]?/gu, ' الله');
-        t = t.replace(/ّلاله/gu, 'الله');
-        t = t.replace(/ّللاه/gu, 'الله');
-        t = t.replace(/َّللاه/gu, 'الله');
-        t = t.replace(/[\u064B-\u065F\u0670\s]*ل{2,}ا+[\u064B-\u065F\u0670\s]*ه/gu, ' الله');
-        t = t.replace(/هللا/gu, 'الله');
-
-        // 7. Inverted 'هلل' -> 'لله'
-        t = t.replace(/الحمد\s*(?:هلل|لله)\s*والص[لا]ة/gu, 'الحمد لله والصلاة');
-        t = t.replace(/الحمد\s*هلل/gu, 'الحمد لله');
-        t = t.replace(/هللوالص[لا]ة/gu, ' لله والصلاة');
-        t = t.replace(/الاستسلام\s*هلل/gu, 'الاستسلام لله');
-        t = t.replace(/االستسالم\s*هلل/gu, 'الاستسلام لله');
-        t = t.replace(/وجهه\s*هلل/gu, 'وجهه لله');
-        t = t.replace(/خالصة\s*هلل/gu, 'خالصة لله');
-        t = t.replace(/الحب\s*هلل/gu, 'الحب لله');
-        t = t.replace(/(?:^|[\s(\[«،.؛!؟:—\-])هلل(?=[\s)\]»،.؛!؟:—\-]|$)/gu, ' لله ');
-
-        // 8. Common Islamic compound formulas:
-        t = t.replace(/بسم\s*(?:هللا|الله)/gu, 'بسم الله');
-        t = t.replace(/رسول\s*الله/gu, 'رسول الله');
-        t = t.replace(/كتاب\s*الله/gu, 'كتاب الله');
-        t = t.replace(/دين\s*الله/gu, 'دين الله');
-        t = t.replace(/سبيل\s*الله/gu, 'سبيل الله');
-        t = t.replace(/بيت\s*الله/gu, 'بيت الله');
-        t = t.replace(/أمر\s*الله/gu, 'أمر الله');
-        t = t.replace(/نهى\s*الله/gu, 'نهى الله');
-        t = t.replace(/رحمة\s*الله/gu, 'رحمة الله');
-        t = t.replace(/قدرة\s*الله/gu, 'قدرة الله');
-        t = t.replace(/عظمة\s*الله/gu, 'عظمة الله');
-        t = t.replace(/إلا\s*الله/gu, 'إلا الله');
-        t = t.replace(/عز\s*وجل/gu, 'عز وجل');
-
-        t = t.replace(/\s{2,}/gu, ' ');
-        return t;
-      }
+      // normalizeIslamicSacredTerms is hoisted to top-level scope above StudentProjectorScreen
 
       function trimToCompleteSentence(text, maxLen = 240) {
         if (!text || text.length <= maxLen) return text;
@@ -8463,10 +8465,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v74.8 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.8 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v74.9 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v74.9 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v74.8' : 'v74.8'}</span>
+                  <span>{isRtl ? 'الإصدار v74.9' : 'v74.9'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
