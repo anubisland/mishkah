@@ -8,6 +8,21 @@
   <link rel="icon" type="image/jpeg" href="icons/mishkah-app-icon.jpg">
   <meta name="theme-color" content="#064E3B">
   <meta name="description" content="منصة مشكاة — نظام التشغيل الشامل للداعية والمعلم الشرعي: القرآن الكريم، أحكام التجويد، والعلوم الشرعية عبر زوم وحلقات العلم.">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <script>
+    (function() {
+      const CURRENT_VER = '76.6';
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('v') !== CURRENT_VER && !window.location.search.includes('mode=student-display')) {
+        const u = new URL(window.location.href);
+        u.searchParams.set('v', CURRENT_VER);
+        u.searchParams.set('t', Date.now());
+        window.location.replace(u.toString());
+      }
+    })();
+  </script>
 
   <!-- Google Fonts: Cairo, Amiri, Amiri Quran, Tajawal, Almarai, Noto Naskh Arabic -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -6006,7 +6021,7 @@
       const [islamicData, setIslamicData] = useState(() => {
         try {
           const s = localStorage.getItem('mishkah_active_islamic_data');
-          return s ? JSON.parse(s) : null;
+          return s ? sanitizeIslamicDataObject(JSON.parse(s)) : null;
         } catch (e) { return null; }
       });
       const [isCurrentLectureSaved, setIsCurrentLectureSaved] = useState(false);
@@ -6022,7 +6037,13 @@
       const [savedIslamicLectures, setSavedIslamicLectures] = useState(() => {
         try {
           const s = localStorage.getItem('mishkah_saved_lectures');
-          return s ? JSON.parse(s) : [];
+          if (!s) return [];
+          const list = JSON.parse(s);
+          if (!Array.isArray(list)) return [];
+          return list.map(item => ({
+            ...item,
+            data: sanitizeIslamicDataObject(item.data)
+          }));
         } catch (e) { return []; }
       });
       const [rawLectureText, setRawLectureText] = useState('');
@@ -6245,7 +6266,7 @@
         }
 
         // Clean out trailing explanatory clauses starting with common continuation phrases
-        t = t.split(/(?:\s+(?:يُ?ثبت\s+الوحي|يُ?ثبت\s+أن|بحيث|والحاصل|وفي هذا المحور|وهو\s+دين|وهذا\s+القسم)|\s*\(\s*سواء)/)[0].trim();
+        t = t.split(/(?:\s+(?:لماذا|كيف|يُ?ثبت\s+الوحي|يُ?ثبت\s+أن|بحيث|والحاصل|وفي هذا المحور|وهو\s+دين|وهذا\s+القسم)|\s*\(\s*سواء)/)[0].trim();
 
         // Clean publishing metadata if any leaked in
         t = t.replace(/(?:تأليف\s*[:：]|للمؤلف\s*[:：]|دار\s+(?:النشر|الوعي|الفكر)|تحقيق\s*[:：]|إعداد\s*[:：]|طبعة\s*[:：]|صفحة\s*\d+|ردمك|ISBN)[\s\S]*$/, '').trim();
@@ -7120,7 +7141,8 @@
       }
 
       function handleLoadSavedLecture(lec) {
-        setIslamicData(lec.data);
+        const cleanData = sanitizeIslamicDataObject(lec.data);
+        setIslamicData(cleanData);
         setLessonTopic(lec.data.metadata.topic);
         setSubjectCategory(lec.data.metadata.category);
         setIslamicSubView('workbench');
@@ -7691,6 +7713,28 @@
         return sub + '...';
       }
 
+      
+      function sanitizeIslamicDataObject(obj) {
+        if (!obj) return obj;
+        if (typeof obj === 'string') {
+          return sanitizeArabicExtractedText(obj);
+        }
+        if (Array.isArray(obj)) {
+          return obj.map(item => sanitizeIslamicDataObject(item));
+        }
+        if (typeof obj === 'object') {
+          const res = {};
+          for (const key of Object.keys(obj)) {
+            if (key === 'id' || key === 'slideNumber' || key === 'phaseNumber' || key === 'durationMinutes' || key === 'isCorrect' || key === 'order' || key === 'index') {
+              res[key] = obj[key];
+            } else {
+              res[key] = sanitizeIslamicDataObject(obj[key]);
+            }
+          }
+          return res;
+        }
+        return obj;
+      }
       function sanitizeArabicExtractedText(rawText) {
         if (!rawText) return '';
         // 0. Separate inline numbered sub-headings so they never get swallowed into cards:
@@ -8765,19 +8809,24 @@
                 <button
                   type="button"
                   onClick={() => {
-                    if ('caches' in window) {
-                      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
-                        window.location.reload(true);
-                      });
-                    } else {
-                      window.location.reload(true);
-                    }
+                    try {
+                      if ('caches' in window) {
+                        caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+                      }
+                      if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.getRegistrations().then(regs => {
+                          for (let r of regs) r.unregister();
+                        });
+                      }
+                    } catch (e) {}
+                    const cleanPath = window.location.origin + window.location.pathname;
+                    window.location.replace(cleanPath + '?v=76.6&t=' + Date.now());
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v76.5 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.5 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v76.6 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.6 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v76.5' : 'v76.5'}</span>
+                  <span>{isRtl ? 'الإصدار v76.6' : 'v76.6'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -13620,6 +13669,26 @@
                     {(islamicViewMode === 'all' || activeIslamicStage === 2) && (
                     <div id="stage-islamic-2" className="space-y-6">
                       
+                      {/* Quick Active Lecture Sanitize & Force Clean Button */}
+                      <div className="flex justify-end gap-2 no-print">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (islamicData) {
+                              const cleaned = sanitizeIslamicDataObject(islamicData);
+                              setIslamicData(cleaned);
+                              try { localStorage.setItem('mishkah_active_islamic_data', JSON.stringify(cleaned)); } catch(e) {}
+                              showToast(isRtl ? 'تمت إعادة تدقيق وتطهير كافة نصوص المحاضرة الحالية بنجاح 🌿' : 'Lecture re-sanitized');
+                            }
+                          }}
+                          className="bg-emerald-950/80 hover:bg-emerald-900 text-gold-300 border border-gold-400/40 text-xs px-3.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition shadow-xs"
+                          title={isRtl ? 'تطهير نصوص المحاضرة الحالية فوراً من أي أخطاء طباعية قديمة' : 'Re-sanitize current lecture'}
+                        >
+                          <span>🧹</span>
+                          <span>{isRtl ? 'إعادة تدقيق وتطهير نصوص الدرس فوراً' : 'Re-sanitize Texts'}</span>
+                        </button>
+                      </div>
+
                       {/* 2.1 Time-Boxed Lesson Blueprint */}
                       <div className="card-islamic-pearl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border-2 border-emerald-800/15 shadow-md">
                         <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 sm:mb-6 border-b border-slate-100">
@@ -13673,7 +13742,7 @@
                                   </span>
                                 </div>
                                 <h4 className="font-bold text-emerald-950 text-sm mb-2 font-cairo">
-                                  {isRtl ? (sanitizeArabicExtractedText(phase.phaseNameAr) || phase.phaseNameAr).replace(/(?:ة\s+الَّ?\s*صلا\s+اوُماَقَأ|اوُماَقَأ\s+صلا\s+الَّ?\s*ة|اوُماَقَأ\s+الصَّ?\s*لا\s*ةَ?|أَقَامُوا\s+الصَّ?\s*لا\s*ةَ?|ةَ?\s*ال\s*َّصلا\s*اوُماَقَأ)/gu, 'أَقَامُوا الصَّلَاةَ') : phase.phaseNameEn}
+                                  {isRtl ? (sanitizeArabicExtractedText(phase.phaseNameAr) || phase.phaseNameAr).replace(/(?:(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?)\s*(?:أَقَامُوا|اوُماَقَأ|إقامة|اقامة|اقامه)|(?:أَقَامُوا|اوُماَقَأ)\s+(?:ةَ?\s*الَّ?\s*صلا|صلا\s*الَّ?\s*ةَ?|الصَّ?\s*لا\s*ةَ?|الصلاة)|(?:الصَّ?\s*لا\s*ةَ?|الصلاة)\s*(?:أَقَامُوا|اوُماَقَأ))/gu, 'أَقَامُوا الصَّلَاةَ') : phase.phaseNameEn}
                                 </h4>
                                 <p className="text-xs text-slate-600 font-amiri leading-relaxed mb-3">
                                   {isRtl ? sanitizeArabicExtractedText(phase.teacherFocusAr || phase.teacherGuidanceAr) : (phase.teacherFocusEn || phase.teacherGuidanceEn)}
