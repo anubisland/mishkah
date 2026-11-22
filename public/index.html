@@ -8137,8 +8137,8 @@
           const allExtractedLines = cleanExtracted.split('\n').map(l => l.trim()).filter(Boolean);
           let primaryTitleCandidate = allExtractedLines.slice(0, 15).find(l => {
             if (l.length < 8 || l.length > 85) return false;
-            if (/^(?:مقدمة|تمهيد|مدخل|كبسولة|فهرس|محتويات|أعوذ|اعوذ|بسم|الحمد|صلى|اللهم|السلام|قال|روى|س ما|س هل)/.test(l)) return false;
-            if (l.includes('بسم الله') || l.includes('أعوذ بالله') || l.includes('الحمد لله') || l.includes('رسول الله') || l.includes('اللهم') || l.includes('علمنا') || l.includes('وارزقنا') || l.includes('فقهية')) return false;
+            if (/^(?:مقدمة|تمهيد|مدخل|كبسولة|فهرس|محتويات|أعوذ|اعوذ|بسم|الحمد|صلى|اللهم|السلام|قال|روى|س ما|س هل|الجامع|أخرجه|أخرج|صحيح|رواه|تخريج)/.test(l)) return false;
+            if (l.includes('بسم الله') || l.includes('أعوذ بالله') || l.includes('الحمد لله') || l.includes('رسول الله') || l.includes('اللهم') || l.includes('علمنا') || l.includes('وارزقنا') || l.includes('فقهية') || l.includes('البخاري') || l.includes('مسلم') || l.includes('الجامع |')) return false;
             return true;
           });
           const cleanName = fname.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
