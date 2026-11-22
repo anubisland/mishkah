@@ -8593,10 +8593,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v75.5 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v75.5 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v75.6 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v75.6 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v75.5' : 'v75.5'}</span>
+                  <span>{isRtl ? 'الإصدار v75.6' : 'v75.6'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -13859,7 +13859,7 @@
 
                                     {scriptureText && (
                                       <div className="font-quran text-base sm:text-lg text-amber-100 leading-relaxed bg-emerald-900/70 p-4 rounded-2xl border-2 border-gold-400/40 shadow-inner">
-                                        « {scriptureText} »
+                                        {formatScriptureDisplay(scriptureText)}
                                       </div>
                                     )}
 
@@ -14158,7 +14158,7 @@
                                                 {sec.scriptureEvidence && (
                                                   <div className="bg-emerald-900/10 p-2 rounded-xl border border-gold-400/40 text-center">
                                                     <p className="font-quran text-xs sm:text-sm text-emerald-950 leading-relaxed">
-                                                      « {normalizeIslamicSacredTerms(sec.scriptureEvidence)} »
+                                                      {formatScriptureDisplay(sec.scriptureEvidence)}
                                                     </p>
                                                   </div>
                                                 )}
@@ -16738,7 +16738,7 @@
                       {scriptureText && (
                         <div className="my-1.5 p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-emerald-900/70 border border-gold-400/50 shadow-inner text-center shrink-0">
                           <p className="font-quran text-base sm:text-xl lg:text-2xl text-amber-100 leading-relaxed drop-shadow-sm">
-                            « {scriptureText} »
+                            {formatScriptureDisplay(scriptureText)}
                           </p>
                         </div>
                       )}
