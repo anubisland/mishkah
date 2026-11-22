@@ -4612,59 +4612,126 @@
       return t;
     }
 
+    // Global helper: Guarantees exactly single Islamic guillemets « ... » without duplication
+    function formatScriptureDisplay(text) {
+      if (!text || typeof text !== 'string') return '';
+      const clean = text.trim();
+      if (!clean) return '';
+      if (clean.startsWith('«') && clean.endsWith('»')) return clean;
+      if (clean.startsWith('«')) return clean;
+      return '« ' + clean.replace(/^[«s]+|[»s]+$/g, '') + ' »';
+    }
+
+    // Canonical Quran Registry with distinctive phrase matching for infallible slide presentation
+    const CANONICAL_SLIDE_QURAN = [
+      {
+        citation: 'الأنعام: 79',
+        phrases: ['وجهت وجهي', 'فطر السماوات', 'حنيفا وما انا'],
+        uthmani: 'إِنِّي وَجَّهْتُ وَجْهِيَ لِلَّذِي فَطَرَ السَّمَاوَاتِ وَالْأَرْضَ حَنِيفًا وَمَا أَنَا مِنَ الْمُشْرِكِينَ'
+      },
+      {
+        citation: 'الأنبياء: 51',
+        phrases: ['اتينا ابراهيم', 'ابراهيم رشده', 'وكنا به عالمين'],
+        uthmani: 'وَلَقَدْ آتَيْنَا إِبْرَاهِيمَ رُشْدَهُ مِن قَبْلُ وَكُنَّا بِهِ عَالِمِينَ'
+      },
+      {
+        citation: 'البقرة: 131',
+        phrases: ['قال له ربه اسلم', 'اسلم قال اسلمت', 'اسلمت لرب'],
+        uthmani: 'إِذْ قَالَ لَهُ رَبُّهُ أَسْلِمْ قَالَ أَسْلَمْتُ لِرَبِّ الْعَالَمِينَ'
+      },
+      {
+        citation: 'النمل: 14',
+        phrases: ['وجحدوا بها', 'استيقنتها انفسهم', 'عاقبه المفسدين'],
+        uthmani: 'وَجَحَدُوا بِهَا وَاسْتَيْقَنَتْهَا أَنْفُسُهُمْ ظُلْمًا وَعُلُوًّا فَانْظُرْ كَيْفَ كَانَ عَاقِبَةُ الْمُفْسِدِينَ'
+      },
+      {
+        citation: 'الطور: 35',
+        phrases: ['ام خلقوا من غير شيء', 'خلقوا من غير', 'ام هم الخالقون'],
+        uthmani: 'أَمْ خُلِقُوا مِنْ غَيْرِ شَيْءٍ أَمْ هُمُ الْخَالِقُونَ'
+      },
+      {
+        citation: 'الأنبياء: 22',
+        phrases: ['لو كان فيهما', 'الهه الا الله', 'لفسدتا'],
+        uthmani: 'لَوْ كَانَ فِيهِمَا آلِهَةٌ إِلَّا اللَّهُ لَفَسَدَتَا'
+      },
+      {
+        citation: 'الذاريات: 56',
+        phrases: ['وما خلقت الجن', 'الجن والانس', 'الا ليعبدون', 'ليعبدون'],
+        uthmani: 'وَمَا خَلَقْتُ الْجِنَّ وَالْإِنسَ إِلَّا لِيَعْبُدُونِ'
+      }
+    ];
+
     // Distill a slide scripture into a clean, golden, uncluttered witness (1-3 lines max, perfect for presentation slides)
     function distillSlideScripture(rawScripture) {
       if (!rawScripture || typeof rawScripture !== 'string') return '';
       let s = normalizeIslamicSacredTerms(rawScripture).trim();
 
-      // Reject scan garbage and tiny fragments
-      if (s.length < 15) return '';
-      if (/^«?\s*﴿?\s*(?:\.|\.لا|لا|\.?\s*إلا|الَِّ\s*\.|لا\s+بس|نعم|بلى|فقط)\s*﴾?\s*»?$/.test(s)) return '';
+      // Normalize for phrase matching
+      const n = s
+        .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '')
+        .replace(/[إأآٱ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .replace(/\s+/g, ' ')
+        .trim();
 
-      // 1. Quranic verse ﴿...﴾
-      const ayahMatch = s.match(/﴿([^﴾]{15,220})﴾/);
-      if (ayahMatch) {
-        let cleanAyah = ayahMatch[1].trim();
-        cleanAyah = cleanAyah.replace(/^[﴿\s]+|[﴾\s]+$/g, '').trim();
-        if (cleanAyah.split(/\s+/).length >= 3 && !cleanAyah.startsWith('.')) {
-          const citeMatch = s.match(/\[([^\]]{3,30})\]/) || s.match(/\((سورة\s+[^\)]{3,25})\)/);
-          const cite = citeMatch ? (' [' + citeMatch[1].replace(/[:\s]+$/, '') + ']') : '';
-          return '﴿' + cleanAyah + '﴾' + cite;
+      // Reject scan noise & tiny broken fragments
+      if (s.length < 15 || /^(?:لا|إلا|لا بس|نعم|بلى|فقط|نود نم|الَِّ|\.|\.لا)$/.test(n)) return '';
+
+      // 1. Check against Canonical Quran Registry with DISTINCTIVE PHRASES FIRST!
+      for (const cq of CANONICAL_SLIDE_QURAN) {
+        if (cq.phrases.some(p => n.includes(p.replace(/[إأآٱ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')))) {
+          return formatScriptureDisplay(`${cq.uthmani} [${cq.citation}]`);
         }
       }
 
       // 2. Hadith of Al-Baraa ibn Azib in the grave
-      if (s.includes('عذاب القبر') || s.includes('استعيذوا بالله') || s.includes('جنازة رجل من الأنصار') || s.includes('البراء بن عازب')) {
-        return '« اسْتَعِيذُوا بِاللَّهِ مِنْ عَذَابِ الْقَبْرِ ... يُثَبِّتُ اللَّهُ الَّذِينَ آمَنُوا بِالْقَوْلِ الثَّابِتِ فِي الْحَيَاةِ الدُّنْيَا وَفِي الْآخِرَةِ » (صحيح أبي داود)';
+      if (s.includes('عذاب القبر') || s.includes('استعيذوا بالله') || s.includes('جنازة رجل من الأنصار') || s.includes('البراء بن عازب') || s.includes('فيجلسانه فيقولان')) {
+        return formatScriptureDisplay('اسْتَعِيذُوا بِاللَّهِ مِنْ عَذَابِ الْقَبْرِ ... يُثَبِّتُ اللَّهُ الَّذِينَ آمَنُوا بِالْقَوْلِ الثَّابِتِ فِي الْحَيَاةِ الدُّنْيَا وَفِي الْآخِرَةِ (صحيح أبي داود)');
       }
 
       // 3. Ya Muqallib al-Quloob
       if (s.includes('مقلب القلوب')) {
-        return '« يَا مُقَلِّبَ الْقُلُوبِ ثَبِّتْ قَلْبِي عَلَى دِينِكَ » (حديث شريف)';
+        return formatScriptureDisplay('يَا مُقَلِّبَ الْقُلُوبِ ثَبِّتْ قَلْبِي عَلَى دِينِكَ (حديث شريف)');
       }
 
       // 4. Turiktu Feekum
       if (s.includes('تركت فيكم') || s.includes('كتاب الله وسنة')) {
-        return '« تَرَكْتُ فِيكُمْ أَمْرَيْنِ لَنْ تَضِلُّوا مَا تَمَسَّكْتُمْ بِهِمَا: كِتَابَ اللَّهِ وَسُنَّةَ نَبِيِّهِ »';
+        return formatScriptureDisplay('تَرَكْتُ فِيكُمْ أَمْرَيْنِ لَنْ تَضِلُّوا مَا تَمَسَّكْتُمْ بِهِمَا: كِتَابَ اللَّهِ وَسُنَّةَ نَبِيِّهِ');
       }
 
-      // 5. Authentic Quote between «...» or "..."
-      const quoteMatch = s.match(/«([^»]{15,160})»/) || s.match(/"([^"]{15,160})"/);
+      // 5. Quranic verse ﴿...﴾ - join internal newlines, ensure at least 3 words and not scan noise
+      const ayahMatch = s.match(/﴿([^﴾]+)﴾/);
+      if (ayahMatch) {
+        let cleanAyah = ayahMatch[1].replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+        cleanAyah = cleanAyah.replace(/^[﴿\s]+|[﴾\s]+$/g, '').trim();
+        const words = cleanAyah.split(/\s+/).filter(w => w.length > 1);
+        if (words.length >= 3 && !/^(?:لا|إلا|لا بس|نعم|بلى|فقط)$/.test(cleanAyah)) {
+          const citeMatch = s.match(/\[([^\]]{3,30})\]/) || s.match(/\((سورة\s+[^\)]{3,25})\)/);
+          const cite = citeMatch ? (' [' + citeMatch[1].replace(/[:\s]+$/, '') + ']') : '';
+          return formatScriptureDisplay(`﴿${cleanAyah}﴾${cite}`);
+        }
+      }
+
+      // 6. Authentic Quote between «...» or "..."
+      const quoteMatch = s.match(/«([^»]{15,220})»/) || s.match(/"([^"]{15,220})"/);
       if (quoteMatch) {
-        return '« ' + quoteMatch[1].trim() + ' »';
+        let q = quoteMatch[1].replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+        q = q.replace(/^(?:قال رسول الله|قال النبي|روى البخاري|عن \w+)[\s:،-]+/, '').trim();
+        return formatScriptureDisplay(q);
       }
 
-      // 6. Long scripture distillation (max 140 chars)
+      // 7. General length distillation (max 140 chars)
       if (s.length > 150) {
         const firstSent = s.split(/[.؛!؟\n]/)[0].trim();
         if (firstSent.length >= 25 && firstSent.length <= 140) {
-          return firstSent.startsWith('«') ? (firstSent + (firstSent.endsWith('»') ? '' : ' »')) : ('« ' + firstSent + ' »');
+          return formatScriptureDisplay(firstSent);
         }
         const sp = s.substring(0, 135).lastIndexOf(' ');
-        return '« ' + s.substring(0, sp > 40 ? sp : 130).trim() + '... »';
+        return formatScriptureDisplay(s.substring(0, sp > 40 ? sp : 130).trim() + '...');
       }
 
-      return s;
+      return formatScriptureDisplay(s);
     }
 
     // Dedicated Distraction-Free Student Projector Screen (For Zoom Window Sharing)
@@ -4718,7 +4785,7 @@
       const safeIdx = Math.max(0, Math.min(slides.length - 1, slideIdx));
       const currentSlide = slides[safeIdx] || slides[0] || {};
       const currentSlideTitle = currentSlide.slideTitle || currentSlide.titleAr || currentSlide.phaseTitle || currentSlide.phaseNameAr || (`المحور ${safeIdx + 1}`);
-      const scriptureText = typeof normalizeIslamicSacredTerms === "function" ? normalizeIslamicSacredTerms(currentSlide.scriptureEvidence || currentSlide.scripture) : (currentSlide.scriptureEvidence || currentSlide.scripture || "");
+      const scriptureText = typeof distillSlideScripture === "function" ? distillSlideScripture(currentSlide.scriptureEvidence || currentSlide.scripture) : normalizeIslamicSacredTerms(currentSlide.scriptureEvidence || currentSlide.scripture);
       const bodyText = currentSlide.talkingPoints || currentSlide.bodyAr || currentSlide.teacherFocusAr;
       const practicalImpact = currentSlide.pedagogicalTip || currentSlide.practicalAction || 'التركيز على ربط المعنى بالسلوك العملي للدارس';
       const bullets = currentSlide.bulletPoints || (currentSlide.talkingPoints ? currentSlide.talkingPoints.split(' • ') : [bodyText]);
@@ -4770,7 +4837,7 @@
             {/* Golden Scripture Frame */}
             {scriptureText && (
               <div className="font-quran text-base sm:text-lg lg:text-xl text-amber-100 leading-relaxed bg-emerald-900/80 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gold-400/50 shadow-inner text-center">
-                {scriptureText.startsWith('«') ? scriptureText : `« ${scriptureText} »`}
+                {formatScriptureDisplay(scriptureText)}
               </div>
             )}
 
@@ -6231,6 +6298,42 @@
         }
 
         // 2. Dynamic Content Extraction Engine for Any Custom Lecture / Second Test Lecture
+        const polishSlideBullet = (b) => {
+          if (!b) return '';
+          let s = b.replace(/^[#*\-•\s\d\.\)\:،=]+/, '').trim();
+          s = s.replace(/\s{2,}/g, ' ');
+
+          // Invert common OCR reversal artifacts
+          if (s.startsWith('ناسنإ')) s = s.replace(/^ناسنإ/, 'إنسان');
+
+          // If bullet has a main concept before parenthetical question/comment, extract the crisp concept:
+          const parenIdx = s.indexOf('(') !== -1 ? s.indexOf('(') : s.indexOf('（');
+          if (parenIdx > 18) {
+            const mainConcept = s.substring(0, parenIdx).trim().replace(/[:：,،؛\s]+$/, '');
+            if (mainConcept.length >= 18 && !/(?:من|إلى|عن|على|في|مع|بين|أن|إن|التي|الذي)$/.test(mainConcept)) {
+              return mainConcept;
+            }
+          }
+
+          // Strip dangling prepositions or truncated endings
+          s = s.replace(/\s+(?:بوصفه|بحيث|من حيث|أل ن ها|ألنه|أل نها)\s*[\u064B-\u0652]?$/, '').trim();
+          s = s.replace(/\s+(?:من|إلى|عن|على|في|مع|بين|أن|إن|بأن|حيث|كما|إذ|دون|و|أو|التي|الذي|الذين|ما|لا|كل|عند|قبل|بعد|نحو|ضد|مثل|غير|أثر|اول)\s*$/, '').trim();
+          s = s.replace(/[:：,،؛\s]+$/, '').trim();
+
+          // If still too long (> 100), find the last natural sentence or clause boundary
+          if (s.length > 105) {
+            const commaPos = s.substring(0, 100).lastIndexOf('،');
+            const andPos = s.substring(0, 100).lastIndexOf(' و');
+            const cutPos = commaPos > 40 ? commaPos : (andPos > 45 ? andPos : s.substring(0, 95).lastIndexOf(' '));
+            if (cutPos > 35) {
+              s = s.substring(0, cutPos).trim();
+              s = s.replace(/\s+(?:من|إلى|عن|على|في|مع|بين|أن|إن|بأن|حيث|كما|إذ|دون|و|أو|التي|الذي|الذين|ما|لا|كل|عند|قبل|بعد|نحو|ضد|مثل|غير|أثر|اول)\s*$/, '').trim();
+              s = s.replace(/[:：,،؛\s]+$/, '').trim();
+            }
+          }
+          return s;
+        };
+
         // Split clean text on sentence terminators: period, exclamation, question mark, or semicolon
         const rawClauses = cleanText
           .split(/(?<=[.؛!؟])\s+|\s+(?:بل|حيث إن|إذ إن|وعليه فإن|والواجب أن|ويقرر النص أن)\s+/)
@@ -6241,27 +6344,10 @@
           let c = s.replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
           c = detectAndInvertReversedArabic(c);
           c = normalizeIslamicSacredTerms(c);
-          // Filter out questions and headers
           if (c.includes('؟') || c.includes('?') || /^\(?\s*(?:س |هل |ماذا |كيف |لماذا )/i.test(c)) continue;
           if (/^(?:أولاً|ثانياً|ثالثاً|رابعاً|المحور|المبحث|الأصل|القاعدة)/.test(c)) continue;
 
-          // Trim excess clauses to 40-90 characters
-          if (c.length > 95) {
-            const sp = c.substring(0, 90).lastIndexOf(' ');
-            c = (sp > 35 ? c.substring(0, sp) : c.substring(0, 88)).trim();
-          }
-
-          // Strip dangling prepositions or trailing broken words
-          c = c.replace(/\s+(?:من|إلى|عن|على|في|مع|بين|أن|إن|بأن|حيث|كما|إذ|دون|و|أو|التي|الذي|ما|لا|كل|عند|قبل|بعد|نحو|ضد|مثل|غير|أثر|اول)$/, '').trim();
-
-          // Balance unclosed parentheses and quotes
-          const op = (c.match(/[\(（]/g) || []).length;
-          const cp = (c.match(/[\)）]/g) || []).length;
-          if (op > cp) c += ')';
-
-          const oq = (c.match(/[«"]/g) || []).length;
-          const cq = (c.match(/[»"]/g) || []).length;
-          if (oq > cq) c += '»';
+          c = polishSlideBullet(c);
 
           if (c.length >= 20 && !bullets.includes(c)) {
             bullets.push(c);
@@ -7083,7 +7169,7 @@
                 x: 0.8, y: currentY, w: 8.4, h: 0.65,
                 fill: { color: '041E15' }, line: { color: 'B45309', width: 1 }
               });
-              slide.addText(`« ${scriptureText} »`, {
+              slide.addText(formatScriptureDisplay(scriptureText), {
                 x: 0.9, y: currentY + 0.05, w: 8.2, h: 0.55,
                 fontSize: 11, fontFace: 'Arial', color: 'FEF3C7', align: 'center', italic: true, rtlMode: true
               });
@@ -8507,10 +8593,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v75.4 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v75.4 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v75.5 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v75.5 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v75.4' : 'v75.4'}</span>
+                  <span>{isRtl ? 'الإصدار v75.5' : 'v75.5'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -13549,7 +13635,7 @@
                                 </span>
                               </div>
                               <p className="font-amiri text-sm sm:text-base text-emerald-950 font-medium leading-relaxed my-2">
-                                «{hd.text || hd.arabicText}»
+                                {formatScriptureDisplay(hd.text || hd.arabicText)}
                               </p>
                               <div className="text-xs text-slate-600 font-amiri pt-2 border-t border-slate-100 flex items-center justify-between">
                                 <span><strong>{isRtl ? 'التخريج والحكم:' : 'Grade:'}</strong> {hd.ruling || hd.grading || 'صحيح معتمد'}</span>
@@ -13707,7 +13793,7 @@
                         const safeIdx = Math.max(0, Math.min(slidesList.length - 1, stage3ActiveSlide));
                         const currentSlide = slidesList[safeIdx] || slidesList[0] || {};
                         const currentSlideTitle = currentSlide.slideTitle || currentSlide.titleAr || currentSlide.phaseTitle || currentSlide.phaseNameAr || (`المحور ${safeIdx + 1}`);
-                        const scriptureText = normalizeIslamicSacredTerms(currentSlide.scriptureEvidence || currentSlide.scripture);
+                        const scriptureText = typeof distillSlideScripture === "function" ? distillSlideScripture(currentSlide.scriptureEvidence || currentSlide.scripture) : normalizeIslamicSacredTerms(currentSlide.scriptureEvidence || currentSlide.scripture);
                         const bodyText = currentSlide.talkingPoints || currentSlide.bodyAr || currentSlide.teacherFocusAr;
                         const pedagogicalTip = currentSlide.pedagogicalTip || currentSlide.practicalAction || 'التركيز على ربط المعنى بالسلوك العملي للدارس';
                         const teleprompterText = currentSlide.fullSectionText || currentSlide.lectureNotes || currentSlide.bodyAr || currentSlide.teacherGuidanceAr || bodyText;
@@ -16621,7 +16707,7 @@
                   : (islamicData.blueprint || []);
                 const currentSlide = slidesList[activeSlideIndex] || slidesList[0] || {};
                 const slideTitleText = currentSlide.slideTitle || currentSlide.phaseTitle || currentSlide.phaseNameAr || (`المحور ${activeSlideIndex + 1}`);
-                const scriptureText = normalizeIslamicSacredTerms(currentSlide.scriptureEvidence || currentSlide.scripture);
+                const scriptureText = typeof distillSlideScripture === "function" ? distillSlideScripture(currentSlide.scriptureEvidence || currentSlide.scripture) : normalizeIslamicSacredTerms(currentSlide.scriptureEvidence || currentSlide.scripture);
                 const bodyText = currentSlide.bodyAr || currentSlide.talkingPoints || currentSlide.teacherFocusAr || currentSlide.teacherGuidanceAr;
                 const impactText = currentSlide.pedagogicalTip || currentSlide.practicalAction || currentSlide.keyTakeawayAr || currentSlide.practicalImpact;
 
