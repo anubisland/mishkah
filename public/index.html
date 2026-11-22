@@ -7637,6 +7637,22 @@
         return merged.join('\n');
       }
 
+      function trimToCompleteSentence(text, maxLen = 240) {
+        if (!text || text.length <= maxLen) return text;
+        const sub = text.substring(0, maxLen);
+        const lastPunct = Math.max(sub.lastIndexOf('.'), sub.lastIndexOf('!'), sub.lastIndexOf('؟'), sub.lastIndexOf('؛'), sub.lastIndexOf(':\n'));
+        if (lastPunct > 80) {
+          return sub.substring(0, lastPunct + 1).trim();
+        }
+        const lastSpace = sub.lastIndexOf(' ');
+        if (lastSpace > 60) {
+          let cleanSub = sub.substring(0, lastSpace).trim();
+          cleanSub = cleanSub.replace(/\s+(?:ال|كل|على|من|في|أن|إن|أو|ثم|مع|إلى|ثالث|عن|بين|وهو|وهي|التي|الذي|هذا|هذه)$/u, '');
+          return cleanSub + '...';
+        }
+        return sub + '...';
+      }
+
       function sanitizeArabicExtractedText(rawText) {
         if (!rawText) return '';
         // 0. Separate inline numbered sub-headings so they never get swallowed into cards:
@@ -8640,10 +8656,10 @@
                     }
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v75.7 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v75.7 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v75.8 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v75.8 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v75.7' : 'v75.7'}</span>
+                  <span>{isRtl ? 'الإصدار v75.8' : 'v75.8'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
