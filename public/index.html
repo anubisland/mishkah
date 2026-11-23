@@ -13,7 +13,7 @@
   <meta http-equiv="Expires" content="0" />
   <script>
     (function() {
-      const CURRENT_VER = '76.8';
+      const CURRENT_VER = '76.9';
       const p = new URLSearchParams(window.location.search);
       if (p.get('v') !== CURRENT_VER && !window.location.search.includes('mode=student-display')) {
         const u = new URL(window.location.href);
@@ -6465,7 +6465,7 @@
           bullets.push('خلاصة المسألة وثمرتها الإيمانية والسلوكية في واقع الحياة');
         }
 
-        return bullets.slice(0, 3);
+        return bullets.slice(0, 3).map(b => sanitizeArabicExtractedText(b));
       }
 
       // Synthesize a substantive, complete, grammatically sound pedagogical statement (never a cut-off fragment!)
@@ -6954,9 +6954,9 @@
             phaseTitle: `المحور ${secNum}`,
             slideTitle: cleanSecTitle,
             scriptureEvidence: distillSlideScripture(secScripture, cleanSecTitle),
-            bulletPoints: secBullets,
-            talkingPoints: secTalkingPoints,
-            fullSectionText: normalizeIslamicSacredTerms(detectAndInvertReversedArabic(sec.lines.join('\n\n') || secText)),
+            bulletPoints: secBullets.map(b => sanitizeArabicExtractedText(b)),
+            talkingPoints: sanitizeArabicExtractedText(secTalkingPoints),
+            fullSectionText: sanitizeArabicExtractedText(sec.lines.join('\n\n') || secText),
             pedagogicalTip: practicalImp,
             discussionPrompts: [
               `في ضوء مدارسة (${cleanSecTitle})؛ كيف نترجم هذا الأصل الشرعي إلى أثر سلوكي في واقعنا؟`,
@@ -7567,7 +7567,7 @@
           if (!clean) return false;
           if (/^[ةـة؟]/.test(clean)) return true;
           if (/^[^إ]*إ$/.test(clean) && clean.length <= 4) return true;
-          if (/(?:لا|لأا)$/.test(clean) && clean.length >= 4 && !/^(?:كلا|ألا|إلا|هلا|علا|فلا|ولا|بلا)$/.test(clean)) return true;
+          if (/(?:لا|لأا)$/.test(clean) && clean.length >= 4 && !/^(?:كلا|ألا|إلا|هلا|علا|فلا|ولا|بلا|هللا|وهللا|الله|والله)$/.test(clean)) return true;
           if (REVERSE_STEMS.has(clean)) return true;
           return false;
         };
@@ -7575,9 +7575,9 @@
         const isTokenForward = (word) => {
           const clean = word.replace(/^[«"“\(\[\.،؛!؟\-]+|[»"”\)\]\.،؛!؟\-]+$/g, '');
           if (!clean) return false;
-          if (/^(?:ال|وال|فال|بال|لل|كال)/.test(clean) && clean.length >= 4) return true;
+          if (/^(?:ال|وال|فال|بال|لل|كال|الله|والله|فالله|بالله|ولله|فلله|هللا|وهللا)/.test(clean) && clean.length >= 3) return true;
           if (/[ةـة]$/.test(clean)) return true;
-          if (/^(?:في|من|عن|على|إلى|مع|أن|إن|هو|هي|هذا|هذه|ذلك|تلك|كان|يكون|قال|يقول|الذي|التي)$/.test(clean)) return true;
+          if (/^(?:في|من|عن|على|إلى|مع|أن|إن|هو|هي|هذا|هذه|ذلك|تلك|كان|يكون|قال|يقول|الذي|التي|ماذا|كيف|لماذا|هل|اسأل|اقرأ|ترك|عدم|حكم|الصلاة|صلاة)$/.test(clean)) return true;
           return false;
         };
 
@@ -7771,7 +7771,26 @@
       }
       function sanitizeArabicExtractedText(rawText) {
         if (!rawText) return '';
-        // 0. Separate inline numbered sub-headings so they never get swallowed into cards:
+        // 0. Pre-strip PDF Page Markers & OCR Inversion Artifacts before line processing:
+        rawText = rawText.replace(/---\s*P\d+\s*---\s*/gi, '\n');
+        rawText = rawText.replace(/^[-\s]*P\d+[-\s]*$/gmi, '');
+        rawText = rawText.replace(/(?:^|\s)P\d+\s*[-–—]+\s*/gi, ' ');
+        rawText = rawText.replace(/(?:^|[\s«\("])باز\s+ابن(?=[\s»\)"،.؛!؟]|$)/gu, ' ابن باز ');
+        rawText = rawText.replace(/س\s+ما\s+حكم\s+ترك\s+الجماعة\s+في\s+المسجد\s*؟\s*باز\s+ابن/gu, 'س: ما حكم ترك الجماعة في المسجد؟ (فتوى الشيخ ابن باز):');
+        rawText = rawText.replace(/[“«"]?\s*ينم\s*؟?\s*(?:الله|هللا)?\s*ديري\s*(?:اذام|اذاَم|اظام)\s*[”»"]?/gu, '«ماذا يريد الله مني؟»');
+        rawText = rawText.replace(/ينم\s*؟?\s*(?:الله|هللا)?\s*ديري\s*(?:اذام|اذاَم|اظام)/gu, 'ماذا يريد الله مني؟');
+        rawText = rawText.replace(/(?:ىلاعت|ىلاعَت)\s+(?:الله|هللا|ه\s*للا)\s+لوق\s+تحت:?/gu, 'تحت قول الله تعالى:');
+        rawText = rawText.replace(/لوق\s+تحت/gu, 'تحت قول');
+        rawText = rawText.replace(/ألتوهما/gu, 'لأتوهما');
+        rawText = rawText.replace(/إعتالء/gu, 'إعلاء');
+        rawText = rawText.replace(/المَ\s+الئِكة/gu, 'الملائكة');
+        rawText = rawText.replace(/المَالئِكة/gu, 'الملائكة');
+        rawText = rawText.replace(/(?:ِ?\s*َ?َّ?لا?\s*ة\s*لِلص|لِلص\s*َّ?َ?لا?\s*ة)/gu, 'لِلصَّلَاةِ');
+        rawText = rawText.replace(/الأدلَّة\s*:\s*ا\s+أول\s*:/gu, 'الأدلة: أولاً:');
+        rawText = rawText.replace(/ا\s+أول\s*:/gu, 'أولاً:');
+        rawText = rawText.replace(/فالشفاعة\s+ال\s+صحيحة\s+التكون\s+إال/gu, 'فالشفاعة الصحيحة لا تكون إلا:');
+
+        // Separate inline numbered sub-headings so they never get swallowed into cards:
         let text = rawText.replace(/([^\n])\s*(\d+[\-–\.]\s*(?:هجر|المحور|المطلب|المبحث|النوع|الأصل|القسم|الوقفة|القاعدة))/gu, '$1\n\n$2');
 
         // 1. Normalize presentation forms to standard Arabic characters
@@ -8910,13 +8929,13 @@
                       }
                     } catch (e) {}
                     const cleanPath = window.location.origin + window.location.pathname;
-                    window.location.replace(cleanPath + '?v=76.8&t=' + Date.now());
+                    window.location.replace(cleanPath + '?v=76.9&t=' + Date.now());
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v76.8 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.8 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v76.9 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v76.9 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v76.8' : 'v76.8'}</span>
+                  <span>{isRtl ? 'الإصدار v76.9' : 'v76.8'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
@@ -14512,7 +14531,7 @@
                                                 <p className={`font-amiri text-slate-800 leading-relaxed whitespace-pre-line text-justify ${
                                                   teacherScriptFontSize === 'small' ? 'text-xs' : (teacherScriptFontSize === 'large' ? 'text-base font-bold' : 'text-sm')
                                                 }`}>
-                                                  {normalizeIslamicSacredTerms(secContent)}
+                                                  {sanitizeArabicExtractedText(secContent)}
                                                 </p>
 
                                                 {/* Talking Points & Impact summary */}
@@ -14542,7 +14561,7 @@
                                             <p className={`font-amiri text-slate-800 leading-relaxed whitespace-pre-line text-justify ${
                                               teacherScriptFontSize === 'small' ? 'text-xs' : (teacherScriptFontSize === 'large' ? 'text-base font-bold' : 'text-sm')
                                             }`}>
-                                              {normalizeIslamicSacredTerms(currentSlide.fullSectionText || teleprompterText)}
+                                              {sanitizeArabicExtractedText(currentSlide.fullSectionText || teleprompterText)}
                                             </p>
                                           </div>
 
@@ -17096,7 +17115,7 @@
                               {pIdx + 1}
                             </span>
                             <p className="font-amiri text-xs sm:text-base lg:text-lg text-slate-100 font-bold leading-relaxed">
-                              {pt}
+                              {sanitizeArabicExtractedText(pt)}
                             </p>
                           </div>
                         ))}
@@ -17117,7 +17136,7 @@
                             📝 {isRtl ? 'ملاحظات وتوجيهات الشرح للمحاضر (خاص بالمعلم):' : 'Presenter Notes:'}
                           </span>
                           <p className="font-amiri text-xs sm:text-sm text-amber-100 leading-relaxed">
-                            {currentSlide.pedagogicalTip || currentSlide.teacherFocusAr || currentSlide.teacherGuidanceAr || 'استعرض المحور مع إشراك الدارسين في استنباط الثمرات.'}
+                            {sanitizeArabicExtractedText(currentSlide.pedagogicalTip || currentSlide.teacherFocusAr || currentSlide.teacherGuidanceAr || 'استعرض المحور مع إشراك الدارسين في استنباط الثمرات.')}
                           </p>
                         </div>
                       )}
