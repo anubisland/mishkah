@@ -13,7 +13,7 @@
   <meta http-equiv="Expires" content="0" />
   <script>
     (function() {
-      const CURRENT_VER = '77.0';
+      const CURRENT_VER = '77.1';
       const p = new URLSearchParams(window.location.search);
       if (p.get('v') !== CURRENT_VER && !window.location.search.includes('mode=student-display')) {
         const u = new URL(window.location.href);
@@ -4662,6 +4662,37 @@
     // Canonical Quran Registry with distinctive phrase matching for infallible slide presentation
     // Canonical Quran Registry with distinctive phrase matching for infallible slide presentation
     const CANONICAL_SLIDE_QURAN = [
+      {
+        citation: 'الجمعة: 9',
+        phrases: ['اذا نودي للصلاة', 'نودي للصلاة من يوم الجمعة', 'فاسعوا الى ذكر الله', 'وذروا البيع', 'لِلصَّلَاةِ مِن يَوْمِ الْجُمُعَةِ'],
+        uthmani: 'يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا نُودِيَ لِلصَّلَاةِ مِن يَوْمِ الْجُمُعَةِ فَاسْعَوْا إِلَىٰ ذِكْرِ اللَّهِ وَذَرُوا الْبَيْعَ ۚ ذَٰلِكُمْ خَيْرٌ لَّكُمْ إِن كُنتُمْ تَعْلَمُونَ'
+      },
+      {
+        citation: 'الفرقان: 30',
+        phrases: ['وقال الرسول يا رب', 'ان قومي اتخذوا هذا القران', 'اتخذوا هذا القران مهجورا'],
+        uthmani: 'وَقَالَ الرَّسُولُ يَا رَبِّ إِنَّ قَوْمِي اتَّخَذُوا هَذَا الْقُرْآنَ مَهْجُورًا'
+      },
+      {
+        citation: 'الزمر: 44',
+        phrases: ['قل لله الشفاعة', 'قل لله الشفاعة جميعا', 'له ملك السماوات والارض'],
+        uthmani: 'قُل لِّلَّهِ الشَّفَاعَةُ جَمِيعًا ۖ لَّهُ مُلْكُ السَّمَاوَاتِ وَالْأَرْضِ ۖ ثُمَّ إِلَيْهِ تُرْجَعُونَ'
+      },
+      {
+        citation: 'البقرة: 255',
+        phrases: ['من ذا الذي يشفع عنده', 'يشفع عنده الا باذنه'],
+        uthmani: 'مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ'
+      },
+      {
+        citation: 'الأنبياء: 28',
+        phrases: ['ولا يشفعون الا لمن ارتضى', 'لمن ارتضى وهم من خشيته'],
+        uthmani: 'وَلَا يَشْفَعُونَ إِلَّا لِمَنِ ارْتَضَىٰ وَهُم مِّنْ خَشْيَتِهِ مُشْفِقُونَ'
+      },
+      {
+        citation: 'النجم: 26',
+        phrases: ['وكم من ملك في السماوات', 'لا تغني شفاعتهم شيئا الا من بعد ان ياذن الله'],
+        uthmani: 'وَكَم مِّن مَّلَكٍ فِي السَّمَاوَاتِ لَا تُغْنِي شَفَاعَتُهُمْ شَيْئًا إِلَّا مِن بَعْدِ أَن يَأْذَنَ اللَّهُ لِمَن يَشَاءُ وَيَرْضَىٰ'
+      },
+
       // Aqeedah & Tawheed
       {
         citation: 'الأنعام: 79',
@@ -6318,10 +6349,21 @@
           return 'محور الدرس ومسائله';
         }
 
-        // Cap length at 48 characters to keep presentation titles elegant and uncluttered
-        if (t.length > 48) {
-          const sp = t.substring(0, 46).lastIndexOf(' ');
-          t = (sp > 20 ? t.substring(0, sp) : t.substring(0, 44)).trim();
+        // Handle questions ending with ؟ (e.g., حكم صلاة الجمعة لمن صلى العيد؟)
+        t = t.replace(/^سs*[ً-ٰٟۖ-ۭs]*ماs*حُ?كمs*/u, 'حكم ');
+        t = t.replace(/^سs*[:：-]?s*/u, '');
+        t = t.replace(/(?:^|[s«("])صَالة(?=[s»)"،.؛!؟]|$)/gu, ' صلاة ');
+        t = t.replace(/صَالةs+الجُمُعة/gu, 'صلاة الجمعة');
+        t = t.replace(/صَالةs+العِيد/gu, 'صلاة العيد');
+        const noDiacriticsClean = t.replace(/[ً-ٰٟۖ-ۭ]/g, '').trim();
+        if (t.includes('؟') && noDiacriticsClean.length <= 75) {
+          return t.split('؟')[0].trim() + '؟';
+        }
+
+        // Cap length gracefully at 65 characters without cutting off words
+        if (noDiacriticsClean.length > 65) {
+          const sp = t.substring(0, 62).lastIndexOf(' ');
+          t = (sp > 25 ? t.substring(0, sp) : t.substring(0, 58)).trim();
         }
 
         return t || rawTitle || 'محور الدرس ومسائله';
@@ -6462,6 +6504,7 @@
 
         for (let s of rawClauses) {
           let c = s.replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
+          c = c.replace(/^(?:قائلاً|القائل|وقوله|قوله|في قوله)\s*[:：]?\s*/u, '').trim();
           c = detectAndInvertReversedArabic(c);
           c = normalizeIslamicSacredTerms(c);
           if (c.includes('؟') || c.includes('?') || /^\(?\s*(?:س |هل |ماذا |كيف |لماذا )/i.test(c)) continue;
@@ -6681,11 +6724,14 @@
               parsedTitle = delimMatch[1].trim();
               initialLineContent = delimMatch[2].trim();
             } else {
-              // Match when heading line continues directly with explanation verbs or clauses (never swallow opening sentences!)
-              const starterMatch = strippedLine.match(/^(.{3,45}?)\s+((?:ترك|عدم|أدوا|ادوا|يُ?ثبت\s+الوحي|هو|وهو|وهي|يقصد\s+به|المراد\s+به|\(\s*سواء)[\s\S]*)$/);
-              if (starterMatch) {
-                parsedTitle = starterMatch[1].trim();
-                initialLineContent = starterMatch[2].trim();
+              // Match when heading line continues directly with explanation verbs or clauses (never swallow opening sentences, never split question titles!)
+              const isQuestionLine = /^(?:س\s*|ما\s*حكم|كبسولة)/i.test(strippedLine) || strippedLine.includes('؟');
+              if (!isQuestionLine) {
+                const starterMatch = strippedLine.match(/^(.{3,45}?)\s+((?:ترك|عدم|أدوا|ادوا|يُ?ثبت\s+الوحي|هو|وهو|وهي|يقصد\s+به|المراد\s+به|\(\s*سواء)[\s\S]*)$/);
+                if (starterMatch) {
+                  parsedTitle = starterMatch[1].trim();
+                  initialLineContent = starterMatch[2].trim();
+                }
               }
             }
 
@@ -6801,7 +6847,7 @@
           const cleanSecTitle = cleanSlideTitle(sec.title);
 
           // Substantive teacher synthesis extracted directly from actual section text:
-          const candidateSentences = sec.lines.filter(l => l.length > 25 && !l.startsWith('#') && !isNoiseLine(l));
+          const candidateSentences = sec.lines.filter(l => l.trim().length > 3 && !l.startsWith('#') && !isNoiseLine(l));
           let rawModelAnswer = candidateSentences.slice(0, 3).join(' ') || secText.substring(0, 220);
           rawModelAnswer = normalizeIslamicSacredTerms(rawModelAnswer);
           rawModelAnswer = rawModelAnswer.replace(/\s*س\s*[\u064B-\u065F\u0670\u06D6-\u06ED\s]*ما\s*حُ?ك[\s\S]*$/u, '');
@@ -7389,6 +7435,25 @@
         // Infallible Canonical Quranic Registry for Classical Curriculum & Tawheed Lectures
         const CANONICAL_QURAN_REGISTRY = [
           {
+            pattern: /نودي[sS]{0,30}?الجمعة[sS]{0,30}?فاسعوا/,
+            uthmani: 'يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا نُودِيَ لِلصَّلَاةِ مِن يَوْمِ الْجُمُعَةِ فَاسْعَوْا إِلَىٰ ذِكْرِ اللَّهِ وَذَرُوا الْبَيْعَ',
+            surah: 'الجمعة',
+            ayah: 9
+          },
+          {
+            pattern: /اتخذوا[sS]{0,20}?القر[آا]ن[sS]{0,20}?مهجورا/,
+            uthmani: 'وَقَالَ الرَّسُولُ يَا رَبِّ إِنَّ قَوْمِي اتَّخَذُوا هَذَا الْقُرْآنَ مَهْجُورًا',
+            surah: 'الفرقان',
+            ayah: 30
+          },
+          {
+            pattern: /قل[sS]{0,15}?لله[sS]{0,15}?الشفاعة[sS]{0,15}?جميعا/,
+            uthmani: 'قُل لِّلَّهِ الشَّفَاعَةُ جَمِيعًا ۖ لَّهُ مُلْكُ السَّمَاوَاتِ وَالْأَرْضِ',
+            surah: 'الزمر',
+            ayah: 44
+          },
+
+          {
             pattern: /[إأاآ]ني[\s\S]{0,20}?وجهت[\s\S]{0,60}?المشركين/,
             uthmani: 'إِنِّي وَجَّهْتُ وَجْهِيَ لِلَّذِي فَطَرَ السَّمَاوَاتِ وَالْأَرْضَ حَنِيفًا وَمَا أَنَا مِنَ الْمُشْرِكِينَ',
             surah: 'الأنعام',
@@ -7469,6 +7534,66 @@
         });
 
         // Authentic Hadith Extractor
+        if (/باب الجنة|فأستفتح|فيقول الخازن|بك أمرت|ألا أفتح لأحد قبلك/.test(text)) {
+          hadiths.push({
+            id: 'h_shafaa_bab',
+            type: 'hadith',
+            arabicText: '« آتِي بَابَ الْجَنَّةِ يَوْمَ الْقِيَامَةِ فَأَسْتَفْتِحُ، فَيَقُولُ الْخَازِنُ: مَنْ أَنْتَ؟ فَأَقُولُ: مُحَمَّدٌ، فَيَقُولُ: بِكَ أُمِرْتُ لَا أَفْتَحُ لِأَحَدٍ قَبْلَكَ »',
+            englishTranslation: 'I will come to the gate of Paradise on the Day of Resurrection and ask for it to be opened...',
+            source: 'صحيح مسلم (197)',
+            narrator: 'أنس بن مالك رضي الله عنه',
+            grading: 'صحيح'
+          });
+        }
+
+        if (/أعمى سأله|هل تسمع النداء|فأجب|من سمع النداء/.test(text)) {
+          hadiths.push({
+            id: 'h_aama_jamaah',
+            type: 'hadith',
+            arabicText: '« أَتَى النَّبِيَّ ﷺ رَجُلٌ أَعْمَى، فَقَالَ: يَا رَسُولَ اللَّهِ، إِنَّهُ لَيْسَ لِي قَائِدٌ يَقُودُنِي إِلَى الْمَسْجِدِ، فَهَلْ لِي مِنْ رُخْصَةٍ أَنْ أُصَلِّيَ فِي بَيْتِي؟ فَقَالَ: هَلْ تَسْمَعُ النِّدَاءَ بِالصَّلَاةِ؟ قَالَ: نَعَمْ، قَالَ: فَأَجِبْ »',
+            englishTranslation: 'A blind man came to the Prophet and asked for permission to pray at home...',
+            source: 'صحيح مسلم (653)',
+            narrator: 'أبو هريرة رضي الله عنه',
+            grading: 'صحيح'
+          });
+        }
+
+        if (/تفضل صلاة الفذ|بسبع وعشرين درجة/.test(text)) {
+          hadiths.push({
+            id: 'h_fadl_jamaah',
+            type: 'hadith',
+            arabicText: '« صَلَاةُ الْجَمَاعَةِ تَفْضُلُ صَلَاةَ الْفَذِّ بِسَبْعٍ وَعِشْرِينَ دَرَجَةً »',
+            englishTranslation: 'Prayer in congregation is twenty-seven degrees superior to prayer performed individually',
+            source: 'صحيح البخاري ومسلم',
+            narrator: 'عبدالله بن عمر رضي الله عنهما',
+            grading: 'متفق عليه'
+          });
+        }
+
+        if (/من أدرك ركعة من الصلاة/.test(text)) {
+          hadiths.push({
+            id: 'h_idrak_rakah',
+            type: 'hadith',
+            arabicText: '« مَنْ أَدْرَكَ رَكْعَةً مِنَ الصَّلَاةِ، فَقَدْ أَدْرَكَ الصَّلَاةَ »',
+            englishTranslation: 'Whoever catches up with one rakah of the prayer has caught up with the prayer',
+            source: 'صحيح البخاري ومسلم',
+            narrator: 'أبو هريرة رضي الله عنه',
+            grading: 'متفق عليه'
+          });
+        }
+
+        if (/أثقل صلاة على المنافقين/.test(text)) {
+          hadiths.push({
+            id: 'h_athqal_salah',
+            type: 'hadith',
+            arabicText: '« إِنَّ أَثْقَلَ صَلَاةٍ عَلَى الْمُنَافِقِينَ صَلَاةُ الْعِشَاءِ وَصَلَاةُ الْفَجْرِ، وَلَوْ يَعْلَمُونَ مَا فِيهِمَا لَأَتَوْهُمَا وَلَوْ حَبْوًا »',
+            englishTranslation: 'The most burdensome prayers for the hypocrites are Isha and Fajr...',
+            source: 'صحيح البخاري ومسلم',
+            narrator: 'أبو هريرة رضي الله عنه',
+            grading: 'متفق عليه'
+          });
+        }
+
         if (/عذاب القبر|استعيذوا بالله|البراء بن عازب|جنازة رجل من الأنصار/.test(text)) {
           hadiths.push({
             id: 'h_baraa',
@@ -7740,33 +7865,31 @@
         return merged.join('\n');
       }
 
-      function trimToCompleteSentence(text, maxLen = 240) {
-        if (!text || text.length <= maxLen) return text;
-        // Infallible completion for 'وإنما' or 'وانما' or 'بل' clauses
-        const inmaIdx = Math.max(text.lastIndexOf('وإنما', maxLen + 30), text.lastIndexOf('وانما', maxLen + 30));
-        if (inmaIdx > 0 && inmaIdx >= maxLen - 90) {
-          const punctCandidates = ['.', '!', '؟', '؛', '\n']
-            .map(p => text.indexOf(p, inmaIdx))
-            .filter(idx => idx !== -1);
-          if (punctCandidates.length > 0) {
-            const nextPunct = Math.min(...punctCandidates);
-            if (nextPunct < maxLen + 160) {
-              return text.substring(0, nextPunct + 1).trim();
-            }
+      function trimToCompleteSentence(text, maxLen = 380) {
+        if (!text) return '';
+        const clean = text.trim();
+        if (clean.length <= maxLen) return clean;
+
+        // Infallible completion for Hadiths, quotations, and sentence endings
+        const searchRange = clean.substring(0, Math.min(clean.length, maxLen + 160));
+        const punctCandidates = ['.', '!', '؟', '؛', '»', '"', ':\n', '\n']
+          .map(p => searchRange.lastIndexOf(p))
+          .filter(idx => idx !== -1);
+
+        if (punctCandidates.length > 0) {
+          const bestPunct = Math.max(...punctCandidates);
+          if (bestPunct >= maxLen - 100) {
+            return clean.substring(0, bestPunct + 1).trim();
           }
         }
-        const sub = text.substring(0, maxLen);
-        const lastPunct = Math.max(sub.lastIndexOf('.'), sub.lastIndexOf('!'), sub.lastIndexOf('؟'), sub.lastIndexOf('؛'), sub.lastIndexOf(':\n'));
-        if (lastPunct > 80) {
-          return sub.substring(0, lastPunct + 1).trim();
-        }
-        const lastSpace = sub.lastIndexOf(' ');
-        if (lastSpace > 60) {
-          let cleanSub = sub.substring(0, lastSpace).trim();
-          cleanSub = cleanSub.replace(/\s+(?:ال|كل|على|من|في|أن|إن|أو|ثم|مع|إلى|ثالث|عن|بين|وهو|وهي|التي|الذي|هذا|هذه|وإنما|وانما|بل|لكن)$/u, '');
+
+        const lastSpace = searchRange.substring(0, maxLen).lastIndexOf(' ');
+        if (lastSpace > 80) {
+          let cleanSub = clean.substring(0, lastSpace).trim();
+          cleanSub = cleanSub.replace(/\s+(?:ال|كل|على|من|في|أن|إن|أو|ثم|مع|إلى|ثالث|عن|بين|وهو|وهي|التي|الذي|هذا|هذه|وإنما|وانما|بل|لكن|أهل|ولا|وقال|فقال)$/u, '');
           return cleanSub + '...';
         }
-        return sub + '...';
+        return clean.substring(0, maxLen).trim() + '...';
       }
 
       
@@ -7815,6 +7938,24 @@
         rawText = rawText.replace(/عبدهللا/gu, 'عبدالله');
         rawText = rawText.replace(/هللا/gu, 'الله');
         rawText = rawText.replace(/---\s*P\d+\s*---\s*/gi, '\n');
+        rawText = rawText.replace(/(?:^|[\s«\("])صَالة(?=[\s»\)"،.؛!؟]|$)/gu, ' صلاة ');
+        rawText = rawText.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]*صَ?ا?لَ?ة[\u064B-\u065F\u0670\u06D6-\u06ED]*\s+[\u064B-\u065F\u0670\u06D6-\u06ED]*الجُمُعة/gu, 'صلاة الجمعة');
+        rawText = rawText.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]*صَ?ا?لَ?ة[\u064B-\u065F\u0670\u06D6-\u06ED]*\s+[\u064B-\u065F\u0670\u06D6-\u06ED]*العِيد/gu, 'صلاة العيد');
+        rawText = rawText.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]*صَ?ا?لَ?ة[\u064B-\u065F\u0670\u06D6-\u06ED]*\s+[\u064B-\u065F\u0670\u06D6-\u06ED]*الجماعة/gu, 'صلاة الجماعة');
+        rawText = rawText.replace(/صالة\s+الفرض/gu, 'صلاة الفرض');
+        rawText = rawText.replace(/صالة\s+النافلة/gu, 'صلاة النافلة');
+        rawText = rawText.replace(/صالة\s+المكتوبة/gu, 'صلاة المكتوبة');
+        rawText = rawText.replace(/صَالة\s+ِالجَماعة/gu, 'صلاة الجماعة');
+        rawText = rawText.replace(/صالة\s+الجماعة/gu, 'صلاة الجماعة');
+        rawText = rawText.replace(/ًاقائل\s*:/gu, 'قائلاً:');
+        rawText = rawText.replace(/ال\s*ُ?أفتَح\s*ٍ?ألحَد\s*قَبلَك/gu, 'لا أفتح لأحد قبلك');
+        rawText = rawText.replace(/ٍألحَد/gu, 'لأحد');
+        rawText = rawText.replace(/ََِّلا\s*ة/gu, 'صَلَاةِ');
+        rawText = rawText.replace(/(?:ِ?\s*َ?َّ?لا?\s*ة\s*لِلص|لِلص\s*َّ?َ?لا?\s*ة)/gu, 'لِلصَّلَاةِ');
+        rawText = rawText.replace(/االمتثال/gu, 'الامتثال');
+        rawText = rawText.replace(/الاامتثال/gu, 'الامتثال');
+        rawText = rawText.replace(/ألوامره/gu, 'لأوامره');
+        rawText = rawText.replace(/لألحكام/gu, 'للأحكام');
         rawText = rawText.replace(/^[-\s]*P\d+[-\s]*$/gmi, '');
         rawText = rawText.replace(/(?:^|\s)P\d+\s*[-–—]+\s*/gi, ' ');
         rawText = rawText.replace(/(?:^|[\s«\("])باز\s+ابن(?=[\s»\)"،.؛!؟]|$)/gu, ' ابن باز ');
@@ -8971,13 +9112,13 @@
                       }
                     } catch (e) {}
                     const cleanPath = window.location.origin + window.location.pathname;
-                    window.location.replace(cleanPath + '?v=77.0&t=' + Date.now());
+                    window.location.replace(cleanPath + '?v=77.1&t=' + Date.now());
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v77.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v77.0 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v77.1 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v77.1 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v77.0' : 'v76.8'}</span>
+                  <span>{isRtl ? 'الإصدار v77.1' : 'v76.8'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
