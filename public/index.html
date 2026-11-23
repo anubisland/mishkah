@@ -13,7 +13,7 @@
   <meta http-equiv="Expires" content="0" />
   <script>
     (function() {
-      const CURRENT_VER = '77.1';
+      const CURRENT_VER = '78.0';
       const p = new URLSearchParams(window.location.search);
       if (p.get('v') !== CURRENT_VER && !window.location.search.includes('mode=student-display')) {
         const u = new URL(window.location.href);
@@ -6691,66 +6691,88 @@
           });
         }
 
-        // 4. Intelligent Dynamic Section Segmentation Engine (Supports up to 20 slides naturally)
+        // 4. Principled Arabic Semantic Paragraph & Heading Segmentation Engine
         const headingRegex = /^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|حادي عشر|ثاني عشر|ثالث عشر|رابع عشر|خامس عشر|سادس عشر|المبحث|المطلب|الفصل|الباب|المحور|المسألة|الوقفة|القسم|الأصل|القاعدة|الضابط|العنصر|النقطة)\s*(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+|[\u0660-\u0669]+|[أ-ي])?[:\.\-\s]|^[#]{1,4}\s+|^(?:\d+|[\u0660-\u0669]+)\s*[\.\-\)]\s*|^(?:س\s*[\u064B-\u065F\u0670\u06D6-\u06ED\s]*ما\s*حُ?ك|كبسولة\s+فقهية)/i;
 
-        const rawSections = [];
-        let currentSec = null;
+        // Phase A: Re-assemble wrapped lines into continuous semantic paragraphs
+        const semanticParagraphs = [];
+        let currentPara = [];
+        const isHeadingLine = (l) => {
+          if (headingRegex.test(l)) return true;
+          if (/^س\s*[\u064B-\u065F\u0670\u06D6-\u06ED\s]*(?:ما\s*حُ?كم|هل|كيف|ما)\b/u.test(l)) return true;
+          if (/^[#]{1,4}\s+/.test(l)) return true;
+          if (l.startsWith('**') && l.endsWith('**')) return true;
+          return false;
+        };
+        const isBulletLine = (l) => /^[•\-\*]\s+/.test(l);
 
         for (let i = 0; i < contentLines.length; i++) {
           const line = contentLines[i];
-          const isHeadingMatch = headingRegex.test(line);
-          const isShortHeaderCandidate = line.length < 55 && !line.endsWith('.') && !line.endsWith('،') && !line.endsWith('؛') && (line.startsWith('**') || line.startsWith('•') || /^[^\s]{3,25}:/.test(line));
+          if (isHeadingLine(line) || isBulletLine(line)) {
+            if (currentPara.length > 0) {
+              semanticParagraphs.push(currentPara.join(' '));
+              currentPara = [];
+            }
+            semanticParagraphs.push(line);
+          } else {
+            if (currentPara.length === 0) {
+              currentPara.push(line);
+            } else {
+              const prev = currentPara[currentPara.length - 1];
+              const prevEndsSentence = /[.؛!؟:]$/.test(prev);
+              if (prevEndsSentence) {
+                semanticParagraphs.push(currentPara.join(' '));
+                currentPara = [line];
+              } else {
+                currentPara.push(line);
+              }
+            }
+          }
+        }
+        if (currentPara.length > 0) {
+          semanticParagraphs.push(currentPara.join(' '));
+        }
+
+        // Phase B: Disaggregate Sections & Headings deterministically
+        const rawSections = [];
+        let currentSec = null;
+
+        for (let i = 0; i < semanticParagraphs.length; i++) {
+          const para = semanticParagraphs[i];
+          const isHeadingMatch = headingRegex.test(para) || isHeadingLine(para);
+          const isShortHeaderCandidate = para.length < 55 && !para.endsWith('.') && !para.endsWith('،') && !para.endsWith('؛') && (para.startsWith('**') || para.startsWith('•') || /^[^\s]{3,25}:/.test(para));
 
           if ((isHeadingMatch || isShortHeaderCandidate) && rawSections.length < 24) {
             if (currentSec && (currentSec.lines.length > 0 || currentSec.title)) {
               rawSections.push(currentSec);
             }
-            let strippedLine = line.replace(/^[\u064B-\u065F\u0670\u06D6-\u06ED\s#*\-•\d\.\)\:،=]+/, '').replace(/[*#]/g, '').trim();
+            let strippedPara = para.replace(/^[\u064B-\u065F\u0670\u06D6-\u06ED\s#*\-•\d\.\)\:،=]+/, '').replace(/[*#]/g, '').trim();
 
-            // Strip leading ordinal prefixes so "الأول: تحقيق العبودية..." becomes "تحقيق العبودية..."
-            const ordinalPrefixRegex = /^[\u064B-\u065F\u0670\u06D6-\u06ED]*(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|حادي عشر|ثاني عشر|المحور \d+|المطلب \d+|المسألة \d+|الوجه \d+)[\s:–—.-]*/i;
-            const withoutOrdinal = strippedLine.replace(ordinalPrefixRegex, '').trim();
-            if (withoutOrdinal.length >= 4) {
-              strippedLine = withoutOrdinal;
-            }
-
-            let parsedTitle = strippedLine;
+            let parsedTitle = strippedPara;
             let initialLineContent = '';
 
-            // Universal Intelligent Heading & Inline Content Disaggregator
-            const delimMatch = strippedLine.match(/^([^:\-\—–\n]{3,50})[:\-\—–]\s*(.+)$/);
-            if (delimMatch) {
-              parsedTitle = delimMatch[1].trim();
-              initialLineContent = delimMatch[2].trim();
+            // Question Section (never split question text!)
+            if (/^(?:س\s*|ما\s*حكم|كبسولة)/i.test(strippedPara) || strippedPara.includes('؟')) {
+              let cleanQ = cleanSlideTitle(strippedPara);
+              if (cleanQ.includes('؟')) {
+                const parts = cleanQ.split('؟');
+                parsedTitle = parts[0].trim() + '؟';
+                initialLineContent = parts.slice(1).join('؟').trim();
+              } else {
+                parsedTitle = cleanQ;
+              }
             } else {
-              // Match when heading line continues directly with explanation verbs or clauses (never swallow opening sentences, never split question titles!)
-              const isQuestionLine = /^(?:س\s*|ما\s*حكم|كبسولة)/i.test(strippedLine) || strippedLine.includes('؟');
-              if (!isQuestionLine) {
-                const starterMatch = strippedLine.match(/^(.{3,45}?)\s+((?:ترك|عدم|أدوا|ادوا|يُ?ثبت\s+الوحي|هو|وهو|وهي|يقصد\s+به|المراد\s+به|\(\s*سواء)[\s\S]*)$/);
-                if (starterMatch) {
-                  parsedTitle = starterMatch[1].trim();
-                  initialLineContent = starterMatch[2].trim();
-                }
+              // Delimited heading: colon or dash
+              const delimMatch = strippedPara.match(/^([^:\-\—–\n]{3,65})[:\-\—–]\s*(.+)$/);
+              if (delimMatch) {
+                parsedTitle = delimMatch[1].trim();
+                initialLineContent = delimMatch[2].trim();
+              } else {
+                parsedTitle = strippedPara;
               }
             }
 
             let cleanT = cleanSlideTitle(parsedTitle);
-            // If the extracted title was just a generic fallback or ordinal, look into initialLineContent:
-            if (cleanT === 'محور الدرس ومسائله' || cleanT.length <= 4 || /^(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر)$/.test(cleanT)) {
-              if (initialLineContent && initialLineContent.length >= 4) {
-                const subDelim = initialLineContent.match(/^([^:\-\—–\n]{3,50})[:\-\—–]\s*(.+)$/);
-                if (subDelim) {
-                  cleanT = cleanSlideTitle(subDelim[1]);
-                  initialLineContent = subDelim[2].trim();
-                } else {
-                  cleanT = cleanSlideTitle(initialLineContent);
-                  initialLineContent = '';
-                }
-              } else if (withoutOrdinal.length >= 4) {
-                cleanT = cleanSlideTitle(withoutOrdinal);
-              }
-            }
             currentSec = {
               title: (cleanT && cleanT.length > 3 && cleanT !== 'محور الدرس ومسائله') ? cleanT : ('المحور ' + (rawSections.length + 1)),
               isFormalHeading: isHeadingMatch,
@@ -6764,7 +6786,7 @@
                 lines: []
               };
             }
-            currentSec.lines.push(line);
+            currentSec.lines.push(para);
           }
         }
         if (currentSec && (currentSec.lines.length > 0 || currentSec.title)) {
@@ -9112,13 +9134,13 @@
                       }
                     } catch (e) {}
                     const cleanPath = window.location.origin + window.location.pathname;
-                    window.location.replace(cleanPath + '?v=77.1&t=' + Date.now());
+                    window.location.replace(cleanPath + '?v=78.0&t=' + Date.now());
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v77.1 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v77.1 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v78.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v78.0 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v77.1' : 'v76.8'}</span>
+                  <span>{isRtl ? 'الإصدار v78.0' : 'v76.8'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
