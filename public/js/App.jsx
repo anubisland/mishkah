@@ -1663,7 +1663,8 @@
                   onClick={() => {
                     try {
                       if ('caches' in window) {
-                        caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+                        // Keep saved Quran pages; only the app's own files are refreshed.
+                        caches.keys().then(keys => Promise.all(keys.filter(k => k !== 'mishkah-quran-v1').map(k => caches.delete(k))));
                       }
                       if ('serviceWorker' in navigator) {
                         navigator.serviceWorker.getRegistrations().then(regs => {
