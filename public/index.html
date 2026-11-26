@@ -10294,43 +10294,124 @@
         return sanitized;
       }
 
-      // Universal Document Extractor for Word (.docx), PDF (.pdf), and Text (.txt, .md)
+      // Universal Document Extractor for Word (.docx, .doc), PDF (.pdf), PowerPoint (.pptx), and Text (.txt, .md)
       async function handleLectureFileUpload(file) {
         if (!file) return;
         setIsExtractingFile(true);
-        try {
-          let extractedText = '';
-          const fname = file.name;
-          const ext = fname.substring(fname.lastIndexOf('.')).toLowerCase();
+        let extractedText = '';
+        const fname = file.name || 'document';
+        const ext = fname.substring(fname.lastIndexOf('.')).toLowerCase();
 
+        try {
           if (ext === '.docx' || ext === '.doc') {
             const arrayBuffer = await file.arrayBuffer();
-            if (window.mammoth) {
-              const res = await window.mammoth.extractRawText({ arrayBuffer });
-              extractedText = res.value || '';
-            } else {
-              throw new Error('Mammoth Word parser not loaded');
+
+            // Layer A: Mammoth parser (first attempt)
+            if (window.mammoth && typeof window.mammoth.extractRawText === 'function') {
+              try {
+                const res = await window.mammoth.extractRawText({ arrayBuffer });
+                if (res && res.value && res.value.trim()) {
+                  extractedText = res.value;
+                }
+              } catch (mErr) {
+                console.warn('Mammoth parser error, engaging JSZip fallback:', mErr);
+              }
+            }
+
+            // Layer B: Native JSZip XML Extractor (100% resilient fallback)
+            if (!extractedText && window.JSZip) {
+              try {
+                const zip = await window.JSZip.loadAsync(arrayBuffer);
+                const docXml = zip.file('word/document.xml');
+                if (docXml) {
+                  const xml = await docXml.async('string');
+                  extractedText = xml
+                    .replace(/<w:p[^>]*>/g, '\n')
+                    .replace(/<w:br[^>]*>/g, '\n')
+                    .replace(/<w:tab[^>]*>/g, ' ')
+                    .replace(/<[^>]+>/g, '')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&apos;/g, "'")
+                    .trim();
+                }
+              } catch (zipErr) {
+                console.warn('JSZip Word extraction error:', zipErr);
+              }
+            }
+
+            if (!extractedText) {
+              throw new Error(isRtl ? 'تعذر استخراج النص من ملف الوورد، يرجى حفظه كملف .docx قياسي أو نسخ النص ولصقه' : 'Could not parse Word document');
+            }
+          } else if (ext === '.pptx' || ext === '.ppt') {
+            // PowerPoint Slide Text Extractor via JSZip
+            const arrayBuffer = await file.arrayBuffer();
+            if (window.JSZip) {
+              try {
+                const zip = await window.JSZip.loadAsync(arrayBuffer);
+                const slideEntries = [];
+                zip.forEach((relPath, entry) => {
+                  if (/ppt\/slides\/slide\d+\.xml$/i.test(relPath)) {
+                    slideEntries.push(entry);
+                  }
+                });
+                slideEntries.sort((a, b) => {
+                  const nA = parseInt(a.name.match(/\d+/)[0], 10);
+                  const nB = parseInt(b.name.match(/\d+/)[0], 10);
+                  return nA - nB;
+                });
+                const slideTexts = [];
+                for (const se of slideEntries) {
+                  const sXml = await se.async('string');
+                  const sTxt = sXml
+                    .replace(/<a:p[^>]*>/g, '\n')
+                    .replace(/<[^>]+>/g, '')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&')
+                    .trim();
+                  if (sTxt) slideTexts.push(sTxt);
+                }
+                extractedText = slideTexts.join('\n\n');
+              } catch (pptxErr) {
+                console.warn('PPTX extraction error:', pptxErr);
+              }
+            }
+            if (!extractedText) {
+              throw new Error(isRtl ? 'تعذر استخراج النص من ملف الباوربوينت' : 'Could not parse PowerPoint presentation');
             }
           } else if (ext === '.pdf') {
             const arrayBuffer = await file.arrayBuffer();
             if (window.pdfjsLib) {
-              const loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
-              const pdf = await loadingTask.promise;
+              let loadingTask;
+              try {
+                loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+              } catch (ltErr) {
+                loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer, disableWorker: true });
+              }
+              let pdf;
+              try {
+                pdf = await loadingTask.promise;
+              } catch (promErr) {
+                // Retry in workerless mode if worker construction failed
+                loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer, disableWorker: true });
+                pdf = await loadingTask.promise;
+              }
               let pagesText = [];
               for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
                 const items = textContent.items || [];
 
-                // Sort items by Y descending (top-to-bottom) before grouping
                 items.sort((a, b) => {
                   const yA = a.transform ? a.transform[5] : 0;
                   const yB = b.transform ? b.transform[5] : 0;
                   if (Math.abs(yA - yB) > 4.0) return yB - yA;
-                  return 0; // maintain document stream order for items on same line
+                  return 0;
                 });
 
-                // Group items into lines by Y coordinate (tolerance 4.0pt)
                 const lineGroups = [];
                 let curLine = [];
                 let curY = null;
@@ -10353,7 +10434,6 @@
                 }
                 if (curLine.length > 0) lineGroups.push(curLine);
 
-                // Assemble line items with coordinate gap calculation (prevents shredding words into letters)
                 const pageLines = lineGroups.map(line => {
                   if (line.length > 1) {
                     const hasArabic = line.some(it => /[\u0600-\u06FF]/.test(it.str));
@@ -10372,12 +10452,8 @@
                       lineStr += it.str;
                     } else {
                       const prev = line[k - 1];
-                      // Detect distance between adjacent items on same line
-                      // In RTL Arabic lines: prev.x > it.x, gap = prev.x - (it.x + it.w)
-                      // In LTR lines: prev.x < it.x, gap = it.x - (prev.x + prev.w)
                       const isRtlOrder = prev.x > it.x;
                       const gap = isRtlOrder ? (prev.x - (it.x + it.w)) : (it.x - (prev.x + prev.w));
-
                       const prevEndsSpace = /[\s\n]$/.test(lineStr);
                       const itStartsSpace = /^[\s\n]/.test(it.str);
                       const isPunct = /^[،.؛!؟\)\]»]/.test(it.str);
@@ -10385,10 +10461,8 @@
                       if (prevEndsSpace || itStartsSpace || isPunct) {
                         lineStr += it.str;
                       } else if (gap > 3.8) {
-                        // True space between distinct words
                         lineStr += ' ' + it.str;
                       } else {
-                        // Sub-word glyph chunk: merge without space!
                         lineStr += it.str;
                       }
                     }
@@ -10402,10 +10476,10 @@
               }
               extractedText = pagesText.join('\n\n');
             } else {
-              throw new Error('PDF.js parser not loaded');
+              throw new Error(isRtl ? 'محرك قراءة PDF غير متاح' : 'PDF reader engine not available');
             }
           } else {
-            // Text or Markdown
+            // Plain text or markdown
             extractedText = await file.text();
           }
 
@@ -10416,11 +10490,19 @@
           }
 
           const cleanExtracted = sanitizeArabicExtractedText(extractedText);
+          // Set raw text immediately so the text is NEVER lost!
           setRawLectureText(cleanExtracted);
-          const evs = extractEvidencesAndProofs(cleanExtracted);
-          setExtractedEvidences(evs);
 
-          // Infer authentic topic title dynamically (universal across any Islamic discipline)
+          const words = cleanExtracted.trim().split(/\s+/).length;
+          const sizeKb = Math.round(file.size / 1024);
+          setUploadedFileInfo({
+            name: fname,
+            sizeKb,
+            wordCount: words,
+            lineCount: cleanExtracted.split('\n').length
+          });
+
+          // Infer topic title
           const allExtractedLines = cleanExtracted.split('\n').map(l => l.trim()).filter(Boolean);
           let primaryTitleCandidate = allExtractedLines.slice(0, 15).find(l => {
             if (l.length < 8 || l.length > 85) return false;
@@ -10431,22 +10513,22 @@
           const cleanName = fname.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
           const suggestedTopic = primaryTitleCandidate || cleanName || 'محاضرة شرعية وتأصيل علمي';
           setLessonTopic(suggestedTopic);
-          // Pass newly extracted evidences directly to avoid stale state closure!
-          handleProcessCustomLecture(cleanExtracted, suggestedTopic, evs);
 
-          const words = extractedText.trim().split(/\s+/).length;
-          const sizeKb = Math.round(file.size / 1024);
-          setUploadedFileInfo({
-            name: fname,
-            sizeKb,
-            wordCount: words,
-            lineCount: extractedText.split('\n').length
-          });
+          const evs = extractEvidencesAndProofs(cleanExtracted);
+          setExtractedEvidences(evs);
 
-          showToast(isRtl ? ('تم استخراج نص الملف بنجاح (' + words + ' كلمة) 📄') : ('Extracted ' + words + ' words successfully 📄'));
+          // Process into stages/slides
+          try {
+            handleProcessCustomLecture(cleanExtracted, suggestedTopic, evs);
+            showToast(isRtl ? ('تم استخراج نص الملف بنجاح (' + words + ' كلمة) 📄✨') : ('Extracted ' + words + ' words successfully 📄✨'));
+          } catch (procErr) {
+            console.error('Lecture processing error:', procErr);
+            showToast(isRtl ? 'تم استخراج النص بنجاح؛ يرجى مراجعة المحاور في المحرر' : 'Text extracted; please review in editor');
+          }
         } catch (err) {
           console.error('File extraction error:', err);
-          showToast(isRtl ? 'حدث خطأ أثناء قراءة الملف، يرجى التأكد من سلامته' : 'Error reading file');
+          const errDetail = err && err.message ? err.message : '';
+          showToast(isRtl ? ('تعذر قراءة الملف: ' + (errDetail || 'يرجى التأكد من إغلاقه في وورد أو حفظه كـ .docx')) : ('Error reading file: ' + errDetail));
         } finally {
           setIsExtractingFile(false);
         }
