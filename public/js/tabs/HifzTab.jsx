@@ -426,7 +426,7 @@
                           title={isRtl ? 'طمس آخر كلمتين لاختبار حفظ فواصل الآيات' : 'Mask Endings'}
                         >
                           <span className="text-base">{isEndingsMasked ? '🙈' : '👁️'}</span>
-                          <span>{isRtl ? (isEndingsMasked ? 'إلغاء طمس الفواصل' : 'طمس فواصل الآيات') : 'Mask Endings'}</span>
+                          <span>{isRtl ? (isEndingsMasked ? 'إظهار آخر الآيات' : 'إخفاء آخر كل آية') : 'Mask Endings'}</span>
                         </button>
 
                         {/* 2. Mask Starters (Innovative) */}
@@ -441,7 +441,7 @@
                           title={isRtl ? 'طمس أول كلمتين لاختبار استحضار مطالع الآيات وترابطها' : 'Mask Starters'}
                         >
                           <span className="text-base">🔀</span>
-                          <span>{isRtl ? (isStartersMasked ? 'إلغاء طمس المطالع' : 'طمس مطالع الآيات') : 'Mask Starters'}</span>
+                          <span>{isRtl ? (isStartersMasked ? 'إظهار أول الآيات' : 'إخفاء أول كل آية') : 'Mask Starters'}</span>
                         </button>
 
                         {/* 3. Mask Divine Attributes (Innovative) */}
@@ -456,7 +456,7 @@
                           title={isRtl ? 'طمس أسماء الله وصفاته في الفواصل لمنع الخلط الشائع' : 'Mask Divine Attributes'}
                         >
                           <span className="text-base">👑</span>
-                          <span>{isRtl ? (isDivineNamesMasked ? 'إلغاء طمس الصفات' : 'طمس الأسماء الحسنى') : 'Divine Names'}</span>
+                          <span>{isRtl ? (isDivineNamesMasked ? 'إظهار أسماء الله' : 'إخفاء أسماء الله في خواتيم الآيات') : 'Divine Names'}</span>
                         </button>
 
                         {/* 4. Alternating Lines (Line by Line) */}
@@ -480,7 +480,7 @@
                           title={isRtl ? 'حجب سطر وسطر بدقة 100% دون أي تقطيع في الحروف' : 'Alternate Lines'}
                         >
                           <span className="text-base">🌓</span>
-                          <span>{isRtl ? (passageTestSection === 'alternate_lines' ? 'إلغاء سطر وسطر' : 'حجب سطر وسطر') : 'Alternate Lines'}</span>
+                          <span>{isRtl ? (passageTestSection === 'alternate_lines' ? 'إظهار كل الآيات' : 'إخفاء آية وترك آية') : 'Alternate Lines'}</span>
                         </button>
 
                         {/* 4b. Alternating 50% Cloze */}
@@ -495,7 +495,7 @@
                           title={isRtl ? 'إخفاء كلمة وترك كلمة لتحفيز اليقظة العقلية الفائقة' : 'Alternating 50% Cloze'}
                         >
                           <span className="text-base">🏁</span>
-                          <span>{isRtl ? (isAlternatingMasked ? 'إلغاء التظليل' : 'تظليل تبادلي 50%') : 'Cloze 50%'}</span>
+                          <span>{isRtl ? (isAlternatingMasked ? 'إظهار كل الكلمات' : 'إخفاء كلمة وترك كلمة') : 'Cloze 50%'}</span>
                         </button>
 
                         {/* 5. Reverse Order Recitation (Innovative) */}
@@ -510,7 +510,7 @@
                           title={isRtl ? 'عرض الآيات من الأسفل للأعلى لاختبار الحفظ الصارم' : 'Reverse Order Test'}
                         >
                           <span className="text-base">🔄</span>
-                          <span>{isRtl ? (isReverseOrder ? 'الترتيب الأصلي' : 'تسميع عكسي صاعد') : 'Reverse Order'}</span>
+                          <span>{isRtl ? (isReverseOrder ? 'الترتيب الأصلي' : 'التسميع من آخر الصفحة') : 'Reverse Order'}</span>
                         </button>
 
                         {/* 6. Full Blind Recitation */}
@@ -528,7 +528,7 @@
                           title={isRtl ? 'إخفاء كامل للآيات مع النقر لكشف أي كلمة أو آية' : 'Full Blind Recitation'}
                         >
                           <span className="text-base">{isFullMasked ? '📖' : '🔒'}</span>
-                          <span>{isRtl ? (isFullMasked ? 'كشف الكل' : 'تسميع غيبي كامل') : 'Blind Mode'}</span>
+                          <span>{isRtl ? (isFullMasked ? 'إظهار الصفحة كلها' : 'إخفاء الصفحة كلها (تسميع غيبي)') : 'Blind Mode'}</span>
                         </button>
 
                       </div>
@@ -878,7 +878,7 @@
 
 {/* Repetition Loop Counter */}
                         <div className="flex items-center gap-2 bg-emerald-950 text-gold-200 rounded-xl px-3 py-1.5 border border-gold-400/40 text-xs shadow-sm">
-                          <span>🔁 {isRtl ? 'عداد التكرار:' : 'Loop:'}</span>
+                          <span>🔁 {isRtl ? 'عدد مرات التكرار:' : 'Loop:'}</span>
                           <div className="flex items-center gap-1">
                             {[3, 5, 7].map(num => (
                               <button
@@ -889,7 +889,7 @@
                                   repeatTarget === num ? 'bg-gold-500 text-emerald-950 font-black' : 'text-emerald-300 hover:text-white'
                                 }`}
                               >
-                                {num}x
+                                {num} مرات
                               </button>
                             ))}
                           </div>
@@ -905,7 +905,7 @@
                             }}
                             className="bg-gold-400 hover:bg-gold-300 text-emerald-950 font-black px-2.5 py-0.5 rounded shadow text-xs transition"
                           >
-                            +1
+                            {isRtl ? '✓ قراءة واحدة' : '+1'}
                           </button>
                         </div>
                       </div>
