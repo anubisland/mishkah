@@ -125,13 +125,16 @@
               </div>
               )}
               <div className="font-quran text-4xl leading-[2.3] text-right" dir="rtl">
-                {ayahs.map((ayah) => {
-                  const { isRevealed } = recitationAyahVisibility(ayah.num, masks);
+                {ayahs.map((ayah, ayahIdx) => {
+                  const { isRevealed } = recitationAyahVisibility(ayahKey(ayah), masks);
                   const words = ayah.text.split(' ');
                   return (
-                    <span key={ayah.num} className="font-quran">
+                    <span key={ayahKey(ayah)} className="font-quran">
+                      {!stage.isReverseOrder && startsSurahMidList(ayah, ayahIdx) && (
+                        <span className="block text-center text-3xl text-emerald-900 my-3 py-2 border-y border-gold-400/40">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
+                      )}
                       {isRevealed ? words.map((word, wIdx) => (
-                        isRecitationWordMasked(ayah.num, words, wIdx, masks)
+                        isRecitationWordMasked(ayahKey(ayah), words, wIdx, masks)
                           ? <span key={wIdx} className="font-quran inline-block mx-1 px-6 rounded-lg bg-amber-100 border-b-4 border-dashed border-amber-500 text-transparent select-none">ـــــ</span>
                           : <span key={wIdx} className="font-quran">{word} </span>
                       )) : (

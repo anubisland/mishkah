@@ -102,7 +102,7 @@
       ];
       const passageActive = ctx.passageMaskedAyahs.size > 0;
       // In full blind recitation, reveal the next hidden ayah once it is recited.
-      const nextHidden = ctx.isFullMasked ? ctx.hifzAyahs.find((a) => !ctx.revealedAyahSet.has(a.num)) : null;
+      const nextHidden = ctx.isFullMasked ? ctx.hifzAyahs.find((a) => !ctx.revealedAyahSet.has(ayahKey(a))) : null;
       return (
         <div className="space-y-2">
           <h5 className="font-black text-emerald-900 text-sm">ما يُخفى عن الطلاب:</h5>
@@ -113,7 +113,7 @@
             <button type="button" className={classPill(ctx.isFullMasked)} onClick={() => ctx.setIsFullMasked(!ctx.isFullMasked)}>🔒 الصفحة كلها (غيباً)</button>
           </div>
           {nextHidden && (
-            <button type="button" className="w-full py-2 rounded-xl bg-emerald-800 text-white font-black" onClick={() => ctx.toggleRevealAyah(nextHidden.num)}>
+            <button type="button" className="w-full py-2 rounded-xl bg-emerald-800 text-white font-black" onClick={() => ctx.toggleRevealAyah(ayahKey(nextHidden))}>
               👁️ قُرئت صحيحة: كشف الآية {nextHidden.num}
             </button>
           )}
@@ -150,11 +150,11 @@
           <div className="font-quran text-2xl leading-[2.2] text-right text-black" dir="rtl">
             {ctx.hifzAyahs.map((ayah) => {
               const words = ayah.text.split(' ');
-              const hiddenAyah = recitation && !recitationAyahVisibility(ayah.num, masks).isRevealed;
+              const hiddenAyah = recitation && !recitationAyahVisibility(ayahKey(ayah), masks).isRevealed;
               return (
-                <span key={ayah.num} className={'font-quran ' + (hiddenAyah ? 'opacity-40' : '')}>
+                <span key={ayahKey(ayah)} className={'font-quran ' + (hiddenAyah ? 'opacity-40' : '')}>
                   {words.map((w, i) => {
-                    const masked = recitation && isRecitationWordMasked(ayah.num, words, i, masks);
+                    const masked = recitation && isRecitationWordMasked(ayahKey(ayah), words, i, masks);
                     return <span key={i} className={'font-quran ' + (masked ? 'bg-amber-200 rounded px-0.5' : '')}>{w} </span>;
                   })}
                   <span className="font-quran text-gold-600">﴿{ayah.num}﴾ </span>

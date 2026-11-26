@@ -20,6 +20,32 @@
       };
       const [fontSizeLevel, setFontSizeLevel] = useState(localStorage.getItem('mishkah_font_level') || 'medium');
       
+      // Light or dark, or follow the device (light by day, dark by night on
+      // most systems). The student window is never themed: it returns before
+      // this hook runs.
+      const [theme, setTheme] = useState(() => {
+        try { return localStorage.getItem('mishkah_theme') || 'light'; } catch (e) { return 'light'; }
+      });
+      useEffect(() => {
+        const media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+        // Colour transitions are paused while switching, so the whole page
+        // changes at once instead of sliding colour by colour.
+        const apply = () => {
+          const dark = theme === 'dark' || (theme === 'auto' && media && media.matches);
+          const root = document.documentElement;
+          root.classList.add('mk-theme-switching');
+          root.setAttribute('data-theme', dark ? 'dark' : 'light');
+          void getComputedStyle(document.body).backgroundColor; // apply the new colours now
+          setTimeout(() => root.classList.remove('mk-theme-switching'), 60);
+        };
+        apply();
+        try { localStorage.setItem('mishkah_theme', theme); } catch (e) { console.warn('Mishkah: could not save the theme', e); }
+        if (theme === 'auto' && media) {
+          media.addEventListener('change', apply);
+          return () => media.removeEventListener('change', apply);
+        }
+      }, [theme]);
+
       // Font Family Switcher (Cairo, Amiri, Tajawal, Almarai, Noto Naskh)
       const [appFont, setAppFont] = useState(localStorage.getItem('mishkah_font') || 'cairo');
 
@@ -73,7 +99,10 @@
       const [isAlternatingMasked, setIsAlternatingMasked] = useState(false);
       const [isReverseOrder, setIsReverseOrder] = useState(false);
       const [isFullMasked, setIsFullMasked] = useState(false);
-      const [revealedAyahSet, setRevealedAyahSet] = useState(new Set([1]));
+      const [revealedAyahSet, setRevealedAyahSet] = useState(() => {
+        const first = PRELOADED_HIFZ_PASSAGES[0] && PRELOADED_HIFZ_PASSAGES[0].ayahs[0];
+        return new Set(first ? [ayahKey(first)] : []);
+      });
       const [customMaskedWords, setCustomMaskedWords] = useState(new Set());
       
       // Repetition Loop State
@@ -125,13 +154,14 @@
           setPassageTestSection('none');
           setPassageMaskedAyahs(new Set());
           setCustomMaskedWords(new Set());
-          setRevealedAyahSet(new Set([preloaded.ayahs[0]?.num || 1]));
+          setRevealedAyahSet(new Set(preloaded.ayahs[0] ? [ayahKey(preloaded.ayahs[0])] : []));
           showToast(isRtl ? 'عرض ' + preloaded.surahAr + ' (' + preloaded.ayahRange + ') ۞' : 'Loaded ' + preloaded.surahEn);
           return;
         }
 
         // 2. Check localStorage cache
-        const cacheKey = 'mishkah_mushaf_page_' + p;
+        // v2: pages that hold two surahs are titled with both.
+        const cacheKey = 'mishkah_mushaf_page_v2_' + p;
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           try {
@@ -145,7 +175,7 @@
               setPassageTestSection('none');
               setPassageMaskedAyahs(new Set());
               setCustomMaskedWords(new Set());
-              setRevealedAyahSet(new Set([parsed.ayahs[0]?.num || 1]));
+              setRevealedAyahSet(new Set(parsed.ayahs[0] ? [ayahKey(parsed.ayahs[0])] : []));
               showToast(isRtl ? 'عرض ' + parsed.surahName + ' (' + parsed.ayahRange + ') ۞' : 'Loaded page ' + p);
               return;
             }
@@ -178,12 +208,17 @@
           const primarySurah = rawAyahs[0]?.surah?.name || 'القرآن الكريم';
           const firstAyah = rawAyahs[0]?.numberInSurah || 1;
           const lastAyah = rawAyahs[rawAyahs.length - 1]?.numberInSurah || rawAyahs.length;
-          const rangeStr = firstAyah + '–' + lastAyah + ' (صفحة ' + p + ')';
+          const lastSurah = rawAyahs[rawAyahs.length - 1]?.surah?.name;
+          const twoSurahs = lastSurah && lastSurah !== primarySurah;
+          const lastShort = twoSurahs ? lastSurah.replace(/^سُورَةُ\s*/, '') : '';
+          const rangeStr = twoSurahs
+            ? firstAyah + ' إلى ' + lastShort + ' ' + lastAyah + ' (صفحة ' + p + ')'
+            : firstAyah + '–' + lastAyah + ' (صفحة ' + p + ')';
 
           const pageMutashabihat = getMutashabihatForPageNumber(p, sMatch?.id);
           const pageData = {
             ayahs: mappedAyahs,
-            surahName: primarySurah.startsWith('سُورَةُ') ? primarySurah : 'سورة ' + primarySurah,
+            surahName: (primarySurah.startsWith('سُورَةُ') ? primarySurah : 'سورة ' + primarySurah) + (twoSurahs ? (new Set(rawAyahs.map((a) => a.surah.number)).size > 2 ? ' إلى ' : ' و') + lastShort : ''),
             ayahRange: rangeStr,
             mutashabihat: pageMutashabihat
           };
@@ -198,7 +233,7 @@
           setPassageTestSection('none');
           setPassageMaskedAyahs(new Set());
           setCustomMaskedWords(new Set());
-          setRevealedAyahSet(new Set([mappedAyahs[0]?.num || 1]));
+          setRevealedAyahSet(new Set(mappedAyahs[0] ? [ayahKey(mappedAyahs[0])] : []));
           showToast(isRtl ? 'تم تحميل ' + pageData.surahName + ' (صفحة ' + p + ') بالرسم العثماني المعتمد ۞' : 'Loaded page ' + p + ' in Uthmani Script ۞');
         } catch(err) {
           console.warn('Could not fetch page ' + p + ':', err);
@@ -217,7 +252,7 @@
           setHifzAyahRange(p.ayahRange);
           setIsEndingsMasked(false);
           setIsFullMasked(false);
-          setRevealedAyahSet(new Set([1]));
+          setRevealedAyahSet(new Set(p.ayahs[0] ? [ayahKey(p.ayahs[0])] : []));
           setCustomMaskedWords(new Set());
           setRepeatCount(0);
           setActiveRepeatAyah(1);
@@ -352,7 +387,7 @@
           setShowCustomInput(false);
           setIsEndingsMasked(false);
           setIsFullMasked(false);
-          setRevealedAyahSet(new Set([from]));
+          setRevealedAyahSet(new Set(mappedAyahs[0] ? [ayahKey(mappedAyahs[0])] : []));
           setCustomMaskedWords(new Set());
           setRepeatCount(0);
           showToast(isRtl ? 'تم جلب آيات سورة ' + surah.name + ' (' + from + '–' + to + ') بالرسم العثماني المعتمد ۞' : 'Loaded Surah ' + surah.en + ' (' + from + '–' + to + ') in Uthmani Script ۞');
@@ -365,8 +400,8 @@
       }
 
       // Word click to mask/unmask
-      function toggleWordMask(ayahNum, wordIdx) {
-        const key = ayahNum + '-' + wordIdx;
+      function toggleWordMask(key0, wordIdx) {
+        const key = key0 + '-' + wordIdx;
         setCustomMaskedWords(prev => {
           const next = new Set(prev);
           if (next.has(key)) {
@@ -379,13 +414,13 @@
       }
 
       // Reveal specific ayah in blind recitation mode
-      function toggleRevealAyah(num) {
+      function toggleRevealAyah(key) {
         setRevealedAyahSet(prev => {
           const next = new Set(prev);
-          if (next.has(num)) {
-            next.delete(num);
+          if (next.has(key)) {
+            next.delete(key);
           } else {
-            next.add(num);
+            next.add(key);
           }
           return next;
         });
@@ -415,14 +450,14 @@
         
         if (sectionType === 'start') {
           const count = Math.max(1, Math.ceil(total / 3));
-          selectedAyahs = hifzAyahs.slice(0, count).map(a => a.num);
+          selectedAyahs = hifzAyahs.slice(0, count).map(ayahKey);
         } else if (sectionType === 'middle') {
           const startIdx = Math.max(0, Math.floor(total / 3));
           const endIdx = Math.max(startIdx + 1, Math.ceil((2 * total) / 3));
-          selectedAyahs = hifzAyahs.slice(startIdx, endIdx).map(a => a.num);
+          selectedAyahs = hifzAyahs.slice(startIdx, endIdx).map(ayahKey);
         } else if (sectionType === 'end') {
           const startIdx = Math.max(0, Math.floor((2 * total) / 3));
-          selectedAyahs = hifzAyahs.slice(startIdx).map(a => a.num);
+          selectedAyahs = hifzAyahs.slice(startIdx).map(ayahKey);
         }
 
         setPassageTestSection(sectionType);
@@ -1503,7 +1538,7 @@
             page: mushafPageNumber,
             surahName: hifzSurahName,
             ayahRange: hifzAyahRange,
-            ayahs: hifzAyahs.map((a) => ({ num: a.num, text: a.text })),
+            ayahs: hifzAyahs.map((a) => ({ num: a.num, text: a.text, surahNumber: a.surahNumber })),
             isReverseOrder,
             masks: recitationMasksToStage({
               isEndingsMasked, isStartersMasked, isDivineNamesMasked, isAlternatingMasked, isFullMasked,
@@ -1580,7 +1615,8 @@
       const headerCtx = {
         isRtl, lang, setLang, activeTab, navigate, myClassesOpen, unplannedCount: unplannedSoon.length,
         onStartClass: handleStartClass, onOpenGuide: () => setGuideOpen(true), handleOpenStudentPopout, studentScreenOpen,
-        FONT_SIZE_LEVELS, fontSizeLevel, setFontSizeLevel, FONT_MAP, appFont, setAppFont, setIsPinModalOpen, version: 'v82'
+        FONT_SIZE_LEVELS, fontSizeLevel, setFontSizeLevel, FONT_MAP, appFont, setAppFont, setIsPinModalOpen, version: 'v82',
+        theme, setTheme
       };
       const homeCtx = {
         scheduleVersion, navigate, startScheduledClass,

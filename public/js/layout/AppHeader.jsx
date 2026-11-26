@@ -67,6 +67,17 @@
               </div>
             </section>
             <section>
+              <h4 className="font-black text-sm mb-1.5">{s.isRtl ? 'الإضاءة' : 'Appearance'}</h4>
+              <div className="flex gap-1">
+                {[['light', '☀️ فاتح', '☀️ Light'], ['dark', '🌙 داكن', '🌙 Dark'], ['auto', '🔄 تلقائي', '🔄 Auto']].map(([key, ar, en]) => (
+                  <button key={key} type="button" className={pill(s.theme === key)} onClick={() => s.setTheme(key)}
+                    title={key === 'auto' ? (s.isRtl ? 'يتبع إعداد الجهاز: فاتح نهاراً وداكن ليلاً' : 'Follows the device setting') : undefined}>
+                    {s.isRtl ? ar : en}
+                  </button>
+                ))}
+              </div>
+            </section>
+            <section>
               <h4 className="font-black text-sm mb-1.5">{s.isRtl ? 'خط الواجهة' : 'Interface font'}</h4>
               <select value={s.appFont} onChange={(e) => s.setAppFont(e.target.value)}
                 className="w-full border-2 border-emerald-900/15 rounded-xl px-2 py-1.5 font-bold">

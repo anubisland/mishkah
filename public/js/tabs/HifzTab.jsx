@@ -323,7 +323,7 @@
                         )}
 
                         {/* The High-Resolution 15-Line Page Image with Authentic Overlays */}
-                        <div className="bg-[#FFFDF9] border-2 border-emerald-900/10 rounded-2xl p-2 sm:p-6 shadow-inner flex justify-center items-center relative overflow-hidden select-none">
+                        <div className="keep-light bg-[#FFFDF9] border-2 border-emerald-900/10 rounded-2xl p-2 sm:p-6 shadow-inner flex justify-center items-center relative overflow-hidden select-none">
                           <div className="relative inline-block w-full max-w-3xl">
                             <img
                               key={mushafPageNumber}
@@ -467,7 +467,7 @@
                               setPassageTestSection('none');
                               setPassageMaskedAyahs(new Set());
                             } else {
-                              const altNums = hifzAyahs.filter((_, idx) => idx % 2 === 1).map(a => a.num);
+                              const altNums = hifzAyahs.filter((_, idx) => idx % 2 === 1).map(ayahKey);
                               setPassageTestSection('alternate_lines');
                               setPassageMaskedAyahs(new Set(altNums));
                             }
@@ -518,7 +518,7 @@
                           type="button"
                           onClick={() => {
                             setIsFullMasked(!isFullMasked);
-                            setRevealedAyahSet(new Set([1]));
+                            setRevealedAyahSet(new Set(hifzAyahs[0] ? [ayahKey(hifzAyahs[0])] : []));
                           }}
                           className={`p-2.5 rounded-xl font-bold text-xs transition flex flex-col items-center justify-center text-center gap-1 border shadow-xs ${
                             isFullMasked
@@ -763,7 +763,7 @@
                                     {passageTestSection === 'end' && (isRtl ? 'ختام الصفحة' : 'End of Page')}
                                   </span>
                                   <span className="bg-emerald-900 text-gold-300 text-xs font-bold px-2.5 py-0.5 rounded-lg shadow-xs">
-                                    {isRtl ? 'الآيات (' + Array.from(passageMaskedAyahs).join(', ') + ')' : 'Ayahs (' + Array.from(passageMaskedAyahs).join(', ') + ')'}
+                                    {isRtl ? 'الآيات (' + Array.from(passageMaskedAyahs).map(ayahKeyNumber).join(', ') + ')' : 'Ayahs (' + Array.from(passageMaskedAyahs).map(ayahKeyNumber).join(', ') + ')'}
                                   </span>
                                 </div>
                                 
@@ -919,15 +919,22 @@
 
                       {/* Ayahs List */}
                       <div className="space-y-3 sm:space-y-4">
-                        {(isReverseOrder ? [...hifzAyahs].reverse() : hifzAyahs).map((ayah) => {
+                        {(isReverseOrder ? [...hifzAyahs].reverse() : hifzAyahs).map((ayah, ayahIdx) => {
                           const words = ayah.text.split(' ');
-                          const { isRevealed, isPassageHidden } = recitationAyahVisibility(ayah.num, recitationMasks);
+                          const key = ayahKey(ayah);
+                          const { isRevealed, isPassageHidden } = recitationAyahVisibility(key, recitationMasks);
                           // With the student screen open, the teacher keeps reading hidden ayahs under a veil.
                           const teacherSeesHidden = !isRevealed && studentScreenOpen;
 
                           return (
-                            <div 
-                              key={ayah.num}
+                            <React.Fragment key={key}>
+                            {!isReverseOrder && startsSurahMidList(ayah, ayahIdx) && (
+                              <div className="text-center font-quran text-2xl text-emerald-900 my-4 py-2 select-none border-y border-gold-400/20 max-w-md mx-auto">
+                                {ayah.surahName ? <div className="font-sans text-sm font-black text-gold-700 mb-1">{ayah.surahName}</div> : null}
+                                بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                              </div>
+                            )}
+                            <div
                               className={`p-3.5 sm:p-4 rounded-2xl transition-all duration-200 bg-white border-2 border-emerald-900/15 shadow-sm hover:border-gold-500/50 ${
                                 activeRepeatAyah === ayah.num 
                                   ? 'ring-2 ring-gold-400' 
@@ -961,7 +968,7 @@
                                   {isFullMasked && (
                                     <button
                                       type="button"
-                                      onClick={() => toggleRevealAyah(ayah.num)}
+                                      onClick={() => toggleRevealAyah(key)}
                                       className={`text-[11px] px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${
                                         isRevealed 
                                           ? 'bg-emerald-100 text-emerald-900' 
@@ -1009,12 +1016,12 @@
                                       : 'text-xl sm:text-2xl leading-[2.2]'
                                 )}>
                                   {words.map((word, wIdx) => {
-                                    const isMasked = isRecitationWordMasked(ayah.num, words, wIdx, recitationMasks);
+                                    const isMasked = isRecitationWordMasked(key, words, wIdx, recitationMasks);
 
                                     return (
                                       <span
                                         key={wIdx}
-                                        onClick={() => toggleWordMask(ayah.num, wIdx)}
+                                        onClick={() => toggleWordMask(key, wIdx)}
                                         className={`px-1.5 py-0.5 rounded-lg cursor-pointer transition-all ${
                                           isMasked && studentScreenOpen
                                             ? 'bg-amber-200/80 text-amber-950 border-b-2 border-dashed border-amber-600'
@@ -1031,6 +1038,7 @@
                                 </div>
                               )}
                             </div>
+                            </React.Fragment>
                           );
                         })}
                       </div>

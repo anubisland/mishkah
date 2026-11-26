@@ -4,9 +4,21 @@
     //
     // masks: {
     //   isEndingsMasked, isStartersMasked, isDivineNamesMasked, isAlternatingMasked,
-    //   isFullMasked, revealedAyahs: Set, customMaskedWords: Set ('ayah-word'),
+    //   isFullMasked, revealedAyahs: Set, customMaskedWords: Set ('key-word'),
     //   passageMaskedAyahs: Set, passageStatus
     // }
+    // Every set holds ayah keys (see ayahKey), never bare ayah numbers.
+
+    // A mushaf page can end one surah and start the next (page 440: Fatir 45,
+    // then Ya-Sin 1), so an ayah is known by its surah and its number.
+    function ayahKey(ayah) {
+      return ayah.surahNumber ? ayah.surahNumber + ':' + ayah.num : String(ayah.num);
+    }
+
+    // The ayah number alone, for showing a key to the teacher.
+    function ayahKeyNumber(key) {
+      return String(key).split(':').pop();
+    }
 
     // Common Quranic divine names and attributes that close ayahs.
     const DIVINE_ENDINGS_LIST = ['ٱلْعَزِيزُ', 'الْعَزِيزُ', 'ٱلْعَزِيزِ', 'ٱلْغَفُورُ', 'الْغَفُورُ', 'ٱلرَّحِيمُ', 'الرَّحِيمُ', 'ٱلسَّمِيعُ', 'السَّمِيعُ', 'ٱلْعَلِيمُ', 'الْعَلِيمُ', 'قَدِيرٌ', 'عَلِيمٌ', 'حَكِيمٌ', 'غَفُورٌ', 'رَّحِيمٌ', 'خَبِيرٌ', 'بَصِيرٌ', 'ٱلتَّوَّابُ', 'التَّوَّابُ', 'ٱلْحَمِيدُ'];
@@ -51,4 +63,9 @@
     function shouldShowBasmalah(surahName, ayahs) {
       if (!ayahs || !ayahs.length || ayahs[0].num !== 1) return false;
       return !/التوبة|الفاتحة/.test(surahName || '');
+    }
+
+    // A surah that starts part-way down the page gets its own basmalah.
+    function startsSurahMidList(ayah, index) {
+      return index > 0 && ayah.num === 1 && !!ayah.surahNumber && ayah.surahNumber !== 1 && ayah.surahNumber !== 9;
     }
