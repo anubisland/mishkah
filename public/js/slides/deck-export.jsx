@@ -71,8 +71,9 @@
     // hidden window, and the teacher may switch windows while exporting.
     const nextFrame = () => new Promise((r) => setTimeout(r, 60));
 
-    // Draws each slide off screen at full size and captures it as a PNG data URL.
-    async function captureDeckSlides(deck, onProgress) {
+    // Draws each slide off screen at full size and captures it as an image data
+    // URL: PNG for full quality, or JPEG to keep a PDF small enough to share.
+    async function captureDeckSlides(deck, onProgress, format) {
       await loadScriptOnce(EXPORT_LIBRARIES.htmlToImage);
       const fontEmbedCSS = await getSlideFontCss();
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
@@ -88,7 +89,10 @@
           // Let the slide mount and shrink its text if it overflows.
           for (let f = 0; f < 4; f++) await nextFrame();
           const node = host.firstElementChild;
-          images.push(await window.htmlToImage.toPng(node, { width: 1600, height: 900, pixelRatio: 1.5, cacheBust: true, fontEmbedCSS }));
+          const options = { width: 1600, height: 900, pixelRatio: 1.5, cacheBust: true, fontEmbedCSS };
+          images.push(format === 'jpeg'
+            ? await window.htmlToImage.toJpeg(node, Object.assign({ quality: 0.88, backgroundColor: '#ffffff' }, options))
+            : await window.htmlToImage.toPng(node, options));
         }
       } finally {
         root.unmount();
@@ -113,12 +117,14 @@
     }
 
     async function exportDeckAsPdf(deck, onProgress) {
-      const images = await captureDeckSlides(deck, onProgress);
+      // JPEG keeps a long lecture small enough for WhatsApp and email; PNG pages
+      // would be lossless but tens of megabytes.
+      const images = await captureDeckSlides(deck, onProgress, 'jpeg');
       await loadScriptOnce(EXPORT_LIBRARIES.jspdf);
       const pdf = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'px', format: [1600, 900], compress: true });
       images.forEach((img, i) => {
         if (i > 0) pdf.addPage([1600, 900], 'landscape');
-        pdf.addImage(img, 'PNG', 0, 0, 1600, 900);
+        pdf.addImage(img, 'JPEG', 0, 0, 1600, 900, undefined, 'FAST');
       });
       downloadBlob(pdf.output('blob'), safeFileName(deck) + '.pdf');
     }
