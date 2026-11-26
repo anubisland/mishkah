@@ -3,7 +3,7 @@
 Mishkah Master Scholarly Presentation Generator (v81.2 Masterpiece Edition)
 Organization: AnubisLand
 Lecture: العقيدة الإسلامية — المحاضرة الثانية: من هو الله؟
-Full 30-Slide Exemplar Presentation with Unified Card Containers, True Arabic RTL Ordering, and Elderly-Friendly Typography.
+Full 30-Slide Exemplar Presentation with Unified Card Containers, True Arabic RTL Ordering, Native RTL XML Properties, and Elderly-Friendly Typography.
 """
 
 import json
@@ -43,11 +43,18 @@ def is_sacred_text(text):
         'قال الله' in text or 'رسول الله' in text or 'صلى الله عليه وسلم' in text or 'ﷺ' in text
     )
 
+def set_p_rtl(p):
+    """Enforce native Right-to-Left paragraph reading order in PowerPoint XML."""
+    try:
+        p._p.get_or_add_pPr().set('rtl', '1')
+    except Exception:
+        pass
+
 def add_header_elements(slide, tag_text, title_text, is_dark=False):
-    # Category Tag
     if tag_text:
         tb_tag = slide.shapes.add_textbox(Inches(0.8), Inches(0.45), Inches(11.733), Inches(0.4))
         p_tag = tb_tag.text_frame.paragraphs[0]
+        set_p_rtl(p_tag)
         p_tag.alignment = PP_ALIGN.RIGHT
         p_tag.font.name = "Cairo"
         p_tag.font.size = Pt(14)
@@ -55,10 +62,10 @@ def add_header_elements(slide, tag_text, title_text, is_dark=False):
         p_tag.font.color.rgb = COLOR_GOLD_LIGHT if is_dark else COLOR_GOLD
         p_tag.text = tag_text
 
-    # Main Title
     if title_text:
         tb_title = slide.shapes.add_textbox(Inches(0.8), Inches(0.9), Inches(11.733), Inches(0.75))
         p_title = tb_title.text_frame.paragraphs[0]
+        set_p_rtl(p_title)
         p_title.alignment = PP_ALIGN.RIGHT
         p_title.font.name = "Cairo"
         p_title.font.size = Pt(24)
@@ -83,7 +90,6 @@ def build_presentation(analysis_json_path, output_pptx_path):
         table_data = s.get('table_data', [])
         notes_text = s.get('notes', '')
 
-        # Set Speaker Notes
         if notes_text and hasattr(slide, 'notes_slide'):
             try:
                 slide.notes_slide.notes_text_frame.text = notes_text
@@ -109,6 +115,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
         ftf = footer.text_frame
         ftf.word_wrap = True
         fp = ftf.paragraphs[0]
+        set_p_rtl(fp)
         fp.alignment = PP_ALIGN.RIGHT
         fp.font.name = "Cairo"
         fp.font.size = Pt(10)
@@ -121,6 +128,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
         if idx == 1:
             tb = slide.shapes.add_textbox(Inches(1.0), Inches(1.8), Inches(11.333), Inches(0.6))
             p = tb.text_frame.paragraphs[0]
+            set_p_rtl(p)
             p.alignment = PP_ALIGN.CENTER
             p.font.name = "Cairo"
             p.font.size = Pt(20)
@@ -130,6 +138,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
 
             tb2 = slide.shapes.add_textbox(Inches(1.0), Inches(2.5), Inches(11.333), Inches(1.5))
             p2 = tb2.text_frame.paragraphs[0]
+            set_p_rtl(p2)
             p2.alignment = PP_ALIGN.CENTER
             p2.font.name = "Cairo"
             p2.font.size = Pt(46)
@@ -139,6 +148,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
 
             tb3 = slide.shapes.add_textbox(Inches(1.0), Inches(4.1), Inches(11.333), Inches(0.8))
             p3 = tb3.text_frame.paragraphs[0]
+            set_p_rtl(p3)
             p3.alignment = PP_ALIGN.CENTER
             p3.font.name = "Cairo"
             p3.font.size = Pt(22)
@@ -153,6 +163,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
             ctf = card.text_frame
             ctf.word_wrap = True
             cp = ctf.paragraphs[0]
+            set_p_rtl(cp)
             cp.alignment = PP_ALIGN.CENTER
             cp.font.name = "Cairo"
             cp.font.size = Pt(16)
@@ -204,21 +215,23 @@ def build_presentation(analysis_json_path, output_pptx_path):
 
                 tf = card.text_frame
                 tf.word_wrap = True
-                tf.margin_top = Inches(0.35)
-                tf.margin_bottom = Inches(0.35)
+                tf.margin_top = Inches(0.4)
+                tf.margin_bottom = Inches(0.4)
                 tf.margin_left = Inches(0.35)
                 tf.margin_right = Inches(0.35)
 
                 p_b = tf.paragraphs[0]
+                set_p_rtl(p_b)
                 p_b.alignment = PP_ALIGN.RIGHT
                 p_b.font.name = "Cairo"
-                p_b.font.size = Pt(13)
+                p_b.font.size = Pt(14)
                 p_b.font.bold = True
                 p_b.font.color.rgb = COLOR_GOLD
                 p_b.text = src["badge"]
                 p_b.space_after = Pt(10)
 
                 p_t = tf.add_paragraph()
+                set_p_rtl(p_t)
                 p_t.alignment = PP_ALIGN.RIGHT
                 p_t.font.name = "Cairo"
                 p_t.font.size = Pt(20)
@@ -228,6 +241,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_t.space_after = Pt(12)
 
                 p_a = tf.add_paragraph()
+                set_p_rtl(p_a)
                 p_a.alignment = PP_ALIGN.RIGHT
                 p_a.font.name = "Cairo"
                 p_a.font.size = Pt(15)
@@ -237,6 +251,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_a.space_after = Pt(14)
 
                 p_f = tf.add_paragraph()
+                set_p_rtl(p_f)
                 p_f.alignment = PP_ALIGN.RIGHT
                 p_f.font.name = "Traditional Arabic"
                 p_f.font.size = Pt(16)
@@ -256,6 +271,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
             tb2.line.color.rgb = COLOR_CARD_BORDER
             tb2.line.width = Pt(1)
             p2 = tb2.text_frame.paragraphs[0]
+            set_p_rtl(p2)
             p2.alignment = PP_ALIGN.RIGHT
             p2.font.name = "Traditional Arabic"
             p2.font.size = Pt(17)
@@ -286,6 +302,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 qtf = q_card.text_frame
                 qtf.word_wrap = True
                 qp_num = qtf.paragraphs[0]
+                set_p_rtl(qp_num)
                 qp_num.alignment = PP_ALIGN.CENTER
                 qp_num.font.name = "Cairo"
                 qp_num.font.size = Pt(24)
@@ -294,6 +311,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 qp_num.text = num
 
                 qp_text = qtf.add_paragraph()
+                set_p_rtl(qp_text)
                 qp_text.alignment = PP_ALIGN.CENTER
                 qp_text.font.name = "Cairo"
                 qp_text.font.size = Pt(18)
@@ -309,6 +327,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
             ptf = punch_box.text_frame
             ptf.word_wrap = True
             pp1 = ptf.paragraphs[0]
+            set_p_rtl(pp1)
             pp1.alignment = PP_ALIGN.CENTER
             pp1.font.name = "Cairo"
             pp1.font.size = Pt(20)
@@ -317,6 +336,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
             pp1.text = "هكذا تماماً هي حياة الإنسان على هذه الأرض."
 
             pp2 = ptf.add_paragraph()
+            set_p_rtl(pp2)
             pp2.alignment = PP_ALIGN.CENTER
             pp2.font.name = "Traditional Arabic"
             pp2.font.size = Pt(16)
@@ -364,12 +384,13 @@ def build_presentation(analysis_json_path, output_pptx_path):
 
                 tf = card.text_frame
                 tf.word_wrap = True
-                tf.margin_top = Inches(0.35)
-                tf.margin_bottom = Inches(0.35)
+                tf.margin_top = Inches(0.4)
+                tf.margin_bottom = Inches(0.4)
                 tf.margin_left = Inches(0.35)
                 tf.margin_right = Inches(0.35)
 
                 p_num = tf.paragraphs[0]
+                set_p_rtl(p_num)
                 p_num.alignment = PP_ALIGN.RIGHT
                 p_num.font.name = "Cairo"
                 p_num.font.size = Pt(28)
@@ -379,6 +400,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_num.space_after = Pt(8)
 
                 p_t = tf.add_paragraph()
+                set_p_rtl(p_t)
                 p_t.alignment = PP_ALIGN.RIGHT
                 p_t.font.name = "Cairo"
                 p_t.font.size = Pt(22)
@@ -388,6 +410,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_t.space_after = Pt(14)
 
                 p_b = tf.add_paragraph()
+                set_p_rtl(p_b)
                 p_b.alignment = PP_ALIGN.RIGHT
                 p_b.font.name = "Traditional Arabic"
                 p_b.font.size = Pt(16)
@@ -420,8 +443,6 @@ def build_presentation(analysis_json_path, output_pptx_path):
             card_h = 4.7
 
             for i, ord_info in enumerate(orders):
-                # i=0 (الأمر الكوني) => Right column (x = 6.93)
-                # i=1 (الأمر الشرعي) => Left column (x = 0.8)
                 x_pos = 0.8 + (1 - i) * (card_w + gap)
 
                 card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x_pos), Inches(top_y), Inches(card_w), Inches(card_h))
@@ -438,6 +459,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 tf.margin_right = Inches(0.4)
 
                 p_b = tf.paragraphs[0]
+                set_p_rtl(p_b)
                 p_b.alignment = PP_ALIGN.RIGHT
                 p_b.font.name = "Cairo"
                 p_b.font.size = Pt(14)
@@ -447,6 +469,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_b.space_after = Pt(10)
 
                 p_t = tf.add_paragraph()
+                set_p_rtl(p_t)
                 p_t.alignment = PP_ALIGN.RIGHT
                 p_t.font.name = "Cairo"
                 p_t.font.size = Pt(22)
@@ -456,6 +479,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_t.space_after = Pt(16)
 
                 p_desc = tf.add_paragraph()
+                set_p_rtl(p_desc)
                 p_desc.alignment = PP_ALIGN.RIGHT
                 p_desc.font.name = "Traditional Arabic"
                 p_desc.font.size = Pt(17)
@@ -500,6 +524,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                         cell.fill.fore_color.rgb = hex_to_rgb('F4EFE6')
 
                     cp = cell.text_frame.paragraphs[0]
+                    set_p_rtl(cp)
                     cp.alignment = PP_ALIGN.CENTER if is_header else PP_ALIGN.RIGHT
                     cp.font.name = "Cairo" if is_header else "Traditional Arabic"
                     cp.font.size = Pt(15) if is_header else Pt(14)
@@ -516,6 +541,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 btf = b_box.text_frame
                 btf.word_wrap = True
                 bp = btf.paragraphs[0]
+                set_p_rtl(bp)
                 bp.alignment = PP_ALIGN.RIGHT
                 bp.font.name = "Cairo"
                 bp.font.size = Pt(13)
@@ -553,12 +579,13 @@ def build_presentation(analysis_json_path, output_pptx_path):
 
                 tf = card.text_frame
                 tf.word_wrap = True
-                tf.margin_top = Inches(0.35)
-                tf.margin_bottom = Inches(0.35)
+                tf.margin_top = Inches(0.4)
+                tf.margin_bottom = Inches(0.4)
                 tf.margin_left = Inches(0.3)
                 tf.margin_right = Inches(0.3)
 
                 p_b = tf.paragraphs[0]
+                set_p_rtl(p_b)
                 p_b.alignment = PP_ALIGN.RIGHT
                 p_b.font.name = "Cairo"
                 p_b.font.size = Pt(13)
@@ -568,6 +595,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_b.space_after = Pt(8)
 
                 p_t = tf.add_paragraph()
+                set_p_rtl(p_t)
                 p_t.alignment = PP_ALIGN.RIGHT
                 p_t.font.name = "Cairo"
                 p_t.font.size = Pt(18)
@@ -577,6 +605,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_t.space_after = Pt(12)
 
                 p_d = tf.add_paragraph()
+                set_p_rtl(p_d)
                 p_d.alignment = PP_ALIGN.RIGHT
                 p_d.font.name = "Traditional Arabic"
                 p_d.font.size = Pt(15)
@@ -624,12 +653,13 @@ def build_presentation(analysis_json_path, output_pptx_path):
 
                 tf = card.text_frame
                 tf.word_wrap = True
-                tf.margin_top = Inches(0.35)
-                tf.margin_bottom = Inches(0.35)
+                tf.margin_top = Inches(0.4)
+                tf.margin_bottom = Inches(0.4)
                 tf.margin_left = Inches(0.35)
                 tf.margin_right = Inches(0.35)
 
                 p_num = tf.paragraphs[0]
+                set_p_rtl(p_num)
                 p_num.alignment = PP_ALIGN.RIGHT
                 p_num.font.name = "Cairo"
                 p_num.font.size = Pt(28)
@@ -639,6 +669,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_num.space_after = Pt(8)
 
                 p_t = tf.add_paragraph()
+                set_p_rtl(p_t)
                 p_t.alignment = PP_ALIGN.RIGHT
                 p_t.font.name = "Cairo"
                 p_t.font.size = Pt(22)
@@ -648,6 +679,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_t.space_after = Pt(14)
 
                 p_b = tf.add_paragraph()
+                set_p_rtl(p_b)
                 p_b.alignment = PP_ALIGN.RIGHT
                 p_b.font.name = "Traditional Arabic"
                 p_b.font.size = Pt(16)
@@ -676,6 +708,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                     tf = tbox.text_frame
                     tf.word_wrap = True
                     p = tf.paragraphs[0]
+                    set_p_rtl(p)
                     p.alignment = PP_ALIGN.RIGHT
                     p.font.name = "Cairo"
                     p.font.size = Pt(14)
@@ -687,6 +720,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                     tf = tbox.text_frame
                     tf.word_wrap = True
                     p = tf.paragraphs[0]
+                    set_p_rtl(p)
                     p.alignment = PP_ALIGN.RIGHT
                     p.font.name = "Cairo"
                     p.font.size = Pt(24)
@@ -703,6 +737,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                         qtf = qbox.text_frame
                         qtf.word_wrap = True
                         qp = qtf.paragraphs[0]
+                        set_p_rtl(qp)
                         qp.alignment = PP_ALIGN.CENTER
                         qp.font.name = "Amiri Quran" if ('{' in raw_text or '﴿' in raw_text) else "Traditional Arabic"
                         qp.font.size = Pt(17)
@@ -714,13 +749,13 @@ def build_presentation(analysis_json_path, output_pptx_path):
                         tf = tbox.text_frame
                         tf.word_wrap = True
                         p = tf.paragraphs[0]
+                        set_p_rtl(p)
                         p.alignment = PP_ALIGN.RIGHT
                         p.font.name = "Traditional Arabic"
                         p.font.size = Pt(16)
                         p.font.color.rgb = COLOR_TEXT_DARK
                         p.text = raw_text
             else:
-                # RTL Mirror for Column elements
                 rtl_left = TOTAL_WIDTH - left_in - width_in
                 rtl_left = max(0.6, min(rtl_left, 12.5))
 
@@ -732,6 +767,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                     badge.line.width = Pt(1.5)
                     btf = badge.text_frame
                     bp = btf.paragraphs[0]
+                    set_p_rtl(bp)
                     bp.alignment = PP_ALIGN.CENTER
                     bp.font.name = "Cairo"
                     bp.font.size = Pt(22)
@@ -747,6 +783,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                     ctf = card.text_frame
                     ctf.word_wrap = True
                     cp = ctf.paragraphs[0]
+                    set_p_rtl(cp)
                     cp.alignment = PP_ALIGN.RIGHT
 
                     if len(raw_text) < 40 and not is_sacred_text(raw_text):
@@ -764,6 +801,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                     tf = tbox.text_frame
                     tf.word_wrap = True
                     p = tf.paragraphs[0]
+                    set_p_rtl(p)
                     p.alignment = PP_ALIGN.RIGHT
                     p.font.name = "Cairo" if len(raw_text) < 40 else "Traditional Arabic"
                     p.font.size = Pt(16)
