@@ -1048,6 +1048,7 @@
       const [studentScreenOpen, setStudentScreenOpen] = useState(false);
       const [slideStudioOpen, setSlideStudioOpen] = useState(false);
       const [splitHintOpen, setSplitHintOpen] = useState(false);
+      const [classModeOpen, setClassModeOpen] = useState(false);
       useEffect(() => {
         const timer = setInterval(() => {
           const win = studentWindowRef.current;
@@ -1486,10 +1487,11 @@
       const { handleGenerateTajweed, getFallbackTajweed } = createTajweedActions({ ayahRange, customContext, isRtl, selectedRule, selectedTextbook, setIsGeneratingTajweed, setQuizAnswers, setQuizSubmitted, setTajweedData, showToast, surahName, tajweedMode, teacherPin });
 
 
-      useEffect(() => {
-        if (slideStudioOpen) return; // the slide studio publishes its own slides
+      // What the student window should show for the open section (hifz and
+      // tajweed). Lecture slides come from the slide studio or class mode.
+      const sectionStage = useMemo(() => {
         if (activeTab === 'hifz' && hifzViewMode === 'interactive_test') {
-          publishStage({
+          return {
             kind: 'recitation',
             page: mushafPageNumber,
             surahName: hifzSurahName,
@@ -1500,24 +1502,42 @@
               isEndingsMasked, isStartersMasked, isDivineNamesMasked, isAlternatingMasked, isFullMasked,
               revealedAyahs: revealedAyahSet, customMaskedWords, passageMaskedAyahs, passageStatus
             })
-          });
-        } else if (activeTab === 'hifz') {
-          publishStage({ kind: 'mushaf', page: mushafPageNumber, overlayMode: mushafOverlayMode, rulerLine: activeRulerLine });
-        } else if (activeTab === 'tajweed') {
-          publishStage({
+          };
+        }
+        if (activeTab === 'hifz') {
+          return { kind: 'mushaf', page: mushafPageNumber, overlayMode: mushafOverlayMode, rulerLine: activeRulerLine };
+        }
+        if (activeTab === 'tajweed') {
+          return {
             kind: 'tajweed',
             lessonId: currentSuwaydLesson && currentSuwaydLesson.id,
-            slideIndex: suwaydZoomModalOpen ? suwaydZoomSlideIndex : 0,
+            // In class mode the teacher steps through the slides from her panel.
+            slideIndex: (suwaydZoomModalOpen || classModeOpen) ? Math.min(suwaydZoomSlideIndex, Math.max(0, currentZoomSlides.length - 1)) : 0,
             plateId: activeSuwaydPlateId,
             metronome: { count: metronomeCount, playing: metronomePlaying, beat: metronomeBeat }
-          });
-        } else if (activeTab === 'islamic') {
-          publishStage({ kind: 'slides' });
+          };
         }
-      }, [slideStudioOpen, activeTab, hifzViewMode, hifzSurahName, hifzAyahRange, hifzAyahs, isReverseOrder, isEndingsMasked, isStartersMasked,
+        if (activeTab === 'islamic') return { kind: 'slides' };
+        return null;
+      }, [activeTab, hifzViewMode, hifzSurahName, hifzAyahRange, hifzAyahs, isReverseOrder, isEndingsMasked, isStartersMasked,
           isDivineNamesMasked, isAlternatingMasked, isFullMasked, revealedAyahSet, customMaskedWords, passageMaskedAyahs, passageStatus,
-          mushafPageNumber, mushafOverlayMode, activeRulerLine, currentSuwaydLesson, suwaydZoomModalOpen,
-          suwaydZoomSlideIndex, activeSuwaydPlateId, metronomeCount, metronomePlaying, metronomeBeat]);
+          mushafPageNumber, mushafOverlayMode, activeRulerLine, currentSuwaydLesson, suwaydZoomModalOpen, classModeOpen,
+          suwaydZoomSlideIndex, currentZoomSlides, activeSuwaydPlateId, metronomeCount, metronomePlaying, metronomeBeat]);
+
+      useEffect(() => {
+        // The slide studio and class mode publish to the student window themselves.
+        if (slideStudioOpen || classModeOpen || !sectionStage) return;
+        publishStage(sectionStage);
+      }, [slideStudioOpen, classModeOpen, sectionStage]);
+
+      // Starting a class opens the student window and turns this window into
+      // the teacher's class panel.
+      const handleStartClass = () => {
+        if (!studentScreenOpen) handleOpenStudentPopout();
+        if (!['hifz', 'tajweed', 'islamic'].includes(activeTab)) setActiveTab('hifz');
+        setClassModeOpen(true);
+      };
+      const classCtx = { activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
 
       return (
         <div className="min-h-screen flex flex-col islamic-screen-pattern">
@@ -1562,6 +1582,15 @@
 
                 {/* Quick Actions (Library + Security + Lang) */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
+                  <button
+                    type="button"
+                    onClick={handleStartClass}
+                    className="font-black text-xs sm:text-sm px-3 sm:px-4 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5 border-2 bg-gold-400 text-emerald-950 border-gold-200 hover:bg-gold-300"
+                    title={isRtl ? 'تفتح شاشة الطالب، وتصير نافذتكِ لوحة التحكم في الحصة' : 'Opens the student screen and turns this window into the class panel'}
+                  >
+                    <span>▶</span>
+                    <span>{isRtl ? 'ابدئي الحصة' : 'Start class'}</span>
+                  </button>
                   <button
                     type="button"
                     onClick={handleOpenStudentPopout}
@@ -1722,6 +1751,7 @@
             </div>
           </header>
 
+          {classModeOpen && <ClassMode ctx={classCtx} onEnd={() => setClassModeOpen(false)} />}
           {splitHintOpen && <SplitScreenHint onClose={() => setSplitHintOpen(false)} />}
 
           {slideStudioOpen && (
