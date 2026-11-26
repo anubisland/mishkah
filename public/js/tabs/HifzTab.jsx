@@ -1,6 +1,11 @@
     // HifzTab: the "hifz" screen, moved out of App unchanged.
     // Every App value it reads arrives as a prop of the same name.
     function HifzTab({ studentScreenOpen, activeRepeatAyah, activeRulerLine, customMaskedWords, handleActivatePassageTest, handleDeleteMutashabiha, handleFetchTargetMutaAyah, handleNavigateMushafPage, handlePassageVerdict, handleSaveNewMutashabiha, handleSearchMutaAyahs, handleSelectMutaMatch, hifzAyahRange, hifzAyahs, hifzMutashabihat, hifzSurahName, hifzViewMode, hifzWorksheetModalOpen, isAddMutaOpen, isAlternatingMasked, isDivineNamesMasked, isEndingsMasked, isFetchingQuran, isFullMasked, isReverseOrder, isRtl, isSearchingMuta, isStartersMasked, mushafCurrentSurahId, mushafOverlayMode, mushafPageNumber, mutaGuideNote, mutaSearchQuery, mutaSearchResults, mutaTargetAyahNum, mutaTargetSurahId, mutaTargetText, passageMaskedAyahs, passageRetryCount, passageStatus, passageTestSection, quranFontSize, repeatCount, repeatTarget, revealedAyahSet, setActiveRepeatAyah, setActiveRulerLine, setCustomMaskedWords, setHifzViewMode, setHifzWorksheetModalOpen, setIsAddMutaOpen, setIsAlternatingMasked, setIsDivineNamesMasked, setIsEndingsMasked, setIsFullMasked, setIsReverseOrder, setIsStartersMasked, setMaskedMushafLines, setMushafOverlayMode, setMutaGuideNote, setMutaSearchQuery, setPassageMaskedAyahs, setPassageTestSection, setQuranFontSize, setRepeatCount, setRepeatTarget, setRevealedAyahSet, showToast, toggleRevealAyah, toggleWordMask }) {
+      const recitationMasks = {
+        isEndingsMasked, isStartersMasked, isDivineNamesMasked, isAlternatingMasked, isFullMasked,
+        revealedAyahs: revealedAyahSet, customMaskedWords, passageMaskedAyahs, passageStatus
+      };
+
       return (
         <div className="space-y-6 animate-fadeIn">
                 
@@ -914,12 +919,9 @@
                       <div className="space-y-3 sm:space-y-4">
                         {(isReverseOrder ? [...hifzAyahs].reverse() : hifzAyahs).map((ayah) => {
                           const words = ayah.text.split(' ');
-                          const isPassageMasked = passageMaskedAyahs.has(ayah.num);
-                          const isPassageHidden = isPassageMasked && (passageStatus === 'reciting' || passageStatus === 'error_retry');
-                          const isRevealed = (!isFullMasked || revealedAyahSet.has(ayah.num)) && !isPassageHidden;
-
-                          // Common Quranic divine names & attributes in endings
-                          const divineEndingsList = ['ٱلْعَزِيزُ', 'الْعَزِيزُ', 'ٱلْعَزِيزِ', 'ٱلْغَفُورُ', 'الْغَفُورُ', 'ٱلرَّحِيمُ', 'الرَّحِيمُ', 'ٱلسَّمِيعُ', 'السَّمِيعُ', 'ٱلْعَلِيمُ', 'الْعَلِيمُ', 'قَدِيرٌ', 'عَلِيمٌ', 'حَكِيمٌ', 'غَفُورٌ', 'رَّحِيمٌ', 'خَبِيرٌ', 'بَصِيرٌ', 'ٱلتَّوَّابُ', 'التَّوَّابُ', 'ٱلْحَمِيدُ'];
+                          const { isRevealed, isPassageHidden } = recitationAyahVisibility(ayah.num, recitationMasks);
+                          // With the student screen open, the teacher keeps reading hidden ayahs under a veil.
+                          const teacherSeesHidden = !isRevealed && studentScreenOpen;
 
                           return (
                             <div 
@@ -970,7 +972,7 @@
                                 </div>
                               </div>
 
-                              {!isRevealed ? (
+                              {!isRevealed && !teacherSeesHidden ? (
                                 isPassageHidden ? (
                                   <div className={'p-6 sm:p-8 rounded-2xl text-center border-2 transition-all select-none ' + (
                                     passageStatus === 'error_retry'
@@ -997,7 +999,7 @@
                                   </div>
                                 )
                               ) : (
-                                <div className={'font-quran font-bold text-black text-right flex flex-wrap gap-x-2 gap-y-2 items-baseline select-none ' + (
+                                <div className={'font-quran font-bold text-black text-right flex flex-wrap gap-x-2 gap-y-2 items-baseline select-none ' + (teacherSeesHidden ? 'opacity-40 border-2 border-dashed border-amber-500 rounded-xl p-2 ' : '') + (
                                   quranFontSize === 'small' 
                                     ? 'text-lg sm:text-xl leading-[2.0]' 
                                     : quranFontSize === 'large' 
@@ -1005,25 +1007,22 @@
                                       : 'text-xl sm:text-2xl leading-[2.2]'
                                 )}>
                                   {words.map((word, wIdx) => {
-                                    const isEndingWord = isEndingsMasked && (wIdx >= words.length - 2);
-                                    const isStarterWord = isStartersMasked && (wIdx < 2);
-                                    const isDivineNameWord = isDivineNamesMasked && (wIdx >= words.length - 3) && divineEndingsList.some(d => word.includes(d) || d.includes(word));
-                                    const isAlternatingWord = isAlternatingMasked && (wIdx % 2 === 1);
-                                    const isCustomMasked = customMaskedWords.has(ayah.num + '-' + wIdx);
-                                    const isMasked = isEndingWord || isStarterWord || isDivineNameWord || isAlternatingWord || isCustomMasked;
+                                    const isMasked = isRecitationWordMasked(ayah.num, words, wIdx, recitationMasks);
 
                                     return (
                                       <span
                                         key={wIdx}
                                         onClick={() => toggleWordMask(ayah.num, wIdx)}
                                         className={`px-1.5 py-0.5 rounded-lg cursor-pointer transition-all ${
-                                          isMasked 
+                                          isMasked && studentScreenOpen
+                                            ? 'bg-amber-200/80 text-amber-950 border-b-2 border-dashed border-amber-600'
+                                          : isMasked
                                             ? 'bg-amber-200 text-amber-950 border-b-2 border-dashed border-amber-600 px-3 font-sans text-base select-none shadow-xs font-bold' 
                                             : 'hover:bg-gold-200 hover:text-emerald-950'
                                         }`}
                                         title={isMasked ? (isRtl ? 'انقر لكشف الكلمة' : 'Click to reveal') : (isRtl ? 'انقر لطمس الكلمة' : 'Click to mask')}
                                       >
-                                        {isMasked ? '[ ... ]' : word}
+                                        {isMasked && !studentScreenOpen ? '[ ... ]' : word}
                                       </span>
                                     );
                                   })}

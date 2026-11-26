@@ -1483,7 +1483,20 @@
 
 
       useEffect(() => {
-        if (activeTab === 'hifz') {
+        if (activeTab === 'hifz' && hifzViewMode === 'interactive_test') {
+          publishStage({
+            kind: 'recitation',
+            page: mushafPageNumber,
+            surahName: hifzSurahName,
+            ayahRange: hifzAyahRange,
+            ayahs: hifzAyahs.map((a) => ({ num: a.num, text: a.text })),
+            isReverseOrder,
+            masks: recitationMasksToStage({
+              isEndingsMasked, isStartersMasked, isDivineNamesMasked, isAlternatingMasked, isFullMasked,
+              revealedAyahs: revealedAyahSet, customMaskedWords, passageMaskedAyahs, passageStatus
+            })
+          });
+        } else if (activeTab === 'hifz') {
           publishStage({ kind: 'mushaf', page: mushafPageNumber, overlayMode: mushafOverlayMode, rulerLine: activeRulerLine });
         } else if (activeTab === 'tajweed') {
           publishStage({
@@ -1496,7 +1509,9 @@
         } else if (activeTab === 'islamic') {
           publishStage({ kind: 'slides' });
         }
-      }, [activeTab, mushafPageNumber, mushafOverlayMode, activeRulerLine, currentSuwaydLesson, suwaydZoomModalOpen,
+      }, [activeTab, hifzViewMode, hifzSurahName, hifzAyahRange, hifzAyahs, isReverseOrder, isEndingsMasked, isStartersMasked,
+          isDivineNamesMasked, isAlternatingMasked, isFullMasked, revealedAyahSet, customMaskedWords, passageMaskedAyahs, passageStatus,
+          mushafPageNumber, mushafOverlayMode, activeRulerLine, currentSuwaydLesson, suwaydZoomModalOpen,
           suwaydZoomSlideIndex, activeSuwaydPlateId, metronomeCount, metronomePlaying, metronomeBeat]);
 
       return (

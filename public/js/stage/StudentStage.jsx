@@ -9,6 +9,7 @@
 
       if (!stage) return <StudentWaitingScreen />;
       if (stage.kind === 'mushaf') return <StudentMushafView stage={stage} />;
+      if (stage.kind === 'recitation') return <StudentRecitationView stage={stage} />;
       if (stage.kind === 'tajweed') return <StudentTajweedView stage={stage} />;
       if (stage.kind === 'slides') return <StudentProjectorScreen />;
       return <StudentWaitingScreen />;
@@ -98,6 +99,42 @@
               />
             </div>
           </div>
+        </StudentFrame>
+      );
+    }
+
+    // The recitation board: the page's ayahs in Uthmani script, with every word
+    // and ayah the teacher hid replaced by a blank the student must fill aloud.
+    function StudentRecitationView({ stage }) {
+      const masks = recitationMasksFromStage(stage);
+      const ayahs = stage.isReverseOrder ? [...(stage.ayahs || [])].reverse() : (stage.ayahs || []);
+      return (
+        <StudentFrame title={stage.surahName} subtitle={'الآيات ' + stage.ayahRange + ' — الصفحة ' + stage.page}>
+          <FitToScreen>
+            <div className="bg-[#FFFDF9] text-black rounded-3xl border-4 border-gold-500/70 shadow-2xl px-10 py-6" style={{ width: '1100px' }}>
+              <div className="text-center font-quran text-3xl text-emerald-900 mb-5 pb-3 border-b border-gold-400/40">
+                بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+              </div>
+              <div className="font-quran text-4xl leading-[2.3] text-right" dir="rtl">
+                {ayahs.map((ayah) => {
+                  const { isRevealed } = recitationAyahVisibility(ayah.num, masks);
+                  const words = ayah.text.split(' ');
+                  return (
+                    <span key={ayah.num} className="font-quran">
+                      {isRevealed ? words.map((word, wIdx) => (
+                        isRecitationWordMasked(ayah.num, words, wIdx, masks)
+                          ? <span key={wIdx} className="font-quran inline-block mx-1 px-6 rounded-lg bg-amber-100 border-b-4 border-dashed border-amber-500 text-transparent select-none">ـــــ</span>
+                          : <span key={wIdx} className="font-quran">{word} </span>
+                      )) : (
+                        <span className="inline-block mx-1 px-10 rounded-xl bg-emerald-900/10 border-2 border-dashed border-emerald-800/40 text-emerald-900/50 text-2xl font-cairo align-middle">🔒</span>
+                      )}
+                      <span className="font-quran text-gold-600 mx-1">﴿{ayah.num}﴾</span>{' '}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </FitToScreen>
         </StudentFrame>
       );
     }
