@@ -45,3 +45,10 @@
         passageMaskedAyahs: new Set(m.passageMaskedAyahs || [])
       });
     }
+
+    // The basmalah heads a surah's first ayah, except in At-Tawbah, and in
+    // Al-Fatiha it is itself ayah 1 so it is not repeated above it.
+    function shouldShowBasmalah(surahName, ayahs) {
+      if (!ayahs || !ayahs.length || ayahs[0].num !== 1) return false;
+      return !/التوبة|الفاتحة/.test(surahName || '');
+    }

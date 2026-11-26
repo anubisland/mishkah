@@ -112,9 +112,11 @@
         <StudentFrame title={stage.surahName} subtitle={'الآيات ' + stage.ayahRange + ' — الصفحة ' + stage.page}>
           <FitToScreen>
             <div className="bg-[#FFFDF9] text-black rounded-3xl border-4 border-gold-500/70 shadow-2xl px-10 py-6" style={{ width: '1100px' }}>
+              {shouldShowBasmalah(stage.surahName, stage.ayahs) && (
               <div className="text-center font-quran text-3xl text-emerald-900 mb-5 pb-3 border-b border-gold-400/40">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
               </div>
+              )}
               <div className="font-quran text-4xl leading-[2.3] text-right" dir="rtl">
                 {ayahs.map((ayah) => {
                   const { isRevealed } = recitationAyahVisibility(ayah.num, masks);

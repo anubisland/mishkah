@@ -911,9 +911,11 @@
                       </div>
 
                       {/* Basmalah */}
+                      {shouldShowBasmalah(hifzSurahName, hifzAyahs) && (
                       <div className="text-center font-quran text-2xl text-emerald-900 mb-8 py-2 select-none border-b border-gold-400/20 max-w-md mx-auto">
                         بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
                       </div>
+                      )}
 
                       {/* Ayahs List */}
                       <div className="space-y-3 sm:space-y-4">
