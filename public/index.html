@@ -13,7 +13,7 @@
   <meta http-equiv="Expires" content="0" />
   <script>
     (function() {
-      const CURRENT_VER = '78.1';
+      const CURRENT_VER = '80.0';
       const p = new URLSearchParams(window.location.search);
       if (p.get('v') !== CURRENT_VER && !window.location.search.includes('mode=student-display')) {
         const u = new URL(window.location.href);
@@ -8625,7 +8625,7 @@
             titleAr: cleanSecTitle,
             bodyAr: modelAnswer,
             practicalAction: practicalImp
-          }});
+          });
 
           // D. Dynamic, Engaging Quiz Question with Content-Specific Options and Shuffled Keys (NEVER repetitive!)
           const d1 = distractorPool[(idx * 3) % distractorPool.length];
