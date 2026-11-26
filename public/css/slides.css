@@ -84,3 +84,4 @@
 /* A verse quoted inside ordinary text keeps the Uthmani font. More specific
    than `.mk-slide .mk-text *` so it always wins. */
 .mk-slide .mk-body .mk-quran-run { font-family: 'Amiri Quran', 'Amiri', serif !important; color: #0E3B2E; font-size: 1.05em; }
+.mk-slide .mk-footer span { white-space: nowrap; }

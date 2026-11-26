@@ -9,12 +9,12 @@
  *   when the connection is weak, and pages load instantly the second time.
  */
 
-const APP_CACHE = 'mishkah-app-v82';
+const APP_CACHE = 'mishkah-app-v83';
 const QURAN_CACHE = 'mishkah-quran-v1';
 const QURAN_HOSTS = ['android.quran.com', 'api.alquran.cloud'];
 // Libraries and fonts the app loads from CDNs: treated like the app's own
 // files (fresh when online, last copy when offline).
-const LIBRARY_HOSTS = ['unpkg.com', 'cdn.tailwindcss.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
+const LIBRARY_HOSTS = ['unpkg.com', 'cdn.tailwindcss.com', 'fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net', 'cdnjs.cloudflare.com'];
 
 self.addEventListener('install', () => {
   self.skipWaiting();
