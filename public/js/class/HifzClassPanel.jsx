@@ -15,7 +15,8 @@
         (active ? 'bg-emerald-900 text-gold-200 border-emerald-900' : 'bg-white text-emerald-950 border-emerald-900/15 hover:border-gold-500');
     }
 
-    function HifzClassPanel({ ctx }) {
+    // planItem: today's planned range; the page controls stay inside it.
+    function HifzClassPanel({ ctx, planItem }) {
       const recitation = ctx.hifzViewMode === 'interactive_test';
       const page = ctx.mushafPageNumber;
       const surahs = typeof MUSHAF_SURAHS_PAGE_MAP !== 'undefined' ? MUSHAF_SURAHS_PAGE_MAP : [];
@@ -29,6 +30,16 @@
               <button type="button" className={classPill(recitation)} onClick={() => ctx.handleNavigateMushafPage(page, 'interactive_test')}>🎧 لوحة التسميع</button>
             </div>
 
+            {planItem ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <button type="button" className={classPill(false)} disabled={page <= planItem.fromPage} onClick={() => ctx.handleNavigateMushafPage(page - 1)}>→ السابقة</button>
+                <span className="flex-1 text-center font-black text-emerald-950 text-sm">
+                  {planItem.surahName} {planItem.fromAyah}–{planItem.toAyah} • صفحة {page}
+                  {planItem.toPage > planItem.fromPage ? ' (' + (page - planItem.fromPage + 1) + ' من ' + (planItem.toPage - planItem.fromPage + 1) + ')' : ''}
+                </span>
+                <button type="button" className={classPill(true)} disabled={page >= planItem.toPage} onClick={() => ctx.handleNavigateMushafPage(page + 1)}>التالية ←</button>
+              </div>
+            ) : (
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" className={classPill(false)} onClick={() => ctx.handleNavigateMushafPage(page - 1)}>→ السابقة</button>
               <select value={currentSurah ? currentSurah.id : ''} onChange={(e) => {
@@ -40,6 +51,7 @@
               <span className="font-black text-emerald-950 text-sm">صفحة {page}</span>
               <button type="button" className={classPill(false)} onClick={() => ctx.handleNavigateMushafPage(page + 1)}>التالية ←</button>
             </div>
+            )}
 
             {recitation ? <RecitationControls ctx={ctx} /> : <MushafMaskControls ctx={ctx} />}
           </section>
