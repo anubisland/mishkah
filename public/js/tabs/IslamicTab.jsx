@@ -458,7 +458,7 @@
                             <input
                               type="file"
                               id="lectureDocFileInput"
-                              accept=".docx,.doc,.pdf,.txt,.md"
+                              accept=".docx,.doc,.pdf,.pptx,.ppt,.txt,.md"
                               onChange={(e) => {
                                 const f = e.target.files && e.target.files[0];
                                 if (f) handleLectureFileUpload(f);

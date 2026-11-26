@@ -706,6 +706,12 @@
               throw new Error(isRtl ? 'تعذر استخراج النص من ملف الوورد، يرجى حفظه كملف .docx قياسي أو نسخ النص ولصقه' : 'Could not parse Word document');
             }
           } else if (ext === '.pptx' || ext === '.ppt') {
+            // The old binary .ppt format is not a zip archive and cannot be read here.
+            if (ext === '.ppt') {
+              throw new Error(isRtl
+                ? 'هذا ملف باوربوينت بالصيغة القديمة (.ppt). افتحيه في باوربوينت واحفظيه بصيغة (.pptx) ثم ارفعيه.'
+                : 'Old .ppt format: open it in PowerPoint, save as .pptx, then upload.');
+            }
             // PowerPoint Slide Text Extractor via JSZip
             const arrayBuffer = await file.arrayBuffer();
             if (window.JSZip) {
@@ -726,11 +732,18 @@
                 for (const se of slideEntries) {
                   const sXml = await se.async('string');
                   const sTxt = sXml
-                    .replace(/<a:p[^>]*>/g, '\n')
+                    // One line per paragraph and a space between text runs, so
+                    // words from separate runs are not glued together.
+                    .replace(/<\/a:p>/g, '\n')
+                    .replace(/<\/a:r>/g, ' ')
                     .replace(/<[^>]+>/g, '')
                     .replace(/&lt;/g, '<')
                     .replace(/&gt;/g, '>')
-                    .replace(/&amp;/g, '&')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&apos;/g, "'")
+                    .replace(/&amp;/g, '&') // last, so "&amp;quot;" stays "&quot;"
+                    .replace(/[ \t]+/g, ' ')
+                    .replace(/\n\s+\n/g, '\n\n')
                     .trim();
                   if (sTxt) slideTexts.push(sTxt);
                 }
