@@ -303,18 +303,12 @@
 <body class="min-h-screen flex flex-col selection:bg-gold-200 selection:text-emerald-950">
   <div id="root"></div>
 
-  <!-- Immediate Service Worker & Stale Cache Purge for Clean Live Rendering -->
+  <!-- Service worker: app files always fresh from the network (offline copy as
+       fallback); mushaf pages and ayah text kept on the device once opened. -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (let registration of registrations) {
-          registration.unregister();
-        }
-      });
-    }
-    if ('caches' in window) {
-      caches.keys().then(keys => {
-        keys.forEach(k => caches.delete(k));
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => console.warn('Mishkah: offline support unavailable', err));
       });
     }
   </script>
