@@ -85,3 +85,8 @@
    than `.mk-slide .mk-text *` so it always wins. */
 .mk-slide .mk-body .mk-quran-run { font-family: 'Amiri Quran', 'Amiri', serif !important; color: #0E3B2E; font-size: 1.05em; }
 .mk-slide .mk-footer span { white-space: nowrap; }
+
+/* The class panel's small copy of the student window: full-window classes
+   take the preview box's size instead of the teacher's window. */
+.mk-student-preview .h-screen, .mk-student-preview .max-h-screen { height: 100% !important; max-height: 100% !important; }
+.mk-student-preview .w-screen { width: 100% !important; }

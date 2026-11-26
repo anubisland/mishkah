@@ -1,11 +1,17 @@
     // The student window shared on Zoom. It has no controls: it shows whatever
     // the teacher's window last published (see stage-channel.jsx).
-    function StudentStage() {
-      const stage = useLiveStage();
+    // previewStage: set when the teacher's class panel shows a small copy of
+    // the student window; the same views draw both, so they always match.
+    const StudentViewportContext = React.createContext(null);
+
+    function StudentStage({ previewStage }) {
+      const liveStage = useLiveStage();
+      const isPreview = previewStage !== undefined;
+      const stage = isPreview ? previewStage : liveStage;
 
       useEffect(() => {
-        document.title = 'مِشكاة | شاشة الطالب';
-      }, []);
+        if (!isPreview) document.title = 'مِشكاة | شاشة الطالب';
+      }, [isPreview]);
 
       if (!stage) return <StudentWaitingScreen />;
       if (stage.kind === 'mushaf') return <StudentMushafView stage={stage} />;
@@ -174,7 +180,9 @@
 
     // A lecture-deck slide filling the window at 16:9, on a dark surround.
     function StudentDeckView({ stage }) {
-      const [size, setSize] = useState({ w: window.innerWidth, h: window.innerHeight });
+      const previewSize = React.useContext(StudentViewportContext);
+      const [windowSize, setSize] = useState({ w: window.innerWidth, h: window.innerHeight });
+      const size = previewSize || windowSize;
       useEffect(() => {
         const onResize = () => setSize({ w: window.innerWidth, h: window.innerHeight });
         window.addEventListener('resize', onResize);
@@ -198,6 +206,22 @@
           <ScaledSlide width={width}>
             <SlideView slide={slide} deck={deck} index={index} total={deck.slides.length} />
           </ScaledSlide>
+        </div>
+      );
+    }
+
+    // A scaled-down copy of the student window for the teacher's class panel.
+    const STUDENT_PREVIEW_SIZE = { w: 1280, h: 720 };
+    function StudentPreview({ stage, width }) {
+      const scale = width / STUDENT_PREVIEW_SIZE.w;
+      return (
+        <div className="mk-student-preview rounded-lg overflow-hidden border-2 border-emerald-900/30 shadow"
+          style={{ width: width + 'px', height: (STUDENT_PREVIEW_SIZE.h * scale) + 'px', position: 'relative' }}>
+          <div style={{ width: STUDENT_PREVIEW_SIZE.w + 'px', height: STUDENT_PREVIEW_SIZE.h + 'px', transform: 'scale(' + scale + ')', transformOrigin: 'top right', position: 'absolute', top: 0, right: 0 }}>
+            <StudentViewportContext.Provider value={STUDENT_PREVIEW_SIZE}>
+              <StudentStage previewStage={stage || null} />
+            </StudentViewportContext.Provider>
+          </div>
         </div>
       );
     }
