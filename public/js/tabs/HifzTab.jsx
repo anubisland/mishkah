@@ -5,25 +5,16 @@
         <div className="space-y-6 animate-fadeIn">
                 
                 {/* Header Banner */}
-                <div className="emerald-pattern rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden border-2 border-gold-400 shadow-xl">
+                <div className="emerald-pattern rounded-3xl p-3 sm:p-4 text-white relative overflow-hidden border-2 border-gold-400 shadow-xl">
                   <div className="absolute top-2.5 right-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
                   <div className="absolute top-2.5 left-3 text-gold-300/40 text-xl font-amiri pointer-events-none select-none">۞</div>
                   <div className="relative z-10 max-w-4xl">
-                    <div className="inline-flex items-center gap-2 bg-gold-400/20 text-gold-200 border border-gold-400/40 text-xs px-3 py-1 rounded-full mb-3 font-bold">
-                      <span>🕋</span>
-                      <span>{isRtl ? 'الفرع الأول: منظومة التحفيظ المتكاملة (المصحف الورقي + اختبار الإتقان)' : 'Branch 1: Complete Quran Memorization System'}</span>
-                    </div>
                     <h2 className="text-lg sm:text-xl font-bold font-cairo text-gold-200 mb-1.5">
                       {isRtl ? 'مدارسة مصحف المدينة واختبارات الإتقان التفاعلية' : 'Madinah Mushaf Visuals & Interactive Testing'}
                     </h2>
-                    <p className="text-emerald-100/90 text-xs sm:text-sm leading-relaxed mb-4">
-                      {isRtl 
-                        ? 'يجمع بين صفحة المصحف الورقي المطبوع الحقيقي (15 سطراً) لترسيخ الذاكرة البصرية، وبين أدوات اختبار الإتقان الفورية (طمس فواصل الآيات، التسميع الغيبي، إخفاء الكلمات، وكاشف المتشابهات).'
-                        : 'Combines authentic 15-line Madinah Mushaf visual page with live mastery testing tools: mask endings, blind recitation, word-masking, and mutashabihat.'}
-                    </p>
 
                     {/* Authentic Mode Switcher Bar */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-emerald-800/80">
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-emerald-800/80">
                       <div className="bg-emerald-950 p-1.5 rounded-2xl border-2 border-gold-400 flex items-center gap-2 shadow-lg">
                         {/* 1. Printed Mushaf Page (Primary Default) */}
                         <button
