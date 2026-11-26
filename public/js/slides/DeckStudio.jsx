@@ -20,6 +20,8 @@
       const [selectedId, setSelectedId] = useState(deck.slides[0] ? deck.slides[0].id : null);
       const [mode, setMode] = useState('edit');
       const [sourceOpen, setSourceOpen] = useState(deck.slides.length === 0);
+      const [importWarnings, setImportWarnings] = useState([]);
+      const [syncProblem, setSyncProblem] = useState(false);
 
       const index = Math.max(0, deck.slides.findIndex((s) => s.id === selectedId));
       const slide = deck.slides[index];
@@ -28,10 +30,13 @@
         if (next) setSelectedId(next.id);
       };
 
-      // The student window follows the presented slide.
+      // The student window follows the presented slide. The deck itself is read
+      // from the studio's saved copy, so each slide change is a tiny message.
       useEffect(() => {
-        if (mode === 'present') publishStage({ kind: 'deck', deck, index });
-      }, [mode, deck, index]);
+        if (mode !== 'present') return;
+        const result = publishStage({ kind: 'deck', index, deckSaved: !store.saveError });
+        setSyncProblem(!result.stored || !result.sent || !!store.saveError);
+      }, [mode, deck, index, store.saveError]);
 
       useEffect(() => {
         if (mode !== 'present') return;
@@ -44,7 +49,8 @@
         return () => window.removeEventListener('keydown', onKey);
       });
 
-      const onNewDeck = (newDeck) => {
+      const onNewDeck = (newDeck, warnings) => {
+        setImportWarnings(warnings || []);
         store.replaceDeck(newDeck);
         setSelectedId(newDeck.slides[0] && newDeck.slides[0].id);
         setSourceOpen(false);
@@ -61,9 +67,24 @@
             deck={deck} mode={mode} store={store} slide={slide}
             studentScreenOpen={studentScreenOpen}
             onSource={() => setSourceOpen(true)} onPresent={startPresenting}
-            onEdit={() => setMode('edit')} onClose={onClose}
+            onEdit={() => setMode('edit')}
+            onClose={() => { if (document.activeElement) document.activeElement.blur(); onClose(); }}
           />
           {store.saveError && <p className="bg-rose-100 text-rose-800 font-bold text-center py-1">{store.saveError}</p>}
+          {store.loadError && <p className="bg-amber-100 text-amber-900 font-bold text-center py-1">{store.loadError}</p>}
+          {mode === 'present' && syncProblem && (
+            <p className="bg-rose-600 text-white font-bold text-center py-1">⚠️ قد لا تتابع شاشة الطالب العرض. أغلقيها وافتحيها من جديد، وتأكدي أن ذاكرة المتصفح غير ممتلئة.</p>
+          )}
+          {importWarnings.length > 0 && (
+            <div className="bg-amber-50 border-b-2 border-amber-300 px-4 py-2 text-sm text-amber-950">
+              <div className="flex items-center justify-between">
+                <b>تنبيه: أُنشئ العرض، لكن غُيّرت بعض الأجزاء. راجعيها:</b>
+                <button type="button" className="font-bold px-2" onClick={() => setImportWarnings([])}>✕</button>
+              </div>
+              <ul className="list-disc pr-5">{importWarnings.slice(0, 8).map((w, i) => <li key={i}>{w}</li>)}</ul>
+              {importWarnings.length > 8 && <p>و{importWarnings.length - 8} ملاحظات أخرى.</p>}
+            </div>
+          )}
 
           {!slide ? (
             <div className="flex-1 flex items-center justify-center text-emerald-900 font-bold text-lg">
@@ -130,7 +151,7 @@
           <div ref={canvasRef} className="min-w-0 flex flex-col items-center justify-center">
             <div className="shadow-2xl rounded-md overflow-hidden">
               <ScaledSlide width={Math.max(320, canvasWidth)}>
-                <SlideView slide={slide} deck={deck} index={index} total={deck.slides.length}
+                <SlideView key={slide.id} slide={slide} deck={deck} index={index} total={deck.slides.length}
                   onEdit={(field, value) => store.updateSlide(slide.id, field, value)} />
               </ScaledSlide>
             </div>

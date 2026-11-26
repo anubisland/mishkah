@@ -141,19 +141,25 @@
       ].join('\n');
     }
 
-    // Claude's reply may wrap the JSON in prose or a code fence.
+    // Claude's reply may wrap the JSON in prose or code fences, and may hold
+    // more than one block: the block that parses with the most slides wins.
+    // Returns { deck, warnings } where warnings lists anything changed or dropped.
     function parseClaudeDeckReply(reply) {
       const text = (reply || '').trim();
-      const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-      const candidate = fenced ? fenced[1] : text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1);
-      if (!candidate || !candidate.trim()) throw new Error('لم أجد في الرد عرضاً بصيغة JSON. انسخي رد Claude كاملاً.');
-      let parsed;
-      try {
-        parsed = JSON.parse(candidate);
-      } catch (e) {
-        throw new Error('رد Claude غير مكتمل أو فيه خطأ في الصيغة. اطلبي منه إعادة إرسال JSON كاملاً.');
-      }
-      const deck = normalizeDeck(parsed);
+      const candidates = [...text.matchAll(/```(?:json)?\s*([\s\S]*?)```/g)].map((m) => m[1]);
+      if (text.includes('{')) candidates.push(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1));
+      if (!candidates.some((c) => c.trim())) throw new Error('لم أجد في الرد عرضاً بصيغة JSON. انسخي رد Claude كاملاً.');
+      let best = null;
+      candidates.forEach((c) => {
+        try {
+          const parsed = JSON.parse(c);
+          const count = parsed && Array.isArray(parsed.slides) ? parsed.slides.length : 0;
+          if (!best || count > best.count) best = { parsed, count };
+        } catch (e) { /* not this block; another may be the deck */ }
+      });
+      if (!best) throw new Error('رد Claude غير مكتمل أو فيه خطأ في الصيغة. اطلبي منه إعادة إرسال JSON كاملاً.');
+      const warnings = [];
+      const deck = normalizeDeck(best.parsed, warnings);
       if (!deck.slides.length) throw new Error('الرد لا يحتوي على أي شريحة.');
-      return deck;
+      return { deck, warnings };
     }

@@ -68,7 +68,7 @@
           <section>
             <h4 className="font-black text-emerald-950 mb-1">ملاحظاتكِ لهذه الشريحة</h4>
             <p className="text-xs text-slate-500 mb-2">تظهر لكِ وحدكِ وقت العرض، ولا تراها الطالبات.</p>
-            <textarea key={slide.id} defaultValue={slide.notes} rows={6}
+            <textarea key={slide.id + '|' + slide.notes} defaultValue={slide.notes} rows={6}
               onBlur={(e) => { if (e.target.value !== slide.notes) onChange('notes', e.target.value); }}
               className="w-full border-2 border-emerald-900/20 rounded-xl p-2 text-sm leading-relaxed" />
           </section>

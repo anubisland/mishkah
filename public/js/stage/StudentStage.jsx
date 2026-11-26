@@ -180,7 +180,15 @@
         window.addEventListener('resize', onResize);
         return () => window.removeEventListener('resize', onResize);
       }, []);
-      const deck = normalizeDeck(stage.deck);
+      // The deck lives in the studio's saved copy; re-read it on every stage
+      // message and whenever the studio saves.
+      const [deckVersion, setDeckVersion] = useState(0);
+      useEffect(() => {
+        const onStorage = (e) => { if (e.key === DECK_STORAGE_KEY) setDeckVersion((v) => v + 1); };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
+      }, []);
+      const deck = useMemo(() => readSavedDeck() || normalizeDeck({ slides: [] }), [stage.sentAt, deckVersion]);
       const index = Math.min(Math.max(0, stage.index || 0), Math.max(0, deck.slides.length - 1));
       const slide = deck.slides[index];
       if (!slide) return <StudentWaitingScreen />;

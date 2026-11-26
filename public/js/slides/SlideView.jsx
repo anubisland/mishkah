@@ -1,15 +1,27 @@
     // Draws one slide on the fixed 1600x900 canvas (see css/slides.css).
     // With onEdit, every text on the slide can be edited in place.
 
-    // Text that becomes editable in place when onCommit is given.
+    // Any ﴿…﴾ inside ordinary slide text is a verse: it is always drawn in the
+    // Uthmani font (project covenant), whatever kind of text surrounds it.
+    function withQuranRuns(text) {
+      if (!text || text.indexOf('﴿') < 0) return text;
+      return text.split(/(﴿[^﴾]*﴾)/).map((part, i) => (
+        /^﴿[^﴾]*﴾$/.test(part) ? <span key={i} className="mk-quran-run font-quran">{part}</span> : part
+      ));
+    }
+
+    // Text that becomes editable in place when onCommit is given. The element
+    // is keyed on its value so an edit, undo or slide switch always redraws it
+    // from the deck instead of leaving the browser's edited text behind.
     function SlideText({ as, className, value, placeholder, onCommit }) {
       const Tag = as || 'div';
       if (!onCommit) {
         if (!value) return null;
-        return <Tag className={className}>{value}</Tag>;
+        return <Tag className={className}>{withQuranRuns(value)}</Tag>;
       }
       return (
         <Tag
+          key={value || ''}
           className={className + ' mk-editable'}
           contentEditable
           suppressContentEditableWarning
@@ -19,7 +31,7 @@
             if (next !== (value || '')) onCommit(next);
           }}
         >
-          {value}
+          {withQuranRuns(value)}
         </Tag>
       );
     }
