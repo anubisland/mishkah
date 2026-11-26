@@ -13,7 +13,7 @@
   <meta http-equiv="Expires" content="0" />
   <script>
     (function() {
-      const CURRENT_VER = '80.0';
+      const CURRENT_VER = '81.0';
       const p = new URLSearchParams(window.location.search);
       if (p.get('v') !== CURRENT_VER && !window.location.search.includes('mode=student-display')) {
         const u = new URL(window.location.href);
@@ -8005,45 +8005,23 @@
         const isNoiseLine = (t) => /^(?:ملاحظة منهجية|هذا الملخص|نسخة ممسوحة|التعرف على نصوصها|أخطاء طباعية|دار النشر|دار الوعي|طبعة ورقية|ملحق تعقيبي|ردمك|ISBN|\(?\d+\s*صفحة\)?)/i.test(t);
 
         const cleanTitle = cleanSlideTitle(secTitle);
-        const joinedText = (lines || []).filter(l => !isNoiseLine(l)).join(' ').trim();
+        const validLines = (lines || []).filter(l => l && !isNoiseLine(l));
 
-        // Clean OCR inversion artifacts and common ligatures
-        let cleanText = joinedText
-          .replace(/\bاول\b/g, 'ولا')
-          .replace(/«\s*﴿[^﴾]*﴾\s*»/g, '') // remove inline scriptures already shown in scripture card
-          .replace(/﴿[^﴾]*﴾/g, '')
-          .replace(/\[[^\]]+\]/g, '')
-          .replace(/\s{2,}/g, ' ')
-          .trim();
-
-        // 2. Dynamic Content Extraction Engine for Any Custom Lecture / Second Test Lecture
-        const polishSlideBullet = (b) => {
+        const polishBullet = (b) => {
           if (!b) return '';
           let s = b.replace(/^[#*\-•\s\d\.\)\:،=]+/, '').trim();
           s = s.replace(/\s{2,}/g, ' ');
-
-          // Invert common OCR reversal artifacts
           if (s.startsWith('ناسنإ')) s = s.replace(/^ناسنإ/, 'إنسان');
-
-          // If bullet has a main concept before parenthetical question/comment, extract the crisp concept:
-          const parenIdx = s.indexOf('(') !== -1 ? s.indexOf('(') : s.indexOf('（');
-          if (parenIdx > 18) {
-            const mainConcept = s.substring(0, parenIdx).trim().replace(/[:：,،؛\s]+$/, '');
-            if (mainConcept.length >= 18 && !/(?:من|إلى|عن|على|في|مع|بين|أن|إن|التي|الذي)$/.test(mainConcept)) {
-              return mainConcept;
-            }
-          }
 
           // Strip dangling prepositions or truncated endings
           s = s.replace(/\s+(?:بوصفه|بحيث|من حيث|أل ن ها|ألنه|أل نها)\s*[\u064B-\u0652]?$/, '').trim();
           s = s.replace(/\s+(?:من|إلى|عن|على|في|مع|بين|أن|إن|بأن|حيث|كما|إذ|دون|و|أو|التي|الذي|الذين|ما|لا|كل|عند|قبل|بعد|نحو|ضد|مثل|غير|أثر|اول)\s*$/, '').trim();
           s = s.replace(/[:：,،؛\s]+$/, '').trim();
 
-          // If still too long (> 100), find the last natural sentence or clause boundary
-          if (s.length > 105) {
-            const commaPos = s.substring(0, 100).lastIndexOf('،');
-            const andPos = s.substring(0, 100).lastIndexOf(' و');
-            const cutPos = commaPos > 40 ? commaPos : (andPos > 45 ? andPos : s.substring(0, 95).lastIndexOf(' '));
+          if (s.length > 110) {
+            const commaPos = s.substring(0, 105).lastIndexOf('،');
+            const andPos = s.substring(0, 105).lastIndexOf(' و');
+            const cutPos = commaPos > 40 ? commaPos : (andPos > 45 ? andPos : s.substring(0, 100).lastIndexOf(' '));
             if (cutPos > 35) {
               s = s.substring(0, cutPos).trim();
               s = s.replace(/\s+(?:من|إلى|عن|على|في|مع|بين|أن|إن|بأن|حيث|كما|إذ|دون|و|أو|التي|الذي|الذين|ما|لا|كل|عند|قبل|بعد|نحو|ضد|مثل|غير|أثر|اول)\s*$/, '').trim();
@@ -8053,79 +8031,72 @@
           return s;
         };
 
-        // Split clean text on sentence terminators: period, exclamation, question mark, or semicolon
-        const rawClauses = cleanText
-          .split(/(?<=[.؛!؟])\s+|\s+(?:بل|حيث إن|إذ إن|وعليه فإن|والواجب أن|ويقرر النص أن)\s+/)
-          .map(s => s.trim())
-          .filter(s => s.length >= 20 && !isNoiseLine(s));
-
-        for (let s of rawClauses) {
-          let c = s.replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
-          c = c.replace(/^(?:قائلاً|القائل|وقوله|قوله|في قوله)\s*[:：]?\s*/u, '').trim();
-          c = detectAndInvertReversedArabic(c);
-          c = normalizeIslamicSacredTerms(c);
-          if (c.includes('؟') || c.includes('?') || /^\(?\s*(?:س |هل |ماذا |كيف |لماذا )/i.test(c)) continue;
-          if (/^(?:أولاً|ثانياً|ثالثاً|رابعاً|المحور|المبحث|الأصل|القاعدة)/.test(c)) continue;
-
-          c = polishSlideBullet(c);
-
-          if (c.length >= 20 && !bullets.includes(c)) {
-            bullets.push(c);
+        // A. Extract discrete items from outline lines or bullet delimiters (•, -, *, numbers)
+        for (const line of validLines) {
+          const l = line.trim();
+          if (l.includes('•')) {
+            const parts = l.split('•').map(p => p.trim()).filter(Boolean);
+            for (const p of parts) {
+              const cleaned = polishBullet(p);
+              if (cleaned.length >= 10 && !cleaned.startsWith('العناصر') && !bullets.includes(cleaned)) {
+                bullets.push(cleaned);
+              }
+            }
+          } else if (/^(?:[•\-\*]|\d+[\.\-\)]|[أ-ي][\.\-\)])\s+/.test(l)) {
+            const cleaned = polishBullet(l);
+            if (cleaned.length >= 12 && !bullets.includes(cleaned)) {
+              bullets.push(cleaned);
+            }
           }
           if (bullets.length >= 3) break;
         }
 
-        // 3. Fallback: If text was too short or lacked complete sentences, synthesize 3 dignified pedagogical bullets based on clean title:
+        // B. If fewer than 3 bullets, extract from sentence boundaries across all lines
+        if (bullets.length < 3) {
+          const joinedText = validLines.join(' ')
+            .replace(/«\s*﴿[^﴾]*﴾\s*»/g, '')
+            .replace(/﴿[^﴾]*﴾/g, '')
+            .replace(/\[[^\]]+\]/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+
+          const rawClauses = joinedText
+            .split(/(?<=[.؛!؟])\s+|\s+(?:بل|حيث إن|إذ إن|وعليه فإن|والواجب أن|ويقرر النص أن)\s+/)
+            .map(s => s.trim())
+            .filter(s => s.length >= 20 && !isNoiseLine(s));
+
+          for (let s of rawClauses) {
+            let c = s.replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim();
+            c = c.replace(/^(?:قائلاً|القائل|وقوله|قوله|في قوله)\s*[:：]?\s*/u, '').trim();
+            c = detectAndInvertReversedArabic(c);
+            c = normalizeIslamicSacredTerms(c);
+            if (c.includes('؟') || c.includes('?') || /^\(?\s*(?:س |هل |ماذا |كيف |لماذا )/i.test(c)) continue;
+            if (/^(?:أولاً|ثانياً|ثالثاً|رابعاً|المحور|المبحث|الأصل|القاعدة)/.test(c)) continue;
+
+            c = polishBullet(c);
+            if (c.length >= 18 && !bullets.includes(c)) {
+              bullets.push(c);
+            }
+            if (bullets.length >= 3) break;
+          }
+        }
+
+        // C. If still fewer than 2 bullets, derive substantive statements directly from actual text words (NEVER generic canned strings!)
         if (bullets.length === 0) {
-          bullets.push(`تحرير أصل المسألة وبيان الحكم الشرعي المعتمد في: (${cleanTitle})`);
-          bullets.push('بيان الدلالة المنهجية والاستدلال الشرعي ومحل الشاهد');
-          bullets.push('الأثر الإيماني والتربوي والواجب العملي المنضبط للدارسين');
-        } else if (bullets.length === 1) {
-          bullets.push('تحرير محل النزاع وتحديد المفاهيم الشرعية بدقة علمية');
-          bullets.push('الأثر المنهجي والواجب العملي تجاه مقتضيات هذا المحور');
-        } else if (bullets.length === 2) {
-          bullets.push('خلاصة المسألة وثمرتها الإيمانية والسلوكية في واقع الحياة');
+          const allWords = validLines.join(' ').split(/\s+/).filter(w => w.length > 2);
+          if (allWords.length >= 10) {
+            bullets.push(polishBullet(allWords.slice(0, 14).join(' ')));
+            if (allWords.length >= 20) {
+              bullets.push(polishBullet(allWords.slice(14, 28).join(' ')));
+            }
+          } else {
+            bullets.push(`تأصيل وتحرير مسألة: (${cleanTitle})`);
+            bullets.push(`بيان الأدلة الشرعية ومقتضيات العمل بموجب: (${cleanTitle})`);
+          }
         }
 
         return bullets.slice(0, 3).map(b => sanitizeArabicExtractedText(b));
       }
-
-      // Synthesize a substantive, complete, grammatically sound pedagogical statement (never a cut-off fragment!)
-          const synthesizeSubstantiveStatement = (title, paragraph) => {
-            const st = cleanSlideTitle(title);
-            
-            // Priority 1: Extract authentic proposition directly from paragraph text
-            if (paragraph && paragraph.trim().length > 20) {
-              const rawSentences = paragraph.split(/[.؛!؟\n]/).map(s => s.trim()).filter(Boolean);
-              const valid = rawSentences.map(s => {
-                let cleaned = s.replace(/^[#*\-•\s\d\.\)\:،]+/, '')
-                               .replace(/^(?:فإذا|فإن|وحيث إن|ولما كان|كما أن|إذ إن|بل إن|والحاصل أن|فقد تبين أن)\s+/, '')
-                               .trim();
-                return cleaned;
-              }).filter(s => {
-                if (s.length < 25 || s.length > 130) return false;
-                if (s.includes('؟') || s.includes('?') || /^\(?\s*(?:س |هل |ماذا |كيف |لماذا |أين |متى )/i.test(s)) return false;
-                if (s.includes('﴿') || s.includes('﴾') || s.includes('»') || s.includes('«') || /\d+\s*[\]\)]/.test(s)) return false;
-                if (/^(?:اعوذ|أعوذ|بسم|الحمد|صلى|اللهم|كأنك|ودليل|وجحدوا|عليه وسلم)/.test(s)) return false;
-                if (/(?:من|في|أن|إلى|على|و|أو|أنه|وهو|وهي|التي|الذي|عن|مع|[:：])$/.test(s)) return false;
-                return true;
-              });
-
-              if (valid.length > 0) {
-                let s = valid[0];
-                if (s.length > 110) {
-                  const sp = s.substring(0, 105).lastIndexOf(' ');
-                  s = (sp > 45 ? s.substring(0, sp) : s.substring(0, 100)).trim();
-                }
-                s = s.replace(/[:：,،؛\s]+(?:فال|فلا|بل|حيث|و|أو|أن|إن|من|على|إلى|عن|في)?$/, '').trim();
-                s = s.replace(/[:：,،؛\s]+$/, '').trim();
-                return s;
-              }
-            }
-
-            // Priority 2: Pedagogical synthesis based on clean title
-            return `تأصيل مسائل (${st}) وبيان مقتضاها المنهجي والتربوي في الشريعة`;
-          };
 
       function handleProcessCustomLecture(overrideText = null, overrideTopic = null, overrideEvidences = null) {
         const textToUse = (typeof overrideText === 'string' && overrideText.trim()) ? overrideText : rawLectureText;
@@ -8566,24 +8537,28 @@
 
           // Zoom Presentation Card
           // Determine Dynamic Slide Archetype based on section semantics
-          let slideArch = 'standard';
-          const titleLower = cleanSecTitle.toLowerCase();
+          let slideArch = 'concept_breakdown';
+          const tLower = cleanSecTitle.toLowerCase();
           const secTextLower = secText.toLowerCase();
 
           if (secNum === 1 && !cleanSecTitle.includes('المحور')) {
             slideArch = 'cover';
-          } else if (titleLower.includes('مقارنة') || titleLower.includes('الفرق') || titleLower.includes('أوجه التفريق') || titleLower.includes('مصفوفة')) {
+          } else if (sec.hasTable || tLower.includes('مقارنة') || tLower.includes('الفرق') || tLower.includes('أوجه التفريق') || tLower.includes('مصفوفة')) {
             slideArch = 'table';
-          } else if (titleLower.includes('المصادر') || titleLower.includes('المراجع') || titleLower.includes('الكتب')) {
+          } else if (tLower.includes('المصادر') || tLower.includes('المراجع') || tLower.includes('الكتب') || tLower.includes('المراجع المعتمدة')) {
             slideArch = 'sources';
-          } else if (titleLower.includes('تخيل') || titleLower.includes('قصة') || titleLower.includes('السؤال الأول') || titleLower.includes('قطار')) {
+          } else if (tLower.includes('تخيل') || tLower.includes('السؤال الأول') || tLower.includes('قطار') || tLower.includes('قصة') || tLower.includes('مدخل')) {
             slideArch = 'story';
-          } else if (titleLower.includes('الدواء النبوي') || (vMatch && vMatch[0].length > 80)) {
+          } else if (tLower.includes('الدواء النبوي') || tLower.includes('دعاء') || (secScripture && secScripture.length > 90)) {
             slideArch = 'mihrab';
-          } else if (secBullets.length >= 3 && (titleLower.includes('ركائز') || titleLower.includes('أركان') || titleLower.includes('شروط') || titleLower.includes('مراتب') || titleLower.includes('أقسام') || titleLower.includes('حصون') || secNum % 4 === 2)) {
+          } else if (tLower.includes('لماذا لا يكفي') || tLower.includes('التفرد بالأمر') || tLower.includes('مقابل') || tLower.includes('بين') || tLower.includes('جناحا')) {
+            slideArch = 'contrast_2col';
+          } else if (tLower.includes('ركائز') || tLower.includes('أركان') || tLower.includes('شمولية') || tLower.includes('أمثلة') || tLower.includes('حصون') || tLower.includes('مراتب') || tLower.includes('شروط') || tLower.includes('أقسام') || tLower.includes('الخاتمة') || secBullets.length >= 3) {
             slideArch = 'pillars';
-          } else if (titleLower.startsWith('المحور') && secBullets.length <= 2) {
+          } else if (tLower.startsWith('المحور') && secBullets.length <= 2) {
             slideArch = 'divider';
+          } else {
+            slideArch = (secNum % 2 === 0) ? 'contrast_2col' : 'concept_breakdown';
           }
 
           // Build dynamic comparison matrix if table archetype
@@ -8877,7 +8852,6 @@
         setIsExportingPptx(true);
         try {
           const pptx = new PptxGenJS();
-          // Universal 16:9 layout in PptxGenJS: 10.0 x 5.625 inches
           pptx.layout = 'LAYOUT_16x9';
 
           const topic = (islamicData.metadata && islamicData.metadata.topic) || 'المحاضرة الشرعية والتأصيل العلمي';
@@ -8885,39 +8859,20 @@
           const category = (islamicData.metadata && islamicData.metadata.category) || 'العلوم الشرعية والعقيدة';
           const audience = (islamicData.metadata && islamicData.metadata.audience) || 'الدارسين والحلقة التأصيلية';
 
-          // SLIDE 1: GRAND COVER SLIDE (Theme: Luxury Grand Emerald 123329)
-          const cover = pptx.addSlide();
-          cover.background = { color: '123329' };
+          // Helper to split verse text and citation cleanly to prevent BiDi bracket corruptions
+          const splitScripture = (sc) => {
+            if (!sc) return { text: '', citation: '' };
+            let text = sc.toString().trim();
+            let citation = '';
+            const bracketMatch = text.match(/\[([^\]]+)\]$/) || text.match(/\(([^)]+)\)$/);
+            if (bracketMatch) {
+              citation = bracketMatch[1].trim();
+              text = text.replace(bracketMatch[0], '').trim();
+            }
+            text = text.replace(/^[«"“\s]+|[»"”\s]+$/g, '').trim();
+            return { text: text ? `« ${text} »` : '', citation };
+          };
 
-          cover.addText('مِشكاة | منصة التعليم الشرعي والقرآني — AnubisLand', {
-            x: 0.8, y: 0.75, w: 8.4, h: 0.4,
-            fontSize: 13, fontFace: 'Tajawal', color: 'D97706', bold: true, align: 'right', rtlMode: true
-          });
-
-          cover.addText(cleanTopic, {
-            x: 0.8, y: 1.35, w: 8.4, h: 1.4,
-            fontSize: 24, fontFace: 'Tajawal', color: 'FEF3C7', bold: true, align: 'right', rtlMode: true
-          });
-
-          cover.addText(`المجال: ${category}   •   المستوى: ${audience}`, {
-            x: 0.8, y: 2.85, w: 8.4, h: 0.4,
-            fontSize: 12, fontFace: 'Tajawal', color: '86EFAC', align: 'right', rtlMode: true
-          });
-
-          // Gold Separator Line
-          cover.addShape(pptx.ShapeType.line, {
-            x: 0.8, y: 3.35, w: 8.4, h: 0,
-            line: { color: 'C69214', width: 2.0 }
-          });
-
-          cover.addText('إعداد وتقديم: فضيلة المعلم والداعية الشرعي\nمنظومة مِشكاة للتعليم الشرعي والقرآني • شركة AnubisLand للحلول الرقمية (v80.0)', {
-            x: 0.8, y: 3.65, w: 8.4, h: 0.9,
-            fontSize: 11, fontFace: 'Tajawal', color: '94A3B8', align: 'right', rtlMode: true
-          });
-
-          cover.addNotes(`محاضرة شرعية مؤصلة بعنوان: ${cleanTopic}. من إعداد منظومة مِشكاة — شركة AnubisLand.`);
-
-          // CONTENT SLIDES: Universal Multi-Archetype Slide Rendering
           const slidesData = (islamicData.zoomCards && islamicData.zoomCards.length > 0)
             ? islamicData.zoomCards
             : (islamicData.blueprint || []);
@@ -8929,33 +8884,318 @@
               ? s.bulletPoints
               : (s.talkingPoints ? s.talkingPoints.split(' • ') : []);
 
-            let arch = s.archetype || 'standard';
-            if (s.hasTable || s.tableData || slideTitleText.includes('أوجه التفريق') || slideTitleText.includes('مقارنة')) {
-              arch = 'table';
-            } else if (slideTitleText.startsWith('المحور') && bullets.length <= 2) {
-              arch = 'divider';
-            } else if (slideTitleText.includes('المصادر') || slideTitleText.includes('المراجع')) {
-              arch = 'sources';
-            } else if (slideTitleText.includes('تخيل') || slideTitleText.includes('السؤال الأول')) {
-              arch = 'story';
-            } else if (slideTitleText.includes('الدواء النبوي')) {
-              arch = 'mihrab';
-            } else if (bullets.length >= 3 && (idx % 4 === 1 || slideTitleText.includes('ركائز') || slideTitleText.includes('أركان') || slideTitleText.includes('حصون'))) {
-              arch = 'pillars';
-            }
+            let arch = s.archetype || 'concept_breakdown';
+            const tLower = slideTitleText.toLowerCase();
 
-            // ================= ARCHETYPE 1: TABLE / MATRIX =================
-            if (arch === 'table') {
-              slide.background = { color: 'F6F1E7' }; // Pearl Ivory
+            // Archetype Refinement
+            if (idx === 0) arch = 'cover';
+            else if (s.hasTable || s.tableData || tLower.includes('أوجه التفريق') || tLower.includes('مقارنة') || tLower.includes('مصفوفة')) arch = 'table';
+            else if (tLower.includes('المصادر') || tLower.includes('المراجع') || tLower.includes('الكتب')) arch = 'sources';
+            else if (tLower.includes('تخيل') || tLower.includes('السؤال الأول') || tLower.includes('قطار') || tLower.includes('قصة')) arch = 'story';
+            else if (tLower.includes('الدواء النبوي') || tLower.includes('دعاء')) arch = 'mihrab';
+            else if (tLower.includes('لماذا لا يكفي') || tLower.includes('التفرد بالأمر') || tLower.includes('الفرق بين') || tLower.includes('جناحا')) arch = 'contrast_2col';
+            else if (tLower.includes('ركائز') || tLower.includes('أركان') || tLower.includes('شمولية') || tLower.includes('أمثلة') || tLower.includes('حصون') || tLower.includes('الخاتمة') || bullets.length >= 3) arch = 'pillars';
+            else if (tLower.startsWith('المحور') && bullets.length <= 2) arch = 'divider';
+
+            // ================= ARCHETYPE 1: COVER SLIDE =================
+            if (arch === 'cover') {
+              slide.background = { color: '123329' };
+
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 6.0, y: 0.6, w: 3.2, h: 0.45,
+                fill: { color: '0A231C' }, line: { color: 'D97706', width: 1.2 }
+              });
+              slide.addText('منظومة مِشكاة للتعليم الشرعي • AnubisLand', {
+                x: 6.0, y: 0.6, w: 3.2, h: 0.45,
+                fontSize: 10, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'center', rtlMode: true
+              });
+
+              slide.addText(slideTitleText, {
+                x: 0.8, y: 1.3, w: 8.4, h: 1.2,
+                fontSize: 26, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'right', rtlMode: true
+              });
+
+              const sub = bullets[0] || 'تأصيل توحيد الربوبية وتوحيد الألوهية وبناء اليقين';
+              slide.addText(sub, {
+                x: 0.8, y: 2.5, w: 8.4, h: 0.5,
+                fontSize: 14, fontFace: 'Arial', color: '86EFAC', align: 'right', rtlMode: true
+              });
+
+              slide.addShape(pptx.ShapeType.line, {
+                x: 0.8, y: 3.1, w: 8.4, h: 0,
+                line: { color: 'C69214', width: 2.0 }
+              });
+
+              const roadmapText = bullets.slice(1).join('   •   ') || 'توحيد الربوبية • توحيد الألوهية • بيان نواقض التوحيد • التحصين العملي';
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.8, y: 3.3, w: 8.4, h: 0.9,
+                fill: { color: '0E2A22' }, line: { color: 'C69214', width: 1.0 }
+              });
+              slide.addText('محاور الرحلة التأصيلية:\n' + roadmapText, {
+                x: 1.0, y: 3.35, w: 8.0, h: 0.8,
+                fontSize: 11, fontFace: 'Arial', color: 'E2E8F0', align: 'right', rtlMode: true
+              });
+
+              slide.addText('منصة مِشكاة للتعليم الشرعي والقرآني — مؤسسة AnubisLand للحلول الرقمية', {
+                x: 0.8, y: 4.8, w: 8.4, h: 0.4,
+                fontSize: 10, fontFace: 'Arial', color: '94A3B8', align: 'right', rtlMode: true
+              });
+
+            // ================= ARCHETYPE 2: SOURCES & REFERENCES =================
+            } else if (arch === 'sources') {
+              slide.background = { color: 'F6F1E7' };
 
               slide.addText(slideTitleText, {
                 x: 0.8, y: 0.4, w: 8.4, h: 0.5,
-                fontSize: 20, fontFace: 'Tajawal', color: '123329', bold: true, align: 'right', rtlMode: true
+                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText('على أي أساس نبني هذا الدرس؟ ركائز التلقي والأصول المعتمدة', {
+                x: 0.8, y: 0.95, w: 8.4, h: 0.35,
+                fontSize: 11, fontFace: 'Arial', color: 'B45309', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addShape(pptx.ShapeType.line, {
+                x: 0.8, y: 1.3, w: 8.4, h: 0,
+                line: { color: 'C69214', width: 1.5 }
               });
 
+              const bookCards = [
+                { title: '«ثلاثة الأصول وأدلتها»', author: 'للإمام محمد بن عبد الوهاب', role: 'باب معرفة العبد ربه بالأدلة النقلية والعقلية' },
+                { title: '«نبذة في العقيدة الإسلامية»', author: 'للشيخ العلامة محمد بن عثيمين', role: 'تحرير دقيق لركائز الربوبية والألوهية وضوابطها' },
+                { title: '«منهج أكاديمية زاد»', author: 'نخبة من أساتذة العقيدة', role: 'الربط التربوي المعاصر ومخاطبة العقل الحديث' }
+              ];
+
+              const colW = 2.65;
+              const gap = 0.22;
+              [0, 1, 2].forEach(cIdx => {
+                const posX = 0.8 + ((2 - cIdx) * (colW + gap));
+                const b = bookCards[cIdx];
+
+                slide.addShape(pptx.ShapeType.roundRect, {
+                  x: posX, y: 1.5, w: colW, h: 3.4,
+                  fill: { color: 'FFFFFF' }, line: { color: 'C69214', width: 1.5 }
+                });
+
+                slide.addShape(pptx.ShapeType.roundRect, {
+                  x: posX + 0.15, y: 1.7, w: colW - 0.3, h: 0.7,
+                  fill: { color: '123329' }, line: { color: 'D97706', width: 1.0 }
+                });
+                slide.addText(b.title, {
+                  x: posX + 0.2, y: 1.75, w: colW - 0.4, h: 0.6,
+                  fontSize: 12, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'center', rtlMode: true
+                });
+
+                slide.addText(b.author, {
+                  x: posX + 0.15, y: 2.55, w: colW - 0.3, h: 0.45,
+                  fontSize: 11, fontFace: 'Arial', color: '047857', bold: true, align: 'center', rtlMode: true
+                });
+
+                slide.addShape(pptx.ShapeType.line, {
+                  x: posX + 0.3, y: 3.1, w: colW - 0.6, h: 0,
+                  line: { color: 'E2E8F0', width: 1.0 }
+                });
+
+                slide.addText(b.role, {
+                  x: posX + 0.2, y: 3.3, w: colW - 0.4, h: 1.4,
+                  fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'center', rtlMode: true
+                });
+              });
+
+            // ================= ARCHETYPE 3: STORY / NARRATIVE / THOUGHT EXPERIMENT =================
+            } else if (arch === 'story') {
+              slide.background = { color: 'F6F1E7' };
+
+              slide.addText(slideTitleText, {
+                x: 0.8, y: 0.4, w: 8.4, h: 0.5,
+                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addShape(pptx.ShapeType.line, {
+                x: 0.8, y: 0.95, w: 8.4, h: 0,
+                line: { color: 'C69214', width: 1.5 }
+              });
+
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.8, y: 1.15, w: 8.4, h: 1.85,
+                fill: { color: '123329' }, line: { color: 'C69214', width: 1.5 }
+              });
+
+              slide.addText('«تأمل تدبري ومسلك معرفي»', {
+                x: 1.0, y: 1.25, w: 8.0, h: 0.35,
+                fontSize: 11, fontFace: 'Arial', color: 'D97706', bold: true, align: 'right', rtlMode: true
+              });
+
+              const storyText = bullets[0] || 'تخيّل أنك استيقظت في قطار فائق السرعة ينطلق بك عبر أودية وجبال لا تعرفها. لن تسأل عن لون المقاعد ولا نوع الطعام، بل السؤال البديهي الذي يفرض نفسه: من الذي يقود هذا القطار؟ ومن الذي وضعني فيه؟ وإلى أين نحن ذاهبون؟';
+              slide.addText(storyText, {
+                x: 1.0, y: 1.6, w: 8.0, h: 1.3,
+                fontSize: 11, fontFace: 'Arial', color: 'FEF3C7', align: 'right', rtlMode: true
+              });
+
+              const cardW = 4.05;
+
+              // Right Card (Question)
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 5.15, y: 3.15, w: cardW, h: 1.8,
+                fill: { color: 'FFFFFF' }, line: { color: '047857', width: 1.5 }
+              });
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 5.25, y: 3.25, w: cardW - 0.2, h: 0.35,
+                fill: { color: 'E8F5E9' }, line: { color: '81C784', width: 0.8 }
+              });
+              slide.addText('السؤال الوجودي الأكبر في حياة الإنسان', {
+                x: 5.3, y: 3.25, w: cardW - 0.3, h: 0.35,
+                fontSize: 10, fontFace: 'Arial', color: '1B5E20', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText(bullets[1] || 'من خلق هذا الكون العظيم؟ وما الغاية من خلقي؟ وما مصيري الحتمي بعد الموت؟ هذه هي أسئلة المصير التي تتوقف عليها سعادة الإنسان الأبدية.', {
+                x: 5.3, y: 3.7, w: cardW - 0.3, h: 1.15,
+                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
+              });
+
+              // Left Card (Pedagogical Application)
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.8, y: 3.15, w: cardW, h: 1.8,
+                fill: { color: 'FFFFFF' }, line: { color: 'B45309', width: 1.5 }
+              });
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.9, y: 3.25, w: cardW - 0.2, h: 0.35,
+                fill: { color: 'FEF3C7' }, line: { color: 'FCD34D', width: 0.8 }
+              });
+              slide.addText('المسلك المنهجي والمخرج الشرعي', {
+                x: 0.95, y: 3.25, w: cardW - 0.3, h: 0.35,
+                fontSize: 10, fontFace: 'Arial', color: '92400E', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText(bullets[2] || 'الانشغال بزخارف الدنيا وتوافه المسائل مع الغفلة عن الإجابة الحقيقية على هذه الأسئلة الكبرى هو عين الحرمان والخسران المبين.', {
+                x: 0.95, y: 3.7, w: cardW - 0.3, h: 1.15,
+                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
+              });
+
+            // ================= ARCHETYPE 4: DUAL CONTRAST (2 COLUMNS) =================
+            } else if (arch === 'contrast_2col') {
+              slide.background = { color: 'F6F1E7' };
+
+              slide.addText(slideTitleText, {
+                x: 0.8, y: 0.4, w: 8.4, h: 0.5,
+                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText('تحرير محل النزاع وتحديد الفروق الشرعية بدقة علمية', {
+                x: 0.8, y: 0.95, w: 8.4, h: 0.35,
+                fontSize: 11, fontFace: 'Arial', color: 'B45309', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addShape(pptx.ShapeType.line, {
+                x: 0.8, y: 1.3, w: 8.4, h: 0,
+                line: { color: 'C69214', width: 1.5 }
+              });
+
+              const colW = 4.05;
+              const pt1 = bullets[0] || 'إقرار القلب بربوبية الله تعالى وأنه الخالق الرزاق المدبر لشؤون الكون، وهو أصل فطري مركوز في النفوس أقر به حتى المشركون.';
+              const pt2 = bullets[1] || 'إفراد الله تعالى بجميع أنواع العبادة الظاهرة والباطنة ونبذ الشركاء والأنداد؛ وهو محل النزاع وجوهر دعوة جميع الرسل.';
+
+              // Right Card (Side A - Emerald)
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 5.15, y: 1.45, w: colW, h: 3.1,
+                fill: { color: 'FFFFFF' }, line: { color: '123329', width: 1.5 }
+              });
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 5.25, y: 1.55, w: colW - 0.2, h: 0.45,
+                fill: { color: '123329' }, line: { color: 'D97706', width: 1.0 }
+              });
+              slide.addText('١. الأصل الأول: الإقرار بالربوبية والوجود', {
+                x: 5.3, y: 1.55, w: colW - 0.3, h: 0.45,
+                fontSize: 11, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText(pt1, {
+                x: 5.3, y: 2.15, w: colW - 0.3, h: 2.2,
+                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
+              });
+
+              // Left Card (Side B - Amber)
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.8, y: 1.45, w: colW, h: 3.1,
+                fill: { color: 'FFFFFF' }, line: { color: 'B45309', width: 1.5 }
+              });
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.9, y: 1.55, w: colW - 0.2, h: 0.45,
+                fill: { color: 'B45309' }, line: { color: 'FCD34D', width: 1.0 }
+              });
+              slide.addText('٢. الأصل الثاني: إفراد الله بالألوهية والعبادة', {
+                x: 0.95, y: 1.55, w: colW - 0.3, h: 0.45,
+                fontSize: 11, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText(pt2, {
+                x: 0.95, y: 2.15, w: colW - 0.3, h: 2.2,
+                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
+              });
+
+              // Bottom Synthesis Callout
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.8, y: 4.7, w: 8.4, h: 0.55,
+                fill: { color: 'EFE6D2' }, line: { color: 'C69214', width: 1.0 }
+              });
+              const synthText = bullets[2] || 'القاعدة المنهجية: الإقرار بالخالق لا ينجي وحده ما لم يُفرد بالعبادة، فالتوحيد كلٌّ لا يتجزأ.';
+              slide.addText('● خلاصة المسألة: ' + synthText, {
+                x: 0.9, y: 4.75, w: 8.2, h: 0.45,
+                fontSize: 10, fontFace: 'Arial', color: '0A231A', bold: true, align: 'right', rtlMode: true
+              });
+
+            // ================= ARCHETYPE 5: 3 VERTICAL PILLARS =================
+            } else if (arch === 'pillars') {
+              slide.background = { color: 'F6F1E7' };
+
+              slide.addText(slideTitleText, {
+                x: 0.8, y: 0.4, w: 8.4, h: 0.5,
+                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText('الركائز الكبرى المنظمة للمحور الشرعي', {
+                x: 0.8, y: 0.95, w: 8.4, h: 0.35,
+                fontSize: 11, fontFace: 'Arial', color: 'B45309', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addShape(pptx.ShapeType.line, {
+                x: 0.8, y: 1.3, w: 8.4, h: 0,
+                line: { color: 'C69214', width: 1.5 }
+              });
+
+              const colW = 2.65;
+              const gap = 0.22;
+              const numSymbols = ['١', '٢', '٣'];
+
+              [0, 1, 2].forEach(cIdx => {
+                const posX = 0.8 + ((2 - cIdx) * (colW + gap));
+                const bText = bullets[cIdx] || 'تأصيل شرعي وضبط منهجي للمسألة العلمية';
+
+                slide.addShape(pptx.ShapeType.roundRect, {
+                  x: posX, y: 1.45, w: colW, h: 3.5,
+                  fill: { color: 'FFFFFF' }, line: { color: 'C69214', width: 1.5 }
+                });
+
+                slide.addShape(pptx.ShapeType.roundRect, {
+                  x: posX + 0.15, y: 1.6, w: 0.5, h: 0.45,
+                  fill: { color: '123329' }, line: { color: 'D97706', width: 1.0 }
+                });
+                slide.addText(numSymbols[cIdx], {
+                  x: posX + 0.15, y: 1.6, w: 0.5, h: 0.45,
+                  fontSize: 13, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'center', rtlMode: true
+                });
+
+                slide.addShape(pptx.ShapeType.line, {
+                  x: posX + 0.15, y: 2.15, w: colW - 0.3, h: 0,
+                  line: { color: 'E2E8F0', width: 1.0 }
+                });
+
+                slide.addText(bText, {
+                  x: posX + 0.15, y: 2.25, w: colW - 0.3, h: 2.5,
+                  fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
+                });
+              });
+
+            // ================= ARCHETYPE 6: MATRIX / COMPARISON TABLE =================
+            } else if (arch === 'table') {
+              slide.background = { color: 'F6F1E7' };
+
+              slide.addText(slideTitleText, {
+                x: 0.8, y: 0.4, w: 8.4, h: 0.5,
+                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
+              });
               slide.addText('مصفوفة الفروق الجوهرية والضوابط الفقهية المقارنة', {
                 x: 0.8, y: 0.95, w: 8.4, h: 0.35,
-                fontSize: 12, fontFace: 'Tajawal', color: 'B45309', bold: true, align: 'right', rtlMode: true
+                fontSize: 11, fontFace: 'Arial', color: 'B45309', bold: true, align: 'right', rtlMode: true
               });
 
               const rawTbl = (s.tableData && s.tableData.length > 0) ? s.tableData : [
@@ -8974,7 +9214,7 @@
                     color: rIdx === 0 ? 'FDE68A' : '1E293B',
                     bold: rIdx === 0,
                     fontSize: rIdx === 0 ? 11 : 10,
-                    fontFace: 'Tajawal',
+                    fontFace: 'Arial',
                     align: 'right',
                     valign: 'middle',
                     rtlMode: true
@@ -8990,17 +9230,57 @@
               });
 
               slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.8, y: 4.45, w: 8.4, h: 0.65,
+                x: 0.8, y: 4.5, w: 8.4, h: 0.65,
                 fill: { color: '0A3324' }, line: { color: 'C69214', width: 1.2 }
               });
               slide.addText('العلاقة الدقيقة: الشرك الأصغر بوابة الأكبر وذريعته؛ فالتساهل في صغائر الشرك يضعف تعظيم الله حتى يقع العبد في الأكبر دون أن يشعر.', {
-                x: 0.9, y: 4.50, w: 8.2, h: 0.55,
-                fontSize: 10, fontFace: 'Tajawal', color: 'FEF3C7', align: 'right', rtlMode: true
+                x: 0.9, y: 4.55, w: 8.2, h: 0.55,
+                fontSize: 10, fontFace: 'Arial', color: 'FEF3C7', align: 'right', rtlMode: true
               });
 
-            // ================= ARCHETYPE 2: SECTION DIVIDER =================
+            // ================= ARCHETYPE 7: SACRED MIHRAB (HADITH / QURAN) =================
+            } else if (arch === 'mihrab') {
+              slide.background = { color: '123329' };
+
+              slide.addText(slideTitleText, {
+                x: 0.8, y: 0.4, w: 8.4, h: 0.55,
+                fontSize: 22, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'center', rtlMode: true
+              });
+
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 1.0, y: 1.2, w: 8.0, h: 2.8,
+                fill: { color: '0A231C' }, line: { color: 'C69214', width: 2.0 }
+              });
+
+              const scInfo = splitScripture(s.scriptureEvidence || bullets[0] || '«اللهم إني أعوذ بك أن أشرك بك وأنا أعلم، وأستغفرك لما لا أعلم»');
+              const bodyText = scInfo.text || bullets[0];
+              const citationText = scInfo.citation || bullets[1] || 'رواه أحمد والأدب المفرد للبخاري | صحيح';
+
+              slide.addText(bodyText, {
+                x: 1.2, y: 1.4, w: 7.6, h: 1.8,
+                fontSize: 14, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'center', rtlMode: true
+              });
+
+              if (citationText) {
+                slide.addText(citationText, {
+                  x: 1.2, y: 3.3, w: 7.6, h: 0.55,
+                  fontSize: 11, fontFace: 'Arial', color: '86EFAC', align: 'center', rtlMode: true
+                });
+              }
+
+              const practicalTip = s.pedagogicalTip || bullets[2] || 'يقال إذا خاف العبد على نفسه شيئاً من الرياء أو إرادة غير وجه الله؛ فينبغي الإكثار منه في كل حال.';
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 1.0, y: 4.2, w: 8.0, h: 0.7,
+                fill: { color: '184335' }, line: { color: '86EFAC', width: 1.0 }
+              });
+              slide.addText('● التوجيه النبوي والواجب العملي: ' + practicalTip, {
+                x: 1.1, y: 4.25, w: 7.8, h: 0.6,
+                fontSize: 10, fontFace: 'Arial', color: 'FFFFFF', align: 'right', rtlMode: true
+              });
+
+            // ================= ARCHETYPE 8: SECTION DIVIDER =================
             } else if (arch === 'divider') {
-              slide.background = { color: '123329' }; // Grand Emerald
+              slide.background = { color: '123329' };
 
               slide.addShape(pptx.ShapeType.line, {
                 x: 2.0, y: 1.5, w: 6.0, h: 0,
@@ -9009,13 +9289,13 @@
 
               slide.addText(slideTitleText, {
                 x: 1.0, y: 1.8, w: 8.0, h: 1.2,
-                fontSize: 26, fontFace: 'Tajawal', color: 'FDE68A', bold: true, align: 'center', rtlMode: true
+                fontSize: 26, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'center', rtlMode: true
               });
 
-              const subText = bullets[0] || s.pedagogicalTip || 'تأصيل شرعي وبناء منهجي لليقين';
+              const subText = bullets[0] || 'تأصيل شرعي وبناء منهجي لليقين';
               slide.addText(subText, {
                 x: 1.5, y: 3.1, w: 7.0, h: 0.9,
-                fontSize: 14, fontFace: 'Tajawal', color: '86EFAC', align: 'center', rtlMode: true
+                fontSize: 14, fontFace: 'Arial', color: '86EFAC', align: 'center', rtlMode: true
               });
 
               slide.addShape(pptx.ShapeType.line, {
@@ -9023,148 +9303,96 @@
                 line: { color: 'C69214', width: 2.0 }
               });
 
-            // ================= ARCHETYPE 3: 3-COLUMN PILLARS / SOURCES =================
-            } else if (arch === 'pillars' || arch === 'sources') {
-              slide.background = { color: 'F6F1E7' }; // Pearl Ivory
-
-              slide.addText(slideTitleText, {
-                x: 0.8, y: 0.4, w: 8.4, h: 0.55,
-                fontSize: 20, fontFace: 'Tajawal', color: '123329', bold: true, align: 'right', rtlMode: true
-              });
-
-              const subLine = s.pedagogicalTip || (arch === 'sources' ? 'المصادر والأسس العلمية المعتمدة لهذا الدرس' : 'الركائز الكبرى المنظمة للمحور');
-              slide.addText(subLine, {
-                x: 0.8, y: 0.95, w: 8.4, h: 0.35,
-                fontSize: 11, fontFace: 'Tajawal', color: 'B45309', bold: true, align: 'right', rtlMode: true
-              });
-
-              const colW = 2.65;
-              const gap = 0.22;
-              const cardData = bullets.slice(0, 3);
-              const numSymbols = ['١', '٢', '٣'];
-
-              [0, 1, 2].forEach(cIdx => {
-                const posX = 0.8 + ((2 - cIdx) * (colW + gap)); // RTL ordering
-                const bText = cardData[cIdx] || 'تأصيل وضبط المحور العلمي المعتمد';
-
-                slide.addShape(pptx.ShapeType.roundRect, {
-                  x: posX, y: 1.45, w: colW, h: 3.35,
-                  fill: { color: 'FFFFFF' }, line: { color: 'C69214', width: 1.5 }
-                });
-
-                // Top Badge with Eastern Numeral
-                slide.addShape(pptx.ShapeType.roundRect, {
-                  x: posX + 0.15, y: 1.60, w: 0.5, h: 0.45,
-                  fill: { color: '123329' }, line: { color: 'D97706', width: 1 }
-                });
-                slide.addText(numSymbols[cIdx], {
-                  x: posX + 0.15, y: 1.60, w: 0.5, h: 0.45,
-                  fontSize: 14, fontFace: 'Tajawal', color: 'FEF3C7', bold: true, align: 'center', rtlMode: true
-                });
-
-                // Pillar Content
-                slide.addText(bText, {
-                  x: posX + 0.15, y: 2.20, w: colW - 0.3, h: 2.45,
-                  fontSize: 11, fontFace: 'Tajawal', color: '1E293B', align: 'right', rtlMode: true
-                });
-              });
-
-            // ================= ARCHETYPE 4: SACRED MIHRAB (HADITH / QURAN) =================
-            } else if (arch === 'mihrab') {
-              slide.background = { color: '123329' }; // Grand Emerald
-
-              slide.addText(slideTitleText, {
-                x: 0.8, y: 0.4, w: 8.4, h: 0.55,
-                fontSize: 22, fontFace: 'Tajawal', color: 'FDE68A', bold: true, align: 'center', rtlMode: true
-              });
-
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 1.0, y: 1.25, w: 8.0, h: 2.8,
-                fill: { color: '0A231C' }, line: { color: 'C69214', width: 2.0 }
-              });
-
-              const scriptureBody = bullets[0] || s.scriptureEvidence || '«اللهم إني أعوذ بك أن أشرك بك وأنا أعلم، وأستغفرك لما لا أعلم»';
-              slide.addText(scriptureBody, {
-                x: 1.2, y: 1.45, w: 7.6, h: 1.8,
-                fontSize: 14, fontFace: 'Amiri', color: 'FEF3C7', bold: true, align: 'center', rtlMode: true
-              });
-
-              const sanad = bullets[1] || 'الراوي: أبو بكر الصديق وأبو موسى الأشعري | المحدث: الألباني | حكم الحديث: صحيح';
-              slide.addText(sanad, {
-                x: 1.2, y: 3.35, w: 7.6, h: 0.55,
-                fontSize: 11, fontFace: 'Tajawal', color: '86EFAC', align: 'center', rtlMode: true
-              });
-
-              slide.addText(s.pedagogicalTip || 'يقال إذا خاف العبد على نفسه شيئاً من الرياء أو إرادة غير وجه الله؛ فينبغي الإكثار منه في كل حال.', {
-                x: 1.0, y: 4.25, w: 8.0, h: 0.65,
-                fontSize: 11, fontFace: 'Tajawal', color: 'E2E8F0', align: 'center', rtlMode: true
-              });
-
-            // ================= ARCHETYPE 5: STANDARD HIGH-LEGIBILITY PEARL IVORY =================
+            // ================= ARCHETYPE 9: DYNAMIC CONCEPT BREAKDOWN (IMPROVED STANDARD) =================
             } else {
-              slide.background = { color: 'F6F1E7' }; // Pearl Ivory
+              slide.background = { color: 'F6F1E7' };
 
-              // Slide Header
               slide.addText(slideTitleText, {
-                x: 0.8, y: 0.4, w: 8.4, h: 0.55,
-                fontSize: 20, fontFace: 'Tajawal', color: '123329', bold: true, align: 'right', rtlMode: true
+                x: 0.8, y: 0.4, w: 8.4, h: 0.5,
+                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
               });
-
-              // Gold Divider Line
               slide.addShape(pptx.ShapeType.line, {
-                x: 0.8, y: 0.98, w: 8.4, h: 0,
+                x: 0.8, y: 0.95, w: 8.4, h: 0,
                 line: { color: 'C69214', width: 1.5 }
               });
 
               let currentY = 1.15;
 
-              // Scripture Banner if available
-              const scriptureText = distillSlideScripture(s.scriptureEvidence || s.scripture || '');
-              if (scriptureText && !scriptureText.includes('صفحة') && !scriptureText.includes('ممسوحة')) {
-                slide.addShape(pptx.ShapeType.roundRect, {
-                  x: 0.8, y: currentY, w: 8.4, h: 0.65,
-                  fill: { color: 'EFE6D2' }, line: { color: 'B45309', width: 1.0 }
-                });
-                slide.addText(formatScriptureDisplay(scriptureText), {
-                  x: 0.9, y: currentY + 0.05, w: 8.2, h: 0.55,
-                  fontSize: 11, fontFace: 'Amiri', color: '062319', bold: true, align: 'center', italic: true, rtlMode: true
-                });
-                currentY += 0.80;
+              // Scripture strip if present
+              if (s.scriptureEvidence) {
+                const sc = splitScripture(s.scriptureEvidence);
+                if (sc.text && !sc.text.includes('صفحة') && !sc.text.includes('ممسوحة')) {
+                  slide.addShape(pptx.ShapeType.roundRect, {
+                    x: 0.8, y: currentY, w: 8.4, h: 0.65,
+                    fill: { color: 'EFE6D2' }, line: { color: 'B45309', width: 1.0 }
+                  });
+                  const scFull = sc.text + (sc.citation ? ` (${sc.citation})` : '');
+                  slide.addText(scFull, {
+                    x: 0.9, y: currentY + 0.05, w: 8.2, h: 0.55,
+                    fontSize: 10, fontFace: 'Arial', color: '062319', bold: true, align: 'center', rtlMode: true
+                  });
+                  currentY += 0.75;
+                }
               }
 
-              // Substantive Focus Cards
-              const cardH = (bullets.length > 2) ? 0.72 : 0.88;
-              const gap = cardH + 0.12;
-
-              bullets.slice(0, 3).forEach((bText, bIdx) => {
-                const cardY = currentY + (bIdx * gap);
-                slide.addShape(pptx.ShapeType.roundRect, {
-                  x: 0.8, y: cardY, w: 8.4, h: cardH,
-                  fill: { color: 'FFFFFF' }, line: { color: '123329', width: 1.2 }
-                });
-                slide.addText(`[${bIdx + 1}]  ${bText}`, {
-                  x: 1.0, y: cardY + 0.06, w: 8.0, h: cardH - 0.12,
-                  fontSize: 12, fontFace: 'Tajawal', color: '1E293B', bold: true, align: 'right', rtlMode: true
-                });
+              // Top Primary Focus Card
+              const p1 = bullets[0] || 'التقرير التأصيلي الأكبر لهذا المحور العلمي';
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.8, y: currentY, w: 8.4, h: 1.1,
+                fill: { color: '123329' }, line: { color: 'C69214', width: 1.2 }
+              });
+              slide.addText('القضية المركزية ومحل الشاهد:', {
+                x: 1.0, y: currentY + 0.08, w: 8.0, h: 0.3,
+                fontSize: 10, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText(p1, {
+                x: 1.0, y: currentY + 0.38, w: 8.0, h: 0.65,
+                fontSize: 11, fontFace: 'Arial', color: 'FEF3C7', align: 'right', rtlMode: true
               });
 
-              // Pedagogical Impact Footer
-              const tip = s.pedagogicalTip || s.practicalImpact || '';
-              if (tip) {
-                slide.addText(`● الثمرة السلوكية والتربوية: ${tip}`, {
-                  x: 0.8, y: 4.70, w: 8.4, h: 0.40,
-                  fontSize: 10, fontFace: 'Tajawal', color: '047857', bold: true, align: 'right', rtlMode: true
-                });
-              }
+              currentY += 1.25;
+
+              // Bottom Two Supporting Columns
+              const p2 = bullets[1] || 'بيان الدلالة المنهجية والاستدلال الشرعي ومقتضيات الفهم السليم.';
+              const p3 = bullets[2] || s.pedagogicalTip || 'الواجب العملي والأثر الإيماني في واقع حياة المسلم وسلوكه.';
+
+              const cardW = 4.05;
+              // Right Card
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 5.15, y: currentY, w: cardW, h: 4.8 - currentY,
+                fill: { color: 'FFFFFF' }, line: { color: '123329', width: 1.2 }
+              });
+              slide.addText('الأثر المعرفي والمنهجي:', {
+                x: 5.25, y: currentY + 0.08, w: cardW - 0.2, h: 0.3,
+                fontSize: 10, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText(p2, {
+                x: 5.25, y: currentY + 0.38, w: cardW - 0.2, h: (4.8 - currentY) - 0.45,
+                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
+              });
+
+              // Left Card
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.8, y: currentY, w: cardW, h: 4.8 - currentY,
+                fill: { color: 'FFFFFF' }, line: { color: '047857', width: 1.2 }
+              });
+              slide.addText('الثمرة الإيمانية والسلوكية:', {
+                x: 0.9, y: currentY + 0.08, w: cardW - 0.2, h: 0.3,
+                fontSize: 10, fontFace: 'Arial', color: '047857', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText(p3, {
+                x: 0.9, y: currentY + 0.38, w: cardW - 0.2, h: (4.8 - currentY) - 0.45,
+                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
+              });
             }
 
-            // Attached Speaker Notes for Lecturer
+            // Attached Speaker Notes
             const speakerNotes = s.notes || s.talkingPoints || s.pedagogicalTip || `ملاحظات المعلم لمسائل: ${slideTitleText}`;
             slide.addNotes(speakerNotes);
 
             // Bottom Left Slide Number
             slide.addText(`${idx + 1} / ${slidesData.length}`, {
-              x: 0.8, y: 5.15, w: 2.0, h: 0.3,
+              x: 0.8, y: 5.2, w: 2.0, h: 0.3,
               fontSize: 9, fontFace: 'Arial', color: '94A3B8', align: 'left'
             });
           });
@@ -9182,8 +9410,7 @@
         } finally {
           setIsExportingPptx(false);
         }
-      };// Intelligent Islamic Evidences & Scientific Proofs Extractor
-      function extractEvidencesAndProofs(rawText) {
+      };function extractEvidencesAndProofs(rawText) {
         if (!rawText) return { quranicVerses: [], hadiths: [], scholarlyProofs: [] };
         var text = sanitizeArabicExtractedText(rawText);
         
@@ -10276,8 +10503,11 @@
 
 
       function handleLoadDemoIslamic() {
-        setIslamicData(getFallbackIslamic());
-        showToast(isRtl ? 'تم تحميل درس العقيدة التجريبي الجاهز (أركان الإيمان) ⚡' : 'Pre-loaded Aqeedah Demo Lesson Loaded (Six Pillars) ⚡');
+        setIslamicData(sanitizeIslamicDataObject(EXEMPLAR_TAWHEED_LECTURE.data));
+        setLessonTopic('من هو الله؟ — تأصيل توحيد الربوبية وتوحيد الألوهية وبناء اليقين');
+        setSubjectCategory('العقيدة والتوحيد (Aqeedah)');
+        setActiveIslamicStage(2);
+        showToast(isRtl ? 'تم تحميل المحاضرة التأصيلية النموذجية الكاملة (30 شريحة متكاملة الأنماط) بنجاح ✨' : '30-Slide Master Multi-Archetype Presentation Loaded ✨');
       }
 
       // Generator Handlers via /api/generate
@@ -10468,7 +10698,52 @@
         };
       }
 
-      function getFallbackIslamic() {
+      
+      // Canonical Master Islamic Lecture (30 Complete Slides, Multi-Archetype, Real Scholarly Content)
+      const EXEMPLAR_TAWHEED_CARDS = [{"slideNumber": 1, "slideTitle": "العقيدة الإسلامية — المحاضرة الثانية", "phaseTitle": "المحور 1: العقيدة الإسلامية — المحاضرة الثانية", "scriptureEvidence": "من هو الله؟", "bulletPoints": ["تأصيل توحيد الربوبية وتوحيد الألوهية وبناء اليقين", "معنى توحيد الربوبية • معنى توحيد الألوهية • لماذا لا يكفي الإقرار بوجود الله؟ • الفرق بين الاعتراف بالخالق وإفراده بالعبادة"], "talkingPoints": "تأصيل توحيد الربوبية وتوحيد الألوهية وبناء اليقين • معنى توحيد الربوبية • معنى توحيد الألوهية • لماذا لا يكفي الإقرار بوجود الله؟ • الفرق بين الاعتراف بالخالق وإفراده بالعبادة", "pedagogicalTip": "العقيدة الإسلامية — المحاضرة الثانية", "archetype": "cover", "hasTable": false, "tableData": [], "notes": "عنوان المحاضرة: من هو الله؟ — تأصيل توحيد الربوبية وتوحيد الألوهية وبناء اليقين. العناصر: معنى توحيد الربوبية، معنى توحيد الألوهية، لماذا لا يكفي الإقرار بوجود الله؟، الفرق بين الاعتراف بالخالق وإفراده بالعبادة."}, {"slideNumber": 2, "slideTitle": "المصادر العلمية المعتمدة", "phaseTitle": "المحور 2: المصادر العلمية المعتمدة", "scriptureEvidence": "", "bulletPoints": ["«ثلاثة الأصول وأدلتها»", "للإمام محمد بن عبد الوهاب — باب: معرفة العبد ربه", "«نبذة في العقيدة الإسلامية»", "للشيخ محمد بن صالح العثيمين — باب: الإيمان بالله"], "talkingPoints": "«ثلاثة الأصول وأدلتها» • للإمام محمد بن عبد الوهاب — باب: معرفة العبد ربه • «نبذة في العقيدة الإسلامية»", "pedagogicalTip": "على أي أساس نبني هذا الدرس؟", "archetype": "sources", "hasTable": false, "tableData": [], "notes": "المصادر: كتاب «ثلاثة الأصول وأدلتها» للإمام محمد بن عبد الوهاب (باب: معرفة العبد ربه)، ورسالة «نبذة في العقيدة الإسلامية» للشيخ محمد بن صالح العثيمين (باب: الإيمان بالله)، والمنهج التأسيسي لمقرر «العقيدة الإسلامية» في أكاديمية زاد للشيخ محمد صالح المنجد."}, {"slideNumber": 3, "slideTitle": "مقدمة: السؤال الأول الذي يحدد مصير الإنسان", "phaseTitle": "المحور 3: مقدمة: السؤال الأول الذي يحدد مصير الإنسان", "scriptureEvidence": "", "bulletPoints": ["ينطلق بك عبر أودية وجبال لا تعرفها. لن تسأل عن لون المقاعد ولا عن نوع الطعام، بل ستسأل فوراً:", "من الذي يقود هذا القطار؟", "من الذي وضعني فيه؟", "إلى أين يتجه بي؟"], "talkingPoints": "ينطلق بك عبر أودية وجبال لا تعرفها. لن تسأل عن لون المقاعد ولا عن نوع الطعام، بل ستسأل فوراً: • من الذي يقود هذا القطار؟ • من الذي وضعني فيه؟", "pedagogicalTip": "تخيّل أنك استيقظت في قطار فائق السرعة…", "archetype": "story", "hasTable": false, "tableData": [], "notes": "تخيل أن إنساناً استيقظ في قطار فائق السرعة ينطلق به عبر أودية وجبال لا يعرفها؛ لن يسأل عن لون المقاعد ولا عن نوع الطعام، بل سيسأل فوراً: من الذي يقود هذا القطار؟ ومن الذي وضعني فيه؟ وإلى أين يتجه بي؟ وما المطلوب مني أثناء هذه الرحلة؟ هكذا تماماً هي حياة الإنسان على هذه الأرض."}, {"slideNumber": 4, "slideTitle": "لماذا هذا السؤال هو أعظم قضية؟", "phaseTitle": "المحور 4: لماذا هذا السؤال هو أعظم قضية؟", "scriptureEvidence": "الله سبحانه هو الذي أوجد الإنسان من العدم، وهداه النجدين: بيّن له طريق الخير والهدى وطريق الشر والضلال، ومنحه القدرة على التمييز والاختيار", "bulletPoints": ["\"لِيَبۡلُوَكُمۡ أَيُّكُمۡ أَحۡسَنُ عَمَلٗاۚ\"", "{مَنْ عَمِلَ صَالِحًا مِنْ ذَكَرٍ أَوْ أُنْثَى وَهُوَ مُؤْمِنٌ فَلَنُحْيِيَنَّهُ حَيَاةً طَيِّبَةً وَلَنَجْزِيَنَّهُمْ أَجْرَهُمْ بِأَحْسَنِ مَا كَانُوا يَعْمَلُونَ} (سورة النحل، الآية 97)", "صلاح القلب، واستقامة السلوك، وطمأنينة النفس، وقبول الأعمال الصالحة، والنجاة في الدنيا والآخرة — كل ذلك متوقف على الإجابة الصادقة اليقينية عن سؤال واحد: من هو الله؟"], "talkingPoints": "\"لِيَبۡلُوَكُمۡ أَيُّكُمۡ أَحۡسَنُ عَمَلٗاۚ\" • {مَنْ عَمِلَ صَالِحًا مِنْ ذَكَرٍ أَوْ أُنْثَى وَهُوَ مُؤْمِنٌ فَلَنُحْيِيَنَّهُ حَيَاةً طَيِّبَةً وَلَنَجْزِيَنَّهُمْ أَجْرَهُمْ بِأَحْسَنِ مَا كَانُوا يَعْمَلُونَ} (سورة النحل، الآية 97) • صلاح القلب، واستقامة السلوك، وطمأنينة النفس، وقبول الأعمال الصالحة، والنجاة في الدنيا والآخرة — كل ذلك متوقف على الإجابة الصادقة اليقينية عن سؤال واحد: من هو الله؟", "pedagogicalTip": "الله سبحانه هو الذي أوجد الإنسان من العدم، وهداه النجدين: بيّن له طريق الخير والهدى وطريق الشر والضلال، ومنحه القدرة على التمييز والاختيار", "archetype": "standard", "hasTable": false, "tableData": [], "notes": "أعظم قضية تواجه العقل البشري، وأجلّ علم يكتسبه المرء في حياته، هو العلم بالله سبحانه وتعالى ليحسن عبادته وينال خير الدنيا والآخرة؛ لأن صلاح القلب، واستقامة السلوك، وطمأنينة النفس، وقبول الأعمال الصالحة، والنجاة في الدنيا والآخرة، كل ذلك متوقف على الإجابة الصادقة واليقينية عن سؤال واحد: من هو الله؟"}, {"slideNumber": 5, "slideTitle": "عناية العلماء بهذا السؤال، وخريطة الرحلة", "phaseTitle": "المحور 5: عناية العلماء بهذا السؤال، وخريطة الرحلة", "scriptureEvidence": "", "bulletPoints": ["أول واجب على كل مكلف هو العلم، وأول مراتبه معرفة العبد ربه بالأدلة والبراهين.", "نبذة في العقيدة الإسلامية", "الإيمان بالله في صدارة أركان الإيمان الستة، مفصلاً أصوله ومقتضياته.", "أكاديمية زاد"], "talkingPoints": "أول واجب على كل مكلف هو العلم، وأول مراتبه معرفة العبد ربه بالأدلة والبراهين. • نبذة في العقيدة الإسلامية • الإيمان بالله في صدارة أركان الإيمان الستة، مفصلاً أصوله ومقتضياته.", "pedagogicalTip": "عناية العلماء بهذا السؤال، وخريطة الرحلة", "archetype": "standard", "hasTable": false, "tableData": [], "notes": "اعتنى علماء العقيدة بهذا السؤال فجعلوه فاتحة رسائلهم ومطالع دروسهم. في هذه المحاضرة نبحر في رحلة علمية وإيمانية متكاملة نفكك فيها هذه الأصول بأسلوب يجمع بين العمق التأصيلي واللمسة التربوية الحية، دون اختصار مخل، لنبني تصوراً متكاملاً عن ربنا وخالقنا ومولانا سبحانه."}, {"slideNumber": 6, "slideTitle": "المحور الأول — توحيد الربوبية", "phaseTitle": "المحور 6: المحور الأول — توحيد الربوبية", "scriptureEvidence": "إفراد الله تعالى بأفعاله الخاصة به سبحانه", "bulletPoints": ["كالخلق من العدم، والرزق، والملك المطلق، والتدبير، والإحياء، والإماتة، وإنزال الغيث، وتصريف الرياح، والنفع والضر.", "معنى «الرب» في «ثلاثة الأصول»", "الرب هو المربي لجميع العالمين بنعمه الظاهرة والباطنة؛ لم يخلق الخلق ثم يتركهم، بل أمدهم بالهواء والماء والغذاء، وهيأ لهم الأرض للسكنى، وسخر لهم ما في السماوات وما في الأرض. ومن جمع صفات الخلق والتربية والإنعام فهو وحده المعبود المستحق لأن يُذل له ويُخضع له."], "talkingPoints": "كالخلق من العدم، والرزق، والملك المطلق، والتدبير، والإحياء، والإماتة، وإنزال الغيث، وتصريف الرياح، والنفع والضر. • معنى «الرب» في «ثلاثة الأصول» • الرب هو المربي لجميع العالمين بنعمه الظاهرة والباطنة؛ لم يخلق الخلق ثم يتركهم، بل أمدهم بالهواء والماء والغذاء، وهيأ لهم الأرض للسكنى، وسخر لهم ما في السماوات وما في الأرض. ومن جمع صفات الخلق والتربية والإنعام فهو وحده المعبود المستحق لأن يُذل له ويُخضع له.", "pedagogicalTip": "إفراد الله تعالى بأفعاله الخاصة به سبحانه", "archetype": "standard", "hasTable": false, "tableData": [], "notes": "كل فعل يختص به الخالق دون المخلوقين يندرج تحت توحيد الربوبية. وقد أوضح الإمام محمد بن عبد الوهاب المعنى اللغوي والشرعي لكلمة الرب: المربي لجميع العالمين بنعمه، ربّاهم منذ اللحظة الأولى لتكوينهم."}, {"slideNumber": 7, "slideTitle": "ركائز الربوبية الثلاث — «نبذة في العقيدة الإسلامية»", "phaseTitle": "المحور 7: ركائز الربوبية الثلاث — «نبذة في العقيدة الإسلامية»", "scriptureEvidence": "الإيمان بالله يكتمل بأربعة أمور: الإيمان بوجوده، وبربوبيته، وبألوهيته، وبأسمائه وصفاته. والربوبية تقوم على ثلاث ركائز لا يشارك الله فيها ملك مقرب ولا نبي مرسل:", "bulletPoints": ["١", "التفرد بالخلق", "لا خالق إلا الله؛ كل ما في السماوات والأرض — حتى أفعال العباد — مخلوق له. و«صنع البشر» تركيب وتحويل لمواد أودعها الله؛ فالطائرة من حديد وألمنيوم خلقهما الله، وبقوانين جاذبية وهواء أوجدها الله.", "٢"], "talkingPoints": "١ • التفرد بالخلق • لا خالق إلا الله؛ كل ما في السماوات والأرض — حتى أفعال العباد — مخلوق له. و«صنع البشر» تركيب وتحويل لمواد أودعها الله؛ فالطائرة من حديد وألمنيوم خلقهما الله، وبقوانين جاذبية وهواء أوجدها الله.", "pedagogicalTip": "الإيمان بالله يكتمل بأربعة أمور: الإيمان بوجوده، وبربوبيته، وبألوهيته، وبأسمائه وصفاته. والربوبية تقوم على ثلاث ركائز لا يشارك الله فيها ملك مقرب ولا نبي مرسل:", "archetype": "pillars", "hasTable": false, "tableData": [], "notes": "يفصّل الشيخ ابن عثيمين في باب الإيمان بالله أن الإيمان بالربوبية يقوم على الاعتقاد الجازم بالتفرد بالخلق والملك والتدبير."}, {"slideNumber": 8, "slideTitle": "التفرد بالأمر والتدبير", "phaseTitle": "المحور 8: التفرد بالأمر والتدبير", "scriptureEvidence": "أمر الله نوعان عظيمان", "bulletPoints": ["الأمر الكوني القدري", "مشيئته النافذة في الكون التي لا يردها راد ولا يعقبها معقب؛ فما شاء الله كان، وما لم يشأ لم يكن.", "الأمر الشرعي الديني", "ما أنزله الله على رسله من الشرائع والأحكام والأوامر والنواهي التي ابتلى بها عباده ليظهر المطيع من العاصي."], "talkingPoints": "الأمر الكوني القدري • مشيئته النافذة في الكون التي لا يردها راد ولا يعقبها معقب؛ فما شاء الله كان، وما لم يشأ لم يكن. • الأمر الشرعي الديني", "pedagogicalTip": "أمر الله نوعان عظيمان", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 9, "slideTitle": "المسلك الكوني لمعرفة الرب — «ثلاثة الأصول»", "phaseTitle": "المحور 9: المسلك الكوني لمعرفة الرب — «ثلاثة الأصول»", "scriptureEvidence": "", "bulletPoints": ["الآيات: العلامات الدالة على وجود الخالق وعظمته وحكمته. والمخلوقات: الكائنات التي أوجدها الله لتشهد بقدرته.", "الآيات المتجددة المتعاقبة", "الليل والنهار، والشمس والقمر. تعاقب منتظم لا يتأخر ثانية منذ آلاف السنين: ليل للسكون وراحة الأبدان، ونهار للسعي في المعايش، وشمس تبعث الحياة، وقمر بمنازله يُعرف به عدد السنين والحساب. هل يمكن أن تسير بهذا الانضباط دون مدبر حكيم؟", "المخلوقات العظيمة الثابتة"], "talkingPoints": "الآيات: العلامات الدالة على وجود الخالق وعظمته وحكمته. والمخلوقات: الكائنات التي أوجدها الله لتشهد بقدرته. • الآيات المتجددة المتعاقبة • الليل والنهار، والشمس والقمر. تعاقب منتظم لا يتأخر ثانية منذ آلاف السنين: ليل للسكون وراحة الأبدان، ونهار للسعي في المعايش، وشمس تبعث الحياة، وقمر بمنازله يُعرف به عدد السنين والحساب. هل يمكن أن تسير بهذا الانضباط دون مدبر حكيم؟", "pedagogicalTip": "كيف أعرف ربي؟ بآياته ومخلوقاته", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 10, "slideTitle": "فطرية توحيد الربوبية — منهج أكاديمية زاد", "phaseTitle": "المحور 10: فطرية توحيد الربوبية — منهج أكاديمية زاد", "scriptureEvidence": "الإيمان بربوبية الله مركوز في أصل الفطرة البشرية", "bulletPoints": ["يولد الإنسان وفي أعماق نفسه شعور فطري بالافتقار إلى خالق عظيم يلجأ إليه.", "إنكار نادر شاذ", "لم ينكر البشر عبر التاريخ وجود خالق مدبر إلا نادراً، وكان إنكارهم جحوداً باللسان بدافع الكبر والعناد وطلب الرياسة، وقلوبهم مستيقنة.", "الفطرة تستيقظ عند الشدائد"], "talkingPoints": "يولد الإنسان وفي أعماق نفسه شعور فطري بالافتقار إلى خالق عظيم يلجأ إليه. • إنكار نادر شاذ • لم ينكر البشر عبر التاريخ وجود خالق مدبر إلا نادراً، وكان إنكارهم جحوداً باللسان بدافع الكبر والعناد وطلب الرياسة، وقلوبهم مستيقنة.", "pedagogicalTip": "الإيمان بربوبية الله مركوز في أصل الفطرة البشرية", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 11, "slideTitle": "المحور الثاني — توحيد الألوهية (توحيد العبادة)", "phaseTitle": "المحور 11: المحور الثاني — توحيد الألوهية (توحيد العبادة)", "scriptureEvidence": "إفراد الله تعالى بأفعال العباد التي يتقربون بها إليه", "bulletPoints": ["أن يخلص العبد جميع أنواع العبادة الظاهرة والباطنة لله وحده لا شريك له. فإن كانت الربوبية توحيد الله بأفعاله هو، فالألوهية توحيده بأفعال عباده.", "من هو «الإله»؟", "المعبود حباً وتعظيماً وخضوعاً؛ تألهه القلوب محبةً وإجلالاً ورغبةً ورهبةً، فتذل له وتنقاد لأمره.", "تقرير ابن عثيمين"], "talkingPoints": "أن يخلص العبد جميع أنواع العبادة الظاهرة والباطنة لله وحده لا شريك له. فإن كانت الربوبية توحيد الله بأفعاله هو، فالألوهية توحيده بأفعال عباده. • من هو «الإله»؟ • المعبود حباً وتعظيماً وخضوعاً؛ تألهه القلوب محبةً وإجلالاً ورغبةً ورهبةً، فتذل له وتنقاد لأمره.", "pedagogicalTip": "إفراد الله تعالى بأفعال العباد التي يتقربون بها إليه", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 12, "slideTitle": "شمولية العبادة — «ثلاثة الأصول»", "phaseTitle": "المحور 12: شمولية العبادة — «ثلاثة الأصول»", "scriptureEvidence": "العبادة هي الغاية العظمى التي خُلق لها الجن والإنس؛ وأعظم ما أمر الله به التوحيد، وأعظم ما نهى عنه الشرك. والعبادة ليست محصورة في الصلاة والصيام، بل ثلاث دوائر مترابطة.", "bulletPoints": ["الدائرة الأولى: العبادات القلبية — أصل العبادات وأساسها", "المحبة الخالصة", "أن يكون الله ورسوله أحب إليه مما سواهما؛ محبة تعظيم وإجلال وطاعة.", "الخوف والخشية"], "talkingPoints": "الدائرة الأولى: العبادات القلبية — أصل العبادات وأساسها • المحبة الخالصة • أن يكون الله ورسوله أحب إليه مما سواهما؛ محبة تعظيم وإجلال وطاعة.", "pedagogicalTip": "العبادة هي الغاية العظمى التي خُلق لها الجن والإنس؛ وأعظم ما أمر الله به التوحيد، وأعظم ما نهى عنه الشرك. والعبادة ليست محصورة في الصلاة والصيام، بل ثلاث دوائر مترابطة.", "archetype": "pillars", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 13, "slideTitle": "شمولية العبادة — تتمة", "phaseTitle": "المحور 13: شمولية العبادة — تتمة", "scriptureEvidence": "", "bulletPoints": ["الدعاء: من أعظم العبادات؛ دعاء المسألة ودعاء العبادة حق خالص لله، فمن دعا ميتاً أو غائباً أو مخلوقاً فيما لا يقدر عليه إلا الله فقد صرف العبادة لغير مستحقها.", "الاستعانة والاستعاذة والاستغاثة: فيما لا يقدر عليه إلا الله لا تُصرف إلا لله الحي القيوم.", "الصلاة والركوع والسجود والطواف: السجود غاية الذل والخضوع، فلا توضع الجبهة تعظيماً وعبادة إلا لخالق السماوات والأرض.", "الدائرة الثالثة: العبادات المالية والنسكية"], "talkingPoints": "الدعاء: من أعظم العبادات؛ دعاء المسألة ودعاء العبادة حق خالص لله، فمن دعا ميتاً أو غائباً أو مخلوقاً فيما لا يقدر عليه إلا الله فقد صرف العبادة لغير مستحقها. • الاستعانة والاستعاذة والاستغاثة: فيما لا يقدر عليه إلا الله لا تُصرف إلا لله الحي القيوم. • الصلاة والركوع والسجود والطواف: السجود غاية الذل والخضوع، فلا توضع الجبهة تعظيماً وعبادة إلا لخالق السماوات والأرض.", "pedagogicalTip": "الدائرة الثانية: العبادات القولية والبدنية", "archetype": "standard", "hasTable": false, "tableData": [], "notes": "يفصل المؤلف أنواع العبادة ليدرك العبد أن حياته كلها يجب أن تكون خالصة لله."}, {"slideNumber": 14, "slideTitle": "توحيد الألوهية هو جوهر دعوة جميع الرسل", "phaseTitle": "المحور 14: توحيد الألوهية هو جوهر دعوة جميع الرسل", "scriptureEvidence": "", "bulletPoints": ["الدعوة إلى عبادة الله وحده لا شريك له، واجتناب كل ما يُعبد من دونه", "لم يأتِ الرسل ليثبتوا وجود خالق فقط — فأقوامهم كانوا يعرفون ذلك في الجملة — وإنما جاؤوا ليصححوا وجهة العبادة، وليحرروا البشرية من عبادة المخلوقات والأوثان والأهواء إلى عبادة رب العالمين وحده."], "talkingPoints": "الدعوة إلى عبادة الله وحده لا شريك له، واجتناب كل ما يُعبد من دونه • لم يأتِ الرسل ليثبتوا وجود خالق فقط — فأقوامهم كانوا يعرفون ذلك في الجملة — وإنما جاؤوا ليصححوا وجهة العبادة، وليحرروا البشرية من عبادة المخلوقات والأوثان والأهواء إلى عبادة رب العالمين وحده.", "pedagogicalTip": "من نوح عليه السلام إلى محمد ﷺ: قاعدة واحدة ثابتة", "archetype": "standard", "hasTable": false, "tableData": [], "notes": "تبرز مقررات أكاديمية زاد ورسالة نبذة في العقيدة الإسلامية أن الحكمة الكبرى من إرسال الرسل وإنزال الكتب هي تحقيق توحيد الألوهية."}, {"slideNumber": 15, "slideTitle": "المحور الثالث — لماذا لا يكفي الإقرار بوجود الله؟", "phaseTitle": "المحور 15: المحور الثالث — لماذا لا يكفي الإقرار بوجود الله؟", "scriptureEvidence": "«أليس يكفي أن أؤمن في قلبي بأن للكون إلهاً خالقاً مدبراً، وأن هناك جنة وناراً وبعثاً وحساباً؟» — الجواب حجر الزاوية في فهم العقيدة، بأربعة براهين قاطعة.", "bulletPoints": ["البرهان الأول: حال المشركين الأوائل", "ما كانوا يقرّون به", "أن الله خالق السماوات والأرض، يرزقهم، ويملك السمع والأبصار، ويخرج الحي من الميت والميت من الحي، ويدبر الأمر. بل كانوا يعظمون البيت ويحجون ويتصدقون ويذكرون اسم الله.", "ومع ذلك لم ينفعهم"], "talkingPoints": "البرهان الأول: حال المشركين الأوائل • ما كانوا يقرّون به • أن الله خالق السماوات والأرض، يرزقهم، ويملك السمع والأبصار، ويخرج الحي من الميت والميت من الحي، ويدبر الأمر. بل كانوا يعظمون البيت ويحجون ويتصدقون ويذكرون اسم الله.", "pedagogicalTip": "«أليس يكفي أن أؤمن في قلبي بأن للكون إلهاً خالقاً مدبراً، وأن هناك جنة وناراً وبعثاً وحساباً؟» — الجواب حجر الزاوية في فهم العقيدة، بأربعة براهين قاطعة.", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 16, "slideTitle": "البرهان الثاني — أكاديمية زاد", "phaseTitle": "المحور 16: البرهان الثاني — أكاديمية زاد", "scriptureEvidence": "", "bulletPoints": ["ما كان يعلمه يقيناً", "أن الله ربه الذي خلقه من نار\nأن الله هو المعبود المستحق للطاعة\nالبعث والنشور؛ فطلب أن يُنظَر إلى يوم يبعثون\nالجنة والنار؛ فقد أُخرج من الجنة وتوعده الله بجهنم\nبل أقسم بعزة الله متوعداً بني آدم بالإغواء!", "ومع ذلك: الكفر الأبدي واللعنة والطرد", "لأنه امتنع عن الانقياد والطاعة والخضوع لأمر الله بالسجود لآدم؛ فاستكبر وأبى. فالمعرفة العقلية المجردة بوجود الله واليوم الآخر لا تنجي صاحبها إذا خلت من الخضوع والعبودية."], "talkingPoints": "ما كان يعلمه يقيناً • أن الله ربه الذي خلقه من نار\nأن الله هو المعبود المستحق للطاعة\nالبعث والنشور؛ فطلب أن يُنظَر إلى يوم يبعثون\nالجنة والنار؛ فقد أُخرج من الجنة وتوعده الله بجهنم\nبل أقسم بعزة الله متوعداً بني آدم بالإغواء! • ومع ذلك: الكفر الأبدي واللعنة والطرد", "pedagogicalTip": "قصة إبليس: العلم النظري بلا انقياد", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 17, "slideTitle": "البرهانان الثالث والرابع", "phaseTitle": "المحور 17: البرهانان الثالث والرابع", "scriptureEvidence": "", "bulletPoints": ["حقيقة الإيمان في الميزان الشرعي", "الإيمان ليس تصديقاً ذهنياً بارداً ولا فكرة فلسفية كنظرية رياضية، بل حقيقة مركبة من القول والعمل: تصديق جازم في القلب يستلزم المحبة والتعظيم والخضوع، وإقرار باللسان، وانقياد بالجوارح. وأعظم حق لله أن يعبدوه ولا يشركوا به شيئاً؛ فمن اعترف بالمنعم ثم صرف الشكر والعبادة لغيره وقع في أعظم الظلم والجحود.", "٤", "مقتضى الحكمة والعدل في خلق الإنسان"], "talkingPoints": "حقيقة الإيمان في الميزان الشرعي • الإيمان ليس تصديقاً ذهنياً بارداً ولا فكرة فلسفية كنظرية رياضية، بل حقيقة مركبة من القول والعمل: تصديق جازم في القلب يستلزم المحبة والتعظيم والخضوع، وإقرار باللسان، وانقياد بالجوارح. وأعظم حق لله أن يعبدوه ولا يشركوا به شيئاً؛ فمن اعترف بالمنعم ثم صرف الشكر والعبادة لغيره وقع في أعظم الظلم والجحود. • ٤", "pedagogicalTip": "البرهانان الثالث والرابع", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 18, "slideTitle": "المحور الرابع — البناء المتكامل بين الاعتراف بالخالق وإفراده بالعبادة", "phaseTitle": "المحور 18: المحور الرابع — البناء المتكامل بين الاعتراف بالخالق وإفراده بالعبادة", "scriptureEvidence": "", "bulletPoints": ["التلازم العقلي والفطري: من الربوبية إلى الألوهية", "كيف يقر عاقل بأن الله وحده أوجده ويمده بالرزق والنفَس، وبيده الشفاء والغنى والموت والحياة، ثم يتوجه إلى مخلوق عاجز فيدعوه أو يستغيث به؟ لذلك يحتج المنهج القرآني — كما يبرزه «ثلاثة الأصول» و«نبذة» — بإقرار الإنسان بالربوبية ليلزمه بالألوهية: المقدمة في يده، والنتيجة ألا يعبد إلا هذا الرب.", "التضمن العملي: من الألوهية إلى الربوبية", "من يقف في صلاته خاشعاً، ويدعو في جوف الليل، ويتوكل في أزماته، ويذبح نسكه لله، إنما يفعل ذلك لأنه مستيقن أن الله هو الرب القادر المدبر بيده خزائن السماوات والأرض. فلا يُعبد رب يُشك في قدرته؛ وكلما ازدادت المعرفة بالربوبية ازداد الحب والإخلاص."], "talkingPoints": "التلازم العقلي والفطري: من الربوبية إلى الألوهية • كيف يقر عاقل بأن الله وحده أوجده ويمده بالرزق والنفَس، وبيده الشفاء والغنى والموت والحياة، ثم يتوجه إلى مخلوق عاجز فيدعوه أو يستغيث به؟ لذلك يحتج المنهج القرآني — كما يبرزه «ثلاثة الأصول» و«نبذة» — بإقرار الإنسان بالربوبية ليلزمه بالألوهية: المقدمة في يده، والنتيجة ألا يعبد إلا هذا الرب. • التضمن العملي: من الألوهية إلى الربوبية", "pedagogicalTip": "علاقة وثيقة: كل أصل يبني الآخر", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 19, "slideTitle": "تحوّل المعرفة النظرية إلى سلوك وحياة — أكاديمية زاد", "phaseTitle": "المحور 19: تحوّل المعرفة النظرية إلى سلوك وحياة — أكاديمية زاد", "scriptureEvidence": "", "bulletPoints": ["الجذر — الاعتراف بالخالق (الربوبية)", "ضارب في أعماق الأرض، يمد الشجرة بالثبات واليقين، ويجيب عن أسئلة الوجود: من أين جئت؟ ومن يدبر أمري؟", "الساق والأغصان والثمار — إفراد الله بالعبادة (الألوهية)", "يترجم اليقين القلبي إلى طاعة وصلاة وذكر وتوكل وأخلاق فاضلة واستسلام كامل لشرع الله."], "talkingPoints": "الجذر — الاعتراف بالخالق (الربوبية) • ضارب في أعماق الأرض، يمد الشجرة بالثبات واليقين، ويجيب عن أسئلة الوجود: من أين جئت؟ ومن يدبر أمري؟ • الساق والأغصان والثمار — إفراد الله بالعبادة (الألوهية)", "pedagogicalTip": "الربوبية والألوهية: جناحا التوحيد", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 20, "slideTitle": "التحرر الحقيقي للإنسان من عبودية المخلوقات", "phaseTitle": "المحور 20: التحرر الحقيقي للإنسان من عبودية المخلوقات", "scriptureEvidence": "", "bulletPoints": ["حين يؤمن أن الله وحده الرب الرزاق النافع الضار", "يتحرر قلبه من الخوف من البشر، ومن القلق على المستقبل، ومن التعلق بالأسباب المادية تعلقاً يذل نفسه؛ لأنه يعلم أن الأمر كله بيد الله.", "وحين يفرد الله وحده بالعبادة والخضوع", "يرفض قلبه أن ينحني لشهوة عابرة، أو هوى متبع، أو سلطان مخلوق، أو خرافة ووهم؛ لأنه أصبح عبداً خالصاً لملك الملوك."], "talkingPoints": "حين يؤمن أن الله وحده الرب الرزاق النافع الضار • يتحرر قلبه من الخوف من البشر، ومن القلق على المستقبل، ومن التعلق بالأسباب المادية تعلقاً يذل نفسه؛ لأنه يعلم أن الأمر كله بيد الله. • وحين يفرد الله وحده بالعبادة والخضوع", "pedagogicalTip": "أعظم هدية: الحرية الحقيقية والعزة الكاملة", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 21, "slideTitle": "المحور الخامس — نواقض التوحيد وقوادحه", "phaseTitle": "المحور 21: المحور الخامس — نواقض التوحيد وقوادحه", "scriptureEvidence": "«وبضدها تتبين الأشياء»: معرفة الشرك وأنواعه", "bulletPoints": ["لا يحافظ العبد على صفاء توحيده ما لم يعرف ما يهدده: خطر يهدمه من أساسه (الشرك الأكبر)، أو خطر ينقص كماله ويقدح في إخلاصه (الشرك الأصغر). فالله يغفر الذنوب جميعاً لمن يشاء إلا أن يُشرك به، والشرك أعظم ذنب عُصي الله به.", "تعريف الشرك الأكبر", "صرف شيء من أنواع العبادة لغير الله تعالى، أو تسوية غير الله بالله فيما هو من خصائص الله.", "«أعظم ما أمر الله به التوحيد، وهو إفراد الله بالعبادة، وأعظم ما نهى عنه الشرك، وهو دعوة غيره معه» — «ثلاثة الأصول»"], "talkingPoints": "لا يحافظ العبد على صفاء توحيده ما لم يعرف ما يهدده: خطر يهدمه من أساسه (الشرك الأكبر)، أو خطر ينقص كماله ويقدح في إخلاصه (الشرك الأصغر). فالله يغفر الذنوب جميعاً لمن يشاء إلا أن يُشرك به، والشرك أعظم ذنب عُصي الله به. • تعريف الشرك الأكبر • صرف شيء من أنواع العبادة لغير الله تعالى، أو تسوية غير الله بالله فيما هو من خصائص الله.", "pedagogicalTip": "«وبضدها تتبين الأشياء»: معرفة الشرك وأنواعه", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 22, "slideTitle": "الشرك الأكبر — أمثلة من «ثلاثة الأصول»", "phaseTitle": "المحور 22: الشرك الأكبر — أمثلة من «ثلاثة الأصول»", "scriptureEvidence": "صرف أي نوع من العبادة لغير الله شرك مخرج من الملة", "bulletPoints": ["شرك الدعاء والاستغاثة", "دعاء ميت أو غائب أو ملك أو ولي فيما لا يقدر عليه إلا الله: تفريج الكربات، شفاء المرضى، قضاء الحاجات، الاستغاثة بالأموات عند الشدائد.", "شرك الذبح والنذر", "الذبح تقرباً وتعظيماً لغير الله — للقبور والأضرحة أو للجن طلباً لنفعهم أو اتقاءً لشرهم — أو النذر لغير الله طاعة أو مالاً."], "talkingPoints": "شرك الدعاء والاستغاثة • دعاء ميت أو غائب أو ملك أو ولي فيما لا يقدر عليه إلا الله: تفريج الكربات، شفاء المرضى، قضاء الحاجات، الاستغاثة بالأموات عند الشدائد. • شرك الذبح والنذر", "pedagogicalTip": "صرف أي نوع من العبادة لغير الله شرك مخرج من الملة", "archetype": "pillars", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 23, "slideTitle": "حقيقة الشرك الأكبر وخطورته — «نبذة» ومنهج زاد", "phaseTitle": "المحور 23: حقيقة الشرك الأكبر وخطورته — «نبذة» ومنهج زاد", "scriptureEvidence": "من مقتضى الإيمان بالألوهية البراءة التامة من كل ما يُعبد من دون الله. والشرك الأكبر لا يقتصر على عبادة الأصنام الحجرية، بل يشمل كل تعلق قلبي وعملي بغير الله فيما يختص به: بنبي، أو ملك، أو ولي، أو كوكب، أو قبر، أو سلطان.", "bulletPoints": ["آثاره المدمرة في الدنيا والآخرة", "إحباط جميع الأعمال", "لا يُقبل له عمل صالح مهما كثر؛ فالشرط الأول لقبول العمل التوحيد الخالص.", "الخروج من الإسلام"], "talkingPoints": "آثاره المدمرة في الدنيا والآخرة • إحباط جميع الأعمال • لا يُقبل له عمل صالح مهما كثر؛ فالشرط الأول لقبول العمل التوحيد الخالص.", "pedagogicalTip": "من مقتضى الإيمان بالألوهية البراءة التامة من كل ما يُعبد من دون الله. والشرك الأكبر لا يقتصر على عبادة الأصنام الحجرية، بل يشمل كل تعلق قلبي وعملي بغير الله فيما يختص به: بنبي، أو ملك، أو ولي، أو كوكب، أو قبر، أو سلطان.", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 24, "slideTitle": "الشرك الأصغر — الخطر الخفي الذي ينقص كمال التوحيد", "phaseTitle": "المحور 24: الشرك الأصغر — الخطر الخفي الذي ينقص كمال التوحيد", "scriptureEvidence": "", "bulletPoints": ["القسم الأول: الظاهر (القولي والعملي)", "الحلف بغير الله", "بالنبي ﷺ أو الكعبة أو الأمانة أو حياة فلان أو شرفه؛ فالحلف تعظيم، والعظمة المطلقة لله. فإن اعتقد مساواة المحلوف به لله أو أنه يملك النفع والضر صار شركاً أكبر.", "التسوية في المشيئة بالواو"], "talkingPoints": "القسم الأول: الظاهر (القولي والعملي) • الحلف بغير الله • بالنبي ﷺ أو الكعبة أو الأمانة أو حياة فلان أو شرفه؛ فالحلف تعظيم، والعظمة المطلقة لله. فإن اعتقد مساواة المحلوف به لله أو أنه يملك النفع والضر صار شركاً أكبر.", "pedagogicalTip": "كل ما نهى عنه الشرع مما هو ذريعة إلى الشرك الأكبر ووسيلة للوقوع فيه، وجاء في النصوص تسميته شركاً، ولم يصل إلى حد الشرك المخرج من الملة. ويُخشى أن يجر التساهل فيه إلى الأكبر.", "archetype": "pillars", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 25, "slideTitle": "القسم الثاني: الشرك الأصغر الخفي (شرك الإرادات والنيات)", "phaseTitle": "المحور 25: القسم الثاني: الشرك الأصغر الخفي (شرك الإرادات والنيات)", "scriptureEvidence": "", "bulletPoints": ["\"قال اللهُ تعالَى : أنا أغْنَى الشُّركاءِ عنِ الشِّركِ ، مَنْ عمِلَ عملًا أشركَ فيه معِيَ تركتُهُ وشِركَهُ\" — الراوي: أبو هريرة | المحدث: الألباني | صحيح", "الرياء في العبادة", "أن يحسّن عمله الصالح أو يظهره ليراه الناس فيمدحوه؛ فيبطله الله ولا يقبله. «ألا أُخبرُكم بما هو أخوفُ عليكم عندي من المسيحِ الدَّجَّالِ ؟ الشِّركُ الخفِيُّ؛ أن يقومَ الرجلُ فيصلِّي، فيزيِّنُ صلاتَه لما يَرى من نظَرِ رجلٍ» (أبو سعيد الخدري | الألباني | حسن)", "إرادة الإنسان بعمله الدنيا"], "talkingPoints": "\"قال اللهُ تعالَى : أنا أغْنَى الشُّركاءِ عنِ الشِّركِ ، مَنْ عمِلَ عملًا أشركَ فيه معِيَ تركتُهُ وشِركَهُ\" — الراوي: أبو هريرة | المحدث: الألباني | صحيح • الرياء في العبادة • أن يحسّن عمله الصالح أو يظهره ليراه الناس فيمدحوه؛ فيبطله الله ولا يقبله. «ألا أُخبرُكم بما هو أخوفُ عليكم عندي من المسيحِ الدَّجَّالِ ؟ الشِّركُ الخفِيُّ؛ أن يقومَ الرجلُ فيصلِّي، فيزيِّنُ صلاتَه لما يَرى من نظَرِ رجلٍ» (أبو سعيد الخدري | الألباني | حسن)", "pedagogicalTip": "أخطر أنواعه وأدقها؛ خافه النبي ﷺ على أصحابه أكثر من فتنة المسيح الدجال، يدب في القلب كدبيب النملة السوداء على الصخرة الصماء في الليلة الظلماء.", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 26, "slideTitle": "أوجه التفريق الجوهرية", "phaseTitle": "المحور 26: أوجه التفريق الجوهرية", "scriptureEvidence": "", "bulletPoints": ["العلاقة بينهما: الشرك الأصغر بوابة الأكبر وذريعته؛ فالتساهل في الحلف بغير الله والتمائم والتعلق بالأسباب والرياء الخفي يضعف تعظيم الله شيئاً فشيئاً حتى يقع العبد في الأكبر دون أن يشعر."], "talkingPoints": "العلاقة بينهما: الشرك الأصغر بوابة الأكبر وذريعته؛ فالتساهل في الحلف بغير الله والتمائم والتعلق بالأسباب والرياء الخفي يضعف تعظيم الله شيئاً فشيئاً حتى يقع العبد في الأكبر دون أن يشعر.", "pedagogicalTip": "الشرك الأكبر والشرك الأصغر", "archetype": "table", "hasTable": true, "tableData": [["من حيث", "الشرك الأكبر", "الشرك الأصغر"], ["أصل الإيمان والملة", "يناقض أصل التوحيد ويخرج صاحبه من الملة", "لا يخرج من الملة، لكن ينقص كمال التوحيد الواجب، ومن أعظم الكبائر"], ["إحباط الأعمال", "يحبط جميع الأعمال الصالحة إن مات عليه", "يحبط العمل الذي خالطه فقط (من راءى في ركعتين بطلتا وحدهما)"], ["المصير في الآخرة", "لا يُغفر لمن مات عليه بلا توبة، ويُخلد في النار", "لا يُخلد في النار؛ تحت المشيئة كأصحاب الكبائر، ومآله إلى الجنة بفضل التوحيد — وهو أعظم من الزنا والسرقة وشرب الخمر"], ["الدم والمال في الدنيا", "يبيح الدم والمال إذا قامت الحجة وانتفت الموانع، وتنقطع الموالاة والتوارث", "لا يبيح دماً ولا مالاً؛ تبقى حرمة المسلم وأحكامه في الزواج والميراث والصلاة عليه"]], "notes": ""}, {"slideNumber": 27, "slideTitle": "خلاصة تربوية: كيف يحمي المسلم نفسه من الشركين؟", "phaseTitle": "المحور 27: خلاصة تربوية: كيف يحمي المسلم نفسه من الشركين؟", "scriptureEvidence": "المؤمن الصادق لا يأمن على نفسه الفتنة مهما بلغ علمه وصلاحه. فإذا كان إبراهيم عليه السلام — إمام الحنفاء الذي حطم الأصنام بيده — يدعو ربه خائفاً وجلاً: «واجْنُبْنِي وَبَنِيَّ أَن نَّعْبُدَ الْأَصْنَامَ»، فكيف يأمن أحدنا على نفسه بعده؟", "bulletPoints": ["أربعة حصون عملية", "العلم الشرعي المؤصل", "دراسة التوحيد ونواقضه وقوادحه، حتى لا يقع في الشرك وهو يظنه تعظيماً أو محبة أو توسلاً مشروعاً.", "المجاهدة في الإخلاص"], "talkingPoints": "أربعة حصون عملية • العلم الشرعي المؤصل • دراسة التوحيد ونواقضه وقوادحه، حتى لا يقع في الشرك وهو يظنه تعظيماً أو محبة أو توسلاً مشروعاً.", "pedagogicalTip": "المؤمن الصادق لا يأمن على نفسه الفتنة مهما بلغ علمه وصلاحه. فإذا كان إبراهيم عليه السلام — إمام الحنفاء الذي حطم الأصنام بيده — يدعو ربه خائفاً وجلاً: «واجْنُبْنِي وَبَنِيَّ أَن نَّعْبُدَ الْأَصْنَامَ»، فكيف يأمن أحدنا على نفسه بعده؟", "archetype": "pillars", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 28, "slideTitle": "الدواء النبوي لداء الشرك الخفي والظاهر", "phaseTitle": "المحور 28: الدواء النبوي لداء الشرك الخفي والظاهر", "scriptureEvidence": "\"الشركُ فيكم أخفى من دبيبِ النملِ، و سأدلُّك على شيءٍ إذا فعلتَه أذْهَبَ عنك صِغارَ الشِّركِ و كبارَه، تقولُ : اللهمَّ إني أعوذُ بك أنْ أُشرِكَ بك وأنا أعلمُ، و أستغفرُك لما لا أعلمُ...\" — الراوي: أبو بكر الصديق | المحدث: الألباني | صحيح", "bulletPoints": ["\"يا أيها الناسُ ! اتَّقوا هذا الشِّركَ؛ فإنه أخفى من دبيبِ النَّملِ. فقال له من شاء اللهُ أن يقولَ : وكيف نتَّقِيه وهو أخفى من دبيبِ النَّملِ يا رسولَ اللهِ ! قال : قولوا : اللهم إنا نعوذُ بك من أن نُشرِكَ بك شيئًا نعلَمُه، و نستغفرُك لما لا نعلمُه\" — الراوي: أبو موسى الأشعري | المحدث: الألباني | حسن لغيره", "يقال إذا خاف العبد على نفسه شيئاً من الرياء أو أراد أن يتقي أبواب الشرك كبيرها وصغيرها؛ فينبغي الإكثار منه، والخوف من الرياء ينبغي أن يلازم العبد في كل حال."], "talkingPoints": "\"يا أيها الناسُ ! اتَّقوا هذا الشِّركَ؛ فإنه أخفى من دبيبِ النَّملِ. فقال له من شاء اللهُ أن يقولَ : وكيف نتَّقِيه وهو أخفى من دبيبِ النَّملِ يا رسولَ اللهِ ! قال : قولوا : اللهم إنا نعوذُ بك من أن نُشرِكَ بك شيئًا نعلَمُه، و نستغفرُك لما لا نعلمُه\" — الراوي: أبو موسى الأشعري | المحدث: الألباني | حسن لغيره • يقال إذا خاف العبد على نفسه شيئاً من الرياء أو أراد أن يتقي أبواب الشرك كبيرها وصغيرها؛ فينبغي الإكثار منه، والخوف من الرياء ينبغي أن يلازم العبد في كل حال.", "pedagogicalTip": "\"الشركُ فيكم أخفى من دبيبِ النملِ، و سأدلُّك على شيءٍ إذا فعلتَه أذْهَبَ عنك صِغارَ الشِّركِ و كبارَه، تقولُ : اللهمَّ إني أعوذُ بك أنْ أُشرِكَ بك وأنا أعلمُ، و أستغفرُك لما لا أعلمُ...\" — الراوي: أبو بكر الصديق | المحدث: الألباني | صحيح", "archetype": "mihrab", "hasTable": false, "tableData": [], "notes": ""}, {"slideNumber": 29, "slideTitle": "الخاتمة: من العلم إلى اليقين والعمل", "phaseTitle": "المحور 29: الخاتمة: من العلم إلى اليقين والعمل", "scriptureEvidence": "", "bulletPoints": ["١", "الله سبحانه وتعالى", "الرب الخالق المالك المدبر الذي ربى جميع العالمين بنعمه، تشهد بربوبيته كل آية في الكون وكل نبضة في الفطرة.", "٢"], "talkingPoints": "١ • الله سبحانه وتعالى • الرب الخالق المالك المدبر الذي ربى جميع العالمين بنعمه، تشهد بربوبيته كل آية في الكون وكل نبضة في الفطرة.", "pedagogicalTip": "الصورة كاملة ناصعة البياض", "archetype": "pillars", "hasTable": false, "tableData": [], "notes": "استقينا معالم هذه الرحلة من «ثلاثة الأصول» و«نبذة في العقيدة الإسلامية» ومنهج أكاديمية زاد."}, {"slideNumber": 30, "slideTitle": "أعظم ثمرة: أن تتحول هذه الحقائق إلى نبض حي في القلب وسلوك عملي في اليوم والليلة؛ فيعيش المسلم مطمئناً بربوبية الله، مستقيماً على ألوهيته وشرعه، مستعداً ليوم يُسأل في قبره عن أول وأعظم أصل:", "phaseTitle": "المحور 30: أعظم ثمرة: أن تتحول هذه الحقائق إلى نبض حي في القلب وسلوك عملي في اليوم والليلة؛ فيعيش المسلم مطمئناً بربوبية الله، مستقيماً على ألوهيته وشرعه، مستعداً ليوم يُسأل في قبره عن أول وأعظم أصل:", "scriptureEvidence": "«من ربك؟»", "bulletPoints": ["فيجيب بلسان اليقين والثبات: «ربي الله»"], "talkingPoints": "فيجيب بلسان اليقين والثبات: «ربي الله»", "pedagogicalTip": "أعظم ثمرة: أن تتحول هذه الحقائق إلى نبض حي في القلب وسلوك عملي في اليوم والليلة؛ فيعيش المسلم مطمئناً بربوبية الله، مستقيماً على ألوهيته وشرعه، مستعداً ليوم يُسأل في قبره عن أول وأعظم أصل:", "archetype": "standard", "hasTable": false, "tableData": [], "notes": ""}];
+
+      const EXEMPLAR_TAWHEED_LECTURE = {
+        id: 'lecture_tawheed_master_v81',
+        title: 'من هو الله؟ — تأصيل توحيد الربوبية وتوحيد الألوهية وبناء اليقين (30 شريحة متعددة الأنماط)',
+        category: 'العقيدة الإسلامية',
+        savedAt: '2026-11-25T16:00:00.000Z',
+        data: {
+          metadata: {
+            topic: 'من هو الله؟ — تأصيل توحيد الربوبية وتوحيد الألوهية وبناء اليقين',
+            category: 'العقيدة الإسلامية',
+            audience: 'المستوى التأصيلي والدارسين',
+            durationMinutes: 60
+          },
+          zoomCards: EXEMPLAR_TAWHEED_CARDS,
+          blueprint: EXEMPLAR_TAWHEED_CARDS.map((c, i) => ({
+            phaseNumber: i + 1,
+            phaseNameAr: c.slideTitle || c.title,
+            phaseNameEn: `Slide ${i + 1}`,
+            allocatedMinutes: 2,
+            teacherGuidanceAr: c.pedagogicalTip || '',
+            talkingPoints: c.bulletPoints || []
+          })),
+          worksheet: EXEMPLAR_TAWHEED_CARDS.slice(0, 10).map((c, i) => ({
+            num: i + 1,
+            topic: c.slideTitle || c.title,
+            questionPrompt: `ما الأصل المنهجي المستفاد من مدارسة: (${c.slideTitle || c.title})?`,
+            options: [
+              { id: 'a', textAr: c.bulletPoints?.[0] || 'التقرير التأصيلي الثابت بالكتاب والسنة' },
+              { id: 'b', textAr: 'الوقوف عند مجرد المعرفة النظرية دون عمل' },
+              { id: 'c', textAr: 'الخلط بين توحيد الربوبية وتوحيد الألوهية' },
+              { id: 'd', textAr: 'تعليق القلب بالأسباب والمخلوقات' }
+            ],
+            correctOptionId: 'a',
+            teacherAnswer: c.bulletPoints?.[0] || 'التقرير التأصيلي الثابت',
+            practicalImpact: c.pedagogicalTip || ''
+          })),
+          evidences: [
+            { type: 'quran', arabicText: '﴿فَاعْلَمْ أَنَّهُ لَا إِلَهَ إِلَّا اللَّهُ وَاسْتَغْفِرْ لِذَنبِكَ﴾ [محمد: 19]', citation: 'سورة محمد: 19' },
+            { type: 'hadith', arabicText: '«اللهم إني أعوذ بك أن أشرك بك وأنا أعلم، وأستغفرك لما لا أعلم»', citation: 'صحيح الأدب المفرد' }
+          ]
+        }
+      };
+function getFallbackIslamic() {
         return {
           metadata: {
             category: subjectCategory,
@@ -10880,10 +11155,10 @@
                     window.location.replace(cleanPath + '?v=78.1&t=' + Date.now());
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v80.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v80.0 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v81.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v81.0 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v80.0' : 'v76.8'}</span>
+                  <span>{isRtl ? 'الإصدار v81.0' : 'v76.8'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
