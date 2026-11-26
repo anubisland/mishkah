@@ -1046,6 +1046,7 @@
       // True while the student window is open, so the teacher's own view can
       // show hidden lines through a light veil instead of hiding them from her.
       const [studentScreenOpen, setStudentScreenOpen] = useState(false);
+      const [slideStudioOpen, setSlideStudioOpen] = useState(false);
       useEffect(() => {
         const timer = setInterval(() => {
           const win = studentWindowRef.current;
@@ -1483,6 +1484,7 @@
 
 
       useEffect(() => {
+        if (slideStudioOpen) return; // the slide studio publishes its own slides
         if (activeTab === 'hifz' && hifzViewMode === 'interactive_test') {
           publishStage({
             kind: 'recitation',
@@ -1509,7 +1511,7 @@
         } else if (activeTab === 'islamic') {
           publishStage({ kind: 'slides' });
         }
-      }, [activeTab, hifzViewMode, hifzSurahName, hifzAyahRange, hifzAyahs, isReverseOrder, isEndingsMasked, isStartersMasked,
+      }, [slideStudioOpen, activeTab, hifzViewMode, hifzSurahName, hifzAyahRange, hifzAyahs, isReverseOrder, isEndingsMasked, isStartersMasked,
           isDivineNamesMasked, isAlternatingMasked, isFullMasked, revealedAyahSet, customMaskedWords, passageMaskedAyahs, passageStatus,
           mushafPageNumber, mushafOverlayMode, activeRulerLine, currentSuwaydLesson, suwaydZoomModalOpen,
           suwaydZoomSlideIndex, activeSuwaydPlateId, metronomeCount, metronomePlaying, metronomeBeat]);
@@ -1717,6 +1719,15 @@
             </div>
           </header>
 
+          {slideStudioOpen && (
+            <DeckStudio
+              lectureText={rawLectureText}
+              onClose={() => setSlideStudioOpen(false)}
+              studentScreenOpen={studentScreenOpen}
+              onOpenStudentScreen={handleOpenStudentPopout}
+            />
+          )}
+
           {/* MAIN WORKSPACE BODY */}
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
 
@@ -1729,7 +1740,7 @@
             {activeTab === 'tajweed' && <TajweedTab {...{ activeMakhrajId, activeSuwaydPlateId, atlasCategory, atlasSearch, currentSuwaydLesson, currentZoomSlides, filterMatchesSuwaydLesson, isRtl, metronomeBeat, metronomeCount, metronomePlaying, metronomeSound, metronomeSpeed, plateZoomLevel, playMetronomeTick, setActiveMakhrajId, setActiveSuwaydPlateId, setAtlasCategory, setAtlasSearch, setMetronomeBeat, setMetronomeCount, setMetronomePlaying, setMetronomeSound, setMetronomeSpeed, setPlateZoomLevel, setSuwaydCatalogSubTab, setSuwaydFilterCategory, setSuwaydLessonId, setSuwaydPlateZoomModal, setSuwaydQuizAnswers, setSuwaydQuizModalOpen, setSuwaydQuizSubmitted, setSuwaydSearchQuery, setSuwaydViewMode, setSuwaydWorksheetModalOpen, setSuwaydZoomModalOpen, setSuwaydZoomSlideIndex, setTajweedSubTab, suwaydCatalogSubTab, suwaydFilterCategory, suwaydLessonId, suwaydPlateZoomModal, suwaydQuizAnswers, suwaydQuizModalOpen, suwaydQuizSubmitted, suwaydSearchQuery, suwaydViewMode, suwaydWorksheetModalOpen, suwaydZoomModalOpen, suwaydZoomSlideIndex, tajweedSubTab }} />}
 
             {/* ================= VIEW: ISLAMIC STUDIES & SERMON WORKBENCH (BRANCH 3) ================= */}
-            {activeTab === 'islamic' && <IslamicTab {...{ activeIslamicStage, broadcastSlideSync, extractEvidencesAndProofs, extractedEvidences, handleCondenseSlide, handleCopyWhatsApp, handleDeleteSavedLecture, handleExportIslamicPowerPoint, handleExportLibrary, handleImportLibrary, handleJumpToStage, handleLectureFileUpload, handleLoadDemoIslamic, handleLoadSavedLecture, handleOpenStudentPopout, handleProcessCustomLecture, handleResetIslamicForm, handleSaveIslamicLecture, handleScrollTeleprompter, handleStartLecturePresentation, handleTransferLectureToQuiz, handleTransferLectureToWorksheet, isCurrentLectureSaved, isExportingPptx, isExtractingFile, isGeneratingIslamic, isRtl, islamicData, islamicInputMode, islamicQuizAnswers, islamicQuizScore, islamicQuizSubmitted, islamicSubView, islamicViewMode, islamicWorksheetAnswers, islamicWorksheetViewMode, lessonDuration, lessonTopic, rawLectureText, sanitizeArabicExtractedText, sanitizeIslamicDataObject, savedIslamicLectures, setActiveIslamicStage, setExtractedEvidences, setIslamicData, setIslamicInputMode, setIslamicQuizAnswers, setIslamicQuizSubmitted, setIslamicSubView, setIslamicViewMode, setIslamicWorksheetAnswers, setIslamicWorksheetViewMode, setLessonDuration, setLessonTopic, setRawLectureText, setShowEvidenceBankModal, setShowExtractedTextPreview, setShowMasterGuide, setStage3ActiveSlide, setStage3ViewMode, setStructuredPhasesText, setSubjectCategory, setTeacherScriptFontSize, setTeacherTeleprompterMode, showExtractedTextPreview, showMasterGuide, showToast, stage3ActiveSlide, stage3ViewMode, structuredPhasesText, subjectCategory, teacherScriptFontSize, teacherTeleprompterMode, teacherTeleprompterScrollRef, uploadedFileInfo }} />}
+            {activeTab === 'islamic' && <IslamicTab {...{ setSlideStudioOpen, activeIslamicStage, broadcastSlideSync, extractEvidencesAndProofs, extractedEvidences, handleCondenseSlide, handleCopyWhatsApp, handleDeleteSavedLecture, handleExportIslamicPowerPoint, handleExportLibrary, handleImportLibrary, handleJumpToStage, handleLectureFileUpload, handleLoadDemoIslamic, handleLoadSavedLecture, handleOpenStudentPopout, handleProcessCustomLecture, handleResetIslamicForm, handleSaveIslamicLecture, handleScrollTeleprompter, handleStartLecturePresentation, handleTransferLectureToQuiz, handleTransferLectureToWorksheet, isCurrentLectureSaved, isExportingPptx, isExtractingFile, isGeneratingIslamic, isRtl, islamicData, islamicInputMode, islamicQuizAnswers, islamicQuizScore, islamicQuizSubmitted, islamicSubView, islamicViewMode, islamicWorksheetAnswers, islamicWorksheetViewMode, lessonDuration, lessonTopic, rawLectureText, sanitizeArabicExtractedText, sanitizeIslamicDataObject, savedIslamicLectures, setActiveIslamicStage, setExtractedEvidences, setIslamicData, setIslamicInputMode, setIslamicQuizAnswers, setIslamicQuizSubmitted, setIslamicSubView, setIslamicViewMode, setIslamicWorksheetAnswers, setIslamicWorksheetViewMode, setLessonDuration, setLessonTopic, setRawLectureText, setShowEvidenceBankModal, setShowExtractedTextPreview, setShowMasterGuide, setStage3ActiveSlide, setStage3ViewMode, setStructuredPhasesText, setSubjectCategory, setTeacherScriptFontSize, setTeacherTeleprompterMode, showExtractedTextPreview, showMasterGuide, showToast, stage3ActiveSlide, stage3ViewMode, structuredPhasesText, subjectCategory, teacherScriptFontSize, teacherTeleprompterMode, teacherTeleprompterScrollRef, uploadedFileInfo }} />}
 
             {/* Dedicated Islamic Evidences & Scientific Proofs Modal */}
             {showEvidenceBankModal && (

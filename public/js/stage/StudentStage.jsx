@@ -11,6 +11,7 @@
       if (stage.kind === 'mushaf') return <StudentMushafView stage={stage} />;
       if (stage.kind === 'recitation') return <StudentRecitationView stage={stage} />;
       if (stage.kind === 'tajweed') return <StudentTajweedView stage={stage} />;
+      if (stage.kind === 'deck') return <StudentDeckView stage={stage} />;
       if (stage.kind === 'slides') return <StudentProjectorScreen />;
       return <StudentWaitingScreen />;
     }
@@ -168,5 +169,27 @@
             </div>
           </FitToScreen>
         </StudentFrame>
+      );
+    }
+
+    // A lecture-deck slide filling the window at 16:9, on a dark surround.
+    function StudentDeckView({ stage }) {
+      const [size, setSize] = useState({ w: window.innerWidth, h: window.innerHeight });
+      useEffect(() => {
+        const onResize = () => setSize({ w: window.innerWidth, h: window.innerHeight });
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+      }, []);
+      const deck = normalizeDeck(stage.deck);
+      const index = Math.min(Math.max(0, stage.index || 0), Math.max(0, deck.slides.length - 1));
+      const slide = deck.slides[index];
+      if (!slide) return <StudentWaitingScreen />;
+      const width = Math.floor(Math.min(size.w, size.h * 16 / 9));
+      return (
+        <div className="h-screen w-screen flex items-center justify-center bg-[#0b1f18] overflow-hidden">
+          <ScaledSlide width={width}>
+            <SlideView slide={slide} deck={deck} index={index} total={deck.slides.length} />
+          </ScaledSlide>
+        </div>
       );
     }

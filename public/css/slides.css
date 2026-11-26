@@ -1,0 +1,82 @@
+/* مِشكاة | Lecture slides.
+ * Every slide is drawn on a fixed 1600x900 canvas and scaled to fit, so it
+ * looks the same in the studio, on the student screen and in exported images.
+ * Selectors are scoped under .mk-slide and use !important where needed to win
+ * over the app-wide font rule in index.html (the Quran font is never touched). */
+
+.mk-slide {
+  --mk-bg: #F4EEDF;
+  --mk-card: #FFFDF8;
+  --mk-ink: #16302A;
+  --mk-soft: #4C5D57;
+  --mk-gold: #B07D2B;
+  --mk-gold-light: #D9B25F;
+  --mk-scale: 1;
+  position: relative;
+  width: 1600px;
+  height: 900px;
+  overflow: hidden;
+  direction: rtl;
+  background-color: var(--mk-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23B07D2B' stroke-opacity='0.09' stroke-width='1.4'%3E%3Cpath d='M60 18 L72 48 L102 60 L72 72 L60 102 L48 72 L18 60 L48 48 Z'/%3E%3Crect x='38' y='38' width='44' height='44' transform='rotate(45 60 60)'/%3E%3Ccircle cx='60' cy='60' r='9'/%3E%3C/g%3E%3C/svg%3E");
+  color: var(--mk-ink);
+  box-sizing: border-box;
+}
+.mk-slide * { box-sizing: border-box; }
+
+/* Calm card palettes from the project covenant. */
+.mk-tone-pearl    { --mk-bg: #F4EEDF; --mk-card: #FFFDF8; }
+.mk-tone-sage     { --mk-bg: #E6EFE6; --mk-card: #FAFDF9; --mk-gold: #8E7A3A; }
+.mk-tone-amber    { --mk-bg: #F6E8CF; --mk-card: #FFFBF2; --mk-gold: #A8701E; }
+.mk-tone-sky      { --mk-bg: #E3EEF3; --mk-card: #FAFDFF; --mk-gold: #9A7B3A; }
+.mk-tone-lavender { --mk-bg: #ECE7F1; --mk-card: #FDFBFF; --mk-gold: #9C7A3C; }
+
+/* Double gold frame with corner rosettes. */
+.mk-frame { position: absolute; inset: 18px; border: 3px solid var(--mk-gold); pointer-events: none; }
+.mk-frame::after { content: ''; position: absolute; inset: 9px; border: 1px solid var(--mk-gold-light); }
+.mk-corner { position: absolute; width: 34px; height: 34px; background: var(--mk-gold); transform: rotate(45deg); }
+.mk-corner.tl { top: 4px; left: 4px; } .mk-corner.tr { top: 4px; right: 4px; }
+.mk-corner.bl { bottom: 4px; left: 4px; } .mk-corner.br { bottom: 4px; right: 4px; }
+
+.mk-body { position: absolute; inset: 70px 110px 64px; display: flex; flex-direction: column; }
+
+/* Typography */
+.mk-slide .mk-eyebrow { font-family: 'Tajawal', sans-serif !important; font-weight: 800; color: var(--mk-gold); font-size: calc(30px * var(--mk-scale)); margin-bottom: 12px; }
+.mk-slide .mk-title { font-family: 'Aref Ruqaa', 'Amiri', serif !important; font-weight: 700; color: var(--mk-ink); font-size: calc(76px * var(--mk-scale)); line-height: 1.35; margin: 0 0 22px; }
+.mk-slide .mk-text, .mk-slide .mk-text * { font-family: 'Tajawal', sans-serif !important; }
+.mk-slide .mk-text { color: var(--mk-soft); font-size: calc(38px * var(--mk-scale)); line-height: 1.7; }
+.mk-slide .mk-strong { font-family: 'Tajawal', sans-serif !important; color: var(--mk-ink); font-weight: 800; font-size: calc(40px * var(--mk-scale)); line-height: 1.5; }
+.mk-slide .mk-classic { font-family: 'Amiri', serif !important; }
+
+/* Cards with the gold side edge */
+.mk-cards { display: grid; gap: 28px; margin: auto 0; }
+.mk-card { background: var(--mk-card); border-radius: 14px; border-right: 7px solid var(--mk-gold); padding: 24px 30px; box-shadow: 0 2px 10px rgba(22, 48, 42, 0.06); }
+
+/* Numbered points */
+.mk-points { display: flex; flex-direction: column; gap: 26px; margin: auto 0; }
+.mk-point .mk-text:only-child, .mk-point .mk-strong + .mk-text { color: var(--mk-ink); }
+.mk-point { display: flex; gap: 22px; align-items: flex-start; }
+.mk-slide .mk-num { flex: none; width: 66px; height: 66px; border-radius: 50%; background: var(--mk-gold); color: #fff; font-family: 'Tajawal', sans-serif !important; font-weight: 800; font-size: 32px; display: flex; align-items: center; justify-content: center; }
+
+/* Scripture frame */
+.mk-scripture { background: var(--mk-card); border: 2px solid var(--mk-gold-light); border-radius: 22px; padding: 40px 56px; text-align: center; position: relative; }
+.mk-scripture::before, .mk-scripture::after { content: '۞'; position: absolute; top: 12px; color: var(--mk-gold); font-size: 30px; }
+.mk-scripture::before { right: 18px; } .mk-scripture::after { left: 18px; }
+.mk-slide .mk-quran { font-family: 'Amiri Quran', 'Amiri', serif !important; font-size: calc(54px * var(--mk-scale)); line-height: 2.1; color: #0E3B2E; }
+.mk-slide .mk-hadith { font-family: 'Amiri', serif !important; font-size: calc(58px * var(--mk-scale)); line-height: 1.9; color: #3B2A12; }
+.mk-slide .mk-source { font-family: 'Tajawal', sans-serif !important; color: var(--mk-gold); font-weight: 700; font-size: 26px; margin-top: 14px; }
+
+.mk-center { align-items: center; justify-content: center; text-align: center; }
+.mk-rule { width: 260px; height: 3px; margin: 18px auto; background: linear-gradient(90deg, transparent, var(--mk-gold), transparent); }
+
+.mk-slide .mk-footer { position: absolute; bottom: 30px; left: 110px; right: 110px; display: flex; justify-content: space-between; font-family: 'Tajawal', sans-serif !important; font-size: 18px; color: var(--mk-gold); opacity: 0.85; }
+
+/* In-place editing in the studio */
+.mk-editable { outline: none; border-radius: 8px; transition: box-shadow 0.15s; min-width: 40px; }
+.mk-editable:hover { box-shadow: 0 0 0 2px rgba(176, 125, 43, 0.35); }
+.mk-editable:focus { box-shadow: 0 0 0 3px rgba(176, 125, 43, 0.8); background: rgba(255, 255, 255, 0.5); }
+.mk-editable:empty::before { content: attr(data-placeholder); opacity: 0.35; }
+
+/* The cover and section titles carry the slide. */
+.mk-center .mk-title { font-size: calc(104px * var(--mk-scale)); }
+.mk-center .mk-text { font-size: calc(40px * var(--mk-scale)); }
