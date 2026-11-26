@@ -175,11 +175,11 @@
     function DeckEditor({ deck, slide, index, store, selectedId, setSelectedId }) {
       const [canvasRef, canvasWidth] = useElementWidth();
       return (
-        <div className="flex-1 min-h-0 grid grid-cols-[220px_1fr_300px] gap-3 p-3">
-          <div className="overflow-y-auto space-y-2 pl-1">
+        <div className="flex-1 min-h-0 overflow-y-auto xl:overflow-hidden grid grid-cols-1 xl:grid-cols-[220px_1fr_300px] content-start xl:content-stretch gap-3 p-3">
+          <div className="flex gap-2 overflow-x-auto pb-1 xl:block xl:overflow-x-visible xl:overflow-y-auto xl:space-y-2 xl:pb-0 pl-1">
             {deck.slides.map((s, i) => (
               <div key={s.id} onClick={() => setSelectedId(s.id)}
-                className={'rounded-lg cursor-pointer border-4 ' + (s.id === selectedId ? 'border-gold-500' : 'border-transparent hover:border-gold-300')}>
+                className={'shrink-0 w-[204px] xl:w-auto rounded-lg cursor-pointer border-4 ' + (s.id === selectedId ? 'border-gold-500' : 'border-transparent hover:border-gold-300')}>
                 <ScaledSlide width={196}><SlideView slide={s} /></ScaledSlide>
                 <div className="flex items-center justify-between text-xs font-bold text-emerald-900 px-1">
                   <span>{i + 1}</span>
@@ -192,10 +192,10 @@
               </div>
             ))}
             <button type="button" onClick={() => { const s = blankSlide('points'); store.insertSlideAfter(selectedId, s); setSelectedId(s.id); }}
-              className="w-full py-2 rounded-xl border-2 border-dashed border-emerald-900/30 font-bold text-emerald-900">+ شريحة جديدة</button>
+              className="shrink-0 w-[160px] xl:w-full py-2 rounded-xl border-2 border-dashed border-emerald-900/30 font-bold text-emerald-900">+ شريحة جديدة</button>
           </div>
 
-          <div ref={canvasRef} className="min-w-0 flex flex-col items-center justify-center">
+          <div ref={canvasRef} className="min-w-0 order-first xl:order-none flex flex-col items-center justify-center">
             <div className="shadow-2xl rounded-md overflow-hidden">
               <ScaledSlide width={Math.max(320, canvasWidth)}>
                 <SlideView key={slide.id} slide={slide} deck={deck} index={index} total={deck.slides.length}
@@ -205,7 +205,7 @@
             <p className="text-sm text-slate-600 mt-2">اضغطي على أي نص في الشريحة لتعديله.</p>
           </div>
 
-          <div className="overflow-y-auto bg-white rounded-2xl p-4 border border-emerald-900/10">
+          <div className="xl:overflow-y-auto bg-white rounded-2xl p-4 border border-emerald-900/10">
             <DeckInspector slide={slide} onChange={(field, value) => store.updateSlide(slide.id, field, value)} />
           </div>
         </div>
@@ -216,7 +216,7 @@
       const [canvasRef, canvasWidth] = useElementWidth();
       const next = deck.slides[index + 1];
       return (
-        <div className="flex-1 min-h-0 grid grid-cols-[1fr_380px] gap-4 p-4">
+        <div className="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-[1fr_380px] content-start lg:content-stretch gap-4 p-3 lg:p-4">
           <div ref={canvasRef} className="min-w-0 flex flex-col items-center justify-center gap-3">
             <div className="shadow-2xl rounded-md overflow-hidden">
               <ScaledSlide width={Math.max(320, canvasWidth)}>
@@ -230,7 +230,7 @@
             </div>
           </div>
           <div className="min-h-0 flex flex-col gap-3">
-            <div className="flex-1 overflow-y-auto bg-white rounded-2xl p-5 border-2 border-gold-400/60">
+            <div className="flex-1 min-h-[180px] overflow-y-auto bg-white rounded-2xl p-5 border-2 border-gold-400/60">
               <h4 className="font-black text-emerald-900 mb-2">📝 ملاحظاتكِ (لا تراها الطالبات)</h4>
               <p className="whitespace-pre-line leading-loose text-lg text-slate-800 font-amiri">{slide.notes || '—'}</p>
             </div>

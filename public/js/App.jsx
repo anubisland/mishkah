@@ -1047,6 +1047,7 @@
       // show hidden lines through a light veil instead of hiding them from her.
       const [studentScreenOpen, setStudentScreenOpen] = useState(false);
       const [slideStudioOpen, setSlideStudioOpen] = useState(false);
+      const [splitHintOpen, setSplitHintOpen] = useState(false);
       useEffect(() => {
         const timer = setInterval(() => {
           const win = studentWindowRef.current;
@@ -1132,11 +1133,13 @@
         const win = window.open(
           url,
           'MishkahStudentDisplay',
-          'width=1120,height=700,menubar=no,toolbar=no,location=no,status=no,resizable=yes'
+          studentWindowFeatures()
         );
         if (win) {
           studentWindowRef.current = win;
-          win.focus();
+          // Left half for the student window; the teacher keeps the right half.
+          placeStudentWindow(win);
+          if (!splitHintHidden()) setSplitHintOpen(true);
           showToast(isRtl ? 'تم فتح نافذة شاشة الطلاب بنجاح! شارك هذه النافذة في زوم (Share Window) 🪟' : 'Student display opened! Share this window in Zoom 🪟');
           setTimeout(() => {
             broadcastSlideSync(stage3ActiveSlide, islamicData);
@@ -1718,6 +1721,8 @@
               ))}
             </div>
           </header>
+
+          {splitHintOpen && <SplitScreenHint onClose={() => setSplitHintOpen(false)} />}
 
           {slideStudioOpen && (
             <DeckStudio
