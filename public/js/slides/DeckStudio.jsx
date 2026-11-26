@@ -22,6 +22,26 @@
       const [sourceOpen, setSourceOpen] = useState(deck.slides.length === 0);
       const [importWarnings, setImportWarnings] = useState([]);
       const [syncProblem, setSyncProblem] = useState(false);
+      const [exporting, setExporting] = useState(null); // { label, done, total }
+      const [exportError, setExportError] = useState(null);
+
+      const runExport = async (option) => {
+        if (exporting) return;
+        if (document.activeElement) document.activeElement.blur(); // keep an edit in progress
+        setExportError(null);
+        setExporting({ label: option.label, done: 0, total: deck.slides.length });
+        try {
+          await option.run(deck, (done, total) => setExporting({ label: option.label, done, total }));
+        } catch (e) {
+          console.error('Mishkah: export failed', e);
+          // Our own messages are in Arabic; anything else is a technical error.
+          setExportError(e && e.message && /[؀-ۿ]/.test(e.message)
+            ? e.message
+            : 'تعذّر تصدير العرض. حاولي مرة أخرى، وإن تكرر الخطأ فأخبري الدعم الفني.');
+        } finally {
+          setExporting(null);
+        }
+      };
 
       const index = Math.max(0, deck.slides.findIndex((s) => s.id === selectedId));
       const slide = deck.slides[index];
@@ -67,10 +87,21 @@
             deck={deck} mode={mode} store={store} slide={slide}
             studentScreenOpen={studentScreenOpen}
             onSource={() => setSourceOpen(true)} onPresent={startPresenting}
+            onExport={runExport} exporting={exporting}
             onEdit={() => setMode('edit')}
             onClose={() => { if (document.activeElement) document.activeElement.blur(); onClose(); }}
           />
           {store.saveError && <p className="bg-rose-100 text-rose-800 font-bold text-center py-1">{store.saveError}</p>}
+          {exporting && (
+            <p className="bg-emerald-100 text-emerald-950 font-bold text-center py-1">
+              ⏳ جارٍ تجهيز {exporting.label}: الشريحة {Math.min(exporting.done + 1, exporting.total)} من {exporting.total}…
+            </p>
+          )}
+          {exportError && (
+            <p className="bg-rose-100 text-rose-800 font-bold text-center py-1">
+              {exportError} <button type="button" className="underline mr-2" onClick={() => setExportError(null)}>إخفاء</button>
+            </p>
+          )}
           {store.loadError && <p className="bg-amber-100 text-amber-900 font-bold text-center py-1">{store.loadError}</p>}
           {mode === 'present' && syncProblem && (
             <p className="bg-rose-600 text-white font-bold text-center py-1">⚠️ قد لا تتابع شاشة الطالب العرض. أغلقيها وافتحيها من جديد، وتأكدي أن ذاكرة المتصفح غير ممتلئة.</p>
@@ -101,8 +132,9 @@
       );
     }
 
-    function DeckStudioBar({ deck, mode, store, slide, studentScreenOpen, onSource, onPresent, onEdit, onClose }) {
+    function DeckStudioBar({ deck, mode, store, slide, studentScreenOpen, onSource, onPresent, onEdit, onClose, onExport, exporting }) {
       const btn = 'px-3 py-1.5 rounded-xl font-black text-sm border-2 transition disabled:opacity-40';
+      const [exportMenuOpen, setExportMenuOpen] = useState(false);
       return (
         <div className="shrink-0 emerald-pattern flex flex-wrap items-center gap-2 px-4 py-2">
           <h2 className="text-gold-200 font-black text-lg ml-auto">🎞️ استوديو الشرائح{deck.title ? ' — ' + deck.title : ''}</h2>
@@ -110,6 +142,21 @@
             <>
               <button type="button" className={btn + ' bg-white text-emerald-950 border-gold-400'} onClick={onSource}>✨ إنشاء من المحاضرة</button>
               <button type="button" className={btn + ' bg-white/90 text-emerald-950 border-white'} disabled={!store.canUndo} onClick={store.undo}>↶ تراجع</button>
+              <div className="relative">
+                <button type="button" className={btn + ' bg-white/90 text-emerald-950 border-white'} disabled={!slide || !!exporting}
+                  onClick={() => setExportMenuOpen(!exportMenuOpen)}>⬇ تصدير</button>
+                {exportMenuOpen && (
+                  <div className="absolute left-0 top-full mt-1 z-10 bg-white rounded-xl shadow-2xl border-2 border-gold-400 w-60 overflow-hidden">
+                    {DECK_EXPORTS.map((opt) => (
+                      <button key={opt.id} type="button" className="block w-full text-right px-3 py-2 hover:bg-gold-50 border-b border-slate-100"
+                        onClick={() => { setExportMenuOpen(false); onExport(opt); }}>
+                        <span className="block font-black text-emerald-950">{opt.label}</span>
+                        <span className="block text-xs text-slate-500">{opt.hint}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <button type="button" className={btn + ' bg-gold-500 text-emerald-950 border-gold-300'} disabled={!slide} onClick={onPresent}>▶ ابدئي العرض</button>
             </>
           ) : (
