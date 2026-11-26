@@ -101,33 +101,10 @@
       --active-app-font: 'Cairo', sans-serif;
     }
 
+    /* Text size for the whole program, chosen in ⚙️ settings (App sets
+       --app-root-font-size). Everything sized in rem grows with it. */
     html {
-      font-size: 16px !important;
-    }
-
-    /* Fixed Invariant Header & Navigation Structure (Immune to Content Zoom) */
-    header, header * {
-      box-sizing: border-box;
-    }
-    header h1 {
-      font-size: 26px !important;
-      line-height: 1.2 !important;
-    }
-    header p {
-      font-size: 12px !important;
-    }
-    header select, header input, header .header-compact-btn {
-      font-size: 12px !important;
-    }
-    /* Core Foundation Branches Primary Typography (Immune to 12px rule) */
-    .branch-tab-btn {
-      font-size: clamp(1.05rem, 1.25vw, 1.25rem) !important;
-      line-height: 1.2 !important;
-    }
-    .branch-tab-label {
-      font-size: clamp(1.05rem, 1.25vw, 1.25rem) !important;
-      line-height: 1.2 !important;
-      font-weight: 800 !important;
+      font-size: var(--app-root-font-size, 16px) !important;
     }
 
     /* Fixed Invariant Hero Banner Frame (Immune to Content Zoom) */
@@ -357,6 +334,8 @@
   <script type="text/babel" src="js/class/LectureClassPanel.jsx"></script>
   <script type="text/babel" src="js/class/ClassMode.jsx"></script>
   <script type="text/babel" src="js/tabs/DashboardTab.jsx"></script>
+  <script type="text/babel" src="js/tabs/HomeTab.jsx"></script>
+  <script type="text/babel" src="js/layout/AppHeader.jsx"></script>
   <script type="text/babel" src="js/tabs/HifzTab.jsx"></script>
   <script type="text/babel" src="js/tabs/TajweedTab.jsx"></script>
   <script type="text/babel" src="js/tabs/IslamicTab.jsx"></script>
