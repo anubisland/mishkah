@@ -13,7 +13,7 @@
   <meta http-equiv="Expires" content="0" />
   <script>
     (function() {
-      const CURRENT_VER = '81.0';
+      const CURRENT_VER = '81.1';
       const p = new URLSearchParams(window.location.search);
       if (p.get('v') !== CURRENT_VER && !window.location.search.includes('mode=student-display')) {
         const u = new URL(window.location.href);
@@ -11237,13 +11237,13 @@ function getFallbackIslamic() {
                       }
                     } catch (e) {}
                     const cleanPath = window.location.origin + window.location.pathname;
-                    window.location.replace(cleanPath + '?v=78.1&t=' + Date.now());
+                    window.location.replace(cleanPath + '?v=81.1&t=' + Date.now());
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v81.0 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v81.0 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v81.1 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v81.1 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v81.0' : 'v76.8'}</span>
+                  <span>{isRtl ? 'الإصدار v81.1' : 'v81.1'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>
