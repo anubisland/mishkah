@@ -3,7 +3,7 @@
       // Check if this window was opened as a dedicated Student Projector Screen for Zoom
       const isStudentDisplayMode = window.location.search.includes('mode=student-display');
       if (isStudentDisplayMode) {
-        return <StudentProjectorScreen />;
+        return <StudentStage />;
       }
 
       // Language & Direction state
@@ -494,45 +494,7 @@
       }, [suwaydLessonId]);
 
       // Dynamic sequence of fullscreen Zoom Presentation slides (Matn/Plate -> Letter Breakdown -> Quranic Metronome Drills)
-      const currentZoomSlides = useMemo(() => {
-        if (!currentSuwaydLesson) return [];
-        const slides = [];
-
-        // Slide 0: Matn and Illustrated Anatomical Plate
-        slides.push({
-          type: 'overview',
-          titleAr: 'الشاهد المعتمد من المتن واللوحة التعليمية المصورة',
-          titleEn: 'Authentic Matn Verse & Illustrated Anatomical Plate'
-        });
-
-        // Systematic Letter & Case Breakdown Slides
-        if (Array.isArray(currentSuwaydLesson.ruleBreakdown) && currentSuwaydLesson.ruleBreakdown.length > 0) {
-          currentSuwaydLesson.ruleBreakdown.forEach((item, bIdx) => {
-            slides.push({
-              type: 'breakdown',
-              item: item,
-              bIndex: bIdx,
-              titleAr: item.titleAr,
-              titleEn: item.titleAr
-            });
-          });
-        }
-
-        // Individual Quranic Practice Words with Live Metronome
-        if (Array.isArray(currentSuwaydLesson.examples) && currentSuwaydLesson.examples.length > 0) {
-          currentSuwaydLesson.examples.forEach((ex, exIdx) => {
-            slides.push({
-              type: 'example',
-              example: ex,
-              exIndex: exIdx,
-              titleAr: ex.word,
-              titleEn: ex.word
-            });
-          });
-        }
-
-        return slides;
-      }, [currentSuwaydLesson]);
+      const currentZoomSlides = useMemo(() => buildTajweedZoomSlides(currentSuwaydLesson), [currentSuwaydLesson]);
 
       const [activeMakhrajId, setActiveMakhrajId] = useState('lisan');
       const [metronomeCount, setMetronomeCount] = useState(2); // 2, 4, 5, 6
@@ -1081,6 +1043,16 @@
       const [activeIslamicStage, setActiveIslamicStage] = useState(() => (localStorage.getItem('mishkah_active_islamic_data') ? 2 : 1)); // 1 to 6
       const [slideCondensedMode, setSlideCondensedMode] = useState(false);
       const studentWindowRef = useRef(null);
+      // True while the student window is open, so the teacher's own view can
+      // show hidden lines through a light veil instead of hiding them from her.
+      const [studentScreenOpen, setStudentScreenOpen] = useState(false);
+      useEffect(() => {
+        const timer = setInterval(() => {
+          const win = studentWindowRef.current;
+          setStudentScreenOpen(!!(win && !win.closed));
+        }, 1000);
+        return () => clearInterval(timer);
+      }, []);
       const syncChannelRef = useRef(null);
 
       // Universal Smooth Stage Switcher: Guarantees fluid navigation across all 6 stages
@@ -1509,6 +1481,24 @@
 
       const { handleGenerateTajweed, getFallbackTajweed } = createTajweedActions({ ayahRange, customContext, isRtl, selectedRule, selectedTextbook, setIsGeneratingTajweed, setQuizAnswers, setQuizSubmitted, setTajweedData, showToast, surahName, tajweedMode, teacherPin });
 
+
+      useEffect(() => {
+        if (activeTab === 'hifz') {
+          publishStage({ kind: 'mushaf', page: mushafPageNumber, overlayMode: mushafOverlayMode, rulerLine: activeRulerLine });
+        } else if (activeTab === 'tajweed') {
+          publishStage({
+            kind: 'tajweed',
+            lessonId: currentSuwaydLesson && currentSuwaydLesson.id,
+            slideIndex: suwaydZoomModalOpen ? suwaydZoomSlideIndex : 0,
+            plateId: activeSuwaydPlateId,
+            metronome: { count: metronomeCount, playing: metronomePlaying, beat: metronomeBeat }
+          });
+        } else if (activeTab === 'islamic') {
+          publishStage({ kind: 'slides' });
+        }
+      }, [activeTab, mushafPageNumber, mushafOverlayMode, activeRulerLine, currentSuwaydLesson, suwaydZoomModalOpen,
+          suwaydZoomSlideIndex, activeSuwaydPlateId, metronomeCount, metronomePlaying, metronomeBeat]);
+
       return (
         <div className="min-h-screen flex flex-col islamic-screen-pattern">
           
@@ -1552,7 +1542,17 @@
 
                 {/* Quick Actions (Library + Security + Lang) */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <button 
+                  <button
+                    type="button"
+                    onClick={handleOpenStudentPopout}
+                    className={'font-black text-xs sm:text-sm px-3 sm:px-4 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5 border-2 ' +
+                      (studentScreenOpen ? 'bg-emerald-600 text-white border-emerald-300' : 'bg-white text-emerald-950 border-gold-400 hover:bg-gold-50')}
+                    title={isRtl ? 'نافذة نظيفة للطلاب — شاركيها وحدها في زوم' : 'Clean window for students — share only this window in Zoom'}
+                  >
+                    <span>🖥️</span>
+                    <span>{studentScreenOpen ? (isRtl ? 'شاشة الطالب مفتوحة' : 'Student screen open') : (isRtl ? 'افتحي شاشة الطالب' : 'Open student screen')}</span>
+                  </button>
+                  <button
                     type="button"
                     onClick={() => {
                       setActiveTab('islamic');
@@ -1709,7 +1709,7 @@
 
             {/* ================= VIEW: MODULE A (TAJWEED COPILOT) ================= */}
                         {/* ================= VIEW: HIFZ & RECITATION WORKBENCH (BRANCH 1) ================= */}
-            {activeTab === 'hifz' && <HifzTab {...{ activeRepeatAyah, activeRulerLine, customMaskedWords, handleActivatePassageTest, handleDeleteMutashabiha, handleFetchTargetMutaAyah, handleNavigateMushafPage, handlePassageVerdict, handleSaveNewMutashabiha, handleSearchMutaAyahs, handleSelectMutaMatch, hifzAyahRange, hifzAyahs, hifzMutashabihat, hifzSurahName, hifzViewMode, hifzWorksheetModalOpen, isAddMutaOpen, isAlternatingMasked, isDivineNamesMasked, isEndingsMasked, isFetchingQuran, isFullMasked, isReverseOrder, isRtl, isSearchingMuta, isStartersMasked, mushafCurrentSurahId, mushafOverlayMode, mushafPageNumber, mutaGuideNote, mutaSearchQuery, mutaSearchResults, mutaTargetAyahNum, mutaTargetSurahId, mutaTargetText, passageMaskedAyahs, passageRetryCount, passageStatus, passageTestSection, quranFontSize, repeatCount, repeatTarget, revealedAyahSet, setActiveRepeatAyah, setActiveRulerLine, setCustomMaskedWords, setHifzViewMode, setHifzWorksheetModalOpen, setIsAddMutaOpen, setIsAlternatingMasked, setIsDivineNamesMasked, setIsEndingsMasked, setIsFullMasked, setIsReverseOrder, setIsStartersMasked, setMaskedMushafLines, setMushafOverlayMode, setMutaGuideNote, setMutaSearchQuery, setPassageMaskedAyahs, setPassageTestSection, setQuranFontSize, setRepeatCount, setRepeatTarget, setRevealedAyahSet, showToast, toggleRevealAyah, toggleWordMask }} />}
+            {activeTab === 'hifz' && <HifzTab {...{ studentScreenOpen, activeRepeatAyah, activeRulerLine, customMaskedWords, handleActivatePassageTest, handleDeleteMutashabiha, handleFetchTargetMutaAyah, handleNavigateMushafPage, handlePassageVerdict, handleSaveNewMutashabiha, handleSearchMutaAyahs, handleSelectMutaMatch, hifzAyahRange, hifzAyahs, hifzMutashabihat, hifzSurahName, hifzViewMode, hifzWorksheetModalOpen, isAddMutaOpen, isAlternatingMasked, isDivineNamesMasked, isEndingsMasked, isFetchingQuran, isFullMasked, isReverseOrder, isRtl, isSearchingMuta, isStartersMasked, mushafCurrentSurahId, mushafOverlayMode, mushafPageNumber, mutaGuideNote, mutaSearchQuery, mutaSearchResults, mutaTargetAyahNum, mutaTargetSurahId, mutaTargetText, passageMaskedAyahs, passageRetryCount, passageStatus, passageTestSection, quranFontSize, repeatCount, repeatTarget, revealedAyahSet, setActiveRepeatAyah, setActiveRulerLine, setCustomMaskedWords, setHifzViewMode, setHifzWorksheetModalOpen, setIsAddMutaOpen, setIsAlternatingMasked, setIsDivineNamesMasked, setIsEndingsMasked, setIsFullMasked, setIsReverseOrder, setIsStartersMasked, setMaskedMushafLines, setMushafOverlayMode, setMutaGuideNote, setMutaSearchQuery, setPassageMaskedAyahs, setPassageTestSection, setQuranFontSize, setRepeatCount, setRepeatTarget, setRevealedAyahSet, showToast, toggleRevealAyah, toggleWordMask }} />}
             {activeTab === 'tajweed' && <TajweedTab {...{ activeMakhrajId, activeSuwaydPlateId, atlasCategory, atlasSearch, currentSuwaydLesson, currentZoomSlides, filterMatchesSuwaydLesson, isRtl, metronomeBeat, metronomeCount, metronomePlaying, metronomeSound, metronomeSpeed, plateZoomLevel, playMetronomeTick, setActiveMakhrajId, setActiveSuwaydPlateId, setAtlasCategory, setAtlasSearch, setMetronomeBeat, setMetronomeCount, setMetronomePlaying, setMetronomeSound, setMetronomeSpeed, setPlateZoomLevel, setSuwaydCatalogSubTab, setSuwaydFilterCategory, setSuwaydLessonId, setSuwaydPlateZoomModal, setSuwaydQuizAnswers, setSuwaydQuizModalOpen, setSuwaydQuizSubmitted, setSuwaydSearchQuery, setSuwaydViewMode, setSuwaydWorksheetModalOpen, setSuwaydZoomModalOpen, setSuwaydZoomSlideIndex, setTajweedSubTab, suwaydCatalogSubTab, suwaydFilterCategory, suwaydLessonId, suwaydPlateZoomModal, suwaydQuizAnswers, suwaydQuizModalOpen, suwaydQuizSubmitted, suwaydSearchQuery, suwaydViewMode, suwaydWorksheetModalOpen, suwaydZoomModalOpen, suwaydZoomSlideIndex, tajweedSubTab }} />}
 
             {/* ================= VIEW: ISLAMIC STUDIES & SERMON WORKBENCH (BRANCH 3) ================= */}
