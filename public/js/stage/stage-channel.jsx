@@ -19,19 +19,25 @@
       return stageChannel;
     }
 
+    // Returns { stored, sent } so a caller can warn the teacher when the
+    // student window may not follow.
     function publishStage(stage) {
       const payload = Object.assign({}, stage, { sentAt: Date.now() });
+      let stored = false;
+      let sent = false;
       try {
         localStorage.setItem(STAGE_STORAGE_KEY, JSON.stringify(payload));
+        stored = true;
       } catch (e) {
         console.warn('Mishkah: could not store the student stage', e);
       }
       try {
         const channel = getStageChannel();
-        if (channel) channel.postMessage(payload);
+        if (channel) { channel.postMessage(payload); sent = true; }
       } catch (e) {
         console.warn('Mishkah: could not send the student stage', e);
       }
+      return { stored, sent };
     }
 
     function readStoredStage() {

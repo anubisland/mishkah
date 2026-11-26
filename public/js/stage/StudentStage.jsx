@@ -11,6 +11,7 @@
       if (stage.kind === 'mushaf') return <StudentMushafView stage={stage} />;
       if (stage.kind === 'recitation') return <StudentRecitationView stage={stage} />;
       if (stage.kind === 'tajweed') return <StudentTajweedView stage={stage} />;
+      if (stage.kind === 'deck') return <StudentDeckView stage={stage} />;
       if (stage.kind === 'slides') return <StudentProjectorScreen />;
       return <StudentWaitingScreen />;
     }
@@ -168,5 +169,35 @@
             </div>
           </FitToScreen>
         </StudentFrame>
+      );
+    }
+
+    // A lecture-deck slide filling the window at 16:9, on a dark surround.
+    function StudentDeckView({ stage }) {
+      const [size, setSize] = useState({ w: window.innerWidth, h: window.innerHeight });
+      useEffect(() => {
+        const onResize = () => setSize({ w: window.innerWidth, h: window.innerHeight });
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+      }, []);
+      // The deck lives in the studio's saved copy; re-read it on every stage
+      // message and whenever the studio saves.
+      const [deckVersion, setDeckVersion] = useState(0);
+      useEffect(() => {
+        const onStorage = (e) => { if (e.key === DECK_STORAGE_KEY) setDeckVersion((v) => v + 1); };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
+      }, []);
+      const deck = useMemo(() => readSavedDeck() || normalizeDeck({ slides: [] }), [stage.sentAt, deckVersion]);
+      const index = Math.min(Math.max(0, stage.index || 0), Math.max(0, deck.slides.length - 1));
+      const slide = deck.slides[index];
+      if (!slide) return <StudentWaitingScreen />;
+      const width = Math.floor(Math.min(size.w, size.h * 16 / 9));
+      return (
+        <div className="h-screen w-screen flex items-center justify-center bg-[#0b1f18] overflow-hidden">
+          <ScaledSlide width={width}>
+            <SlideView slide={slide} deck={deck} index={index} total={deck.slides.length} />
+          </ScaledSlide>
+        </div>
       );
     }

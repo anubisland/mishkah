@@ -1,0 +1,199 @@
+    // The slide studio: build a deck from the lecture, review and edit every
+    // slide, then present it. While presenting, the student window shows the
+    // slide and the teacher sees the slide with her notes.
+
+    function useElementWidth() {
+      const ref = useRef(null);
+      const [width, setWidth] = useState(800);
+      useEffect(() => {
+        if (!ref.current) return;
+        const observer = new ResizeObserver(([entry]) => setWidth(Math.floor(entry.contentRect.width)));
+        observer.observe(ref.current);
+        return () => observer.disconnect();
+      }, []);
+      return [ref, width];
+    }
+
+    function DeckStudio({ lectureText, onClose, studentScreenOpen, onOpenStudentScreen }) {
+      const store = useDeckStore();
+      const { deck } = store;
+      const [selectedId, setSelectedId] = useState(deck.slides[0] ? deck.slides[0].id : null);
+      const [mode, setMode] = useState('edit');
+      const [sourceOpen, setSourceOpen] = useState(deck.slides.length === 0);
+      const [importWarnings, setImportWarnings] = useState([]);
+      const [syncProblem, setSyncProblem] = useState(false);
+
+      const index = Math.max(0, deck.slides.findIndex((s) => s.id === selectedId));
+      const slide = deck.slides[index];
+      const go = (delta) => {
+        const next = deck.slides[Math.min(deck.slides.length - 1, Math.max(0, index + delta))];
+        if (next) setSelectedId(next.id);
+      };
+
+      // The student window follows the presented slide. The deck itself is read
+      // from the studio's saved copy, so each slide change is a tiny message.
+      useEffect(() => {
+        if (mode !== 'present') return;
+        const result = publishStage({ kind: 'deck', index, deckSaved: !store.saveError });
+        setSyncProblem(!result.stored || !result.sent || !!store.saveError);
+      }, [mode, deck, index, store.saveError]);
+
+      useEffect(() => {
+        if (mode !== 'present') return;
+        const onKey = (e) => {
+          if (e.key === 'ArrowLeft' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(1); }
+          if (e.key === 'ArrowRight' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+          if (e.key === 'Escape') setMode('edit');
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+      });
+
+      const onNewDeck = (newDeck, warnings) => {
+        setImportWarnings(warnings || []);
+        store.replaceDeck(newDeck);
+        setSelectedId(newDeck.slides[0] && newDeck.slides[0].id);
+        setSourceOpen(false);
+      };
+
+      const startPresenting = () => {
+        if (!studentScreenOpen) onOpenStudentScreen();
+        setMode('present');
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 bg-[#f3f1ea] flex flex-col" dir="rtl">
+          <DeckStudioBar
+            deck={deck} mode={mode} store={store} slide={slide}
+            studentScreenOpen={studentScreenOpen}
+            onSource={() => setSourceOpen(true)} onPresent={startPresenting}
+            onEdit={() => setMode('edit')}
+            onClose={() => { if (document.activeElement) document.activeElement.blur(); onClose(); }}
+          />
+          {store.saveError && <p className="bg-rose-100 text-rose-800 font-bold text-center py-1">{store.saveError}</p>}
+          {store.loadError && <p className="bg-amber-100 text-amber-900 font-bold text-center py-1">{store.loadError}</p>}
+          {mode === 'present' && syncProblem && (
+            <p className="bg-rose-600 text-white font-bold text-center py-1">⚠️ قد لا تتابع شاشة الطالب العرض. أغلقيها وافتحيها من جديد، وتأكدي أن ذاكرة المتصفح غير ممتلئة.</p>
+          )}
+          {importWarnings.length > 0 && (
+            <div className="bg-amber-50 border-b-2 border-amber-300 px-4 py-2 text-sm text-amber-950">
+              <div className="flex items-center justify-between">
+                <b>تنبيه: أُنشئ العرض، لكن غُيّرت بعض الأجزاء. راجعيها:</b>
+                <button type="button" className="font-bold px-2" onClick={() => setImportWarnings([])}>✕</button>
+              </div>
+              <ul className="list-disc pr-5">{importWarnings.slice(0, 8).map((w, i) => <li key={i}>{w}</li>)}</ul>
+              {importWarnings.length > 8 && <p>و{importWarnings.length - 8} ملاحظات أخرى.</p>}
+            </div>
+          )}
+
+          {!slide ? (
+            <div className="flex-1 flex items-center justify-center text-emerald-900 font-bold text-lg">
+              لا توجد شرائح بعد. اضغطي «إنشاء من المحاضرة».
+            </div>
+          ) : mode === 'present' ? (
+            <DeckPresenter deck={deck} slide={slide} index={index} go={go} />
+          ) : (
+            <DeckEditor deck={deck} slide={slide} index={index} store={store} selectedId={selectedId} setSelectedId={setSelectedId} />
+          )}
+
+          {sourceOpen && <DeckSourcePanel lectureText={lectureText} onDeck={onNewDeck} onClose={() => setSourceOpen(false)} />}
+        </div>
+      );
+    }
+
+    function DeckStudioBar({ deck, mode, store, slide, studentScreenOpen, onSource, onPresent, onEdit, onClose }) {
+      const btn = 'px-3 py-1.5 rounded-xl font-black text-sm border-2 transition disabled:opacity-40';
+      return (
+        <div className="shrink-0 emerald-pattern flex flex-wrap items-center gap-2 px-4 py-2">
+          <h2 className="text-gold-200 font-black text-lg ml-auto">🎞️ استوديو الشرائح{deck.title ? ' — ' + deck.title : ''}</h2>
+          {mode === 'edit' ? (
+            <>
+              <button type="button" className={btn + ' bg-white text-emerald-950 border-gold-400'} onClick={onSource}>✨ إنشاء من المحاضرة</button>
+              <button type="button" className={btn + ' bg-white/90 text-emerald-950 border-white'} disabled={!store.canUndo} onClick={store.undo}>↶ تراجع</button>
+              <button type="button" className={btn + ' bg-gold-500 text-emerald-950 border-gold-300'} disabled={!slide} onClick={onPresent}>▶ ابدئي العرض</button>
+            </>
+          ) : (
+            <>
+              <span className={'text-sm font-bold px-2 py-1 rounded-lg ' + (studentScreenOpen ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white')}>
+                {studentScreenOpen ? '🖥️ شاشة الطالب تعرض الشريحة' : 'شاشة الطالب مغلقة'}
+              </span>
+              <button type="button" className={btn + ' bg-white text-emerald-950 border-gold-400'} onClick={onEdit}>✎ رجوع للتعديل</button>
+            </>
+          )}
+          <button type="button" className={btn + ' bg-transparent text-gold-200 border-gold-400/50'} onClick={onClose}>✕ إغلاق</button>
+        </div>
+      );
+    }
+
+    function DeckEditor({ deck, slide, index, store, selectedId, setSelectedId }) {
+      const [canvasRef, canvasWidth] = useElementWidth();
+      return (
+        <div className="flex-1 min-h-0 grid grid-cols-[220px_1fr_300px] gap-3 p-3">
+          <div className="overflow-y-auto space-y-2 pl-1">
+            {deck.slides.map((s, i) => (
+              <div key={s.id} onClick={() => setSelectedId(s.id)}
+                className={'rounded-lg cursor-pointer border-4 ' + (s.id === selectedId ? 'border-gold-500' : 'border-transparent hover:border-gold-300')}>
+                <ScaledSlide width={196}><SlideView slide={s} /></ScaledSlide>
+                <div className="flex items-center justify-between text-xs font-bold text-emerald-900 px-1">
+                  <span>{i + 1}</span>
+                  <span className="flex gap-1">
+                    <button type="button" title="لأعلى" onClick={(e) => { e.stopPropagation(); store.moveSlide(s.id, -1); }}>▲</button>
+                    <button type="button" title="لأسفل" onClick={(e) => { e.stopPropagation(); store.moveSlide(s.id, 1); }}>▼</button>
+                    <button type="button" title="حذف" className="text-rose-700" onClick={(e) => { e.stopPropagation(); store.removeSlide(s.id); }}>✕</button>
+                  </span>
+                </div>
+              </div>
+            ))}
+            <button type="button" onClick={() => { const s = blankSlide('points'); store.insertSlideAfter(selectedId, s); setSelectedId(s.id); }}
+              className="w-full py-2 rounded-xl border-2 border-dashed border-emerald-900/30 font-bold text-emerald-900">+ شريحة جديدة</button>
+          </div>
+
+          <div ref={canvasRef} className="min-w-0 flex flex-col items-center justify-center">
+            <div className="shadow-2xl rounded-md overflow-hidden">
+              <ScaledSlide width={Math.max(320, canvasWidth)}>
+                <SlideView key={slide.id} slide={slide} deck={deck} index={index} total={deck.slides.length}
+                  onEdit={(field, value) => store.updateSlide(slide.id, field, value)} />
+              </ScaledSlide>
+            </div>
+            <p className="text-sm text-slate-600 mt-2">اضغطي على أي نص في الشريحة لتعديله.</p>
+          </div>
+
+          <div className="overflow-y-auto bg-white rounded-2xl p-4 border border-emerald-900/10">
+            <DeckInspector slide={slide} onChange={(field, value) => store.updateSlide(slide.id, field, value)} />
+          </div>
+        </div>
+      );
+    }
+
+    function DeckPresenter({ deck, slide, index, go }) {
+      const [canvasRef, canvasWidth] = useElementWidth();
+      const next = deck.slides[index + 1];
+      return (
+        <div className="flex-1 min-h-0 grid grid-cols-[1fr_380px] gap-4 p-4">
+          <div ref={canvasRef} className="min-w-0 flex flex-col items-center justify-center gap-3">
+            <div className="shadow-2xl rounded-md overflow-hidden">
+              <ScaledSlide width={Math.max(320, canvasWidth)}>
+                <SlideView slide={slide} deck={deck} index={index} total={deck.slides.length} />
+              </ScaledSlide>
+            </div>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => go(-1)} disabled={index === 0} className="px-6 py-2 rounded-xl bg-white border-2 border-emerald-900/20 font-black disabled:opacity-40">→ السابقة</button>
+              <span className="font-black text-emerald-950">{index + 1} / {deck.slides.length}</span>
+              <button type="button" onClick={() => go(1)} disabled={!next} className="px-6 py-2 rounded-xl bg-emerald-900 text-gold-200 font-black disabled:opacity-40">التالية ←</button>
+            </div>
+          </div>
+          <div className="min-h-0 flex flex-col gap-3">
+            <div className="flex-1 overflow-y-auto bg-white rounded-2xl p-5 border-2 border-gold-400/60">
+              <h4 className="font-black text-emerald-900 mb-2">📝 ملاحظاتكِ (لا تراها الطالبات)</h4>
+              <p className="whitespace-pre-line leading-loose text-lg text-slate-800 font-amiri">{slide.notes || '—'}</p>
+            </div>
+            {next && (
+              <div className="bg-white/70 rounded-2xl p-2 border border-emerald-900/10">
+                <p className="text-xs font-bold text-slate-500 mb-1 px-1">الشريحة التالية</p>
+                <ScaledSlide width={360}><SlideView slide={next} /></ScaledSlide>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }

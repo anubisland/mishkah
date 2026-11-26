@@ -1,6 +1,6 @@
     // IslamicTab: the "islamic" screen, moved out of App unchanged.
     // Every App value it reads arrives as a prop of the same name.
-    function IslamicTab({ activeIslamicStage, broadcastSlideSync, extractEvidencesAndProofs, extractedEvidences, handleCondenseSlide, handleCopyWhatsApp, handleDeleteSavedLecture, handleExportIslamicPowerPoint, handleExportLibrary, handleImportLibrary, handleJumpToStage, handleLectureFileUpload, handleLoadDemoIslamic, handleLoadSavedLecture, handleOpenStudentPopout, handleProcessCustomLecture, handleResetIslamicForm, handleSaveIslamicLecture, handleScrollTeleprompter, handleStartLecturePresentation, handleTransferLectureToQuiz, handleTransferLectureToWorksheet, isCurrentLectureSaved, isExportingPptx, isExtractingFile, isGeneratingIslamic, isRtl, islamicData, islamicInputMode, islamicQuizAnswers, islamicQuizScore, islamicQuizSubmitted, islamicSubView, islamicViewMode, islamicWorksheetAnswers, islamicWorksheetViewMode, lessonDuration, lessonTopic, rawLectureText, sanitizeArabicExtractedText, sanitizeIslamicDataObject, savedIslamicLectures, setActiveIslamicStage, setExtractedEvidences, setIslamicData, setIslamicInputMode, setIslamicQuizAnswers, setIslamicQuizSubmitted, setIslamicSubView, setIslamicViewMode, setIslamicWorksheetAnswers, setIslamicWorksheetViewMode, setLessonDuration, setLessonTopic, setRawLectureText, setShowEvidenceBankModal, setShowExtractedTextPreview, setShowMasterGuide, setStage3ActiveSlide, setStage3ViewMode, setStructuredPhasesText, setSubjectCategory, setTeacherScriptFontSize, setTeacherTeleprompterMode, showExtractedTextPreview, showMasterGuide, showToast, stage3ActiveSlide, stage3ViewMode, structuredPhasesText, subjectCategory, teacherScriptFontSize, teacherTeleprompterMode, teacherTeleprompterScrollRef, uploadedFileInfo }) {
+    function IslamicTab({ setSlideStudioOpen, activeIslamicStage, broadcastSlideSync, extractEvidencesAndProofs, extractedEvidences, handleCondenseSlide, handleCopyWhatsApp, handleDeleteSavedLecture, handleExportIslamicPowerPoint, handleExportLibrary, handleImportLibrary, handleJumpToStage, handleLectureFileUpload, handleLoadDemoIslamic, handleLoadSavedLecture, handleOpenStudentPopout, handleProcessCustomLecture, handleResetIslamicForm, handleSaveIslamicLecture, handleScrollTeleprompter, handleStartLecturePresentation, handleTransferLectureToQuiz, handleTransferLectureToWorksheet, isCurrentLectureSaved, isExportingPptx, isExtractingFile, isGeneratingIslamic, isRtl, islamicData, islamicInputMode, islamicQuizAnswers, islamicQuizScore, islamicQuizSubmitted, islamicSubView, islamicViewMode, islamicWorksheetAnswers, islamicWorksheetViewMode, lessonDuration, lessonTopic, rawLectureText, sanitizeArabicExtractedText, sanitizeIslamicDataObject, savedIslamicLectures, setActiveIslamicStage, setExtractedEvidences, setIslamicData, setIslamicInputMode, setIslamicQuizAnswers, setIslamicQuizSubmitted, setIslamicSubView, setIslamicViewMode, setIslamicWorksheetAnswers, setIslamicWorksheetViewMode, setLessonDuration, setLessonTopic, setRawLectureText, setShowEvidenceBankModal, setShowExtractedTextPreview, setShowMasterGuide, setStage3ActiveSlide, setStage3ViewMode, setStructuredPhasesText, setSubjectCategory, setTeacherScriptFontSize, setTeacherTeleprompterMode, showExtractedTextPreview, showMasterGuide, showToast, stage3ActiveSlide, stage3ViewMode, structuredPhasesText, subjectCategory, teacherScriptFontSize, teacherTeleprompterMode, teacherTeleprompterScrollRef, uploadedFileInfo }) {
       return (
         <div className="space-y-6 sm:space-y-8 animate-fadeIn">
                 
@@ -1337,6 +1337,16 @@
                               <span>{isRtl ? 'كافة الشرائح' : 'Grid'}</span>
                             </button>
                           </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setSlideStudioOpen(true)}
+                            className="bg-emerald-900 hover:bg-emerald-800 text-gold-200 border-2 border-gold-400 font-black px-4 py-1.5 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center gap-1.5"
+                            title="عرض جديد بقوالب مزخرفة، تعدّلينه شريحةً شريحة"
+                          >
+                            <span>🎞️</span>
+                            <span>استوديو الشرائح الجديد</span>
+                          </button>
 
                           <button
                             type="button"
