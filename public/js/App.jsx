@@ -99,7 +99,10 @@
       const [isAlternatingMasked, setIsAlternatingMasked] = useState(false);
       const [isReverseOrder, setIsReverseOrder] = useState(false);
       const [isFullMasked, setIsFullMasked] = useState(false);
-      const [revealedAyahSet, setRevealedAyahSet] = useState(new Set([1]));
+      const [revealedAyahSet, setRevealedAyahSet] = useState(() => {
+        const first = PRELOADED_HIFZ_PASSAGES[0] && PRELOADED_HIFZ_PASSAGES[0].ayahs[0];
+        return new Set(first ? [ayahKey(first)] : []);
+      });
       const [customMaskedWords, setCustomMaskedWords] = useState(new Set());
       
       // Repetition Loop State
