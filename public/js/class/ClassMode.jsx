@@ -37,13 +37,37 @@
       return '';
     }
 
-    function ClassMode({ ctx, onEnd }) {
+    const PLAN_SECTION = { hifz: 'hifz', tajweed: 'tajweed', lecture: 'islamic' };
+
+    // Moves the teacher (and the student window) to the start of a plan item.
+    function openPlanItem(ctx, item, setLectureIndex) {
+      if (item.type === 'hifz') {
+        ctx.setActiveTab('hifz');
+        ctx.handleNavigateMushafPage(item.fromPage);
+      } else if (item.type === 'tajweed') {
+        ctx.setActiveTab('tajweed');
+        ctx.setSuwaydLessonId(item.lessonIds[0]);
+        ctx.setSuwaydZoomSlideIndex(0);
+      } else if (item.type === 'lecture') {
+        ctx.setActiveTab('islamic');
+        setLectureIndex(0);
+      }
+    }
+
+    function ClassMode({ ctx, plan, onEnd }) {
       const section = CLASS_SECTIONS.some((s) => s.id === ctx.activeTab) ? ctx.activeTab : 'hifz';
+      const planItems = (plan && plan.items) || [];
+      const planItem = planItems.find((it) => PLAN_SECTION[it.type] === section) || null;
       const [lectureIndex, setLectureIndex] = useState(0);
       const [history, setHistory] = useState([]);
       const [minimized, setMinimized] = useState(false);
       const [syncProblem, setSyncProblem] = useState(false);
       const [previewRef, previewWidth] = useElementWidth();
+
+      // The class starts on the plan's first item.
+      useEffect(() => {
+        if (planItems[0]) openPlanItem(ctx, planItems[0], setLectureIndex);
+      }, []);
 
       const stage = section === 'islamic' ? { kind: 'deck', index: lectureIndex } : ctx.sectionStage;
 
@@ -80,7 +104,11 @@
 
       // The arrow keys step through pages or slides, as on a clicker.
       const step = (delta) => {
-        if (section === 'hifz') ctx.handleNavigateMushafPage(ctx.mushafPageNumber + delta);
+        if (section === 'hifz') {
+          let next = ctx.mushafPageNumber + delta;
+          if (planItem) next = Math.max(planItem.fromPage, Math.min(planItem.toPage, next));
+          if (next !== ctx.mushafPageNumber) ctx.handleNavigateMushafPage(next);
+        }
         else if (section === 'tajweed') ctx.setSuwaydZoomSlideIndex(Math.max(0, Math.min(ctx.currentZoomSlides.length - 1, ctx.suwaydZoomSlideIndex + delta)));
         else setLectureIndex((i) => Math.max(0, i + delta));
       };
@@ -110,7 +138,7 @@
             <span className="text-gold-200 font-black ml-auto flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" /> الحصة جارية
             </span>
-            {CLASS_SECTIONS.map((s) => (
+            {!planItems.length && CLASS_SECTIONS.map((s) => (
               <button key={s.id} type="button" onClick={() => ctx.setActiveTab(s.id)}
                 className={'px-3 py-1.5 rounded-xl text-sm font-black border-2 ' + (section === s.id ? 'bg-gold-400 text-emerald-950 border-gold-200' : 'bg-emerald-900/70 text-emerald-50 border-emerald-700')}>
                 {s.label}
@@ -122,6 +150,17 @@
             )}
             <button type="button" onClick={onEnd} className="px-3 py-1.5 rounded-xl text-sm font-bold text-gold-200 border-2 border-gold-400/60">■ إنهاء الحصة</button>
           </div>
+          {planItems.length > 0 && (
+            <div className="shrink-0 bg-emerald-950 px-3 py-2 flex gap-2 overflow-x-auto">
+              <span className="text-gold-300 font-black text-sm self-center shrink-0">📋 جدول الحصة:</span>
+              {planItems.map((it, i) => (
+                <button key={i} type="button" onClick={() => openPlanItem(ctx, it, setLectureIndex)}
+                  className={'shrink-0 px-3 py-1.5 rounded-xl text-sm font-bold border-2 ' + (it === planItem ? 'bg-gold-400 text-emerald-950 border-gold-200' : 'bg-emerald-900 text-emerald-50 border-emerald-700')}>
+                  {(i + 1) + '. ' + classPlanItemLabel(it)}
+                </button>
+              ))}
+            </div>
+          )}
           {syncProblem && <p className="bg-rose-600 text-white text-center font-bold py-1 text-sm">⚠️ قد لا تتابع شاشة الطالب. أغلقيها وافتحيها من جديد.</p>}
 
           <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3">
@@ -132,8 +171,8 @@
               </div>
             </section>
 
-            {section === 'hifz' && <HifzClassPanel ctx={ctx} />}
-            {section === 'tajweed' && <TajweedClassPanel ctx={ctx} />}
+            {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={planItem} />}
+            {section === 'tajweed' && <TajweedClassPanel ctx={ctx} planItem={planItem} />}
             {section === 'islamic' && <LectureClassPanel ctx={ctx} index={lectureIndex} setIndex={setLectureIndex} onOpenStudio={() => { setMinimized(true); ctx.setSlideStudioOpen(true); }} />}
 
             <ClassHistory history={history} currentKey={classStageKey(stage)} onRestore={restore} />

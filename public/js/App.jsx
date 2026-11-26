@@ -1049,6 +1049,10 @@
       const [slideStudioOpen, setSlideStudioOpen] = useState(false);
       const [splitHintOpen, setSplitHintOpen] = useState(false);
       const [classModeOpen, setClassModeOpen] = useState(false);
+      const [classPlan, setClassPlan] = useState(null);
+      const [myClassesOpen, setMyClassesOpen] = useState(false);
+      const [planNowFor, setPlanNowFor] = useState(null); // { title } while planning a class to start now
+      const [scheduleVersion, setScheduleVersion] = useState(0);
       useEffect(() => {
         const timer = setInterval(() => {
           const win = studentWindowRef.current;
@@ -1531,12 +1535,33 @@
       }, [slideStudioOpen, classModeOpen, sectionStage]);
 
       // Starting a class opens the student window and turns this window into
-      // the teacher's class panel.
-      const handleStartClass = () => {
+      // the teacher's class panel, organised around the class plan.
+      const beginClass = (plan) => {
         if (!studentScreenOpen) handleOpenStudentPopout();
+        // "Continue the last class plan" offers what she actually taught last.
+        if (plan && !saveClassPlan(plan)) showToast('تنبيه: لن تُحفظ خطة هذه الحصة لاستعمالها مرة أخرى (ذاكرة المتصفح ممتلئة).');
         if (!['hifz', 'tajweed', 'islamic'].includes(activeTab)) setActiveTab('hifz');
+        setClassPlan(plan || null);
+        setMyClassesOpen(false);
+        setPlanNowFor(null);
         setClassModeOpen(true);
       };
+      // The header button: a planned class due within two hours starts with
+      // its plan; otherwise the teacher says first what this class covers.
+      const handleStartClass = () => {
+        const now = Date.now();
+        const window2h = 2 * 60 * 60 * 1000;
+        const due = loadClassSchedule()
+          .filter((c) => c.plan && Math.abs(new Date(c.at).getTime() - now) <= window2h)
+          .sort((a, b) => Math.abs(new Date(a.at).getTime() - now) - Math.abs(new Date(b.at).getTime() - now))[0];
+        if (due) beginClass(due.plan);
+        else setPlanNowFor({ title: '' });
+      };
+      const startScheduledClass = (cls) => {
+        if (cls.plan) beginClass(cls.plan);
+        else setPlanNowFor({ title: cls.title });
+      };
+      const unplannedSoon = useMemo(() => classesNeedingPlan(loadClassSchedule()), [scheduleVersion, myClassesOpen]);
       const classCtx = { activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
 
       return (
@@ -1582,6 +1607,15 @@
 
                 {/* Quick Actions (Library + Security + Lang) */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setMyClassesOpen(true)}
+                    className="font-black text-xs sm:text-sm px-3 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5 border-2 bg-white text-emerald-950 border-gold-400 hover:bg-gold-50"
+                    title={isRtl ? 'حصصكِ القادمة وخططها' : 'Upcoming classes and their plans'}
+                  >
+                    <span>📅</span>
+                    <span>{isRtl ? 'حصصي' : 'My classes'}</span>
+                  </button>
                   <button
                     type="button"
                     onClick={handleStartClass}
@@ -1751,7 +1785,14 @@
             </div>
           </header>
 
-          {classModeOpen && <ClassMode ctx={classCtx} onEnd={() => setClassModeOpen(false)} />}
+          {classModeOpen && <ClassMode ctx={classCtx} plan={classPlan} onEnd={() => setClassModeOpen(false)} />}
+          {myClassesOpen && (
+            <MyClasses onStartClass={startScheduledClass} onStartUnscheduled={() => setPlanNowFor({ title: '' })}
+              onClose={() => { setMyClassesOpen(false); setScheduleVersion((v) => v + 1); }} />
+          )}
+          {planNowFor && (
+            <ClassPlanner mode="start" title={planNowFor.title} onStart={beginClass} onClose={() => setPlanNowFor(null)} />
+          )}
           {splitHintOpen && <SplitScreenHint onClose={() => setSplitHintOpen(false)} />}
 
           {slideStudioOpen && (
@@ -1765,6 +1806,17 @@
 
           {/* MAIN WORKSPACE BODY */}
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+            {unplannedSoon.length > 0 && (
+              <div className="mb-5 rounded-2xl border-2 border-amber-400 bg-amber-50 p-3 flex flex-wrap items-center gap-3" dir="rtl">
+                <span className="text-2xl">⏰</span>
+                <div className="flex-1 min-w-[200px]">
+                  {unplannedSoon.map((c) => (
+                    <p key={c.id} className="font-bold text-amber-950">عندكِ حصة «{c.title}» {formatClassTime(c.at)}، ولم تُجهَّز خطتها بعد.</p>
+                  ))}
+                </div>
+                <button type="button" onClick={() => setMyClassesOpen(true)} className="px-4 py-2 rounded-xl bg-emerald-900 text-gold-200 font-black">📋 جهّزي الخطة الآن</button>
+              </div>
+            )}
 
             {/* ================= VIEW: DASHBOARD ================= */}
             {activeTab === 'dashboard' && <DashboardTab {...{ isRtl, setActiveTab, tajweedData }} />}

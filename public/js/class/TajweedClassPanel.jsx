@@ -1,24 +1,44 @@
     // The teacher's tajweed panel in class mode: choose the lesson, step
     // through its slides, and read the companion material for the slide the
     // students see (from Dr. Ayman Suwayd's curriculum data).
-    function TajweedClassPanel({ ctx }) {
+    // planItem: today's lessons; the picker lists only them, and "next" on a
+    // lesson's last slide moves on to the next planned lesson.
+    function TajweedClassPanel({ ctx, planItem }) {
       const lesson = ctx.currentSuwaydLesson;
       const slides = ctx.currentZoomSlides;
       const index = Math.min(ctx.suwaydZoomSlideIndex, Math.max(0, slides.length - 1));
       const slide = slides[index];
-      const go = (i) => ctx.setSuwaydZoomSlideIndex(Math.max(0, Math.min(slides.length - 1, i)));
+      const lessons = planItem ? SUWAYD_TAJWEED_CURRICULUM.filter((l) => planItem.lessonIds.includes(l.id)) : SUWAYD_TAJWEED_CURRICULUM;
+      const lessonPos = lessons.findIndex((l) => l.id === lesson.id);
+      const nextLesson = lessonPos >= 0 ? lessons[lessonPos + 1] : null;
+      useEffect(() => {
+        if (planItem && lessonPos === -1 && lessons[0]) {
+          ctx.setSuwaydLessonId(lessons[0].id);
+          ctx.setSuwaydZoomSlideIndex(0);
+        }
+      }, [planItem, lessonPos]);
+      const go = (i) => {
+        if (i > slides.length - 1 && nextLesson) {
+          ctx.setSuwaydLessonId(nextLesson.id);
+          ctx.setSuwaydZoomSlideIndex(0);
+          return;
+        }
+        ctx.setSuwaydZoomSlideIndex(Math.max(0, Math.min(slides.length - 1, i)));
+      };
 
       return (
         <>
           <section className="bg-white rounded-2xl p-3 border border-emerald-900/10 space-y-3">
             <select value={lesson.id} onChange={(e) => { ctx.setSuwaydLessonId(e.target.value); ctx.setSuwaydZoomSlideIndex(0); }}
               className="w-full border-2 border-emerald-900/15 rounded-xl px-2 py-2 font-bold">
-              {SUWAYD_TAJWEED_CURRICULUM.map((l, i) => <option key={l.id} value={l.id}>{(i + 1) + '. ' + l.titleAr}</option>)}
+              {lessons.map((l, i) => <option key={l.id} value={l.id}>{(i + 1) + '. ' + l.titleAr}</option>)}
             </select>
             <div className="flex items-center gap-2">
               <button type="button" className={classPill(false)} disabled={index === 0} onClick={() => go(index - 1)}>→ السابقة</button>
               <span className="flex-1 text-center font-black text-emerald-950 text-sm">الشريحة {index + 1} من {slides.length}</span>
-              <button type="button" className={classPill(true)} disabled={index >= slides.length - 1} onClick={() => go(index + 1)}>التالية ←</button>
+              <button type="button" className={classPill(true)} disabled={index >= slides.length - 1 && !nextLesson} onClick={() => go(index + 1)}>
+                {index >= slides.length - 1 && nextLesson ? 'الدرس التالي ←' : 'التالية ←'}
+              </button>
             </div>
             <div className="flex flex-wrap gap-1">
               {slides.map((s, i) => (
