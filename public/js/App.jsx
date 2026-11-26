@@ -1512,7 +1512,7 @@
             kind: 'tajweed',
             lessonId: currentSuwaydLesson && currentSuwaydLesson.id,
             // In class mode the teacher steps through the slides from her panel.
-            slideIndex: (suwaydZoomModalOpen || classModeOpen) ? suwaydZoomSlideIndex : 0,
+            slideIndex: (suwaydZoomModalOpen || classModeOpen) ? Math.min(suwaydZoomSlideIndex, Math.max(0, currentZoomSlides.length - 1)) : 0,
             plateId: activeSuwaydPlateId,
             metronome: { count: metronomeCount, playing: metronomePlaying, beat: metronomeBeat }
           };
@@ -1522,7 +1522,7 @@
       }, [activeTab, hifzViewMode, hifzSurahName, hifzAyahRange, hifzAyahs, isReverseOrder, isEndingsMasked, isStartersMasked,
           isDivineNamesMasked, isAlternatingMasked, isFullMasked, revealedAyahSet, customMaskedWords, passageMaskedAyahs, passageStatus,
           mushafPageNumber, mushafOverlayMode, activeRulerLine, currentSuwaydLesson, suwaydZoomModalOpen, classModeOpen,
-          suwaydZoomSlideIndex, activeSuwaydPlateId, metronomeCount, metronomePlaying, metronomeBeat]);
+          suwaydZoomSlideIndex, currentZoomSlides, activeSuwaydPlateId, metronomeCount, metronomePlaying, metronomeBeat]);
 
       useEffect(() => {
         // The slide studio and class mode publish to the student window themselves.

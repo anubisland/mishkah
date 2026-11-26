@@ -47,12 +47,14 @@
 
       const stage = section === 'islamic' ? { kind: 'deck', index: lectureIndex } : ctx.sectionStage;
 
-      // Class mode is the only publisher while the class runs.
+      // Class mode publishes while its panel is open. While minimized, the
+      // slide studio may drive the student window, so on returning to the
+      // panel the panel's stage is sent again and both screens agree.
       useEffect(() => {
-        if (!stage) return;
+        if (!stage || minimized) return;
         const result = publishStage(stage);
         setSyncProblem(!result.stored || !result.sent);
-      }, [JSON.stringify(stage)]);
+      }, [JSON.stringify(stage), minimized]);
 
       // Remember each new thing shown, newest last.
       useEffect(() => {
