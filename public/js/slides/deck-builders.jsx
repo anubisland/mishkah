@@ -110,14 +110,14 @@
 
     function buildClaudeDeckPrompt(lectureText) {
       return [
-        'أنت تساعد معلمةً للعلوم الشرعية في تحويل محاضرتها إلى عرض شرائح تعرضه على طالباتها في زوم.',
+        'أنت تساعد معلّماً (أو معلّمة) للعلوم الشرعية في تحويل محاضرته إلى عرض شرائح يعرضه على طلابه في زوم.',
         'اقرأ المحاضرة أدناه، وافهم محاورها الأساسية، ثم وزّعها على شرائح واضحة.',
         '',
         'قواعد ملزمة:',
         '- لا تضف أي آية أو حديث أو قول عالم غير موجود في نص المحاضرة. انقل الآيات والأحاديث حرفياً كما وردت.',
         '- الآية توضع بين ﴿ ﴾ في layout "ayah"، والحديث أو الأثر في layout "hadith"، مع المصدر إن ذُكر.',
         '- الشريحة لا تحمل أكثر من 4 نقاط، وكل نقطة جملة قصيرة واضحة.',
-        '- في "notes" اكتب ما ستقوله المعلمة عند هذه الشريحة، مأخوذاً من نص المحاضرة نفسها.',
+        '- في "notes" اكتب ما سيقوله المعلم عند هذه الشريحة، مأخوذاً من نص المحاضرة نفسها.',
         '- عدد الشرائح بين 12 و30 حسب طول المحاضرة. ابدأ بشريحة "cover" واختم بشريحة "closing".',
         '- نوّع الألوان (tone) بين المحاور.',
         '',
@@ -129,7 +129,7 @@
         JSON.stringify({
           title: 'عنوان المحاضرة', series: 'اسم السلسلة (اختياري)',
           slides: [
-            { layout: 'cover', tone: 'pearl', eyebrow: 'اسم السلسلة', title: 'عنوان المحاضرة', body: 'سطر تعريفي', notes: 'ما تقوله المعلمة' },
+            { layout: 'cover', tone: 'pearl', eyebrow: 'اسم السلسلة', title: 'عنوان المحاضرة', body: 'سطر تعريفي', notes: 'ما يقوله المعلم' },
             { layout: 'cards', tone: 'sage', eyebrow: 'المحور الأول', title: 'عنوان', body: 'تمهيد قصير', items: [{ title: 'عنوان البطاقة', text: 'شرح قصير' }], footer: 'سطر ختامي (اختياري)', notes: '...' },
             { layout: 'ayah', tone: 'amber', eyebrow: 'الدليل', title: '', quote: { text: '﴿...﴾', source: 'سورة ... الآية ...' }, body: 'وجه الدلالة', notes: '...' }
           ]
@@ -148,7 +148,7 @@
       const text = (reply || '').trim();
       const candidates = [...text.matchAll(/```(?:json)?\s*([\s\S]*?)```/g)].map((m) => m[1]);
       if (text.includes('{')) candidates.push(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1));
-      if (!candidates.some((c) => c.trim())) throw new Error('لم أجد في الرد عرضاً بصيغة JSON. انسخي رد Claude كاملاً.');
+      if (!candidates.some((c) => c.trim())) throw new Error('لا يوجد في الرد عرض بصيغة JSON. المطلوب نسخ رد Claude كاملاً.');
       let best = null;
       candidates.forEach((c) => {
         try {
@@ -157,7 +157,7 @@
           if (!best || count > best.count) best = { parsed, count };
         } catch (e) { /* not this block; another may be the deck */ }
       });
-      if (!best) throw new Error('رد Claude غير مكتمل أو فيه خطأ في الصيغة. اطلبي منه إعادة إرسال JSON كاملاً.');
+      if (!best) throw new Error('رد Claude غير مكتمل أو فيه خطأ في الصيغة. الحل: طلب إعادة إرسال JSON كاملاً منه.');
       const warnings = [];
       const deck = normalizeDeck(best.parsed, warnings);
       if (!deck.slides.length) throw new Error('الرد لا يحتوي على أي شريحة.');

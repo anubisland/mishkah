@@ -278,7 +278,7 @@
         
         const currentText = (curAyah ? curAyah.text : '') + ' (' + hifzSurahName + ': ' + mutaCurrentAyahNum + ')';
         const targetText = (mutaTargetText || 'آية ' + mutaTargetAyahNum) + ' (سورة ' + targetSurahObj.name + ': ' + mutaTargetAyahNum + ')';
-        const guide = mutaGuideNote.trim() || (isRtl ? 'انتبه للفارق اللفظي بين الموضعين لتثبيت الحفظ.' : 'Notice the verbal difference to secure memorization.');
+        const guide = mutaGuideNote.trim() || (isRtl ? 'الانتباه للفارق اللفظي بين الموضعين يثبّت الحفظ.' : 'Notice the verbal difference to secure memorization.');
 
         const newEntry = {
           ayah: currentText,
@@ -1051,6 +1051,7 @@
       const [classModeOpen, setClassModeOpen] = useState(false);
       const [classPlan, setClassPlan] = useState(null);
       const [myClassesOpen, setMyClassesOpen] = useState(false);
+      const [guideOpen, setGuideOpen] = useState(false);
       const [planNowFor, setPlanNowFor] = useState(null); // { title } while planning a class to start now
       const [scheduleVersion, setScheduleVersion] = useState(0);
       useEffect(() => {
@@ -1609,9 +1610,18 @@
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <button
                     type="button"
+                    onClick={() => setGuideOpen(true)}
+                    className="font-black text-xs sm:text-sm px-3 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5 border-2 bg-white/90 text-emerald-950 border-white hover:bg-white"
+                    title={isRtl ? 'دليل الاستخدام: كل خطوات البرنامج' : 'User guide'}
+                  >
+                    <span>❓</span>
+                    <span>{isRtl ? 'الدليل' : 'Guide'}</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setMyClassesOpen(true)}
                     className="font-black text-xs sm:text-sm px-3 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5 border-2 bg-white text-emerald-950 border-gold-400 hover:bg-gold-50"
-                    title={isRtl ? 'حصصكِ القادمة وخططها' : 'Upcoming classes and their plans'}
+                    title={isRtl ? 'الحصص القادمة وخططها' : 'Upcoming classes and their plans'}
                   >
                     <span>📅</span>
                     <span>{isRtl ? 'حصصي' : 'My classes'}</span>
@@ -1620,20 +1630,20 @@
                     type="button"
                     onClick={handleStartClass}
                     className="font-black text-xs sm:text-sm px-3 sm:px-4 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5 border-2 bg-gold-400 text-emerald-950 border-gold-200 hover:bg-gold-300"
-                    title={isRtl ? 'تفتح شاشة الطالب، وتصير نافذتكِ لوحة التحكم في الحصة' : 'Opens the student screen and turns this window into the class panel'}
+                    title={isRtl ? 'تفتح شاشة الطالب، وتصير هذه النافذة لوحة التحكم في الحصة' : 'Opens the student screen and turns this window into the class panel'}
                   >
                     <span>▶</span>
-                    <span>{isRtl ? 'ابدئي الحصة' : 'Start class'}</span>
+                    <span>{isRtl ? 'بدء الحصة' : 'Start class'}</span>
                   </button>
                   <button
                     type="button"
                     onClick={handleOpenStudentPopout}
                     className={'font-black text-xs sm:text-sm px-3 sm:px-4 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5 border-2 ' +
                       (studentScreenOpen ? 'bg-emerald-600 text-white border-emerald-300' : 'bg-white text-emerald-950 border-gold-400 hover:bg-gold-50')}
-                    title={isRtl ? 'نافذة نظيفة للطلاب — شاركيها وحدها في زوم' : 'Clean window for students — share only this window in Zoom'}
+                    title={isRtl ? 'نافذة نظيفة للطلاب — تُشارَك وحدها في زوم' : 'Clean window for students — share only this window in Zoom'}
                   >
                     <span>🖥️</span>
-                    <span>{studentScreenOpen ? (isRtl ? 'شاشة الطالب مفتوحة' : 'Student screen open') : (isRtl ? 'افتحي شاشة الطالب' : 'Open student screen')}</span>
+                    <span>{studentScreenOpen ? (isRtl ? 'شاشة الطالب مفتوحة' : 'Student screen open') : (isRtl ? 'فتح شاشة الطالب' : 'Open student screen')}</span>
                   </button>
                   <button
                     type="button"
@@ -1786,6 +1796,7 @@
           </header>
 
           {classModeOpen && <ClassMode ctx={classCtx} plan={classPlan} onEnd={() => setClassModeOpen(false)} />}
+          {guideOpen && <GuideViewer onClose={() => setGuideOpen(false)} />}
           {myClassesOpen && (
             <MyClasses onStartClass={startScheduledClass} onStartUnscheduled={() => setPlanNowFor({ title: '' })}
               onClose={() => { setMyClassesOpen(false); setScheduleVersion((v) => v + 1); }} />
@@ -1811,10 +1822,10 @@
                 <span className="text-2xl">⏰</span>
                 <div className="flex-1 min-w-[200px]">
                   {unplannedSoon.map((c) => (
-                    <p key={c.id} className="font-bold text-amber-950">عندكِ حصة «{c.title}» {formatClassTime(c.at)}، ولم تُجهَّز خطتها بعد.</p>
+                    <p key={c.id} className="font-bold text-amber-950">حصة «{c.title}» {formatClassTime(c.at)} لم تُجهَّز خطتها بعد.</p>
                   ))}
                 </div>
-                <button type="button" onClick={() => setMyClassesOpen(true)} className="px-4 py-2 rounded-xl bg-emerald-900 text-gold-200 font-black">📋 جهّزي الخطة الآن</button>
+                <button type="button" onClick={() => setMyClassesOpen(true)} className="px-4 py-2 rounded-xl bg-emerald-900 text-gold-200 font-black">📋 تجهيز الخطة الآن</button>
               </div>
             )}
 

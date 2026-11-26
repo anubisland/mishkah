@@ -54,20 +54,20 @@
                 ))}
               </div>
               <button type="button" className="mt-2 w-full py-1.5 rounded-xl border-2 border-dashed border-emerald-900/30 font-bold text-emerald-900"
-                onClick={() => onChange('items', items.concat([{ title: '', text: 'نقطة جديدة' }]))}>+ أضيفي نقطة</button>
+                onClick={() => onChange('items', items.concat([{ title: '', text: 'نقطة جديدة' }]))}>+ إضافة نقطة</button>
             </section>
           )}
 
           {usesQuote && !slide.quote && (
             <button type="button" className="w-full py-1.5 rounded-xl border-2 border-dashed border-gold-500 font-bold"
               onClick={() => onChange('quote', { text: slide.layout === 'ayah' ? '﴿ ﴾' : '« »', source: '' })}>
-              + أضيفي {slide.layout === 'ayah' ? 'الآية' : 'الحديث'}
+              + إضافة {slide.layout === 'ayah' ? 'الآية' : 'الحديث'}
             </button>
           )}
 
           <section>
-            <h4 className="font-black text-emerald-950 mb-1">ملاحظاتكِ لهذه الشريحة</h4>
-            <p className="text-xs text-slate-500 mb-2">تظهر لكِ وحدكِ وقت العرض، ولا تراها الطالبات.</p>
+            <h4 className="font-black text-emerald-950 mb-1">ملاحظات المعلم لهذه الشريحة</h4>
+            <p className="text-xs text-slate-500 mb-2">تظهر للمعلم وحده وقت العرض، ولا يراها الطلاب.</p>
             <textarea key={slide.id + '|' + slide.notes} defaultValue={slide.notes} rows={6}
               onBlur={(e) => { if (e.target.value !== slide.notes) onChange('notes', e.target.value); }}
               className="w-full border-2 border-emerald-900/20 rounded-xl p-2 text-sm leading-relaxed" />

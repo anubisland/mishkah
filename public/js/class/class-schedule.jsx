@@ -67,8 +67,8 @@
         'DTSTART:' + stamp(start),
         'DTEND:' + stamp(end),
         'SUMMARY:' + escapeText('حصة: ' + cls.title),
-        'DESCRIPTION:' + escapeText('افتحي مِشكاة وجهّزي خطة الحصة إن لم تكن جاهزة.'),
-        'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY', 'DESCRIPTION:' + escapeText('غداً حصة ' + cls.title + ': جهّزي خطتها في مِشكاة'), 'END:VALARM',
+        'DESCRIPTION:' + escapeText('موعد تجهيز خطة الحصة في مِشكاة إن لم تكن جاهزة.'),
+        'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY', 'DESCRIPTION:' + escapeText('غداً حصة ' + cls.title + ': موعد تجهيز خطتها في مِشكاة'), 'END:VALARM',
         'BEGIN:VALARM', 'TRIGGER:-PT15M', 'ACTION:DISPLAY', 'DESCRIPTION:' + escapeText('بعد ربع ساعة حصة ' + cls.title), 'END:VALARM',
         'END:VEVENT', 'END:VCALENDAR'
       ];

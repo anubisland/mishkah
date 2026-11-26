@@ -72,7 +72,7 @@
         <StudentFrame title="مِشكاة" subtitle="شاشة الطالب">
           <div className="text-center">
             <p className="text-4xl sm:text-5xl text-gold-200 font-amiri mb-4">بسم الله الرحمن الرحيم</p>
-            <p className="text-base sm:text-lg text-gold-100/80 font-cairo">سيظهر هنا ما تعرضه المعلمة</p>
+            <p className="text-base sm:text-lg text-gold-100/80 font-cairo">سيظهر هنا ما يعرضه المعلم</p>
           </div>
         </StudentFrame>
       );
