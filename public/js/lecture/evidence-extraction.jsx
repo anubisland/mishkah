@@ -216,3 +216,7 @@
         scholarlyProofs: scholarlyProofs
       };
     }
+
+    if (typeof window !== 'undefined') {
+      window.extractEvidencesAndProofs = extractEvidencesAndProofs;
+    }

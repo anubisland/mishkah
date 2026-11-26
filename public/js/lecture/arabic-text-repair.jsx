@@ -662,3 +662,12 @@
 
       return sanitized;
     }
+
+    if (typeof window !== 'undefined') {
+      window.normalizeArabicPresentationForms = normalizeArabicPresentationForms;
+      window.detectAndInvertReversedArabic = detectAndInvertReversedArabic;
+      window.joinWrappedArabicLines = joinWrappedArabicLines;
+      window.trimToCompleteSentence = trimToCompleteSentence;
+      window.sanitizeIslamicDataObject = sanitizeIslamicDataObject;
+      window.sanitizeArabicExtractedText = sanitizeArabicExtractedText;
+    }

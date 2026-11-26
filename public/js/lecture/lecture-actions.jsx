@@ -1,6 +1,22 @@
     // createLectureActions: handlers moved out of App unchanged. App calls this once
     // per render and passes the state and setters the handlers read.
     function createLectureActions({ audienceLevel, customSubjectCategory, extractedEvidences, isRtl, lessonDuration, lessonTopic, rawLectureText, setActiveIslamicStage, setExtractedEvidences, setIsExtractingFile, setIslamicData, setIslamicQuizAnswers, setIslamicQuizSubmitted, setIslamicWorksheetAnswers, setLessonTopic, setRawLectureText, setStage3ActiveSlide, setUploadedFileInfo, showToast, subjectCategory }) {
+      const getSynthesizeSubstantiveStatement = () => {
+        if (typeof window !== 'undefined' && typeof window.synthesizeSubstantiveStatement === 'function') {
+          return window.synthesizeSubstantiveStatement;
+        }
+        return function(title, paragraph) {
+          const st = (typeof window !== 'undefined' && typeof window.cleanSlideTitle === 'function') ? window.cleanSlideTitle(title) : (title || 'محور الدرس');
+          if (paragraph && paragraph.trim().length > 20) {
+            const rawSentences = paragraph.split(/[.؛!؟\n]/).map(s => s.trim()).filter(Boolean);
+            const valid = rawSentences.map(s => s.replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim()).filter(s => s.length >= 25 && s.length <= 130);
+            if (valid.length > 0) return valid[0];
+          }
+          return `تأصيل مسائل (${st}) وبيان مقتضاها المنهجي والتربوي في الشريعة`;
+        };
+      };
+      const synthesizeSubstantiveStatement = getSynthesizeSubstantiveStatement();
+
       function handleProcessCustomLecture(overrideText = null, overrideTopic = null, overrideEvidences = null) {
         const textToUse = (typeof overrideText === 'string' && overrideText.trim()) ? overrideText : rawLectureText;
         if (!textToUse || !textToUse.trim()) {
@@ -1131,4 +1147,8 @@ function getFallbackIslamic() {
       }
 
       return { handleProcessCustomLecture, handleLectureFileUpload, getFallbackIslamic };
+    }
+
+    if (typeof window !== 'undefined') {
+      window.createLectureActions = createLectureActions;
     }

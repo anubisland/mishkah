@@ -42,3 +42,8 @@
         ]
       }
     };
+
+    if (typeof window !== 'undefined') {
+      window.EXEMPLAR_TAWHEED_CARDS = EXEMPLAR_TAWHEED_CARDS;
+      window.EXEMPLAR_TAWHEED_LECTURE = EXEMPLAR_TAWHEED_LECTURE;
+    }

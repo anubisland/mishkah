@@ -285,3 +285,9 @@
 
       return formatScriptureDisplay(s);
     }
+
+    if (typeof window !== 'undefined') {
+      window.normalizeIslamicSacredTerms = normalizeIslamicSacredTerms;
+      window.formatScriptureDisplay = formatScriptureDisplay;
+      window.distillSlideScripture = distillSlideScripture;
+    }

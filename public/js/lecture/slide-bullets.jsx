@@ -27,10 +27,10 @@
       t = t.replace(/^[\u064B-\u065F\u0670\u06D6-\u06ED\s#*\-•\d\.\)\:،=]+/, '').replace(/[*#]/g, '').trim();
       // Remove outline/bullet markers like '2ب.' or 'ب.' or 'أ.' or 'ج.' at start of titles
       t = t.replace(/^(?:\d+\s*[أ-ي]\s*[\.\-\)]|[أ-ي]\s*[\.\-\)]|\d+[\.\-\)])\s*/u, '').trim();
-      t = t.replace(/^(?:أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|حادي عشر|ثاني عشر|المحور \d+|المبحث \d+|المطلب \d+|الفصل \d+|\d+[\-\.\)]|Theme \d+)[:\s–—.-]*/i, '').trim();
+      t = t.replace(/^(?:المحور\s+(?:الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+)|المبحث\s+\S+|المطلب\s+\S+|الفصل\s+\S+|أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً|الأول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|حادي عشر|ثاني عشر|\d+[\-\.\)]|Theme \d+)[:\s–—.-]*/iu, '').trim();
 
-      // If title contains an inline delimiter like colon ':' or dash '–' or '—', extract strictly what is before it!
-      const delimiterMatch = t.match(/^([^:\-\—–\n]{3,50})[:\-\—–]\s*(.+)$/);
+      // If title contains an inline delimiter like colon ':' or dash '–' or '—', extract strictly the core substantive topic
+      const delimiterMatch = t.match(/^([^:\-\—–\n]{3,65})[:\-\—–]\s*(.+)$/);
       if (delimiterMatch) {
         t = delimiterMatch[1].trim();
       }
@@ -175,7 +175,7 @@
 
     // Synthesize a substantive, complete pedagogical statement for a lecture section.
     // Restored from history: commit 440264e dropped the definition but kept its callers.
-    const synthesizeSubstantiveStatement = (title, paragraph) => {
+    function synthesizeSubstantiveStatement(title, paragraph) {
       const st = cleanSlideTitle(title);
       
       // Priority 1: Extract authentic proposition directly from paragraph text
@@ -209,4 +209,10 @@
 
       // Priority 2: Pedagogical synthesis based on clean title
       return `تأصيل مسائل (${st}) وبيان مقتضاها المنهجي والتربوي في الشريعة`;
-    };
+    }
+
+    if (typeof window !== 'undefined') {
+      window.cleanSlideTitle = cleanSlideTitle;
+      window.extractConciseSlideBullets = extractConciseSlideBullets;
+      window.synthesizeSubstantiveStatement = synthesizeSubstantiveStatement;
+    }
