@@ -20,6 +20,32 @@
       };
       const [fontSizeLevel, setFontSizeLevel] = useState(localStorage.getItem('mishkah_font_level') || 'medium');
       
+      // Light or dark, or follow the device (light by day, dark by night on
+      // most systems). The student window is never themed: it returns before
+      // this hook runs.
+      const [theme, setTheme] = useState(() => {
+        try { return localStorage.getItem('mishkah_theme') || 'light'; } catch (e) { return 'light'; }
+      });
+      useEffect(() => {
+        const media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+        // Colour transitions are paused while switching, so the whole page
+        // changes at once instead of sliding colour by colour.
+        const apply = () => {
+          const dark = theme === 'dark' || (theme === 'auto' && media && media.matches);
+          const root = document.documentElement;
+          root.classList.add('mk-theme-switching');
+          root.setAttribute('data-theme', dark ? 'dark' : 'light');
+          void getComputedStyle(document.body).backgroundColor; // apply the new colours now
+          setTimeout(() => root.classList.remove('mk-theme-switching'), 60);
+        };
+        apply();
+        try { localStorage.setItem('mishkah_theme', theme); } catch (e) { console.warn('Mishkah: could not save the theme', e); }
+        if (theme === 'auto' && media) {
+          media.addEventListener('change', apply);
+          return () => media.removeEventListener('change', apply);
+        }
+      }, [theme]);
+
       // Font Family Switcher (Cairo, Amiri, Tajawal, Almarai, Noto Naskh)
       const [appFont, setAppFont] = useState(localStorage.getItem('mishkah_font') || 'cairo');
 
@@ -1580,7 +1606,8 @@
       const headerCtx = {
         isRtl, lang, setLang, activeTab, navigate, myClassesOpen, unplannedCount: unplannedSoon.length,
         onStartClass: handleStartClass, onOpenGuide: () => setGuideOpen(true), handleOpenStudentPopout, studentScreenOpen,
-        FONT_SIZE_LEVELS, fontSizeLevel, setFontSizeLevel, FONT_MAP, appFont, setAppFont, setIsPinModalOpen, version: 'v82'
+        FONT_SIZE_LEVELS, fontSizeLevel, setFontSizeLevel, FONT_MAP, appFont, setAppFont, setIsPinModalOpen, version: 'v82',
+        theme, setTheme
       };
       const homeCtx = {
         scheduleVersion, navigate, startScheduledClass,

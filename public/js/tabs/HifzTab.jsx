@@ -323,7 +323,7 @@
                         )}
 
                         {/* The High-Resolution 15-Line Page Image with Authentic Overlays */}
-                        <div className="bg-[#FFFDF9] border-2 border-emerald-900/10 rounded-2xl p-2 sm:p-6 shadow-inner flex justify-center items-center relative overflow-hidden select-none">
+                        <div className="keep-light bg-[#FFFDF9] border-2 border-emerald-900/10 rounded-2xl p-2 sm:p-6 shadow-inner flex justify-center items-center relative overflow-hidden select-none">
                           <div className="relative inline-block w-full max-w-3xl">
                             <img
                               key={mushafPageNumber}
