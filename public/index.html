@@ -8027,7 +8027,6 @@
               s = s.substring(0, stopPos + 1).trim();
             }
           }
-          }
           return s;
         };
 
@@ -9314,14 +9313,7 @@
           setIsExportingPptx(false);
         }
       };
-          showToast(isRtl ? 'تم تصدير العرض التقديمي بالهندسة المتعددة الأنماط بنجاح ✨' : 'Multi-archetype PowerPoint exported successfully ✨');
-        } catch (err) {
-          console.error('Error generating PowerPoint file:', err);
-          showToast(isRtl ? 'حدث خطأ أثناء إنشاء ملف البوربوينت' : 'Error generating PowerPoint file');
-        } finally {
-          setIsExportingPptx(false);
-        }
-      };function extractEvidencesAndProofs(rawText) {
+      function extractEvidencesAndProofs(rawText) {
         if (!rawText) return { quranicVerses: [], hadiths: [], scholarlyProofs: [] };
         var text = sanitizeArabicExtractedText(rawText);
         
