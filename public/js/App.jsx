@@ -10,11 +10,13 @@
       const [lang, setLang] = useState('ar');
       const isRtl = lang === 'ar';
       
-      // 3-Level Simple Ergonomic Font Scale: صغير (14px) | متوسط (16px - الافتراضي) | كبير (18px - مريح لكبار السن)
+      // Text size for the whole program. It sets the root size, so text,
+      // spacing, buttons and the Quran grow together and proportions hold.
       const FONT_SIZE_LEVELS = {
-        small: { px: 14, labelAr: 'صغير', labelEn: 'Small', tipAr: 'خط صغير مدمج', tipEn: 'Compact font (14px)' },
-        medium: { px: 16, labelAr: 'متوسط', labelEn: 'Medium', tipAr: 'خط متوسط متزن (الافتراضي)', tipEn: 'Balanced font (Default 16px)' },
-        large: { px: 18, labelAr: 'كبير', labelEn: 'Large', tipAr: 'خط كبير ومريح للعين وكبار السن بدون الإخلال بتوازن الصفحة', tipEn: 'Comfortable large font for seniors (18px)' }
+        small: { px: 15, labelAr: 'صغير', labelEn: 'Small' },
+        medium: { px: 16, labelAr: 'متوسط', labelEn: 'Medium' },
+        large: { px: 18, labelAr: 'كبير', labelEn: 'Large' },
+        xlarge: { px: 20, labelAr: 'كبير جداً', labelEn: 'Extra large' }
       };
       const [fontSizeLevel, setFontSizeLevel] = useState(localStorage.getItem('mishkah_font_level') || 'medium');
       
@@ -32,7 +34,7 @@
       useEffect(() => {
         const currentLevel = FONT_SIZE_LEVELS[fontSizeLevel] || FONT_SIZE_LEVELS.medium;
         document.documentElement.style.setProperty('--lesson-content-font-size', `${currentLevel.px}px`);
-        document.documentElement.style.fontSize = '16px';
+        document.documentElement.style.setProperty('--app-root-font-size', currentLevel.px + 'px');
         document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
         document.documentElement.lang = lang;
         document.title = isRtl ? 'منصة مشكاة | نظام التشغيل الشامل للداعية والمعلم الشرعي' : "Mishkah Platform | Comprehensive OS for Da'wah & Islamic Educators";
@@ -44,7 +46,7 @@
       }, [fontSizeLevel, isRtl, lang, appFont]);
 
       // Active View (Default directly to Branch 1: Authentic Mushaf & Recitation)
-      const [activeTab, setActiveTab] = useState('hifz');
+      const [activeTab, setActiveTab] = useState('dashboard');
 
       // ================= BRANCH 1: HIFZ & RECITATION STATE =================
       const [hifzPassageId, setHifzPassageId] = useState('mulk_page_562');
@@ -1235,16 +1237,16 @@
 
       // Load initial pre-loaded demo lessons
       useEffect(() => {
-        handleLoadDemoTajweed();
+        handleLoadDemoTajweed({ silent: true }); // quietly, on startup
         // // // handleLoadDemoIslamic(); - Clean slate on startup - Clean slate on startup - Clean slate on startup
       }, []);
 
       // Handlers to load Pre-loaded Demo Lessons instantly
-      function handleLoadDemoTajweed() {
+      function handleLoadDemoTajweed(options) {
         setTajweedData(getFallbackTajweed());
         setQuizAnswers({});
         setQuizSubmitted(false);
-        showToast(isRtl ? 'تم تحميل درس التجويد التجريبي الجاهز (سورة الملك) ⚡' : 'Pre-loaded Tajweed Demo Lesson Loaded (Al-Mulk) ⚡');
+        if (!(options && options.silent)) showToast(isRtl ? 'تم تحميل درس التجويد التجريبي الجاهز (سورة الملك) ⚡' : 'Pre-loaded Tajweed Demo Lesson Loaded (Al-Mulk) ⚡');
       }
 
 
@@ -1563,6 +1565,29 @@
         else setPlanNowFor({ title: cls.title });
       };
       const unplannedSoon = useMemo(() => classesNeedingPlan(loadClassSchedule()), [scheduleVersion, myClassesOpen]);
+
+      // One way to move between the program's places (the header and Home use it).
+      const navigate = (id) => {
+        if (id === 'classes') { setMyClassesOpen(true); return; }
+        setMyClassesOpen(false);
+        setActiveTab(id);
+        if (id === 'tajweed') {
+          setTajweedSubTab('generator');
+          setSuwaydCatalogSubTab('lessons');
+          setSuwaydViewMode('catalog');
+        }
+      };
+      const headerCtx = {
+        isRtl, lang, setLang, activeTab, navigate, myClassesOpen, unplannedCount: unplannedSoon.length,
+        onStartClass: handleStartClass, onOpenGuide: () => setGuideOpen(true), handleOpenStudentPopout, studentScreenOpen,
+        FONT_SIZE_LEVELS, fontSizeLevel, setFontSizeLevel, FONT_MAP, appFont, setAppFont, setIsPinModalOpen, version: 'v82'
+      };
+      const homeCtx = {
+        scheduleVersion, navigate, startScheduledClass,
+        openMyClasses: () => setMyClassesOpen(true),
+        openGuide: () => setGuideOpen(true),
+        openStudio: () => { setActiveTab('islamic'); setSlideStudioOpen(true); }
+      };
       const classCtx = { activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
 
       return (
@@ -1577,223 +1602,7 @@
           )}
 
           {/* TOP GRAND EMERALD HEADER */}
-          <header className="emerald-pattern text-white relative border-b-4 border-gold-400 shadow-xl overflow-hidden rounded-b-3xl sm:rounded-b-[36px] no-print">
-            {/* Islamic Corner Rosette Accents */}
-            <div className="absolute top-2 right-4 text-gold-300/40 text-lg font-amiri pointer-events-none select-none">۞</div>
-            <div className="absolute top-2 left-4 text-gold-300/40 text-lg font-amiri pointer-events-none select-none">۞</div>
-            {/* 8-pointed star watermark background */}
-            <div className="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center">
-              <svg className="w-[600px] h-[600px] text-gold-300" viewBox="0 0 100 100" fill="currentColor">
-                <polygon points="50,0 64,28 95,21 80,50 95,79 64,72 50,100 36,72 5,79 20,50 5,21 36,28" />
-              </svg>
-            </div>
-
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 relative z-10">
-              {/* Row 1: Brand Logo & Title on Right + Actions on Left */}
-              <div className="flex items-center justify-between gap-3 mb-1.5">
-                {/* Brand */}
-                <div className="flex items-center gap-3 sm:gap-4 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-950 border-2 border-gold-400 p-0.5 shadow-lg flex items-center justify-center transform hover:scale-105 transition overflow-hidden shrink-0">
-                    <img src="icons/mishkah-app-icon.jpg" alt="Mishkah Logo" className="w-full h-full object-cover rounded-xl drop-shadow" />
-                  </div>
-                  <div>
-                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-normal text-gold-300 font-amiri drop-shadow-lg leading-none" style={{ fontSize: 'clamp(1.9rem, 3.2vw, 2.6rem)' }}>
-                      {isRtl ? 'منصة مِشكاة' : 'Mishkah Platform'}
-                    </h1>
-                    <p className="text-xs text-emerald-100/90 font-medium hidden md:block mt-0.5 font-cairo">
-                      {isRtl ? 'نظام التشغيل الشامل للداعية والمعلم الشرعي' : "Comprehensive OS for Da'wah & Islamic Educators"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Quick Actions (Library + Security + Lang) */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setGuideOpen(true)}
-                    className="font-black text-xs sm:text-sm px-3 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5 border-2 bg-white/90 text-emerald-950 border-white hover:bg-white"
-                    title={isRtl ? 'دليل الاستخدام: كل خطوات البرنامج' : 'User guide'}
-                  >
-                    <span>❓</span>
-                    <span>{isRtl ? 'الدليل' : 'Guide'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMyClassesOpen(true)}
-                    className="font-black text-xs sm:text-sm px-3 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5 border-2 bg-white text-emerald-950 border-gold-400 hover:bg-gold-50"
-                    title={isRtl ? 'الحصص القادمة وخططها' : 'Upcoming classes and their plans'}
-                  >
-                    <span>📅</span>
-                    <span>{isRtl ? 'حصصي' : 'My classes'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleStartClass}
-                    className="font-black text-xs sm:text-sm px-3 sm:px-4 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5 border-2 bg-gold-400 text-emerald-950 border-gold-200 hover:bg-gold-300"
-                    title={isRtl ? 'تفتح شاشة الطالب، وتصير هذه النافذة لوحة التحكم في الحصة' : 'Opens the student screen and turns this window into the class panel'}
-                  >
-                    <span>▶</span>
-                    <span>{isRtl ? 'بدء الحصة' : 'Start class'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleOpenStudentPopout}
-                    className={'font-black text-xs sm:text-sm px-3 sm:px-4 py-1.5 rounded-xl shadow-md transition flex items-center gap-1.5 border-2 ' +
-                      (studentScreenOpen ? 'bg-emerald-600 text-white border-emerald-300' : 'bg-white text-emerald-950 border-gold-400 hover:bg-gold-50')}
-                    title={isRtl ? 'نافذة نظيفة للطلاب — تُشارَك وحدها في زوم' : 'Clean window for students — share only this window in Zoom'}
-                  >
-                    <span>🖥️</span>
-                    <span>{studentScreenOpen ? (isRtl ? 'شاشة الطالب مفتوحة' : 'Student screen open') : (isRtl ? 'فتح شاشة الطالب' : 'Open student screen')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab('islamic');
-                      setIslamicSubView('library');
-                    }}
-                    className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black text-xs px-2.5 sm:px-3 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1.5"
-                    title={isRtl ? 'مكتبة محاضراتي المحفوظة' : 'My Lectures Library'}
-                  >
-                    <span>📚</span>
-                    <span className="text-[11px] sm:text-xs font-black">{isRtl ? 'مكتبة محاضراتي' : 'My Library'}</span>
-                    <span className="bg-emerald-950 text-gold-200 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
-                      {savedIslamicLectures.length}
-                    </span>
-                  </button>
-
-                  <button 
-                    onClick={() => setIsPinModalOpen(true)}
-                    className="bg-emerald-800/90 hover:bg-emerald-700 border border-gold-400/50 text-gold-200 text-xs px-2.5 py-1.5 rounded-xl flex items-center gap-1 transition shadow-xs"
-                    title={isRtl ? 'رمز أمان المعلم' : 'Teacher Security PIN'}
-                  >
-                    <span>🔒</span>
-                    <span className="text-[11px] font-bold hidden xs:inline">{isRtl ? 'الأمان' : 'PIN'}</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-                  </button>
-
-                  <button 
-                    onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-                    className="bg-gold-500 hover:bg-gold-400 text-emerald-950 font-black text-xs px-2.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1"
-                  >
-                    <span>🌐</span>
-                    <span className="text-[11px] font-bold">{lang === 'ar' ? 'EN' : 'عربي'}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Row 2: Typography Group on Right + Version Badge on Left */}
-              <div className="flex items-center justify-between gap-3 pt-2 pb-1 border-t border-emerald-800/60 flex-wrap sm:flex-nowrap">
-                {/* Group: Font Family Dropdown + Font Size Pills Side by Side */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  {/* Font Family */}
-                  <div className="flex items-center gap-1 bg-emerald-950/80 border border-gold-400/50 rounded-xl px-2.5 py-1 text-xs text-gold-200 shadow-xs">
-                    <span className="text-gold-300 text-xs">🔤</span>
-                    <select 
-                      value={appFont} 
-                      onChange={(e) => {
-                        const newF = e.target.value;
-                        setAppFont(newF);
-                        const fCfg = FONT_MAP[newF] || FONT_MAP.cairo;
-                        showToast(isRtl ? 'تم تفعيل ' + fCfg.nameAr + ' ✨' : 'Font set to ' + fCfg.nameEn + ' ✨');
-                      }}
-                      className="bg-transparent text-gold-100 font-bold text-[11px] focus:outline-none cursor-pointer"
-                      title={isRtl ? 'اختيار خط واجهة التطبيق' : 'Choose Interface Font'}
-                    >
-                      <option value="cairo" className="bg-emerald-950 text-gold-100">{isRtl ? "خط كايرو (Cairo)" : "Cairo Font"}</option>
-                      <option value="amiri" className="bg-emerald-950 text-gold-100">{isRtl ? "خط أميري (Amiri)" : "Amiri Font"}</option>
-                      <option value="tajawal" className="bg-emerald-950 text-gold-100">{isRtl ? "خط تجوال (Tajawal)" : "Tajawal Font"}</option>
-                      <option value="almarai" className="bg-emerald-950 text-gold-100">{isRtl ? "خط المراعي (Almarai)" : "Almarai Font"}</option>
-                      <option value="naskh" className="bg-emerald-950 text-gold-100">{isRtl ? "خط النسخ (Noto Naskh)" : "Noto Naskh Font"}</option>
-                    </select>
-                  </div>
-
-                  {/* Font Size Pills (Directly Beside Font Family!) */}
-                  <div className="flex items-center gap-1 bg-emerald-950/80 border border-gold-400/50 rounded-xl px-2 py-1 text-xs text-gold-200 shadow-xs">
-                    <span className="text-gold-300 text-[10px] font-bold">{isRtl ? 'حجم الخط:' : 'Size:'}</span>
-                    <div className="flex items-center bg-emerald-900/80 rounded-lg p-0.5 gap-0.5 border border-emerald-700/60">
-                      {Object.entries(FONT_SIZE_LEVELS).map(([key, config]) => {
-                        const isActive = fontSizeLevel === key;
-                        return (
-                          <button
-                            key={key}
-                            type="button"
-                            onClick={() => {
-                              setFontSizeLevel(key);
-                              showToast(isRtl ? 'حجم الخط: ' + config.labelAr : 'Font size: ' + config.labelEn);
-                            }}
-                            className={'px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold transition-all ' + (
-                              isActive 
-                                ? 'bg-gold-500 text-emerald-950 shadow-xs font-black' 
-                                : 'text-emerald-100 hover:text-gold-200'
-                            )}
-                          >
-                            {isRtl ? config.labelAr : config.labelEn}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* System Version Badge positioned at the end of Row 2 */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    try {
-                      if ('caches' in window) {
-                        // Keep saved Quran pages; only the app's own files are refreshed.
-                        caches.keys().then(keys => Promise.all(keys.filter(k => k !== 'mishkah-quran-v1').map(k => caches.delete(k))));
-                      }
-                      if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.getRegistrations().then(regs => {
-                          for (let r of regs) r.unregister();
-                        });
-                      }
-                    } catch (e) {}
-                    const cleanPath = window.location.origin + window.location.pathname;
-                    window.location.replace(cleanPath + '?v=81.1&t=' + Date.now());
-                  }}
-                  className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v81.3 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v81.3 — Click to force reload'}
-                >
-                  <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v81.3' : 'v81.3'}</span>
-                  <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
-                    {isRtl ? 'أحدث تحديث' : 'Latest'}
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* Navigation Tabs Bar — 3 Core Foundation Branches (Substantially Enlarged & Dignified Typography) */}
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 border-t-2 border-emerald-800/90 flex flex-wrap py-2 gap-2 sm:gap-4 justify-center items-center">
-              {[
-                { id: 'hifz', icon: '🕋', labelAr: '1. التحفيظ والتسميع', labelEn: '1. Quran & Mushaf' },
-                { id: 'tajweed', icon: '📖', labelAr: '2. التجويد', labelEn: '2. Tajweed Rules' },
-                { id: 'islamic', icon: '🕌', labelAr: '3. المحاضرات الشرعية', labelEn: '3. Islamic Lectures' }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    if (tab.id === 'tajweed') {
-                      setTajweedSubTab('generator');
-                      setSuwaydCatalogSubTab('lessons');
-                      setSuwaydViewMode('catalog');
-                    }
-                  }}
-                  className={`branch-tab-btn flex items-center gap-2.5 sm:gap-3 px-4 sm:px-6 py-2 rounded-xl sm:rounded-2xl font-extrabold font-cairo whitespace-nowrap transition-all duration-200 cursor-pointer ${
-                    activeTab === tab.id 
-                      ? 'bg-gradient-to-r from-gold-400 via-amber-300 to-gold-400 text-emerald-950 shadow-xl border-3 border-gold-200 ring-2 ring-gold-400/50' 
-                      : 'bg-emerald-900/85 hover:bg-emerald-800 text-emerald-100 hover:text-white border-2 border-emerald-700/80 shadow-md hover:border-gold-400/60'
-                  }`}
-                >
-                  <span className="text-xl sm:text-2xl drop-shadow leading-none shrink-0">{tab.icon}</span>
-                  <span className="branch-tab-label font-black font-cairo leading-none drop-shadow-xs">{isRtl ? tab.labelAr : tab.labelEn}</span>
-                </button>
-              ))}
-            </div>
-          </header>
+          <AppHeader s={headerCtx} />
 
           {classModeOpen && <ClassMode ctx={classCtx} plan={classPlan} onEnd={() => setClassModeOpen(false)} />}
           {guideOpen && <GuideViewer onClose={() => setGuideOpen(false)} />}
@@ -1816,21 +1625,13 @@
           )}
 
           {/* MAIN WORKSPACE BODY */}
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
-            {unplannedSoon.length > 0 && (
-              <div className="mb-5 rounded-2xl border-2 border-amber-400 bg-amber-50 p-3 flex flex-wrap items-center gap-3" dir="rtl">
-                <span className="text-2xl">⏰</span>
-                <div className="flex-1 min-w-[200px]">
-                  {unplannedSoon.map((c) => (
-                    <p key={c.id} className="font-bold text-amber-950">حصة «{c.title}» {formatClassTime(c.at)} لم تُجهَّز خطتها بعد.</p>
-                  ))}
-                </div>
-                <button type="button" onClick={() => setMyClassesOpen(true)} className="px-4 py-2 rounded-xl bg-emerald-900 text-gold-200 font-black">📋 تجهيز الخطة الآن</button>
-              </div>
-            )}
+          {/* The sections menu beside the page content. */}
+          <div className="flex-1 flex items-stretch">
+          <AppSidebar s={headerCtx} />
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 min-w-0 w-full">
 
             {/* ================= VIEW: DASHBOARD ================= */}
-            {activeTab === 'dashboard' && <DashboardTab {...{ isRtl, setActiveTab, tajweedData }} />}
+            {activeTab === 'dashboard' && <HomeTab h={homeCtx} />}
 
             {/* ================= VIEW: MODULE A (TAJWEED COPILOT) ================= */}
                         {/* ================= VIEW: HIFZ & RECITATION WORKBENCH (BRANCH 1) ================= */}
@@ -2005,6 +1806,7 @@
             {/* ================= VIEW: INTERACTIVE SELF-GRADING QUIZ & TEACHER QUESTION BANK ================= */}
             {activeTab === 'quiz' && <QuizTab {...{ activeQuizQuestions, editingQuizQuestionId, handleClearQuizQuestions, handleDeleteQuizQuestion, handleResetQuizQuestions, handleSaveQuizQuestion, handleSwitchQuizBranch, handleTransferLectureToQuiz, isAddingQuizQuestion, isRtl, islamicData, quizAnswers, quizBranch, quizIslamicCategory, quizMode, quizQuestionForm, quizScore, quizSubmitted, setEditingQuizQuestionId, setIsAddingQuizQuestion, setQuizAnswers, setQuizMode, setQuizQuestionForm, setQuizSubmitted }} />}
           </main>
+          </div>
 
           {/* ================= FULLSCREEN PRESENTATION OVERLAY (Strict Viewport-Fit 16:9, Zero Cropping) ================= */}
           {isFullscreenZoom && (presentationTarget === 'islamic' ? islamicData : tajweedData) && (
@@ -2324,7 +2126,7 @@
                 <span>{isRtl ? 'منصة الداعية والمعلم الأولى لتعليم القرآن والعلوم الشرعية' : 'Empowering Quran & Islamic Studies Educators'}</span>
               </div>
               <div className="text-[11px] text-emerald-400/80">
-                <span>Designed with ADR-0006 Grand Emerald & Soft Gold Motif • Gemini Flash Architecture</span>
+                <span>© AnubisLand</span>
               </div>
             </div>
           </footer>
