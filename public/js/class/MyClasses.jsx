@@ -24,7 +24,7 @@
         if (!title.trim() || !day || !time) return;
         const when = new Date(day + 'T' + time);
         if (when.getTime() < Date.now()) {
-          setAddError('هذا الموعد مضى. اختاري يوماً وساعة قادمين.');
+          setAddError('هذا الموعد مضى. المطلوب يوم وساعة قادمان.');
           return;
         }
         setAddError(null);
@@ -52,12 +52,12 @@
                   className="flex-1 min-w-[160px] border-2 border-emerald-900/15 rounded-xl px-3 py-1.5 font-bold" />
                 <input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="border-2 border-emerald-900/15 rounded-xl px-2 py-1.5" />
                 <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="border-2 border-emerald-900/15 rounded-xl px-2 py-1.5" />
-                <button type="button" onClick={addClass} disabled={!title.trim()} className="px-4 py-1.5 rounded-xl bg-emerald-900 text-gold-200 font-black disabled:opacity-40">أضيفي</button>
+                <button type="button" onClick={addClass} disabled={!title.trim()} className="px-4 py-1.5 rounded-xl bg-emerald-900 text-gold-200 font-black disabled:opacity-40">إضافة</button>
               </div>
               {addError && <p className="text-rose-700 font-bold text-sm">{addError}</p>}
             </section>
 
-            {upcoming.length === 0 && <p className="text-center text-slate-600 py-4">لا توجد حصص قادمة. أضيفي حصتكِ القادمة لتجهّزي خطتها من الآن.</p>}
+            {upcoming.length === 0 && <p className="text-center text-slate-600 py-4">لا توجد حصص قادمة. بإضافة الحصة القادمة هنا تُجهَّز خطتها من الآن.</p>}
             <div className="space-y-2">
               {upcoming.map((c) => (
                 <div key={c.id} className={'rounded-2xl p-3 border-2 space-y-2 ' + (c.plan ? 'bg-white border-emerald-200' : (soon(c) ? 'bg-amber-50 border-amber-300' : 'bg-white border-slate-200'))}>
@@ -72,9 +72,9 @@
                   </div>
                   {c.plan && <p className="text-sm text-slate-700">{c.plan.items.map(classPlanItemLabel).join(' • ')}</p>}
                   <div className="flex flex-wrap gap-1.5">
-                    <button type="button" onClick={() => setPlanning(c)} className="px-3 py-1.5 rounded-xl bg-emerald-900 text-gold-200 font-bold text-sm">📋 {c.plan ? 'تعديل الخطة' : 'جهّزي الخطة'}</button>
-                    <button type="button" onClick={() => downloadClassCalendarFile(c)} className="px-3 py-1.5 rounded-xl border-2 border-emerald-900/20 font-bold text-sm" title="تضيف الحصة إلى تقويم هاتفكِ مع تذكير قبلها بيوم">📅 أضيفي إلى التقويم</button>
-                    <button type="button" onClick={() => onStartClass(c)} className="px-3 py-1.5 rounded-xl bg-gold-400 text-emerald-950 font-black text-sm">▶ ابدئي</button>
+                    <button type="button" onClick={() => setPlanning(c)} className="px-3 py-1.5 rounded-xl bg-emerald-900 text-gold-200 font-bold text-sm">📋 {c.plan ? 'تعديل الخطة' : 'تجهيز الخطة'}</button>
+                    <button type="button" onClick={() => downloadClassCalendarFile(c)} className="px-3 py-1.5 rounded-xl border-2 border-emerald-900/20 font-bold text-sm" title="تضيف الحصة إلى تقويم الهاتف مع تذكير قبلها بيوم">📅 إضافة إلى التقويم</button>
+                    <button type="button" onClick={() => onStartClass(c)} className="px-3 py-1.5 rounded-xl bg-gold-400 text-emerald-950 font-black text-sm">▶ بدء</button>
                     <button type="button" onClick={() => { if (window.confirm('حذف حصة «' + c.title + '»؟')) commit(list.filter((x) => x.id !== c.id)); }} className="px-2 py-1.5 rounded-xl text-rose-700 font-bold text-sm mr-auto">🗑 حذف</button>
                   </div>
                 </div>

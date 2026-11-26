@@ -20,7 +20,7 @@
         return (
           <section className="bg-white rounded-2xl p-5 border-2 border-dashed border-gold-400 text-center space-y-3">
             <p className="font-bold text-emerald-950">لا يوجد عرض جاهز لهذه المحاضرة بعد.</p>
-            <button type="button" onClick={onOpenStudio} className="px-5 py-2 rounded-xl bg-emerald-900 text-gold-200 font-black">🎞️ جهّزي العرض في استوديو الشرائح</button>
+            <button type="button" onClick={onOpenStudio} className="px-5 py-2 rounded-xl bg-emerald-900 text-gold-200 font-black">🎞️ تجهيز العرض في استوديو الشرائح</button>
           </section>
         );
       }
@@ -42,7 +42,7 @@
           </section>
 
           <section className="bg-white rounded-2xl p-4 border-2 border-gold-400/60">
-            <h4 className="font-black text-emerald-900 text-sm mb-1.5">📝 ملاحظاتكِ لهذه الشريحة</h4>
+            <h4 className="font-black text-emerald-900 text-sm mb-1.5">📝 ملاحظات المعلم لهذه الشريحة</h4>
             <p className="whitespace-pre-line leading-loose text-lg text-slate-800 font-amiri">{slide.notes || '—'}</p>
           </section>
 

@@ -21,7 +21,7 @@
           tag.onload = resolve;
           tag.onerror = () => {
             delete loadedScripts[url];
-            reject(new Error('تعذّر تحميل أداة التصدير. تأكدي من الاتصال بالإنترنت ثم حاولي مرة أخرى.'));
+            reject(new Error('تعذّر تحميل أداة التصدير. يلزم الاتصال بالإنترنت، ثم المحاولة مرة أخرى.'));
           };
           document.head.appendChild(tag);
         });
@@ -61,7 +61,7 @@
         slideFontCssPromise = buildSlideFontCss().catch((e) => {
           slideFontCssPromise = null;
           console.warn('Mishkah: slide fonts could not be embedded', e);
-          throw new Error('تعذّر تحميل خطوط الشرائح، فلن تظهر الصور بخطوطها الصحيحة. تأكدي من الاتصال بالإنترنت ثم حاولي مرة أخرى.');
+          throw new Error('تعذّر تحميل خطوط الشرائح، فلن تظهر الصور بخطوطها الصحيحة. يلزم الاتصال بالإنترنت، ثم المحاولة مرة أخرى.');
         });
       }
       return slideFontCssPromise;
@@ -157,5 +157,5 @@
     const DECK_EXPORTS = [
       { id: 'pdf', label: 'ملف PDF', hint: 'للإرسال للطالبات', run: exportDeckAsPdf },
       { id: 'images', label: 'صور (ملف مضغوط)', hint: 'صورة لكل شريحة', run: exportDeckAsImages },
-      { id: 'pptx', label: 'باوربوينت', hint: 'بملاحظاتكِ في ملاحظات المتحدث', run: exportDeckAsPowerPoint }
+      { id: 'pptx', label: 'باوربوينت', hint: 'مع ملاحظات المعلم في ملاحظات المتحدث', run: exportDeckAsPowerPoint }
     ];

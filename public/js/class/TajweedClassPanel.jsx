@@ -131,8 +131,8 @@
     function TajweedTeachingNotes({ lesson }) {
       return (
         <>
-          <TeacherNote title="❓ سؤال تطرحينه على الطالبات" tone="card-islamic-sky border-sky-200">{lesson.teacherPromptAr}</TeacherNote>
-          <TeacherNote title="👂 أخطاء شائعة تنتبهين لها" tone="card-islamic-amber border-gold-300">{lesson.commonMistakesAr}</TeacherNote>
+          <TeacherNote title="❓ سؤال يُطرح على الطلاب" tone="card-islamic-sky border-sky-200">{lesson.teacherPromptAr}</TeacherNote>
+          <TeacherNote title="👂 أخطاء شائعة يُنتبه لها" tone="card-islamic-amber border-gold-300">{lesson.commonMistakesAr}</TeacherNote>
         </>
       );
     }

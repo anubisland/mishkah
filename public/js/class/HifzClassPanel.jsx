@@ -33,7 +33,7 @@
             {planItem && (page < planItem.fromPage || page > planItem.toPage) && (
               <div className="flex flex-wrap items-center gap-2 bg-amber-50 border border-amber-300 rounded-xl p-2 text-sm font-bold text-amber-950">
                 <span className="flex-1">الصفحة المعروضة ({page}) خارج خطة اليوم.</span>
-                <button type="button" className={classPill(true)} onClick={() => ctx.handleNavigateMushafPage(planItem.fromPage)}>ارجعي إلى صفحة {planItem.fromPage}</button>
+                <button type="button" className={classPill(true)} onClick={() => ctx.handleNavigateMushafPage(planItem.fromPage)}>العودة إلى صفحة {planItem.fromPage}</button>
               </div>
             )}
             {planItem ? (
@@ -72,7 +72,7 @@
       const lineMode = ctx.mushafOverlayMode === 'ruler' || ctx.mushafOverlayMode === 'spotlight';
       return (
         <div className="space-y-2">
-          <h5 className="font-black text-emerald-900 text-sm">ما يُخفى عن الطالبات:</h5>
+          <h5 className="font-black text-emerald-900 text-sm">ما يُخفى عن الطلاب:</h5>
           <div className="flex flex-wrap gap-1.5">
             {MUSHAF_MASK_OPTIONS.map((m) => (
               <button key={m.id} type="button" className={classPill(ctx.mushafOverlayMode === m.id)}
@@ -85,7 +85,7 @@
             <div className="flex items-center gap-2">
               <button type="button" className={classPill(false)} onClick={() => ctx.setActiveRulerLine(Math.max(1, ctx.activeRulerLine - 1))}>▲ السطر السابق</button>
               <span className="font-black">السطر {ctx.activeRulerLine} من 15</span>
-              <button type="button" className={classPill(true)} onClick={() => ctx.setActiveRulerLine(Math.min(15, ctx.activeRulerLine + 1))}>▼ اكشفي التالي</button>
+              <button type="button" className={classPill(true)} onClick={() => ctx.setActiveRulerLine(Math.min(15, ctx.activeRulerLine + 1))}>▼ كشف السطر التالي</button>
             </div>
           )}
         </div>
@@ -105,7 +105,7 @@
       const nextHidden = ctx.isFullMasked ? ctx.hifzAyahs.find((a) => !ctx.revealedAyahSet.has(a.num)) : null;
       return (
         <div className="space-y-2">
-          <h5 className="font-black text-emerald-900 text-sm">ما يُخفى عن الطالبات:</h5>
+          <h5 className="font-black text-emerald-900 text-sm">ما يُخفى عن الطلاب:</h5>
           <div className="flex flex-wrap gap-1.5">
             {toggles.map(([value, setter, label]) => (
               <button key={value} type="button" className={classPill(ctx[value])} onClick={() => ctx[setter](!ctx[value])}>{label}</button>
@@ -114,7 +114,7 @@
           </div>
           {nextHidden && (
             <button type="button" className="w-full py-2 rounded-xl bg-emerald-800 text-white font-black" onClick={() => ctx.toggleRevealAyah(nextHidden.num)}>
-              👁️ قرأتها صحيحة: اكشفي الآية {nextHidden.num}
+              👁️ قُرئت صحيحة: كشف الآية {nextHidden.num}
             </button>
           )}
           <h5 className="font-black text-emerald-900 text-sm pt-1">اختبار مقطع:</h5>
@@ -146,7 +146,7 @@
       if (!ctx.hifzAyahs || !ctx.hifzAyahs.length) return null;
       return (
         <section className="bg-[#FFFDF9] rounded-2xl p-4 border-2 border-gold-400/50">
-          <h4 className="font-black text-emerald-900 text-sm mb-2">📜 النص الكامل لكِ وحدكِ{ctx.isFetchingQuran ? ' (جارٍ التحميل…)' : ''}</h4>
+          <h4 className="font-black text-emerald-900 text-sm mb-2">📜 النص الكامل للمعلم فقط{ctx.isFetchingQuran ? ' (جارٍ التحميل…)' : ''}</h4>
           <div className="font-quran text-2xl leading-[2.2] text-right text-black" dir="rtl">
             {ctx.hifzAyahs.map((ayah) => {
               const words = ayah.text.split(' ');
@@ -162,7 +162,7 @@
               );
             })}
           </div>
-          {recitation && <p className="text-xs text-slate-500 mt-2">الأصفر: مخفي عن الطالبات. الباهت: آية مقفلة عندهن.</p>}
+          {recitation && <p className="text-xs text-slate-500 mt-2">الأصفر: مخفي عن الطلاب. الباهت: آية مقفلة عندهم.</p>}
         </section>
       );
     }
@@ -171,7 +171,7 @@
       if (!items || !items.length) return null;
       return (
         <section className="card-islamic-amber rounded-2xl p-4 border border-gold-300">
-          <h4 className="font-black text-emerald-950 text-sm mb-2">⚠️ متشابهات هذه الصفحة: نبّهي الطالبات</h4>
+          <h4 className="font-black text-emerald-950 text-sm mb-2">⚠️ متشابهات هذه الصفحة: للتنبيه عليها</h4>
           <div className="space-y-3">
             {items.map((m, i) => (
               <div key={i} className="text-sm space-y-1">

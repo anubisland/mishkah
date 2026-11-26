@@ -55,26 +55,26 @@
             {/* A small picture of the arrangement: student left, teacher right. */}
             <div className="flex gap-2 h-28 rounded-xl border-2 border-slate-300 p-2 bg-slate-50" dir="ltr">
               <div className="flex-1 rounded-lg bg-emerald-900 text-gold-200 font-black flex flex-col items-center justify-center text-sm">
-                <span>شاشة الطالب</span><span className="text-xs font-bold opacity-80">تشاركينها في زوم</span>
+                <span>شاشة الطالب</span><span className="text-xs font-bold opacity-80">تُشارَك في زوم</span>
               </div>
               <div className="flex-1 rounded-lg bg-gold-100 border-2 border-gold-400 text-emerald-950 font-black flex flex-col items-center justify-center text-sm">
-                <span>مِشكاة (أنتِ)</span><span className="text-xs font-bold opacity-80">الأدوات والملاحظات</span>
+                <span>مِشكاة (المعلم)</span><span className="text-xs font-bold opacity-80">الأدوات والملاحظات</span>
               </div>
             </div>
 
             <div className="text-emerald-950 leading-loose">
-              <p className="font-bold">لتضعي نافذتكِ في النصف الأيمن:</p>
+              <p className="font-bold">لوضع نافذة مِشكاة في النصف الأيمن:</p>
               {mac ? (
-                <p>اضغطي مطولاً على الزر الأخضر أعلى نافذة المتصفح، واختاري «وضع النافذة على يمين الشاشة».</p>
+                <p>بالضغط مطولاً على الزر الأخضر أعلى نافذة المتصفح، ثم اختيار «وضع النافذة على يمين الشاشة».</p>
               ) : (
-                <p>اضغطي على هذه النافذة، ثم اضغطي معاً <kbd className="px-2 py-0.5 rounded bg-slate-200 border font-mono">⊞ Windows</kbd> + <kbd className="px-2 py-0.5 rounded bg-slate-200 border font-mono">→</kbd></p>
+                <p>بالضغط على هذه النافذة، ثم الضغط معاً على <kbd className="px-2 py-0.5 rounded bg-slate-200 border font-mono">⊞ Windows</kbd> + <kbd className="px-2 py-0.5 rounded bg-slate-200 border font-mono">→</kbd></p>
               )}
-              <p className="text-sm text-slate-600 mt-1">وفي زوم: شاركي نافذة «مِشكاة | شاشة الطالب» وحدها.</p>
+              <p className="text-sm text-slate-600 mt-1">وفي زوم: تُشارَك نافذة «مِشكاة | شاشة الطالب» وحدها.</p>
             </div>
 
             <label className="flex items-center gap-2 text-sm text-slate-600">
               <input type="checkbox" checked={dontShow} onChange={(e) => setDontShow(e.target.checked)} />
-              لا تُظهري هذه الرسالة مرة أخرى
+              عدم إظهار هذه الرسالة مرة أخرى
             </label>
             <button type="button" onClick={close} className="w-full py-2.5 rounded-xl bg-emerald-900 text-gold-200 font-black">فهمت</button>
           </div>

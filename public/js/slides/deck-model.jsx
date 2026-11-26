@@ -83,7 +83,7 @@
         ? { text: asText(q.text), source: asText(q.source) }
         : null;
       if (quote && !['ayah', 'hadith', 'closing'].includes(layout)) {
-        say('فيها نص آية أو حديث لا يظهر في نوع «' + SLIDE_LAYOUTS.find((l) => l.id === layout).label + '». غيّري نوعها إلى «آية» أو «حديث» ليظهر');
+        say('فيها نص آية أو حديث لا يظهر في نوع «' + SLIDE_LAYOUTS.find((l) => l.id === layout).label + '». يظهر بتغيير نوعها إلى «آية» أو «حديث»');
       }
       return {
         id: typeof s.id === 'string' && s.id ? s.id : newSlideId(),

@@ -37,7 +37,7 @@
           // Our own messages are in Arabic; anything else is a technical error.
           setExportError(e && e.message && /[؀-ۿ]/.test(e.message)
             ? e.message
-            : 'تعذّر تصدير العرض. حاولي مرة أخرى، وإن تكرر الخطأ فأخبري الدعم الفني.');
+            : 'تعذّر تصدير العرض. يمكن إعادة المحاولة، وإن تكرر الخطأ فيُرجى إبلاغ الدعم الفني.');
         } finally {
           setExporting(null);
         }
@@ -104,12 +104,12 @@
           )}
           {store.loadError && <p className="bg-amber-100 text-amber-900 font-bold text-center py-1">{store.loadError}</p>}
           {mode === 'present' && syncProblem && (
-            <p className="bg-rose-600 text-white font-bold text-center py-1">⚠️ قد لا تتابع شاشة الطالب العرض. أغلقيها وافتحيها من جديد، وتأكدي أن ذاكرة المتصفح غير ممتلئة.</p>
+            <p className="bg-rose-600 text-white font-bold text-center py-1">⚠️ قد لا تتابع شاشة الطالب العرض. الحل: إغلاقها ثم فتحها من جديد، مع التأكد أن ذاكرة المتصفح غير ممتلئة.</p>
           )}
           {importWarnings.length > 0 && (
             <div className="bg-amber-50 border-b-2 border-amber-300 px-4 py-2 text-sm text-amber-950">
               <div className="flex items-center justify-between">
-                <b>تنبيه: أُنشئ العرض، لكن غُيّرت بعض الأجزاء. راجعيها:</b>
+                <b>تنبيه: أُنشئ العرض، لكن غُيّرت بعض الأجزاء، وتحتاج إلى مراجعة:</b>
                 <button type="button" className="font-bold px-2" onClick={() => setImportWarnings([])}>✕</button>
               </div>
               <ul className="list-disc pr-5">{importWarnings.slice(0, 8).map((w, i) => <li key={i}>{w}</li>)}</ul>
@@ -119,7 +119,7 @@
 
           {!slide ? (
             <div className="flex-1 flex items-center justify-center text-emerald-900 font-bold text-lg">
-              لا توجد شرائح بعد. اضغطي «إنشاء من المحاضرة».
+              لا توجد شرائح بعد. البداية من زر «إنشاء من المحاضرة».
             </div>
           ) : mode === 'present' ? (
             <DeckPresenter deck={deck} slide={slide} index={index} go={go} />
@@ -157,7 +157,7 @@
                   </div>
                 )}
               </div>
-              <button type="button" className={btn + ' bg-gold-500 text-emerald-950 border-gold-300'} disabled={!slide} onClick={onPresent}>▶ ابدئي العرض</button>
+              <button type="button" className={btn + ' bg-gold-500 text-emerald-950 border-gold-300'} disabled={!slide} onClick={onPresent}>▶ بدء العرض</button>
             </>
           ) : (
             <>
@@ -202,7 +202,7 @@
                   onEdit={(field, value) => store.updateSlide(slide.id, field, value)} />
               </ScaledSlide>
             </div>
-            <p className="text-sm text-slate-600 mt-2">اضغطي على أي نص في الشريحة لتعديله.</p>
+            <p className="text-sm text-slate-600 mt-2">بالضغط على أي نص في الشريحة يمكن تعديله.</p>
           </div>
 
           <div className="xl:overflow-y-auto bg-white rounded-2xl p-4 border border-emerald-900/10">
@@ -231,7 +231,7 @@
           </div>
           <div className="min-h-0 flex flex-col gap-3">
             <div className="flex-1 min-h-[180px] overflow-y-auto bg-white rounded-2xl p-5 border-2 border-gold-400/60">
-              <h4 className="font-black text-emerald-900 mb-2">📝 ملاحظاتكِ (لا تراها الطالبات)</h4>
+              <h4 className="font-black text-emerald-900 mb-2">📝 ملاحظات المعلم (لا يراها الطلاب)</h4>
               <p className="whitespace-pre-line leading-loose text-lg text-slate-800 font-amiri">{slide.notes || '—'}</p>
             </div>
             {next && (

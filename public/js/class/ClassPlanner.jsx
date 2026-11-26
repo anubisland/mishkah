@@ -42,11 +42,11 @@
             }
             if (useTajweed && lessonIds.length) items.push({ type: 'tajweed', lessonIds: SUWAYD_TAJWEED_CURRICULUM.map((l) => l.id).filter((id) => lessonIds.includes(id)) });
             if (useLecture) {
-              if (!deckReady) throw new Error('لا يوجد عرض جاهز للمحاضرة. جهّزيه أولاً في استوديو الشرائح، أو ألغي اختيار المحاضرة.');
+              if (!deckReady) throw new Error('لا يوجد عرض جاهز للمحاضرة. يُجهَّز أولاً في استوديو الشرائح، أو يُلغى اختيار المحاضرة.');
               items.push({ type: 'lecture', deckTitle: deck.title });
             }
           }
-          if (!items.length) throw new Error('اختاري ما ستشرحينه اليوم أولاً.');
+          if (!items.length) throw new Error('لم يُحدَّد بعدُ ما سيُشرح في هذه الحصة.');
           const next = { createdAt: Date.now(), items };
           const result = await prepareClassPlan(next, (done, total) => setProgress({ done, total }));
           setFailedCount(result.failed.length);
@@ -54,7 +54,7 @@
           setPhase('ready');
         } catch (e) {
           console.warn('Mishkah: class preparation failed', e);
-          setError(e && e.message && /[؀-ۿ]/.test(e.message) ? e.message : 'تعذّر تجهيز الحصة. تأكدي من الاتصال بالإنترنت ثم حاولي مرة أخرى.');
+          setError(e && e.message && /[؀-ۿ]/.test(e.message) ? e.message : 'تعذّر تجهيز الحصة. يلزم الاتصال بالإنترنت، ثم المحاولة مرة أخرى.');
           setPhase('edit');
         }
       };
@@ -78,7 +78,7 @@
                     <span className="block text-sm text-slate-700">{lastPlan.items.map(classPlanItemLabel).join(' • ')}</span>
                   </button>
                 )}
-                <p className="text-sm text-slate-600">ماذا ستشرحين في هذه الحصة؟ يجهّز البرنامج ما تختارينه فقط.</p>
+                <p className="text-sm text-slate-600">ماذا سيُشرح في هذه الحصة؟ يجهّز البرنامج المختار فقط.</p>
 
                 <div className={card(useHifz)}>
                   <label className="flex items-center gap-2 font-black text-emerald-950">
@@ -122,13 +122,13 @@
                   </label>
                   {useLecture && (deck && deck.slides.length
                     ? <p className="text-sm">العرض الجاهز: <b>{deck.title || 'بلا عنوان'}</b> ({deck.slides.length} شريحة)</p>
-                    : <p className="text-sm text-rose-700 font-bold">لا يوجد عرض جاهز. جهّزيه أولاً في استوديو الشرائح من قسم المحاضرات.</p>)}
+                    : <p className="text-sm text-rose-700 font-bold">لا يوجد عرض جاهز. يُجهَّز أولاً في استوديو الشرائح من قسم المحاضرات.</p>)}
                 </div>
 
                 {error && <p className="text-rose-700 font-bold bg-rose-50 border border-rose-200 rounded-xl p-3">{error}</p>}
                 <button type="button" onClick={() => prepare(null)}
                   disabled={!useHifz && !(useTajweed && lessonIds.length) && !(useLecture && deckReady)}
-                  className="w-full py-3 rounded-2xl bg-emerald-900 text-gold-200 font-black text-lg disabled:opacity-40">جهّزي الحصة</button>
+                  className="w-full py-3 rounded-2xl bg-emerald-900 text-gold-200 font-black text-lg disabled:opacity-40">تجهيز الحصة</button>
               </>
             )}
 
@@ -151,9 +151,9 @@
                   </p>
                 )}
                 {mode === 'save' ? (
-                  <button type="button" onClick={() => onSave(plan)} className="w-full py-3 rounded-2xl bg-emerald-900 text-gold-200 font-black text-lg">✓ احفظي الخطة</button>
+                  <button type="button" onClick={() => onSave(plan)} className="w-full py-3 rounded-2xl bg-emerald-900 text-gold-200 font-black text-lg">✓ حفظ الخطة</button>
                 ) : (
-                  <button type="button" onClick={() => onStart(plan)} className="w-full py-3 rounded-2xl bg-gold-400 text-emerald-950 font-black text-lg">▶ ابدئي الحصة الآن</button>
+                  <button type="button" onClick={() => onStart(plan)} className="w-full py-3 rounded-2xl bg-gold-400 text-emerald-950 font-black text-lg">▶ بدء الحصة الآن</button>
                 )}
                 <button type="button" onClick={() => setPhase('edit')} className="w-full py-2 rounded-xl border-2 border-slate-300 font-bold">تعديل الخطة</button>
               </div>

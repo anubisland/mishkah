@@ -146,7 +146,7 @@
             ))}
             <button type="button" onClick={() => setMinimized(true)} className="px-3 py-1.5 rounded-xl text-sm font-bold bg-white/90 text-emerald-950 border-2 border-white" title="البرنامج الكامل، والحصة مستمرة">⚙️ كل الأدوات</button>
             {!ctx.studentScreenOpen && (
-              <button type="button" onClick={ctx.handleOpenStudentPopout} className="px-3 py-1.5 rounded-xl text-sm font-black bg-rose-600 text-white">🖥️ افتحي شاشة الطالب</button>
+              <button type="button" onClick={ctx.handleOpenStudentPopout} className="px-3 py-1.5 rounded-xl text-sm font-black bg-rose-600 text-white">🖥️ فتح شاشة الطالب</button>
             )}
             <button type="button" onClick={onEnd} className="px-3 py-1.5 rounded-xl text-sm font-bold text-gold-200 border-2 border-gold-400/60">■ إنهاء الحصة</button>
           </div>
@@ -161,11 +161,11 @@
               ))}
             </div>
           )}
-          {syncProblem && <p className="bg-rose-600 text-white text-center font-bold py-1 text-sm">⚠️ قد لا تتابع شاشة الطالب. أغلقيها وافتحيها من جديد.</p>}
+          {syncProblem && <p className="bg-rose-600 text-white text-center font-bold py-1 text-sm">⚠️ قد لا تتابع شاشة الطالب. الحل: إغلاقها ثم فتحها من جديد.</p>}
 
           <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3">
             <section ref={previewRef} className="bg-white rounded-2xl p-3 border border-emerald-900/10">
-              <h4 className="font-black text-emerald-900 text-sm mb-2">👁️ ما تراه الطالبات الآن</h4>
+              <h4 className="font-black text-emerald-900 text-sm mb-2">👁️ ما يراه الطلاب الآن</h4>
               <div className="flex justify-center">
                 <StudentPreview stage={stage} width={Math.min(520, Math.max(200, previewWidth - 24))} />
               </div>
@@ -187,7 +187,7 @@
       if (history.length < 2) return null;
       return (
         <section className="bg-white rounded-2xl p-3 border border-emerald-900/10">
-          <h4 className="font-black text-emerald-900 text-sm mb-2">🕘 ما عُرض في الحصة (اضغطي للرجوع إليه)</h4>
+          <h4 className="font-black text-emerald-900 text-sm mb-2">🕘 ما عُرض في الحصة (بالضغط يعود على الشاشتين)</h4>
           <div className="space-y-1 max-h-56 overflow-y-auto">
             {history.slice().reverse().map((entry, i) => (
               <button key={entry.key + i} type="button" onClick={() => onRestore(entry)}

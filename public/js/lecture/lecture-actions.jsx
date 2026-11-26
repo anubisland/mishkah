@@ -725,7 +725,7 @@
             // The old binary .ppt format is not a zip archive and cannot be read here.
             if (ext === '.ppt') {
               throw new Error(isRtl
-                ? 'هذا ملف باوربوينت بالصيغة القديمة (.ppt). افتحيه في باوربوينت واحفظيه بصيغة (.pptx) ثم ارفعيه.'
+                ? 'هذا ملف باوربوينت بالصيغة القديمة (.ppt). الحل: فتحه في باوربوينت وحفظه بصيغة (.pptx) ثم رفعه.'
                 : 'Old .ppt format: open it in PowerPoint, save as .pptx, then upload.');
             }
             // PowerPoint Slide Text Extractor via JSZip

@@ -13,7 +13,7 @@
                           {isRtl ? 'منظومة المراجعة الذاتية التفاعلية وبنك أسئلة المعلم' : 'Interactive Self-Grading Quiz & Teacher Question Bank'}
                         </span>
                         <h2 className="text-xl sm:text-2xl font-extrabold font-cairo text-emerald-950 mt-0.5">
-                          {isRtl ? 'اختبر معلوماتكِ التفاعلية في علوم الشريعة والقرآن' : 'Test Your Knowledge Across All Disciplines'}
+                          {isRtl ? 'اختبار تفاعلي للمعلومات في علوم الشريعة والقرآن' : 'Test Your Knowledge Across All Disciplines'}
                         </h2>
                       </div>
 
@@ -486,7 +486,7 @@
                                 <div className={`mt-3 p-3.5 rounded-xl text-xs font-amiri leading-relaxed ${
                                   isCorrect ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-red-50 text-red-900 border border-red-200'
                                 }`}>
-                                  <strong>{isCorrect ? '✓ إجابة صحيحة بارك الله فيكِ:' : '✗ توضيح الإجابة الصحيحة والتأصيل الشرعي:'}</strong> {isRtl ? q.explanationAr : q.explanationEn}
+                                  <strong>{isCorrect ? '✓ إجابة صحيحة، بارك الله فيك:' : '✗ توضيح الإجابة الصحيحة والتأصيل الشرعي:'}</strong> {isRtl ? q.explanationAr : q.explanationEn}
                                 </div>
                               )}
                             </div>
