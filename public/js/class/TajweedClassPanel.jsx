@@ -11,6 +11,12 @@
       const lessons = planItem ? SUWAYD_TAJWEED_CURRICULUM.filter((l) => planItem.lessonIds.includes(l.id)) : SUWAYD_TAJWEED_CURRICULUM;
       const lessonPos = lessons.findIndex((l) => l.id === lesson.id);
       const nextLesson = lessonPos >= 0 ? lessons[lessonPos + 1] : null;
+      useEffect(() => {
+        if (planItem && lessonPos === -1 && lessons[0]) {
+          ctx.setSuwaydLessonId(lessons[0].id);
+          ctx.setSuwaydZoomSlideIndex(0);
+        }
+      }, [planItem, lessonPos]);
       const go = (i) => {
         if (i > slides.length - 1 && nextLesson) {
           ctx.setSuwaydLessonId(nextLesson.id);

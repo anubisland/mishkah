@@ -9,6 +9,7 @@
       const initTajweed = initial('tajweed');
       const surahs = typeof MUSHAF_SURAHS_PAGE_MAP !== 'undefined' ? MUSHAF_SURAHS_PAGE_MAP : [];
       const deck = useMemo(() => readSavedDeck(), []);
+      const deckReady = !!(deck && deck.slides.length);
 
       const [useHifz, setUseHifz] = useState(initialPlan ? !!initHifz : true);
       const [surahId, setSurahId] = useState(initHifz ? initHifz.surahId : 67);
@@ -40,11 +41,13 @@
               items.push({ type: 'hifz', surahId: surah.id, surahName: 'سورة ' + surah.name, fromAyah: a, toAyah: b, fromPage: pages.fromPage, toPage: pages.toPage });
             }
             if (useTajweed && lessonIds.length) items.push({ type: 'tajweed', lessonIds: SUWAYD_TAJWEED_CURRICULUM.map((l) => l.id).filter((id) => lessonIds.includes(id)) });
-            if (useLecture) items.push({ type: 'lecture', deckTitle: deck ? deck.title : '' });
+            if (useLecture) {
+              if (!deckReady) throw new Error('لا يوجد عرض جاهز للمحاضرة. جهّزيه أولاً في استوديو الشرائح، أو ألغي اختيار المحاضرة.');
+              items.push({ type: 'lecture', deckTitle: deck.title });
+            }
           }
           if (!items.length) throw new Error('اختاري ما ستشرحينه اليوم أولاً.');
           const next = { createdAt: Date.now(), items };
-          if (!saveClassPlan(next)) console.warn('Mishkah: the plan will not be remembered after closing');
           const result = await prepareClassPlan(next, (done, total) => setProgress({ done, total }));
           setFailedCount(result.failed.length);
           setPlan(next);
@@ -124,7 +127,7 @@
 
                 {error && <p className="text-rose-700 font-bold bg-rose-50 border border-rose-200 rounded-xl p-3">{error}</p>}
                 <button type="button" onClick={() => prepare(null)}
-                  disabled={!useHifz && !(useTajweed && lessonIds.length) && !useLecture}
+                  disabled={!useHifz && !(useTajweed && lessonIds.length) && !(useLecture && deckReady)}
                   className="w-full py-3 rounded-2xl bg-emerald-900 text-gold-200 font-black text-lg disabled:opacity-40">جهّزي الحصة</button>
               </>
             )}

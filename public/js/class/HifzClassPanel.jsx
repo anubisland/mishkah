@@ -30,12 +30,18 @@
               <button type="button" className={classPill(recitation)} onClick={() => ctx.handleNavigateMushafPage(page, 'interactive_test')}>🎧 لوحة التسميع</button>
             </div>
 
+            {planItem && (page < planItem.fromPage || page > planItem.toPage) && (
+              <div className="flex flex-wrap items-center gap-2 bg-amber-50 border border-amber-300 rounded-xl p-2 text-sm font-bold text-amber-950">
+                <span className="flex-1">الصفحة المعروضة ({page}) خارج خطة اليوم.</span>
+                <button type="button" className={classPill(true)} onClick={() => ctx.handleNavigateMushafPage(planItem.fromPage)}>ارجعي إلى صفحة {planItem.fromPage}</button>
+              </div>
+            )}
             {planItem ? (
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" className={classPill(false)} disabled={page <= planItem.fromPage} onClick={() => ctx.handleNavigateMushafPage(page - 1)}>→ السابقة</button>
                 <span className="flex-1 text-center font-black text-emerald-950 text-sm">
                   {planItem.surahName} {planItem.fromAyah}–{planItem.toAyah} • صفحة {page}
-                  {planItem.toPage > planItem.fromPage ? ' (' + (page - planItem.fromPage + 1) + ' من ' + (planItem.toPage - planItem.fromPage + 1) + ')' : ''}
+                  {planItem.toPage > planItem.fromPage && page >= planItem.fromPage && page <= planItem.toPage ? ' (' + (page - planItem.fromPage + 1) + ' من ' + (planItem.toPage - planItem.fromPage + 1) + ')' : ''}
                 </span>
                 <button type="button" className={classPill(true)} disabled={page >= planItem.toPage} onClick={() => ctx.handleNavigateMushafPage(page + 1)}>التالية ←</button>
               </div>

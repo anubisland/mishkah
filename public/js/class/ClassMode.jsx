@@ -105,9 +105,9 @@
       // The arrow keys step through pages or slides, as on a clicker.
       const step = (delta) => {
         if (section === 'hifz') {
-          const next = ctx.mushafPageNumber + delta;
-          if (planItem && (next < planItem.fromPage || next > planItem.toPage)) return;
-          ctx.handleNavigateMushafPage(next);
+          let next = ctx.mushafPageNumber + delta;
+          if (planItem) next = Math.max(planItem.fromPage, Math.min(planItem.toPage, next));
+          if (next !== ctx.mushafPageNumber) ctx.handleNavigateMushafPage(next);
         }
         else if (section === 'tajweed') ctx.setSuwaydZoomSlideIndex(Math.max(0, Math.min(ctx.currentZoomSlides.length - 1, ctx.suwaydZoomSlideIndex + delta)));
         else setLectureIndex((i) => Math.max(0, i + delta));

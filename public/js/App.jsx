@@ -1538,6 +1538,8 @@
       // the teacher's class panel, organised around the class plan.
       const beginClass = (plan) => {
         if (!studentScreenOpen) handleOpenStudentPopout();
+        // "Continue the last class plan" offers what she actually taught last.
+        if (plan && !saveClassPlan(plan)) showToast('تنبيه: لن تُحفظ خطة هذه الحصة لاستعمالها مرة أخرى (ذاكرة المتصفح ممتلئة).');
         if (!['hifz', 'tajweed', 'islamic'].includes(activeTab)) setActiveTab('hifz');
         setClassPlan(plan || null);
         setMyClassesOpen(false);
@@ -1548,7 +1550,10 @@
       // its plan; otherwise the teacher says first what this class covers.
       const handleStartClass = () => {
         const now = Date.now();
-        const due = upcomingClasses(loadClassSchedule(), now).find((c) => c.plan && Math.abs(new Date(c.at).getTime() - now) <= 2 * 60 * 60 * 1000);
+        const window2h = 2 * 60 * 60 * 1000;
+        const due = loadClassSchedule()
+          .filter((c) => c.plan && Math.abs(new Date(c.at).getTime() - now) <= window2h)
+          .sort((a, b) => Math.abs(new Date(a.at).getTime() - now) - Math.abs(new Date(b.at).getTime() - now))[0];
         if (due) beginClass(due.plan);
         else setPlanNowFor({ title: '' });
       };

@@ -7,7 +7,12 @@
       const [saveError, setSaveError] = useState(null);
       const [planning, setPlanning] = useState(null); // the class whose plan is open
       const [title, setTitle] = useState('');
-      const [day, setDay] = useState(() => new Date(Date.now() + 86400000).toISOString().slice(0, 10));
+      // Tomorrow in the teacher's own time zone (toISOString would give UTC).
+      const [day, setDay] = useState(() => {
+        const t = new Date(Date.now() + 86400000);
+        return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+      });
+      const [addError, setAddError] = useState(null);
       const [time, setTime] = useState('17:00');
 
       const commit = (next) => {
@@ -17,7 +22,13 @@
 
       const addClass = () => {
         if (!title.trim() || !day || !time) return;
-        const at = new Date(day + 'T' + time).toISOString();
+        const when = new Date(day + 'T' + time);
+        if (when.getTime() < Date.now()) {
+          setAddError('هذا الموعد مضى. اختاري يوماً وساعة قادمين.');
+          return;
+        }
+        setAddError(null);
+        const at = when.toISOString();
         commit(list.concat([{ id: 'c' + Date.now().toString(36), title: title.trim(), at, plan: null, preparedAt: null }]));
         setTitle('');
       };
@@ -43,6 +54,7 @@
                 <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="border-2 border-emerald-900/15 rounded-xl px-2 py-1.5" />
                 <button type="button" onClick={addClass} disabled={!title.trim()} className="px-4 py-1.5 rounded-xl bg-emerald-900 text-gold-200 font-black disabled:opacity-40">أضيفي</button>
               </div>
+              {addError && <p className="text-rose-700 font-bold text-sm">{addError}</p>}
             </section>
 
             {upcoming.length === 0 && <p className="text-center text-slate-600 py-4">لا توجد حصص قادمة. أضيفي حصتكِ القادمة لتجهّزي خطتها من الآن.</p>}
