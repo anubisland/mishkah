@@ -1,15 +1,10 @@
-    // The program's header: one calm row. The brand, five places to go, one
-    // primary action (start a class) and a settings menu for everything that
-    // is set once: text size, interface font, language, the guide, security,
-    // and updates.
+    // The program's identity bar: the name, large, with one line saying what
+    // the program is; and on the other side the two actions that never change
+    // with the page: start a class, and settings. Moving between sections is
+    // the sidebar's job (AppSidebar.jsx).
 
-    const APP_SECTIONS = [
-      { id: 'dashboard', icon: '🏠', ar: 'الرئيسية', en: 'Home' },
-      { id: 'classes', icon: '📅', ar: 'حصصي', en: 'My classes' },
-      { id: 'hifz', icon: '🕋', ar: 'التحفيظ', en: 'Hifz' },
-      { id: 'tajweed', icon: '📖', ar: 'التجويد', en: 'Tajweed' },
-      { id: 'islamic', icon: '🕌', ar: 'المحاضرات', en: 'Lectures' }
-    ];
+    const APP_TAGLINE_AR = 'منصة المعلّم لتحفيظ القرآن الكريم وتجويده وتدريس العلوم الشرعية';
+    const APP_TAGLINE_EN = 'The teacher\'s platform for Quran memorisation, tajweed and Islamic studies';
 
     // Empties the app's own caches (the saved Quran pages are kept) and reloads.
     function forceRefreshApp() {
@@ -28,40 +23,24 @@
 
     function AppHeader({ s }) {
       const [settingsOpen, setSettingsOpen] = useState(false);
-      const label = (sec) => (s.isRtl ? sec.ar : sec.en);
       return (
         <header className="emerald-pattern text-white border-b-2 border-gold-400 shadow-md relative z-40">
-          <div className="max-w-7xl mx-auto px-3 sm:px-5 h-14 flex items-center gap-2 sm:gap-4">
-            <button type="button" onClick={() => s.navigate('dashboard')} className="flex items-center gap-2 shrink-0" title={s.isRtl ? 'الرئيسية' : 'Home'}>
-              <img src="icons/mishkah-app-icon.jpg" alt="" className="w-9 h-9 rounded-lg border border-gold-400" />
-              <span className="font-amiri font-bold text-gold-200 text-2xl leading-none">{s.isRtl ? 'مِشكاة' : 'Mishkah'}</span>
+          <div className="px-3 sm:px-6 py-3 flex items-center gap-3 sm:gap-4">
+            <button type="button" onClick={() => s.navigate('dashboard')} className="flex items-center gap-3 min-w-0 text-right" title={s.isRtl ? 'الرئيسية' : 'Home'}>
+              <img src="icons/mishkah-app-icon.jpg" alt="" className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border-2 border-gold-400 shrink-0" />
+              <span className="min-w-0">
+                <span className="block font-amiri font-bold text-gold-200 leading-none text-[2rem] sm:text-[2.6rem]">{s.isRtl ? 'مِشكاة' : 'Mishkah'}</span>
+                <span className="block text-emerald-100/90 text-xs sm:text-sm font-bold mt-1 truncate">{s.isRtl ? APP_TAGLINE_AR : APP_TAGLINE_EN}</span>
+              </span>
             </button>
-
-            <nav className="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto scrollbar-none">
-              {APP_SECTIONS.map((sec) => {
-                const active = sec.id === 'classes' ? s.myClassesOpen : (s.activeTab === sec.id && !s.myClassesOpen);
-                return (
-                  <button key={sec.id} type="button" onClick={() => s.navigate(sec.id)}
-                    className={'relative shrink-0 px-2.5 sm:px-3 py-1.5 rounded-lg font-bold text-sm sm:text-base transition flex items-center gap-1.5 ' +
-                      (active ? 'bg-white/15 text-gold-200 shadow-[inset_0_-3px_0_0_#fbbf24]' : 'text-emerald-50 hover:bg-white/10')}>
-                    <span className="hidden md:inline">{sec.icon}</span>
-                    <span>{label(sec)}</span>
-                    {sec.id === 'classes' && s.unplannedCount > 0 && (
-                      <span className="absolute -top-1 -left-1 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-emerald-950 text-[11px] font-black flex items-center justify-center"
-                        title={s.isRtl ? 'حصص قريبة لم تُجهَّز خطتها' : 'Upcoming classes without a plan'}>{s.unplannedCount}</span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-
+            <span className="flex-1" />
             <button type="button" onClick={s.onStartClass}
-              className="shrink-0 px-3 sm:px-4 py-2 rounded-xl bg-gold-400 hover:bg-gold-300 text-emerald-950 font-black text-sm sm:text-base shadow">
+              className="shrink-0 px-3 sm:px-5 py-2.5 rounded-xl bg-gold-400 hover:bg-gold-300 text-emerald-950 font-black text-sm sm:text-base shadow">
               ▶ <span className="hidden sm:inline">{s.isRtl ? 'بدء الحصة' : 'Start class'}</span>
             </button>
             <div className="relative shrink-0">
               <button type="button" onClick={() => setSettingsOpen(!settingsOpen)} aria-label={s.isRtl ? 'الإعدادات' : 'Settings'}
-                className={'w-10 h-10 rounded-xl text-xl flex items-center justify-center transition ' + (settingsOpen ? 'bg-white/20' : 'hover:bg-white/10')}>⚙️</button>
+                className={'w-11 h-11 rounded-xl text-2xl flex items-center justify-center transition ' + (settingsOpen ? 'bg-white/20' : 'hover:bg-white/10')}>⚙️</button>
               {settingsOpen && <SettingsMenu s={s} onClose={() => setSettingsOpen(false)} />}
             </div>
           </div>

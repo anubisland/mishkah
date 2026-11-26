@@ -1237,16 +1237,16 @@
 
       // Load initial pre-loaded demo lessons
       useEffect(() => {
-        handleLoadDemoTajweed();
+        handleLoadDemoTajweed({ silent: true }); // quietly, on startup
         // // // handleLoadDemoIslamic(); - Clean slate on startup - Clean slate on startup - Clean slate on startup
       }, []);
 
       // Handlers to load Pre-loaded Demo Lessons instantly
-      function handleLoadDemoTajweed() {
+      function handleLoadDemoTajweed(options) {
         setTajweedData(getFallbackTajweed());
         setQuizAnswers({});
         setQuizSubmitted(false);
-        showToast(isRtl ? 'تم تحميل درس التجويد التجريبي الجاهز (سورة الملك) ⚡' : 'Pre-loaded Tajweed Demo Lesson Loaded (Al-Mulk) ⚡');
+        if (!(options && options.silent)) showToast(isRtl ? 'تم تحميل درس التجويد التجريبي الجاهز (سورة الملك) ⚡' : 'Pre-loaded Tajweed Demo Lesson Loaded (Al-Mulk) ⚡');
       }
 
 
@@ -1625,7 +1625,10 @@
           )}
 
           {/* MAIN WORKSPACE BODY */}
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+          {/* The sections menu beside the page content. */}
+          <div className="flex-1 flex items-stretch">
+          <AppSidebar s={headerCtx} />
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 min-w-0 w-full">
 
             {/* ================= VIEW: DASHBOARD ================= */}
             {activeTab === 'dashboard' && <HomeTab h={homeCtx} />}
@@ -1803,6 +1806,7 @@
             {/* ================= VIEW: INTERACTIVE SELF-GRADING QUIZ & TEACHER QUESTION BANK ================= */}
             {activeTab === 'quiz' && <QuizTab {...{ activeQuizQuestions, editingQuizQuestionId, handleClearQuizQuestions, handleDeleteQuizQuestion, handleResetQuizQuestions, handleSaveQuizQuestion, handleSwitchQuizBranch, handleTransferLectureToQuiz, isAddingQuizQuestion, isRtl, islamicData, quizAnswers, quizBranch, quizIslamicCategory, quizMode, quizQuestionForm, quizScore, quizSubmitted, setEditingQuizQuestionId, setIsAddingQuizQuestion, setQuizAnswers, setQuizMode, setQuizQuestionForm, setQuizSubmitted }} />}
           </main>
+          </div>
 
           {/* ================= FULLSCREEN PRESENTATION OVERLAY (Strict Viewport-Fit 16:9, Zero Cropping) ================= */}
           {isFullscreenZoom && (presentationTarget === 'islamic' ? islamicData : tajweedData) && (
