@@ -13,7 +13,7 @@
   <meta http-equiv="Expires" content="0" />
   <script>
     (function() {
-      const CURRENT_VER = '81.2';
+      const CURRENT_VER = '81.3';
       const p = new URLSearchParams(window.location.search);
       if (p.get('v') !== CURRENT_VER && !window.location.search.includes('mode=student-display')) {
         const u = new URL(window.location.href);
@@ -8018,15 +8018,15 @@
           s = s.replace(/\s+(?:من|إلى|عن|على|في|مع|بين|أن|إن|بأن|حيث|كما|إذ|دون|و|أو|التي|الذي|الذين|ما|لا|كل|عند|قبل|بعد|نحو|ضد|مثل|غير|أثر|اول)\s*$/, '').trim();
           s = s.replace(/[:：,،؛\s]+$/, '').trim();
 
-          if (s.length > 110) {
-            const commaPos = s.substring(0, 105).lastIndexOf('،');
-            const andPos = s.substring(0, 105).lastIndexOf(' و');
-            const cutPos = commaPos > 40 ? commaPos : (andPos > 45 ? andPos : s.substring(0, 100).lastIndexOf(' '));
-            if (cutPos > 35) {
-              s = s.substring(0, cutPos).trim();
-              s = s.replace(/\s+(?:من|إلى|عن|على|في|مع|بين|أن|إن|بأن|حيث|كما|إذ|دون|و|أو|التي|الذي|الذين|ما|لا|كل|عند|قبل|بعد|نحو|ضد|مثل|غير|أثر|اول)\s*$/, '').trim();
-              s = s.replace(/[:：,،؛\s]+$/, '').trim();
+          // Preserve complete thoughts and grammatical integrity
+          if (s.length > 300) {
+            const dotPos = s.substring(0, 280).lastIndexOf('.');
+            const qPos = s.substring(0, 280).lastIndexOf('؟');
+            const stopPos = dotPos > 80 ? dotPos : (qPos > 80 ? qPos : -1);
+            if (stopPos > 60) {
+              s = s.substring(0, stopPos + 1).trim();
             }
+          }
           }
           return s;
         };
@@ -8852,26 +8852,19 @@
         setIsExportingPptx(true);
         try {
           const pptx = new PptxGenJS();
-          pptx.layout = 'LAYOUT_16x9';
+          // Define standard 16:9 HD widescreen dimensions
+          pptx.defineLayout({ name: 'WIDE_13_3', width: 13.333, height: 7.5 });
+          pptx.layout = 'WIDE_13_3';
 
           const topic = (islamicData.metadata && islamicData.metadata.topic) || 'المحاضرة الشرعية والتأصيل العلمي';
           const cleanTopic = cleanSlideTitle(topic);
           const category = (islamicData.metadata && islamicData.metadata.category) || 'العلوم الشرعية والعقيدة';
-          const audience = (islamicData.metadata && islamicData.metadata.audience) || 'الدارسين والحلقة التأصيلية';
 
-          // Helper to split verse text and citation cleanly to prevent BiDi bracket corruptions
-          const splitScripture = (sc) => {
-            if (!sc) return { text: '', citation: '' };
-            let text = sc.toString().trim();
-            let citation = '';
-            const bracketMatch = text.match(/\[([^\]]+)\]$/) || text.match(/\(([^)]+)\)$/);
-            if (bracketMatch) {
-              citation = bracketMatch[1].trim();
-              text = text.replace(bracketMatch[0], '').trim();
-            }
-            text = text.replace(/^[«"“\s]+|[»"”\s]+$/g, '').trim();
-            return { text: text ? `« ${text} »` : '', citation };
-          };
+          // Distinctive Serene Islamic Card Themes
+          const THEME_HONEY = { bg: 'FFF9EE', border: 'C69214', title: '92400E', badge: 'C69214' };
+          const THEME_SAGE = { bg: 'EAF4EE', border: '123329', title: '123329', badge: '047857' };
+          const THEME_SKY = { bg: 'EEF6FB', border: '2563EB', title: '1E40AF', badge: '2563EB' };
+          const THEME_LAVENDER = { bg: 'F7EEFB', border: '7C3AED', title: '6D28D9', badge: '7C3AED' };
 
           const slidesData = (islamicData.zoomCards && islamicData.zoomCards.length > 0)
             ? islamicData.zoomCards
@@ -8887,7 +8880,7 @@
             let arch = s.archetype;
             const tLower = slideTitleText.toLowerCase();
 
-            // Dynamic Archetype Classifier (Honors s.archetype if set, otherwise deduces from content)
+            // Archetype Classifier
             if (!arch || arch === 'standard') {
               if (idx === 0) arch = 'cover';
               else if ((s.hasTable && Array.isArray(s.tableData) && s.tableData.length > 0) || (Array.isArray(s.tableData) && s.tableData.length > 0) || tLower.includes('أوجه التفريق') || tLower.includes('مصفوفة')) arch = 'table';
@@ -8900,318 +8893,241 @@
               else arch = (idx % 2 === 0) ? 'contrast_2col' : 'concept_breakdown';
             }
 
-            // ================= ARCHETYPE 1: COVER SLIDE =================
+            // Slide Background
+            slide.background = { color: (arch === 'cover' || arch === 'closing' || idx === slidesData.length - 1) ? '0B2E24' : 'FAF7F2' };
+
+            // Top Gold Trim
+            slide.addShape(pptx.ShapeType.rect, {
+              x: 0, y: 0, w: 13.333, h: 0.12,
+              fill: { color: 'C69214' }, line: { color: 'C69214' }
+            });
+
+            // Slide Footer
+            slide.addText(`مِشكاة — نظام التشغيل الشرعي | المحاضرة: ${cleanTopic} | شريحة ${idx + 1} من ${slidesData.length}`, {
+              x: 0.8, y: 7.05, w: 11.733, h: 0.35,
+              fontSize: 10, fontFace: 'Cairo', color: (arch === 'cover' || idx === slidesData.length - 1) ? 'FDE68A' : '64748B', align: 'right', rtlMode: true
+            });
+
+            // ================= 1. COVER SLIDE =================
             if (arch === 'cover') {
-              slide.background = { color: '123329' };
-
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 6.0, y: 0.6, w: 3.2, h: 0.45,
-                fill: { color: '0A231C' }, line: { color: 'D97706', width: 1.2 }
+              slide.addText('العقيدة الإسلامية — تأصيل اليقين • مِشكاة', {
+                x: 1.0, y: 1.8, w: 11.333, h: 0.6,
+                fontSize: 20, fontFace: 'Cairo', color: 'C69214', bold: true, align: 'center', rtlMode: true
               });
-              slide.addText('منظومة مِشكاة للتعليم الشرعي • AnubisLand', {
-                x: 6.0, y: 0.6, w: 3.2, h: 0.45,
-                fontSize: 10, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'center', rtlMode: true
-              });
-
               slide.addText(slideTitleText, {
-                x: 0.8, y: 1.3, w: 8.4, h: 1.2,
-                fontSize: 26, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'right', rtlMode: true
+                x: 1.0, y: 2.5, w: 11.333, h: 1.5,
+                fontSize: 44, fontFace: 'Cairo', color: 'FFFFFF', bold: true, align: 'center', rtlMode: true
               });
-
-              const sub = bullets[0] || 'تأصيل توحيد الربوبية وتوحيد الألوهية وبناء اليقين';
-              slide.addText(sub, {
-                x: 0.8, y: 2.5, w: 8.4, h: 0.5,
-                fontSize: 14, fontFace: 'Arial', color: '86EFAC', align: 'right', rtlMode: true
+              const subCover = bullets[0] || 'تأصيل توحيد الربوبية وتوحيد الألوهية وبناء اليقين';
+              slide.addText(subCover, {
+                x: 1.0, y: 4.1, w: 11.333, h: 0.8,
+                fontSize: 22, fontFace: 'Cairo', color: 'FDE68A', align: 'center', rtlMode: true
               });
-
-              slide.addShape(pptx.ShapeType.line, {
-                x: 0.8, y: 3.1, w: 8.4, h: 0,
-                line: { color: 'C69214', width: 2.0 }
-              });
-
-              const roadmapText = bullets.slice(1).join('   •   ') || 'توحيد الربوبية • توحيد الألوهية • بيان نواقض التوحيد • التحصين العملي';
               slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.8, y: 3.3, w: 8.4, h: 0.9,
-                fill: { color: '0E2A22' }, line: { color: 'C69214', width: 1.0 }
-              });
-              slide.addText('محاور الرحلة التأصيلية:\n' + roadmapText, {
-                x: 1.0, y: 3.35, w: 8.0, h: 0.8,
-                fontSize: 11, fontFace: 'Arial', color: 'E2E8F0', align: 'right', rtlMode: true
-              });
-
-              slide.addText('منصة مِشكاة للتعليم الشرعي والقرآني — مؤسسة AnubisLand للحلول الرقمية', {
-                x: 0.8, y: 4.8, w: 8.4, h: 0.4,
-                fontSize: 10, fontFace: 'Arial', color: '94A3B8', align: 'right', rtlMode: true
-              });
-
-            // ================= ARCHETYPE 2: SOURCES & REFERENCES =================
-            } else if (arch === 'sources') {
-              slide.background = { color: 'F6F1E7' };
-
-              slide.addText(slideTitleText, {
-                x: 0.8, y: 0.4, w: 8.4, h: 0.5,
-                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addText('على أي أساس نبني هذا الدرس؟ ركائز التلقي والأصول المعتمدة', {
-                x: 0.8, y: 0.95, w: 8.4, h: 0.35,
-                fontSize: 11, fontFace: 'Arial', color: 'B45309', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addShape(pptx.ShapeType.line, {
-                x: 0.8, y: 1.3, w: 8.4, h: 0,
-                line: { color: 'C69214', width: 1.5 }
-              });
-
-              const bookCards = [
-                { title: '«ثلاثة الأصول وأدلتها»', author: 'للإمام محمد بن عبد الوهاب', role: 'باب معرفة العبد ربه بالأدلة النقلية والعقلية' },
-                { title: '«نبذة في العقيدة الإسلامية»', author: 'للشيخ العلامة محمد بن عثيمين', role: 'تحرير دقيق لركائز الربوبية والألوهية وضوابطها' },
-                { title: '«منهج أكاديمية زاد»', author: 'نخبة من أساتذة العقيدة', role: 'الربط التربوي المعاصر ومخاطبة العقل الحديث' }
-              ];
-
-              const colW = 2.65;
-              const gap = 0.22;
-              [0, 1, 2].forEach(cIdx => {
-                const posX = 0.8 + ((2 - cIdx) * (colW + gap));
-                const b = bookCards[cIdx];
-
-                slide.addShape(pptx.ShapeType.roundRect, {
-                  x: posX, y: 1.5, w: colW, h: 3.4,
-                  fill: { color: 'FFFFFF' }, line: { color: 'C69214', width: 1.5 }
-                });
-
-                slide.addShape(pptx.ShapeType.roundRect, {
-                  x: posX + 0.15, y: 1.7, w: colW - 0.3, h: 0.7,
-                  fill: { color: '123329' }, line: { color: 'D97706', width: 1.0 }
-                });
-                slide.addText(b.title, {
-                  x: posX + 0.2, y: 1.75, w: colW - 0.4, h: 0.6,
-                  fontSize: 12, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'center', rtlMode: true
-                });
-
-                slide.addText(b.author, {
-                  x: posX + 0.15, y: 2.55, w: colW - 0.3, h: 0.45,
-                  fontSize: 11, fontFace: 'Arial', color: '047857', bold: true, align: 'center', rtlMode: true
-                });
-
-                slide.addShape(pptx.ShapeType.line, {
-                  x: posX + 0.3, y: 3.1, w: colW - 0.6, h: 0,
-                  line: { color: 'E2E8F0', width: 1.0 }
-                });
-
-                slide.addText(b.role, {
-                  x: posX + 0.2, y: 3.3, w: colW - 0.4, h: 1.4,
-                  fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'center', rtlMode: true
-                });
-              });
-
-            // ================= ARCHETYPE 3: STORY / NARRATIVE / THOUGHT EXPERIMENT =================
-            } else if (arch === 'story') {
-              slide.background = { color: 'F6F1E7' };
-
-              slide.addText(slideTitleText, {
-                x: 0.8, y: 0.4, w: 8.4, h: 0.5,
-                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addShape(pptx.ShapeType.line, {
-                x: 0.8, y: 0.95, w: 8.4, h: 0,
-                line: { color: 'C69214', width: 1.5 }
-              });
-
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.8, y: 1.15, w: 8.4, h: 1.85,
+                x: 1.5, y: 5.1, w: 10.333, h: 1.2,
                 fill: { color: '123329' }, line: { color: 'C69214', width: 1.5 }
               });
-
-              slide.addText('«تأمل تدبري ومسلك معرفي»', {
-                x: 1.0, y: 1.25, w: 8.0, h: 0.35,
-                fontSize: 11, fontFace: 'Arial', color: 'D97706', bold: true, align: 'right', rtlMode: true
+              const outlineBullets = bullets.slice(1).join(' • ') || 'معرفة العبد ربه • أدلة الربوبية • حقيقة الألوهية • ثمار التوحيد في الدارين';
+              slide.addText(outlineBullets, {
+                x: 1.6, y: 5.2, w: 10.133, h: 1.0,
+                fontSize: 16, fontFace: 'Cairo', color: 'FFFFFF', align: 'center', rtlMode: true
               });
 
-              // Intelligent full story restoration (prevents headless sentences)
-              let storyText = bullets[0] || '';
-              if (!storyText || storyText.startsWith('ينطلق') || storyText.length < 40) {
-                storyText = (s.notes && s.notes.includes('قطار'))
-                  ? s.notes
-                  : 'تخيّل أن إنساناً استيقظ في قطار فائق السرعة ينطلق به عبر أودية وجبال لا يعرفها؛ لن يسأل عن لون المقاعد ولا عن نوع الطعام، بل السؤال البديهي الذي يفرض نفسه: من الذي يقود هذا القطار؟ ومن الذي وضعني فيه؟ وإلى أين يتجه بي؟';
-              }
-              slide.addText(storyText, {
-                x: 1.0, y: 1.6, w: 8.0, h: 1.3,
-                fontSize: 11, fontFace: 'Arial', color: 'FEF3C7', align: 'right', rtlMode: true
+            // ================= 2. SOURCES (3 Soft Distinct Cards) =================
+            } else if (arch === 'sources') {
+              slide.addText('المصادر العلمية المعتمدة', {
+                x: 0.8, y: 0.45, w: 11.733, h: 0.4,
+                fontSize: 14, fontFace: 'Cairo', color: 'C69214', bold: true, align: 'right', rtlMode: true
               });
-
-              const cardW = 4.05;
-
-              // Right Card (Question / Point)
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 5.15, y: 3.15, w: cardW, h: 1.8,
-                fill: { color: 'FFFFFF' }, line: { color: '047857', width: 1.5 }
-              });
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 5.25, y: 3.25, w: cardW - 0.2, h: 0.35,
-                fill: { color: 'E8F5E9' }, line: { color: '81C784', width: 0.8 }
-              });
-              slide.addText('السؤال الأول الذي يحدد مصير الإنسان', {
-                x: 5.3, y: 3.25, w: cardW - 0.3, h: 0.35,
-                fontSize: 10, fontFace: 'Arial', color: '1B5E20', bold: true, align: 'right', rtlMode: true
-              });
-              const qText = bullets[1] || 'من خلق هذا الكون العظيم؟ وما الغاية من خلقي؟ وما مصيري الحتمي بعد الموت؟ هذه هي أسئلة المصير التي تتوقف عليها سعادة الإنسان الأبدية.';
-              slide.addText(qText, {
-                x: 5.3, y: 3.7, w: cardW - 0.3, h: 1.15,
-                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
-              });
-
-              // Left Card (Pedagogical Application)
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.8, y: 3.15, w: cardW, h: 1.8,
-                fill: { color: 'FFFFFF' }, line: { color: 'B45309', width: 1.5 }
-              });
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.9, y: 3.25, w: cardW - 0.2, h: 0.35,
-                fill: { color: 'FEF3C7' }, line: { color: 'FCD34D', width: 0.8 }
-              });
-              slide.addText('المسلك المنهجي والمخرج الشرعي', {
-                x: 0.95, y: 3.25, w: cardW - 0.3, h: 0.35,
-                fontSize: 10, fontFace: 'Arial', color: '92400E', bold: true, align: 'right', rtlMode: true
-              });
-              const appText = bullets[2] || 'الانشغال بزخارف الدنيا وتوافه المسائل مع الغفلة عن الإجابة الحقيقية على هذه الأسئلة الكبرى هو عين الحرمان والخسران المبين.';
-              slide.addText(appText, {
-                x: 0.95, y: 3.7, w: cardW - 0.3, h: 1.15,
-                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
-              });
-
-            // ================= ARCHETYPE 4: DUAL CONTRAST (2 COLUMNS) =================
-            } else if (arch === 'contrast_2col') {
-              slide.background = { color: 'F6F1E7' };
-
               slide.addText(slideTitleText, {
-                x: 0.8, y: 0.4, w: 8.4, h: 0.5,
-                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addText('تحرير محل النزاع وتحديد الفروق الشرعية بدقة علمية', {
-                x: 0.8, y: 0.95, w: 8.4, h: 0.35,
-                fontSize: 11, fontFace: 'Arial', color: 'B45309', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addShape(pptx.ShapeType.line, {
-                x: 0.8, y: 1.3, w: 8.4, h: 0,
-                line: { color: 'C69214', width: 1.5 }
+                x: 0.8, y: 0.9, w: 11.733, h: 0.75,
+                fontSize: 24, fontFace: 'Cairo', color: '123329', bold: true, align: 'right', rtlMode: true
               });
 
-              const colW = 4.05;
+              const srcList = [
+                { badge: 'المصدر الأول', title: '«ثلاثة الأصول وأدلتها»', author: 'للإمام محمد بن عبد الوهاب رحمه الله', focus: 'باب: معرفة العبد ربه بالأدلة والبراهين الصريحة من الكتاب والسنة وفطرة الإنسان.', thm: THEME_HONEY },
+                { badge: 'المصدر الثاني', title: '«نبذة في العقيدة الإسلامية»', author: 'للشيخ محمد بن صالح العثيمين رحمه الله', focus: 'باب: الإيمان بالله — تفصيل ركائز الربوبية وإفراد الألوهية ومقتضى التوحيد.', thm: THEME_SAGE },
+                { badge: 'المصدر الثالث', title: 'منهج العقيدة — أكاديمية زاد', author: 'المنهج التأسيسي للشيخ محمد صالح المنجد', focus: 'مقرر «العقيدة الإسلامية» — بناء اليقين العقدي والتصور الشامل للوجود والتحرر من الشرك.', thm: THEME_SKY }
+              ];
 
-              // Intelligent Dynamic Column Titles & Body Extraction
-              let titleA = '١. الوجه الأول / الأصل المقابل';
+              const cardW = 3.65;
+              const gap = 0.39;
+              [0, 1, 2].forEach(i => {
+                const posX = 0.8 + ((2 - i) * (cardW + gap));
+                const item = srcList[i];
+                slide.addShape(pptx.ShapeType.roundRect, {
+                  x: posX, y: 1.95, w: cardW, h: 4.8,
+                  fill: { color: item.thm.bg }, line: { color: item.thm.border, width: 1.5 }
+                });
+                slide.addText(item.badge, {
+                  x: posX + 0.3, y: 2.2, w: cardW - 0.6, h: 0.35,
+                  fontSize: 14, fontFace: 'Cairo', color: item.thm.badge, bold: true, align: 'right', rtlMode: true
+                });
+                slide.addText(item.title, {
+                  x: posX + 0.3, y: 2.65, w: cardW - 0.6, h: 0.5,
+                  fontSize: 21, fontFace: 'Cairo', color: item.thm.title, bold: true, align: 'right', rtlMode: true
+                });
+                slide.addText(item.author, {
+                  x: posX + 0.3, y: 3.25, w: cardW - 0.6, h: 0.45,
+                  fontSize: 15, fontFace: 'Cairo', color: '047857', bold: true, align: 'right', rtlMode: true
+                });
+                slide.addText(item.focus, {
+                  x: posX + 0.3, y: 3.8, w: cardW - 0.6, h: 2.5,
+                  fontSize: 16, fontFace: 'Traditional Arabic', color: '1E293B', align: 'right', rtlMode: true
+                });
+              });
+
+            // ================= 3. STORY / THOUGHT EXPERIMENT (4 Soft Cards) =================
+            } else if (arch === 'story') {
+              slide.addText('مقدمة: تأمل تدبري ومدخل وجودي', {
+                x: 0.8, y: 0.45, w: 11.733, h: 0.4,
+                fontSize: 14, fontFace: 'Cairo', color: 'C69214', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText(slideTitleText, {
+                x: 0.8, y: 0.9, w: 11.733, h: 0.75,
+                fontSize: 24, fontFace: 'Cairo', color: '123329', bold: true, align: 'right', rtlMode: true
+              });
+
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.8, y: 1.65, w: 11.733, h: 0.85,
+                fill: { color: 'FFF9EE' }, line: { color: 'C69214', width: 1.0 }
+              });
+              const premise = bullets[0] || 'تخيّل أنك استيقظت في قطار فائق السرعة ينطلق بك عبر أودية وجبال لا تعرفها. لن تسأل عن لون المقاعد ولا عن نوع الطعام، بل ستسأل فوراً:';
+              slide.addText(premise, {
+                x: 1.0, y: 1.7, w: 11.333, h: 0.75,
+                fontSize: 17, fontFace: 'Traditional Arabic', color: '1E293B', bold: true, align: 'right', rtlMode: true
+              });
+
+              const qList = [
+                { num: '١', q: 'من الذي يقود هذا القطار؟', thm: THEME_HONEY },
+                { num: '٢', q: 'من الذي وضعني فيه؟', thm: THEME_SAGE },
+                { num: '٣', q: 'إلى أين يتجه بي؟', thm: THEME_SKY },
+                { num: '٤', q: 'ما المطلوب مني أثناء الرحلة؟', thm: THEME_LAVENDER }
+              ];
+              const qW = 2.75;
+              const qGap = 0.24;
+              [0, 1, 2, 3].forEach(i => {
+                const posX = 0.8 + ((3 - i) * (qW + qGap));
+                const item = qList[i];
+                slide.addShape(pptx.ShapeType.roundRect, {
+                  x: posX, y: 2.65, w: qW, h: 2.3,
+                  fill: { color: item.thm.bg }, line: { color: item.thm.border, width: 1.5 }
+                });
+                slide.addText(item.num, {
+                  x: posX, y: 2.85, w: qW, h: 0.5,
+                  fontSize: 26, fontFace: 'Cairo', color: item.thm.badge, bold: true, align: 'center', rtlMode: true
+                });
+                slide.addText(item.q, {
+                  x: posX + 0.1, y: 3.5, w: qW - 0.2, h: 1.2,
+                  fontSize: 18, fontFace: 'Cairo', color: item.thm.title, bold: true, align: 'center', rtlMode: true
+                });
+              });
+
+              slide.addShape(pptx.ShapeType.roundRect, {
+                x: 0.8, y: 5.2, w: 11.733, h: 1.4,
+                fill: { color: '0B2E24' }, line: { color: 'C69214', width: 1.5 }
+              });
+              slide.addText('هكذا تماماً هي حياة الإنسان على هذه الأرض.', {
+                x: 1.0, y: 5.35, w: 11.333, h: 0.45,
+                fontSize: 20, fontFace: 'Cairo', color: 'FDE68A', bold: true, align: 'center', rtlMode: true
+              });
+              slide.addText('أسئلة وجودية حاسمة تحدد الغاية والمصير، والإجابة عنها هي أول وأعظم واجب على كل مكلف.', {
+                x: 1.0, y: 5.85, w: 11.333, h: 0.55,
+                fontSize: 16, fontFace: 'Traditional Arabic', color: 'FFFFFF', align: 'center', rtlMode: true
+              });
+
+            // ================= 4. CONTRAST (2 Distinct Soft Cards: Sage & Honey) =================
+            } else if (arch === 'contrast_2col') {
+              slide.addText('التحرير والتفريق المنهجي', {
+                x: 0.8, y: 0.45, w: 11.733, h: 0.4,
+                fontSize: 14, fontFace: 'Cairo', color: 'C69214', bold: true, align: 'right', rtlMode: true
+              });
+              slide.addText(slideTitleText, {
+                x: 0.8, y: 0.9, w: 11.733, h: 0.75,
+                fontSize: 24, fontFace: 'Cairo', color: '123329', bold: true, align: 'right', rtlMode: true
+              });
+
+              let titleA = 'الوجه الأول';
               let bodyA = bullets[0] || 'تحرير الركيزة الأولى ومقتضياتها المنهجية بدقة علمية.';
-              let titleB = '٢. الوجه الثاني / الأصل المتمم';
+              let titleB = 'الوجه المقابل';
               let bodyB = bullets[1] || 'بيان الوجه المقابل والضوابط الشرعية المفرقة بدقة علمية.';
-              let bottomSynth = bullets[2] || '';
 
               if (bullets[0] && (bullets[0].includes(':') || bullets[0].includes('—'))) {
                 const sep = bullets[0].includes(':') ? ':' : '—';
-                const parts = bullets[0].split(sep);
-                titleA = '١. ' + parts[0].trim();
-                bodyA = parts.slice(1).join(sep).trim();
-              } else if (bullets[0] && bullets[1] && bullets[0].length < 40 && bullets[1].length >= 35) {
-                titleA = '١. ' + bullets[0].trim();
-                bodyA = bullets[1].trim();
+                const pts = bullets[0].split(sep);
+                titleA = pts[0].trim();
+                bodyA = pts.slice(1).join(sep).trim();
+              }
+              if (bullets[1] && (bullets[1].includes(':') || bullets[1].includes('—'))) {
+                const sep = bullets[1].includes(':') ? ':' : '—';
+                const pts = bullets[1].split(sep);
+                titleB = pts[0].trim();
+                bodyB = pts.slice(1).join(sep).trim();
               }
 
-              const bIdx = (bullets[0] && bullets[1] && bullets[0].length < 40 && bullets[1].length >= 35) ? 2 : 1;
-              const bRaw = bullets[bIdx];
-              if (bRaw && (bRaw.includes(':') || bRaw.includes('—'))) {
-                const sep = bRaw.includes(':') ? ':' : '—';
-                const parts = bRaw.split(sep);
-                titleB = '٢. ' + parts[0].trim();
-                bodyB = parts.slice(1).join(sep).trim();
-                bottomSynth = bullets[bIdx + 1] || bottomSynth;
-              } else if (bRaw && bullets[bIdx + 1] && bRaw.length < 40 && bullets[bIdx + 1].length >= 35) {
-                titleB = '٢. ' + bRaw.trim();
-                bodyB = bullets[bIdx + 1].trim();
-                bottomSynth = bullets[bIdx + 2] || bottomSynth;
-              } else if (bRaw) {
-                bodyB = bRaw;
-              }
+              const colW = 5.6;
+              const gap = 0.53;
 
-              if (!bottomSynth && bullets[bullets.length - 1] && bullets[bullets.length - 1] !== bodyA && bullets[bullets.length - 1] !== bodyB) {
-                bottomSynth = bullets[bullets.length - 1];
-              }
-              if (!bottomSynth) {
-                bottomSynth = 'القاعدة المنهجية: الجمع بين الأصول وضبط الفروق الشرعية أصل النجاة والفهم السليم.';
-              }
-
-              // Right Card (Side A - Emerald)
+              // Card 1 (Right): Sage Green
               slide.addShape(pptx.ShapeType.roundRect, {
-                x: 5.15, y: 1.45, w: colW, h: 3.1,
-                fill: { color: 'FFFFFF' }, line: { color: '123329', width: 1.5 }
+                x: 0.8 + colW + gap, y: 1.85, w: colW, h: 4.8,
+                fill: { color: THEME_SAGE.bg }, line: { color: THEME_SAGE.border, width: 1.5 }
               });
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 5.25, y: 1.55, w: colW - 0.2, h: 0.45,
-                fill: { color: '123329' }, line: { color: 'D97706', width: 1.0 }
+              slide.addText('الأصل الأول', {
+                x: 0.8 + colW + gap + 0.4, y: 2.1, w: colW - 0.8, h: 0.35,
+                fontSize: 14, fontFace: 'Cairo', color: THEME_SAGE.badge, bold: true, align: 'right', rtlMode: true
               });
               slide.addText(titleA, {
-                x: 5.3, y: 1.55, w: colW - 0.3, h: 0.45,
-                fontSize: 11, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'right', rtlMode: true
+                x: 0.8 + colW + gap + 0.4, y: 2.5, w: colW - 0.8, h: 0.6,
+                fontSize: 22, fontFace: 'Cairo', color: THEME_SAGE.title, bold: true, align: 'right', rtlMode: true
               });
               slide.addText(bodyA, {
-                x: 5.3, y: 2.15, w: colW - 0.3, h: 2.2,
-                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
+                x: 0.8 + colW + gap + 0.4, y: 3.2, w: colW - 0.8, h: 3.2,
+                fontSize: 17, fontFace: 'Traditional Arabic', color: '1E293B', align: 'right', rtlMode: true
               });
 
-              // Left Card (Side B - Amber)
+              // Card 2 (Left): Warm Honey
               slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.8, y: 1.45, w: colW, h: 3.1,
-                fill: { color: 'FFFFFF' }, line: { color: 'B45309', width: 1.5 }
+                x: 0.8, y: 1.85, w: colW, h: 4.8,
+                fill: { color: THEME_HONEY.bg }, line: { color: THEME_HONEY.border, width: 1.5 }
               });
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.9, y: 1.55, w: colW - 0.2, h: 0.45,
-                fill: { color: 'B45309' }, line: { color: 'FCD34D', width: 1.0 }
+              slide.addText('الأصل المقابل', {
+                x: 1.2, y: 2.1, w: colW - 0.8, h: 0.35,
+                fontSize: 14, fontFace: 'Cairo', color: THEME_HONEY.badge, bold: true, align: 'right', rtlMode: true
               });
               slide.addText(titleB, {
-                x: 0.95, y: 1.55, w: colW - 0.3, h: 0.45,
-                fontSize: 11, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'right', rtlMode: true
+                x: 1.2, y: 2.5, w: colW - 0.8, h: 0.6,
+                fontSize: 22, fontFace: 'Cairo', color: THEME_HONEY.title, bold: true, align: 'right', rtlMode: true
               });
               slide.addText(bodyB, {
-                x: 0.95, y: 2.15, w: colW - 0.3, h: 2.2,
-                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
+                x: 1.2, y: 3.2, w: colW - 0.8, h: 3.2,
+                fontSize: 17, fontFace: 'Traditional Arabic', color: '1E293B', align: 'right', rtlMode: true
               });
 
-              // Bottom Synthesis Callout
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.8, y: 4.7, w: 8.4, h: 0.55,
-                fill: { color: 'EFE6D2' }, line: { color: 'C69214', width: 1.0 }
-              });
-              slide.addText('● خلاصة المسألة: ' + bottomSynth, {
-                x: 0.9, y: 4.75, w: 8.2, h: 0.45,
-                fontSize: 10, fontFace: 'Arial', color: '0A231A', bold: true, align: 'right', rtlMode: true
-              });
-                fontSize: 10, fontFace: 'Arial', color: '0A231A', bold: true, align: 'right', rtlMode: true
-              });
-
-            // ================= ARCHETYPE 5: 3 VERTICAL PILLARS =================
+            // ================= 5. PILLARS (3 Soft Distinct Cards: Honey, Sage, Sky) =================
             } else if (arch === 'pillars') {
-              slide.background = { color: 'F6F1E7' };
-
+              slide.addText('الركائز والأصول الكبرى', {
+                x: 0.8, y: 0.45, w: 11.733, h: 0.4,
+                fontSize: 14, fontFace: 'Cairo', color: 'C69214', bold: true, align: 'right', rtlMode: true
+              });
               slide.addText(slideTitleText, {
-                x: 0.8, y: 0.4, w: 8.4, h: 0.5,
-                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addText('الركائز الكبرى المنظمة للمحور الشرعي', {
-                x: 0.8, y: 0.95, w: 8.4, h: 0.35,
-                fontSize: 11, fontFace: 'Arial', color: 'B45309', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addShape(pptx.ShapeType.line, {
-                x: 0.8, y: 1.3, w: 8.4, h: 0,
-                line: { color: 'C69214', width: 1.5 }
+                x: 0.8, y: 0.9, w: 11.733, h: 0.75,
+                fontSize: 24, fontFace: 'Cairo', color: '123329', bold: true, align: 'right', rtlMode: true
               });
 
-              const colW = 2.65;
-              const gap = 0.22;
+              const colW = 3.65;
+              const gap = 0.39;
               const numSymbols = ['١', '٢', '٣'];
+              const thms = [THEME_HONEY, THEME_SAGE, THEME_SKY];
               const cleanPillars = bullets.filter(b => b && !/^[\d\u0660-\u0669\s\.\-\)]+$/.test(b.trim()));
 
-              [0, 1, 2].forEach(cIdx => {
-                const posX = 0.8 + ((2 - cIdx) * (colW + gap));
-                const rawBText = cleanPillars[cIdx] || 'تأصيل شرعي وضبط منهجي للمسألة العلمية';
+              [0, 1, 2].forEach(i => {
+                const posX = 0.8 + ((2 - i) * (colW + gap));
+                const rawBText = cleanPillars[i] || 'تأصيل شرعي وضبط منهجي للمسألة العلمية';
+                const thm = thms[i];
                 let colTitle = '';
                 let colBody = rawBText;
+
                 if (rawBText.includes(':')) {
                   const cPos = rawBText.indexOf(':');
                   colTitle = rawBText.substring(0, cPos).trim();
@@ -9223,247 +9139,165 @@
                 }
 
                 slide.addShape(pptx.ShapeType.roundRect, {
-                  x: posX, y: 1.45, w: colW, h: 3.5,
-                  fill: { color: 'FFFFFF' }, line: { color: 'C69214', width: 1.5 }
+                  x: posX, y: 1.95, w: colW, h: 4.8,
+                  fill: { color: thm.bg }, line: { color: thm.border, width: 1.5 }
                 });
 
-                slide.addShape(pptx.ShapeType.roundRect, {
-                  x: posX + 0.15, y: 1.6, w: 0.5, h: 0.45,
-                  fill: { color: '123329' }, line: { color: 'D97706', width: 1.0 }
-                });
-                slide.addText(numSymbols[cIdx], {
-                  x: posX + 0.15, y: 1.6, w: 0.5, h: 0.45,
-                  fontSize: 13, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'center', rtlMode: true
+                slide.addText(numSymbols[i], {
+                  x: posX + 0.3, y: 2.15, w: colW - 0.6, h: 0.5,
+                  fontSize: 28, fontFace: 'Cairo', color: thm.badge, bold: true, align: 'right', rtlMode: true
                 });
 
                 if (colTitle) {
                   slide.addText(colTitle, {
-                    x: posX + 0.72, y: 1.6, w: colW - 0.85, h: 0.45,
-                    fontSize: 10, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
+                    x: posX + 0.3, y: 2.75, w: colW - 0.6, h: 0.6,
+                    fontSize: 22, fontFace: 'Cairo', color: thm.title, bold: true, align: 'right', rtlMode: true
                   });
                 }
-
-                slide.addShape(pptx.ShapeType.line, {
-                  x: posX + 0.15, y: 2.15, w: colW - 0.3, h: 0,
-                  line: { color: 'E2E8F0', width: 1.0 }
-                });
 
                 slide.addText(colBody, {
-                  x: posX + 0.15, y: 2.25, w: colW - 0.3, h: 2.5,
-                  fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
+                  x: posX + 0.3, y: colTitle ? 3.45 : 2.8, w: colW - 0.6, h: 3.0,
+                  fontSize: 16, fontFace: 'Traditional Arabic', color: '1E293B', align: 'right', rtlMode: true
                 });
               });
 
-            // ================= ARCHETYPE 6: MATRIX / COMPARISON TABLE =================
+            // ================= 6. MATRIX / COMPARISON TABLE =================
             } else if (arch === 'table') {
-              slide.background = { color: 'F6F1E7' };
-
+              slide.addText('أوجه التفريق الجوهرية', {
+                x: 0.8, y: 0.45, w: 11.733, h: 0.4,
+                fontSize: 14, fontFace: 'Cairo', color: 'C69214', bold: true, align: 'right', rtlMode: true
+              });
               slide.addText(slideTitleText, {
-                x: 0.8, y: 0.4, w: 8.4, h: 0.5,
-                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addText('مصفوفة الفروق الجوهرية والضوابط الفقهية المقارنة', {
-                x: 0.8, y: 0.95, w: 8.4, h: 0.35,
-                fontSize: 11, fontFace: 'Arial', color: 'B45309', bold: true, align: 'right', rtlMode: true
+                x: 0.8, y: 0.9, w: 11.733, h: 0.75,
+                fontSize: 24, fontFace: 'Cairo', color: '123329', bold: true, align: 'right', rtlMode: true
               });
 
-              const rawTbl = (s.tableData && s.tableData.length > 0) ? s.tableData : [
-                ['وجه المقارنة', 'القسم الأول (الأكبر / الأصلي)', 'القسم الثاني (الأصغر / الفرعي)'],
-                ['أصل الإيمان والملة', 'يناقض أصل التوحيد ويخرج صاحبه من الملة بالكلية', 'لا يخرج من الملة لكن ينقص كمال التوحيد الواجب'],
-                ['إحباط الأعمال', 'يحبط جميع الأعمال الصالحة إن مات عليه بلا توبة', 'يحبط العمل الذي خالطه فقط دون سائر الأعمال'],
-                ['المصير في الآخرة', 'لا يُغفر لمن مات عليه مخلداً في نار جهنم أبداً', 'تحت مشيئة الله تعالى ولا يخلد في النار ومآله الجنة'],
-                ['الأحكام الدنيوية', 'يبيح الدم والمال وتنتفي الموالاة والتوارث بالردة', 'تثبت له حرمة المسلم وأحكام الميراث والصلاة عليه']
-              ];
+              const tData = (Array.isArray(s.tableData) && s.tableData.length > 0)
+                ? s.tableData
+                : [
+                    ['من حيث', 'الشرك الأكبر', 'الشرك الأصغر'],
+                    ['أصل الإيمان والملة', 'يناقض أصل التوحيد ويخرج صاحبه من الملة', 'لا يخرج من الملة، لكن ينقص كمال التوحيد الواجب'],
+                    ['إحباط الأعمال', 'يحبط جميع الأعمال الصالحة إن مات عليه', 'يحبط العمل الذي خالطه فقط'],
+                    ['المصير في الآخرة', 'لا يُغفر لمن مات عليه بلا توبة، ويُخلد في النار', 'تحت المشيئة كأصحاب الكبائر، ولا يخلد في النار'],
+                    ['الدم والمال في الدنيا', 'يبيح الدم والمال إذا قامت الحجة وانتفت الموانع', 'لا يبيح دماً ولا مالاً؛ وتبقى حرمة المسلم كاملة']
+                  ];
 
-              const formattedTableRows = rawTbl.map((row, rIdx) => {
-                return row.map(cell => ({
-                  text: cell,
-                  options: {
-                    fill: rIdx === 0 ? { color: '123329' } : { color: rIdx % 2 === 1 ? 'FFFFFF' : 'EFE6D2' },
-                    color: rIdx === 0 ? 'FDE68A' : '1E293B',
-                    bold: rIdx === 0,
-                    fontSize: rIdx === 0 ? 11 : 10,
-                    fontFace: 'Arial',
-                    align: 'right',
-                    valign: 'middle',
-                    rtlMode: true
-                  }
-                }));
+              const formattedTable = tData.map((row, rIdx) => {
+                return row.map((cellText, cIdx) => {
+                  let fColor = (rIdx === 0) ? '0B2E24' : (cIdx === 1 ? 'FFF9EE' : (cIdx === 2 ? 'EAF4EE' : 'FFFFFF'));
+                  let tColor = (rIdx === 0) ? 'C69214' : '1E293B';
+                  return {
+                    text: cellText,
+                    options: {
+                      fill: { color: fColor },
+                      color: tColor,
+                      fontSize: (rIdx === 0) ? 15 : 14,
+                      fontFace: (rIdx === 0) ? 'Cairo' : 'Traditional Arabic',
+                      bold: (rIdx === 0 || cIdx === 0),
+                      align: (rIdx === 0) ? 'center' : 'right',
+                      rtlMode: true
+                    }
+                  };
+                });
               });
 
-              slide.addTable(formattedTableRows, {
-                x: 0.8, y: 1.45, w: 8.4,
-                border: { pt: 1, color: 'C69214' },
-                colW: [2.0, 3.2, 3.2],
-                autoPage: false
+              slide.addTable(formattedTable, {
+                x: 0.8, y: 1.8, w: 11.733, h: 4.3,
+                colW: [2.333, 4.7, 4.7],
+                border: { color: 'C69214', width: 1.0 }
               });
 
               slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.8, y: 4.5, w: 8.4, h: 0.65,
-                fill: { color: '0A3324' }, line: { color: 'C69214', width: 1.2 }
+                x: 0.8, y: 6.25, w: 11.733, h: 0.65,
+                fill: { color: 'FFFFFF' }, line: { color: 'C69214', width: 1.0 }
               });
-              slide.addText('العلاقة الدقيقة: الشرك الأصغر بوابة الأكبر وذريعته؛ فالتساهل في صغائر الشرك يضعف تعظيم الله حتى يقع العبد في الأكبر دون أن يشعر.', {
-                x: 0.9, y: 4.55, w: 8.2, h: 0.55,
-                fontSize: 10, fontFace: 'Arial', color: 'FEF3C7', align: 'right', rtlMode: true
+              slide.addText('العلاقة بينهما: الشرك الأصغر بوابة الأكبر وذريعته؛ فالتساهل في الصغير يجر إلى الوقوع في الكبير عياذاً بالله.', {
+                x: 1.0, y: 6.3, w: 11.333, h: 0.55,
+                fontSize: 14, fontFace: 'Cairo', color: '123329', bold: true, align: 'right', rtlMode: true
               });
 
-            // ================= ARCHETYPE 7: SACRED MIHRAB (HADITH / QURAN) =================
+            // ================= 7. MIHRAB (Sacred Verses & Hadiths) =================
             } else if (arch === 'mihrab') {
-              slide.background = { color: '123329' };
-
+              slide.addText('محراب الوحي والبيان النبوي', {
+                x: 0.8, y: 0.45, w: 11.733, h: 0.4,
+                fontSize: 14, fontFace: 'Cairo', color: 'C69214', bold: true, align: 'right', rtlMode: true
+              });
               slide.addText(slideTitleText, {
-                x: 0.8, y: 0.4, w: 8.4, h: 0.55,
-                fontSize: 22, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'center', rtlMode: true
+                x: 0.8, y: 0.9, w: 11.733, h: 0.75,
+                fontSize: 24, fontFace: 'Cairo', color: '123329', bold: true, align: 'right', rtlMode: true
               });
 
               slide.addShape(pptx.ShapeType.roundRect, {
-                x: 1.0, y: 1.2, w: 8.0, h: 2.8,
-                fill: { color: '0A231C' }, line: { color: 'C69214', width: 2.0 }
+                x: 1.0, y: 1.85, w: 11.333, h: 3.5,
+                fill: { color: 'FFF9EE' }, line: { color: 'C69214', width: 2.0 }
               });
 
-              const scInfo = splitScripture(s.scriptureEvidence || bullets[0] || '«اللهم إني أعوذ بك أن أشرك بك وأنا أعلم، وأستغفرك لما لا أعلم»');
-              const bodyText = scInfo.text || bullets[0];
-              const citationText = scInfo.citation || bullets[1] || 'رواه أحمد والأدب المفرد للبخاري | صحيح';
-
-              slide.addText(bodyText, {
-                x: 1.2, y: 1.4, w: 7.6, h: 1.8,
-                fontSize: 14, fontFace: 'Arial', color: 'FEF3C7', bold: true, align: 'center', rtlMode: true
+              const sacredMain = bullets[0] || s.scriptureEvidence || '«اللهم إني أعوذ بك أن أشرك بك وأنا أعلم، وأستغفرك لما لا أعلم»';
+              slide.addText(sacredMain, {
+                x: 1.4, y: 2.2, w: 10.533, h: 2.8,
+                fontSize: 22, fontFace: 'Traditional Arabic', color: '123329', bold: true, align: 'center', rtlMode: true
               });
 
-              if (citationText) {
-                slide.addText(citationText, {
-                  x: 1.2, y: 3.3, w: 7.6, h: 0.55,
-                  fontSize: 11, fontFace: 'Arial', color: '86EFAC', align: 'center', rtlMode: true
+              if (bullets[1]) {
+                slide.addShape(pptx.ShapeType.roundRect, {
+                  x: 1.0, y: 5.55, w: 11.333, h: 1.2,
+                  fill: { color: 'EAF4EE' }, line: { color: '123329', width: 1.2 }
+                });
+                slide.addText(bullets[1], {
+                  x: 1.3, y: 5.65, w: 10.733, h: 1.0,
+                  fontSize: 16, fontFace: 'Cairo', color: '1E293B', align: 'center', rtlMode: true
                 });
               }
 
-              const practicalTip = s.pedagogicalTip || bullets[2] || 'يقال إذا خاف العبد على نفسه شيئاً من الرياء أو إرادة غير وجه الله؛ فينبغي الإكثار منه في كل حال.';
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 1.0, y: 4.2, w: 8.0, h: 0.7,
-                fill: { color: '184335' }, line: { color: '86EFAC', width: 1.0 }
-              });
-              slide.addText('● التوجيه النبوي والواجب العملي: ' + practicalTip, {
-                x: 1.1, y: 4.25, w: 7.8, h: 0.6,
-                fontSize: 10, fontFace: 'Arial', color: 'FFFFFF', align: 'right', rtlMode: true
-              });
-
-            // ================= ARCHETYPE 8: SECTION DIVIDER =================
-            } else if (arch === 'divider') {
-              slide.background = { color: '123329' };
-
-              slide.addShape(pptx.ShapeType.line, {
-                x: 2.0, y: 1.5, w: 6.0, h: 0,
-                line: { color: 'C69214', width: 2.0 }
-              });
-
-              slide.addText(slideTitleText, {
-                x: 1.0, y: 1.8, w: 8.0, h: 1.2,
-                fontSize: 26, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'center', rtlMode: true
-              });
-
-              const subText = bullets[0] || 'تأصيل شرعي وبناء منهجي لليقين';
-              slide.addText(subText, {
-                x: 1.5, y: 3.1, w: 7.0, h: 0.9,
-                fontSize: 14, fontFace: 'Arial', color: '86EFAC', align: 'center', rtlMode: true
-              });
-
-              slide.addShape(pptx.ShapeType.line, {
-                x: 2.0, y: 4.2, w: 6.0, h: 0,
-                line: { color: 'C69214', width: 2.0 }
-              });
-
-            // ================= ARCHETYPE 9: DYNAMIC CONCEPT BREAKDOWN (IMPROVED STANDARD) =================
+            // ================= 8. DEFAULT / CONCEPT BREAKDOWN =================
             } else {
-              slide.background = { color: 'F6F1E7' };
-
+              slide.addText('التأصيل والبيان الشرعي', {
+                x: 0.8, y: 0.45, w: 11.733, h: 0.4,
+                fontSize: 14, fontFace: 'Cairo', color: 'C69214', bold: true, align: 'right', rtlMode: true
+              });
               slide.addText(slideTitleText, {
-                x: 0.8, y: 0.4, w: 8.4, h: 0.5,
-                fontSize: 20, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addShape(pptx.ShapeType.line, {
-                x: 0.8, y: 0.95, w: 8.4, h: 0,
-                line: { color: 'C69214', width: 1.5 }
+                x: 0.8, y: 0.9, w: 11.733, h: 0.75,
+                fontSize: 24, fontFace: 'Cairo', color: '123329', bold: true, align: 'right', rtlMode: true
               });
 
-              let currentY = 1.15;
-
-              // Scripture strip if present
-              if (s.scriptureEvidence) {
-                const sc = splitScripture(s.scriptureEvidence);
-                if (sc.text && !sc.text.includes('صفحة') && !sc.text.includes('ممسوحة')) {
+              const count = Math.min(bullets.length, 3);
+              if (count === 2) {
+                const colW = 5.6;
+                const gap = 0.53;
+                const thms = [THEME_SAGE, THEME_HONEY];
+                [0, 1].forEach(i => {
+                  const posX = 0.8 + ((1 - i) * (colW + gap));
                   slide.addShape(pptx.ShapeType.roundRect, {
-                    x: 0.8, y: currentY, w: 8.4, h: 0.65,
-                    fill: { color: 'EFE6D2' }, line: { color: 'B45309', width: 1.0 }
+                    x: posX, y: 1.95, w: colW, h: 4.8,
+                    fill: { color: thms[i].bg }, line: { color: thms[i].border, width: 1.5 }
                   });
-                  const scFull = sc.text + (sc.citation ? ` (${sc.citation})` : '');
-                  slide.addText(scFull, {
-                    x: 0.9, y: currentY + 0.05, w: 8.2, h: 0.55,
-                    fontSize: 10, fontFace: 'Arial', color: '062319', bold: true, align: 'center', rtlMode: true
+                  slide.addText(bullets[i], {
+                    x: posX + 0.4, y: 2.3, w: colW - 0.8, h: 4.0,
+                    fontSize: 17, fontFace: 'Traditional Arabic', color: '1E293B', align: 'right', rtlMode: true
                   });
-                  currentY += 0.75;
-                }
+                });
+              } else {
+                const colW = 3.65;
+                const gap = 0.39;
+                const thms = [THEME_HONEY, THEME_SAGE, THEME_SKY];
+                [0, 1, 2].forEach(i => {
+                  const posX = 0.8 + ((2 - i) * (colW + gap));
+                  const bText = bullets[i] || 'بيان المحور العلمي والواجب المنهجي والشرعي المستفاد.';
+                  slide.addShape(pptx.ShapeType.roundRect, {
+                    x: posX, y: 1.95, w: colW, h: 4.8,
+                    fill: { color: thms[i].bg }, line: { color: thms[i].border, width: 1.5 }
+                  });
+                  slide.addText(bText, {
+                    x: posX + 0.35, y: 2.3, w: colW - 0.7, h: 4.0,
+                    fontSize: 16, fontFace: 'Traditional Arabic', color: '1E293B', align: 'right', rtlMode: true
+                  });
+                });
               }
-
-              // Top Primary Focus Card
-              const p1 = bullets[0] || 'التقرير التأصيلي الأكبر لهذا المحور العلمي';
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.8, y: currentY, w: 8.4, h: 1.1,
-                fill: { color: '123329' }, line: { color: 'C69214', width: 1.2 }
-              });
-              slide.addText('القضية المركزية ومحل الشاهد:', {
-                x: 1.0, y: currentY + 0.08, w: 8.0, h: 0.3,
-                fontSize: 10, fontFace: 'Arial', color: 'FDE68A', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addText(p1, {
-                x: 1.0, y: currentY + 0.38, w: 8.0, h: 0.65,
-                fontSize: 11, fontFace: 'Arial', color: 'FEF3C7', align: 'right', rtlMode: true
-              });
-
-              currentY += 1.25;
-
-              // Bottom Two Supporting Columns
-              const p2 = bullets[1] || 'بيان الدلالة المنهجية والاستدلال الشرعي ومقتضيات الفهم السليم.';
-              const p3 = bullets[2] || s.pedagogicalTip || 'الواجب العملي والأثر الإيماني في واقع حياة المسلم وسلوكه.';
-
-              const cardW = 4.05;
-              // Right Card
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 5.15, y: currentY, w: cardW, h: 4.8 - currentY,
-                fill: { color: 'FFFFFF' }, line: { color: '123329', width: 1.2 }
-              });
-              slide.addText('الأثر المعرفي والمنهجي:', {
-                x: 5.25, y: currentY + 0.08, w: cardW - 0.2, h: 0.3,
-                fontSize: 10, fontFace: 'Arial', color: '123329', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addText(p2, {
-                x: 5.25, y: currentY + 0.38, w: cardW - 0.2, h: (4.8 - currentY) - 0.45,
-                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
-              });
-
-              // Left Card
-              slide.addShape(pptx.ShapeType.roundRect, {
-                x: 0.8, y: currentY, w: cardW, h: 4.8 - currentY,
-                fill: { color: 'FFFFFF' }, line: { color: '047857', width: 1.2 }
-              });
-              slide.addText('الثمرة الإيمانية والسلوكية:', {
-                x: 0.9, y: currentY + 0.08, w: cardW - 0.2, h: 0.3,
-                fontSize: 10, fontFace: 'Arial', color: '047857', bold: true, align: 'right', rtlMode: true
-              });
-              slide.addText(p3, {
-                x: 0.9, y: currentY + 0.38, w: cardW - 0.2, h: (4.8 - currentY) - 0.45,
-                fontSize: 10, fontFace: 'Arial', color: '1E293B', align: 'right', rtlMode: true
-              });
             }
 
             // Attached Speaker Notes
-            const speakerNotes = s.notes || s.talkingPoints || s.pedagogicalTip || `ملاحظات المعلم لمسائل: ${slideTitleText}`;
+            const speakerNotes = s.notes || s.talkingPoints || s.pedagogicalTip || `ملاحظات المحاضر وتوجيهات الشرح لمسائل: ${slideTitleText}`;
             slide.addNotes(speakerNotes);
-
-            // Bottom Left Slide Number
-            slide.addText(`${idx + 1} / ${slidesData.length}`, {
-              x: 0.8, y: 5.2, w: 2.0, h: 0.3,
-              fontSize: 9, fontFace: 'Arial', color: '94A3B8', align: 'left'
-            });
           });
 
           // Save Presentation
@@ -9472,6 +9306,14 @@
             .substring(0, 40)
             .trim();
           await pptx.writeFile({ fileName: `مِشكاة_${sanitizedFilename}.pptx` });
+          showToast(isRtl ? 'تم تصدير العرض التقديمي فائق الجودة بالهوية الإسلامية بنجاح ✨' : 'Islamic PowerPoint presentation exported successfully ✨');
+        } catch (err) {
+          console.error('Error generating PowerPoint file:', err);
+          showToast(isRtl ? 'حدث خطأ أثناء إنشاء ملف البوربوينت' : 'Error generating PowerPoint file');
+        } finally {
+          setIsExportingPptx(false);
+        }
+      };
           showToast(isRtl ? 'تم تصدير العرض التقديمي بالهندسة المتعددة الأنماط بنجاح ✨' : 'Multi-archetype PowerPoint exported successfully ✨');
         } catch (err) {
           console.error('Error generating PowerPoint file:', err);
@@ -11306,10 +11148,10 @@ function getFallbackIslamic() {
                     window.location.replace(cleanPath + '?v=81.1&t=' + Date.now());
                   }}
                   className="bg-gold-400/90 hover:bg-gold-300 text-emerald-950 border border-gold-300 text-[10px] sm:text-xs px-3 py-1 rounded-full font-black shadow-xs cursor-pointer flex items-center gap-1.5 transition shrink-0"
-                  title={isRtl ? 'الإصدار المعتمد v81.2 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v81.2 — Click to force reload'}
+                  title={isRtl ? 'الإصدار المعتمد v81.3 — انقر للتحديث الفوري وإفراغ الذاكرة المؤقتة' : 'v81.3 — Click to force reload'}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
-                  <span>{isRtl ? 'الإصدار v81.2' : 'v81.2'}</span>
+                  <span>{isRtl ? 'الإصدار v81.3' : 'v81.3'}</span>
                   <span className="text-[9px] bg-emerald-950 text-gold-300 px-1.5 py-0.2 rounded-full font-bold hidden sm:inline">
                     {isRtl ? 'أحدث تحديث' : 'Latest'}
                   </span>

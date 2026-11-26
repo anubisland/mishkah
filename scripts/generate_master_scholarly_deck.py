@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Mishkah Master Scholarly Presentation Generator (v81.2 Masterpiece Edition)
-Organization: AnubisLand
+Mishkah Master Scholarly Presentation Generator (v81.3 Masterpiece Edition)
+Institutional Organization: AnubisLand
 Lecture: العقيدة الإسلامية — المحاضرة الثانية: من هو الله؟
-Full 30-Slide Exemplar Presentation with Unified Card Containers, True Arabic RTL Ordering, Native RTL XML Properties, and Elderly-Friendly Typography.
+Full 30-Slide Exemplar Presentation with Distinctive Soft Islamic Card Backgrounds (Sage, Amber, Sky, Lavender),
+Native RTL Paragraphs, Large Elderly-Friendly Typography, and Complete Semantic Thoughts.
 """
 
 import json
@@ -24,12 +25,16 @@ COLOR_EMERALD_DARK = hex_to_rgb('123329')
 COLOR_GOLD = hex_to_rgb('C69214')
 COLOR_GOLD_LIGHT = hex_to_rgb('FDE68A')
 COLOR_IVORY_BG = hex_to_rgb('FAF7F2')
-COLOR_CARD_BG = hex_to_rgb('FFFFFF')
-COLOR_CARD_BORDER = hex_to_rgb('DCD2BD')
 COLOR_TEXT_DARK = hex_to_rgb('1E293B')
 COLOR_TEXT_MUTED = hex_to_rgb('64748B')
 COLOR_WHITE = hex_to_rgb('FFFFFF')
 COLOR_QURAN_GREEN = hex_to_rgb('047857')
+
+# Harmonious Soft Islamic Color Themes
+THEME_HONEY = {"bg": "FFF9EE", "border": "C69214", "title": "92400E", "badge": "C69214"}
+THEME_SAGE = {"bg": "EAF4EE", "border": "123329", "title": "123329", "badge": "047857"}
+THEME_SKY = {"bg": "EEF6FB", "border": "2563EB", "title": "1E40AF", "badge": "2563EB"}
+THEME_LAVENDER = {"bg": "F7EEFB", "border": "7C3AED", "title": "6D28D9", "badge": "7C3AED"}
 
 TOTAL_WIDTH = 13.333
 TOTAL_HEIGHT = 7.5
@@ -44,7 +49,6 @@ def is_sacred_text(text):
     )
 
 def set_p_rtl(p):
-    """Enforce native Right-to-Left paragraph reading order in PowerPoint XML."""
     try:
         p._p.get_or_add_pPr().set('rtl', '1')
     except Exception:
@@ -98,19 +102,19 @@ def build_presentation(analysis_json_path, output_pptx_path):
 
         is_dark_slide = (idx in [1, 30])
 
-        # 1. Slide Background
+        # Background
         bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, Inches(TOTAL_WIDTH), Inches(TOTAL_HEIGHT))
         bg.fill.solid()
         bg.fill.fore_color.rgb = COLOR_EMERALD_DEEP if is_dark_slide else COLOR_IVORY_BG
         bg.line.fill.background()
 
-        # 2. Top Islamic Gold Trim
+        # Top Gold Accent
         top_bar = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, Inches(TOTAL_WIDTH), Inches(0.12))
         top_bar.fill.solid()
         top_bar.fill.fore_color.rgb = COLOR_GOLD
         top_bar.line.fill.background()
 
-        # 3. Footer Banner
+        # Footer
         footer = slide.shapes.add_textbox(Inches(0.8), Inches(7.05), Inches(11.733), Inches(0.35))
         ftf = footer.text_frame
         ftf.word_wrap = True
@@ -123,7 +127,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
         fp.text = f"مِشكاة — نظام التشغيل الشرعي | المحاضرة الثانية: من هو الله؟ | شريحة {idx} من {len(slides_data)}"
 
         # ==========================================
-        # SPECIAL CASE: Slide 1 (Title Slide)
+        # Slide 1: Cover
         # ==========================================
         if idx == 1:
             tb = slide.shapes.add_textbox(Inches(1.0), Inches(1.8), Inches(11.333), Inches(0.6))
@@ -172,7 +176,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
             continue
 
         # ==========================================
-        # SPECIAL CASE: Slide 2 (Authoritative Sources - Perfect Unified RTL Cards)
+        # Slide 2: Sources (3 Distinct Soft Colors)
         # ==========================================
         if idx == 2:
             add_header_elements(slide, "المصادر العلمية المعتمدة", "على أي أساس نبني هذا الدرس؟")
@@ -182,35 +186,38 @@ def build_presentation(analysis_json_path, output_pptx_path):
                     "badge": "المصدر الأول",
                     "title": "«ثلاثة الأصول وأدلتها»",
                     "author": "للإمام محمد بن عبد الوهاب رحمه الله",
-                    "focus": "باب: معرفة العبد ربه بالأدلة والبراهين الصريحة من الكتاب والسنة."
+                    "focus": "باب: معرفة العبد ربه بالأدلة والبراهين الصريحة من الكتاب والسنة.",
+                    "theme": THEME_HONEY
                 },
                 {
                     "badge": "المصدر الثاني",
                     "title": "«نبذة في العقيدة الإسلامية»",
                     "author": "للشيخ محمد بن صالح العثيمين رحمه الله",
-                    "focus": "باب: الإيمان بالله — تفصيل ركائز الربوبية الثلاث وإفراد الألوهية ومقتضى التوحيد."
+                    "focus": "باب: الإيمان بالله — تفصيل ركائز الربوبية الثلاث وإفراد الألوهية ومقتضى التوحيد.",
+                    "theme": THEME_SAGE
                 },
                 {
                     "badge": "المصدر الثالث",
                     "title": "منهج العقيدة — أكاديمية زاد",
                     "author": "المنهج التأسيسي للشيخ محمد صالح المنجد",
-                    "focus": "مقرر «العقيدة الإسلامية» — بناء اليقين العقدي والتصور الشامل للوجود والتحرر من الشرك."
+                    "focus": "مقرر «العقيدة الإسلامية» — بناء اليقين العقدي والتصور الشامل للوجود والتحرر من الشرك.",
+                    "theme": THEME_SKY
                 }
             ]
 
             card_w = 3.65
             gap = 0.39
             top_y = 1.95
-            card_h = 4.7
+            card_h = 4.8
 
             for i, src in enumerate(sources):
-                # RTL position: Source 1 on the far RIGHT!
                 x_pos = 0.8 + (2 - i) * (card_w + gap)
+                thm = src["theme"]
 
                 card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x_pos), Inches(top_y), Inches(card_w), Inches(card_h))
                 card.fill.solid()
-                card.fill.fore_color.rgb = COLOR_WHITE
-                card.line.color.rgb = COLOR_CARD_BORDER
+                card.fill.fore_color.rgb = hex_to_rgb(thm["bg"])
+                card.line.color.rgb = hex_to_rgb(thm["border"])
                 card.line.width = Pt(1.5)
 
                 tf = card.text_frame
@@ -226,7 +233,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_b.font.name = "Cairo"
                 p_b.font.size = Pt(14)
                 p_b.font.bold = True
-                p_b.font.color.rgb = COLOR_GOLD
+                p_b.font.color.rgb = hex_to_rgb(thm["badge"])
                 p_b.text = src["badge"]
                 p_b.space_after = Pt(10)
 
@@ -234,9 +241,9 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 set_p_rtl(p_t)
                 p_t.alignment = PP_ALIGN.RIGHT
                 p_t.font.name = "Cairo"
-                p_t.font.size = Pt(20)
+                p_t.font.size = Pt(21)
                 p_t.font.bold = True
-                p_t.font.color.rgb = COLOR_EMERALD_DARK
+                p_t.font.color.rgb = hex_to_rgb(thm["title"])
                 p_t.text = src["title"]
                 p_t.space_after = Pt(12)
 
@@ -246,7 +253,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_a.font.name = "Cairo"
                 p_a.font.size = Pt(15)
                 p_a.font.bold = True
-                p_a.font.color.rgb = COLOR_QURAN_GREEN
+                p_a.font.color.rgb = hex_to_rgb('047857') if thm != THEME_SAGE else hex_to_rgb('123329')
                 p_a.text = src["author"]
                 p_a.space_after = Pt(14)
 
@@ -260,15 +267,15 @@ def build_presentation(analysis_json_path, output_pptx_path):
             continue
 
         # ==========================================
-        # SPECIAL CASE: Slide 3 (Introduction / Thought Experiment)
+        # Slide 3: Thought Experiment (4 Distinct Soft Colors)
         # ==========================================
         if idx == 3:
             add_header_elements(slide, "مقدمة: السؤال الأول الذي يحدد مصير الإنسان", "تخيّل أنك استيقظت في قطار فائق السرعة…")
 
             tb2 = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.65), Inches(11.733), Inches(0.85))
             tb2.fill.solid()
-            tb2.fill.fore_color.rgb = hex_to_rgb('F4EFE6')
-            tb2.line.color.rgb = COLOR_CARD_BORDER
+            tb2.fill.fore_color.rgb = hex_to_rgb('FFF9EE')
+            tb2.line.color.rgb = hex_to_rgb('C69214')
             tb2.line.width = Pt(1)
             p2 = tb2.text_frame.paragraphs[0]
             set_p_rtl(p2)
@@ -280,23 +287,23 @@ def build_presentation(analysis_json_path, output_pptx_path):
             p2.text = "ينطلق بك عبر أودية وجبال لا تعرفها. لن تسأل عن لون المقاعد ولا عن نوع الطعام، بل ستسأل فوراً:"
 
             questions = [
-                ("١", "من الذي يقود هذا القطار؟"),
-                ("٢", "من الذي وضعني فيه؟"),
-                ("٣", "إلى أين يتجه بي؟"),
-                ("٤", "ما المطلوب مني أثناء الرحلة؟")
+                ("١", "من الذي يقود هذا القطار؟", THEME_HONEY),
+                ("٢", "من الذي وضعني فيه؟", THEME_SAGE),
+                ("٣", "إلى أين يتجه بي؟", THEME_SKY),
+                ("٤", "ما المطلوب مني أثناء الرحلة؟", THEME_LAVENDER)
             ]
             q_width = 2.75
             q_gap = 0.24
             q_top = 2.65
             q_height = 2.3
 
-            for q_idx, (num, q_text) in enumerate(questions):
+            for q_idx, (num, q_text, thm) in enumerate(questions):
                 x_pos = 0.8 + (3 - q_idx) * (q_width + q_gap)
 
                 q_card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x_pos), Inches(q_top), Inches(q_width), Inches(q_height))
                 q_card.fill.solid()
-                q_card.fill.fore_color.rgb = COLOR_WHITE
-                q_card.line.color.rgb = COLOR_GOLD
+                q_card.fill.fore_color.rgb = hex_to_rgb(thm["bg"])
+                q_card.line.color.rgb = hex_to_rgb(thm["border"])
                 q_card.line.width = Pt(1.5)
 
                 qtf = q_card.text_frame
@@ -305,9 +312,9 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 set_p_rtl(qp_num)
                 qp_num.alignment = PP_ALIGN.CENTER
                 qp_num.font.name = "Cairo"
-                qp_num.font.size = Pt(24)
+                qp_num.font.size = Pt(26)
                 qp_num.font.bold = True
-                qp_num.font.color.rgb = COLOR_GOLD
+                qp_num.font.color.rgb = hex_to_rgb(thm["badge"])
                 qp_num.text = num
 
                 qp_text = qtf.add_paragraph()
@@ -316,7 +323,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 qp_text.font.name = "Cairo"
                 qp_text.font.size = Pt(18)
                 qp_text.font.bold = True
-                qp_text.font.color.rgb = COLOR_EMERALD_DARK
+                qp_text.font.color.rgb = hex_to_rgb(thm["title"])
                 qp_text.text = q_text
 
             punch_box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(5.2), Inches(11.733), Inches(1.4))
@@ -345,7 +352,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
             continue
 
         # ==========================================
-        # SPECIAL CASE: Slide 7 (The 3 Pillars of Rububiyyah - Unified RTL Cards)
+        # Slide 7: 3 Pillars (Honey, Sage, Sky)
         # ==========================================
         if idx == 7:
             add_header_elements(slide, "ركائز الربوبية الثلاث — «نبذة في العقيدة الإسلامية»", "الإيمان بالله يكتمل بأربعة أمور: بوجوده، وبربوبيته، وبألوهيته، وبأسمائه وصفاته.")
@@ -354,32 +361,36 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 {
                     "num": "١",
                     "title": "التفرد بالخلق",
-                    "body": "لا خالق إلا الله؛ كل ما في السماوات والأرض — حتى أفعال العباد — مخلوق له سبحانه. و«صنع البشر» ليس خلقاً من عدم، بل مجرد تحويل وتركيب لمواد خلقها الله وأوجدها."
+                    "body": "لا خالق إلا الله؛ كل ما في السماوات والأرض — حتى أفعال العباد — مخلوق له سبحانه. و«صنع البشر» ليس خلقاً، بل مجرد تحويل لمواد أوجدها الله.",
+                    "theme": THEME_HONEY
                 },
                 {
                     "num": "٢",
                     "title": "التفرد بالملك",
-                    "body": "الله هو المالك الحقيقي المطلق لجميع الكائنات ونواصي العباد بيده. وملك الإنسان لما تحت يده ملك عارضي ناقص ومؤقت، ينتهي بالموت ولا يتصرف فيه إلا بما شرع الله."
+                    "body": "الله هو المالك الحقيقي المطلق لجميع الكائنات ونواصي العباد بيده. وملك الإنسان لما تحت يده عارضي ناقص ومؤقت، ينتهي بالموت ولا يتصرف فيه إلا بشرع الله.",
+                    "theme": THEME_SAGE
                 },
                 {
                     "num": "٣",
                     "title": "التفرد بالأمر والتدبير",
-                    "body": "يدبر أمر السماوات والأرض من فوق سبع سماوات: يقسم الأرزاق، ويعز ويذل، ويحيي ويميت، ويشفي المريض ويكشف الكرب؛ لا راد لقضائه ولا معقب لحكمه."
+                    "body": "يدبر أمر السماوات والأرض من فوق سبع سماوات: يقسم الأرزاق، ويعز ويذل، ويحيي ويميت، ويشفي المريض ويكشف الكرب؛ لا راد لقضائه ولا معقب لحكمه.",
+                    "theme": THEME_SKY
                 }
             ]
 
             card_w = 3.65
             gap = 0.39
             top_y = 1.95
-            card_h = 4.7
+            card_h = 4.8
 
             for i, p_info in enumerate(pillars):
                 x_pos = 0.8 + (2 - i) * (card_w + gap)
+                thm = p_info["theme"]
 
                 card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x_pos), Inches(top_y), Inches(card_w), Inches(card_h))
                 card.fill.solid()
-                card.fill.fore_color.rgb = COLOR_WHITE
-                card.line.color.rgb = COLOR_CARD_BORDER
+                card.fill.fore_color.rgb = hex_to_rgb(thm["bg"])
+                card.line.color.rgb = hex_to_rgb(thm["border"])
                 card.line.width = Pt(1.5)
 
                 tf = card.text_frame
@@ -389,37 +400,37 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 tf.margin_left = Inches(0.35)
                 tf.margin_right = Inches(0.35)
 
-                p_num = tf.paragraphs[0]
-                set_p_rtl(p_num)
-                p_num.alignment = PP_ALIGN.RIGHT
-                p_num.font.name = "Cairo"
-                p_num.font.size = Pt(28)
-                p_num.font.bold = True
-                p_num.font.color.rgb = COLOR_GOLD
-                p_num.text = p_info["num"]
-                p_num.space_after = Pt(8)
+                pn = tf.paragraphs[0]
+                set_p_rtl(pn)
+                pn.alignment = PP_ALIGN.RIGHT
+                pn.font.name = "Cairo"
+                pn.font.size = Pt(28)
+                pn.font.bold = True
+                pn.font.color.rgb = hex_to_rgb(thm["badge"])
+                pn.text = p_info["num"]
+                pn.space_after = Pt(8)
 
-                p_t = tf.add_paragraph()
-                set_p_rtl(p_t)
-                p_t.alignment = PP_ALIGN.RIGHT
-                p_t.font.name = "Cairo"
-                p_t.font.size = Pt(22)
-                p_t.font.bold = True
-                p_t.font.color.rgb = COLOR_EMERALD_DARK
-                p_t.text = p_info["title"]
-                p_t.space_after = Pt(14)
+                pt = tf.add_paragraph()
+                set_p_rtl(pt)
+                pt.alignment = PP_ALIGN.RIGHT
+                pt.font.name = "Cairo"
+                pt.font.size = Pt(22)
+                pt.font.bold = True
+                pt.font.color.rgb = hex_to_rgb(thm["title"])
+                pt.text = p_info["title"]
+                pt.space_after = Pt(14)
 
-                p_b = tf.add_paragraph()
-                set_p_rtl(p_b)
-                p_b.alignment = PP_ALIGN.RIGHT
-                p_b.font.name = "Traditional Arabic"
-                p_b.font.size = Pt(16)
-                p_b.font.color.rgb = COLOR_TEXT_DARK
-                p_b.text = p_info["body"]
+                pb = tf.add_paragraph()
+                set_p_rtl(pb)
+                pb.alignment = PP_ALIGN.RIGHT
+                pb.font.name = "Traditional Arabic"
+                pb.font.size = Pt(16)
+                pb.font.color.rgb = COLOR_TEXT_DARK
+                pb.text = p_info["body"]
             continue
 
         # ==========================================
-        # SPECIAL CASE: Slide 8 (Two Types of God's Order - Unified RTL Cards)
+        # Slide 8: Contrast (2 Distinct Colors: Sage & Amber)
         # ==========================================
         if idx == 8:
             add_header_elements(slide, "التفرد بالأمر والتدبير", "أمر الله نوعان عظيمان")
@@ -428,27 +439,30 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 {
                     "badge": "النوع الأول",
                     "title": "الأمر الكوني القدري",
-                    "body": "مشيئته النافذة في الكون التي لا يردها راد ولا يعقبها معقب؛ فما شاء الله كان، وما لم يشأ لم يكن.\n\nيدخل تحته خلق الكائنات وحركة الأفلاك وتصريف الرياح وحياة وموت المخلوقات، لا يخرج عنه مؤمن ولا كافر ولا ذرة في الوجود."
+                    "body": "مشيئته النافذة في الكون التي لا يردها راد ولا يعقبها معقب؛ فما شاء الله كان، وما لم يشأ لم يكن.\n\nيدخل تحته خلق الكائنات وحركة الأفلاك وتصريف الرياح وحياة وموت المخلوقات، لا يخرج عنه مؤمن ولا كافر ولا ذرة في الوجود.",
+                    "theme": THEME_SAGE
                 },
                 {
                     "badge": "النوع الثاني",
                     "title": "الأمر الشرعي الديني",
-                    "body": "ما أنزله الله على رسله الكرام من الشرائع والأحكام والأوامر والنواهي التي ابتلى بها عباده ليظهر المطيع من العاصي.\n\nوهذا الأمر يحبه الله ويرضاه، لكن العباد مخيرون في الامتثال له؛ فمنهم من أطاع وأفلح، ومنهم من عصى فخسر."
+                    "body": "ما أنزله الله على رسله الكرام من الشرائع والأحكام والأوامر والنواهي التي ابتلى بها عباده ليظهر المطيع من العاصي.\n\nوهذا الأمر يحبه الله ويرضاه، لكن العباد مخيرون في الامتثال له؛ فمنهم من أطاع وأفلح، ومنهم من عصى فخسر.",
+                    "theme": THEME_HONEY
                 }
             ]
 
             card_w = 5.6
             gap = 0.53
             top_y = 1.95
-            card_h = 4.7
+            card_h = 4.8
 
             for i, ord_info in enumerate(orders):
                 x_pos = 0.8 + (1 - i) * (card_w + gap)
+                thm = ord_info["theme"]
 
                 card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x_pos), Inches(top_y), Inches(card_w), Inches(card_h))
                 card.fill.solid()
-                card.fill.fore_color.rgb = COLOR_WHITE
-                card.line.color.rgb = COLOR_CARD_BORDER
+                card.fill.fore_color.rgb = hex_to_rgb(thm["bg"])
+                card.line.color.rgb = hex_to_rgb(thm["border"])
                 card.line.width = Pt(1.5)
 
                 tf = card.text_frame
@@ -464,7 +478,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_b.font.name = "Cairo"
                 p_b.font.size = Pt(14)
                 p_b.font.bold = True
-                p_b.font.color.rgb = COLOR_GOLD
+                p_b.font.color.rgb = hex_to_rgb(thm["badge"])
                 p_b.text = ord_info["badge"]
                 p_b.space_after = Pt(10)
 
@@ -474,7 +488,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_t.font.name = "Cairo"
                 p_t.font.size = Pt(22)
                 p_t.font.bold = True
-                p_t.font.color.rgb = COLOR_EMERALD_DARK
+                p_t.font.color.rgb = hex_to_rgb(thm["title"])
                 p_t.text = ord_info["title"]
                 p_t.space_after = Pt(16)
 
@@ -488,7 +502,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
             continue
 
         # ==========================================
-        # SPECIAL CASE: Slide 26 (Comparison Table)
+        # Slide 26: Comparison Table
         # ==========================================
         if has_table and table_data:
             title_text = shapes_info[0]['text'].strip() if len(shapes_info) > 0 else 'أوجه التفريق الجوهرية'
@@ -518,10 +532,12 @@ def build_presentation(analysis_json_path, output_pptx_path):
                     cell.fill.solid()
                     if is_header:
                         cell.fill.fore_color.rgb = COLOR_EMERALD_DEEP
-                    elif r_idx % 2 == 1:
-                        cell.fill.fore_color.rgb = COLOR_WHITE
+                    elif c_idx == 1:
+                        cell.fill.fore_color.rgb = hex_to_rgb('FFF9EE') # Amber tint for Shirk Akbar
+                    elif c_idx == 2:
+                        cell.fill.fore_color.rgb = hex_to_rgb('EAF4EE') # Sage tint for Shirk Asghar
                     else:
-                        cell.fill.fore_color.rgb = hex_to_rgb('F4EFE6')
+                        cell.fill.fore_color.rgb = COLOR_WHITE
 
                     cp = cell.text_frame.paragraphs[0]
                     set_p_rtl(cp)
@@ -551,30 +567,30 @@ def build_presentation(analysis_json_path, output_pptx_path):
             continue
 
         # ==========================================
-        # SPECIAL CASE: Slide 27 (Four Fortresses - Unified RTL Cards)
+        # Slide 27: Four Fortresses (4 Distinct Colors: Honey, Sage, Sky, Lavender)
         # ==========================================
         if idx == 27:
             add_header_elements(slide, "خلاصة تربوية: كيف يحمي المسلم نفسه من الشركين؟", "المؤمن الصادق لا يأمن على نفسه الفتنة؛ فإذا كان إبراهيم  يدعو: «واجنبني وبني أن نعبد الأصنام»، فكيف بنا؟")
 
             forts = [
-                ("الحصن الأول", "العلم الشرعي المؤصل", "دراسة التوحيد ونواقضه وقوادحه، حتى لا يقع في الشرك وهو يظنه تعظيماً أو محبة أو توسلاً مشروعاً."),
-                ("الحصن الثاني", "المجاهدة في الإخلاص", "مراقبة النية قبل العمل وأثناءه وبعده، وتطهير القلب تماماً من التطلع إلى مدح الناس وريائهم."),
-                ("الحصن الثالث", "ضبط الألفاظ والمعتقدات", "تطهير اللسان من الحلف بغير الله وألفاظ التسوية، وتطهير القلب من التشاؤم والتمائم والأوهام."),
-                ("الحصن الرابع", "الالتجاء الدائم بالدعاء", "«اللهم إني أعوذ بك أن أشرك بك وأنا أعلم، وأستغفرك لما لا أعلم». دعاء نبوي حصين يحمي من دبيب الشرك.")
+                ("الحصن الأول", "العلم الشرعي المؤصل", "دراسة التوحيد ونواقضه وقوادحه، حتى لا يقع في الشرك وهو يظنه تعظيماً أو محبة أو توسلاً مشروعاً.", THEME_HONEY),
+                ("الحصن الثاني", "المجاهدة في الإخلاص", "مراقبة النية قبل العمل وأثناءه وبعده، وتطهير القلب تماماً من التطلع إلى مدح الناس وريائهم.", THEME_SAGE),
+                ("الحصن الثالث", "ضبط الألفاظ والمعتقدات", "تطهير اللسان من الحلف بغير الله وألفاظ التسوية، وتطهير القلب من التشاؤم والتمائم والأوهام.", THEME_SKY),
+                ("الحصن الرابع", "الالتجاء الدائم بالدعاء", "«اللهم إني أعوذ بك أن أشرك بك وأنا أعلم، وأستغفرك لما لا أعلم». دعاء نبوي حصين يحمي من دبيب الشرك.", THEME_LAVENDER)
             ]
 
             card_w = 2.75
             gap = 0.24
             top_y = 1.95
-            card_h = 4.7
+            card_h = 4.8
 
-            for f_idx, (b_txt, t_txt, desc_txt) in enumerate(forts):
+            for f_idx, (b_txt, t_txt, desc_txt, thm) in enumerate(forts):
                 x_pos = 0.8 + (3 - f_idx) * (card_w + gap)
 
                 card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x_pos), Inches(top_y), Inches(card_w), Inches(card_h))
                 card.fill.solid()
-                card.fill.fore_color.rgb = COLOR_WHITE
-                card.line.color.rgb = COLOR_CARD_BORDER
+                card.fill.fore_color.rgb = hex_to_rgb(thm["bg"])
+                card.line.color.rgb = hex_to_rgb(thm["border"])
                 card.line.width = Pt(1.5)
 
                 tf = card.text_frame
@@ -590,7 +606,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_b.font.name = "Cairo"
                 p_b.font.size = Pt(13)
                 p_b.font.bold = True
-                p_b.font.color.rgb = COLOR_GOLD
+                p_b.font.color.rgb = hex_to_rgb(thm["badge"])
                 p_b.text = b_txt
                 p_b.space_after = Pt(8)
 
@@ -600,7 +616,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_t.font.name = "Cairo"
                 p_t.font.size = Pt(18)
                 p_t.font.bold = True
-                p_t.font.color.rgb = COLOR_EMERALD_DARK
+                p_t.font.color.rgb = hex_to_rgb(thm["title"])
                 p_t.text = t_txt
                 p_t.space_after = Pt(12)
 
@@ -614,7 +630,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
             continue
 
         # ==========================================
-        # SPECIAL CASE: Slide 29 (Conclusion - 3 Pillars RTL)
+        # Slide 29: Conclusion (Honey, Sage, Sky)
         # ==========================================
         if idx == 29:
             add_header_elements(slide, "الخاتمة: من العلم إلى اليقين والعمل", "الصورة كاملة ناصعة البياض — أصول النجاة الثلاثة")
@@ -623,32 +639,36 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 {
                     "num": "١",
                     "title": "الله سبحانه وتعالى",
-                    "body": "الرب الخالق المالك المدبر الذي ربى جميع العالمين بنعمه، تشهد بربوبيته وعظمته كل آية في الآفاق وفي الأنفس، ولا رب ولا خالق سواه."
+                    "body": "الرب الخالق المالك المدبر الذي ربى جميع العالمين بنعمه، تشهد بربوبيته وعظمته كل آية في الآفاق وفي الأنفس، ولا رب ولا خالق سواه.",
+                    "theme": THEME_HONEY
                 },
                 {
                     "num": "٢",
                     "title": "حقه الأعظم على عباده",
-                    "body": "إفراده سبحانه بالألوهية والعبادة الظاهرة والباطنة، بلا ند ولا شريك في دعاء أو رجاء أو خوف أو توكل أو ذبح أو نذر."
+                    "body": "إفراده سبحانه بالألوهية والعبادة الظاهرة والباطنة، بلا ند ولا شريك في دعاء أو رجاء أو خوف أو توكل أو ذبح أو نذر.",
+                    "theme": THEME_SAGE
                 },
                 {
                     "num": "٣",
                     "title": "الإقرار المجرد لا يكفي",
-                    "body": "لا ينجي الإقرار بالربوبية ما لم يثمر استسلاماً وانقياداً لأمر الله وإخلاصاً للعبودية؛ فالمشركون أقروا بالخلق وعذبوا بالشرك."
+                    "body": "لا ينجي الإقرار بالربوبية ما لم يثمر استسلاماً وانقياداً لأمر الله وإخلاصاً للعبودية؛ فالمشركون أقروا بالخلق وعذبوا بالشرك.",
+                    "theme": THEME_SKY
                 }
             ]
 
             card_w = 3.65
             gap = 0.39
             top_y = 1.95
-            card_h = 4.7
+            card_h = 4.8
 
             for i, p_info in enumerate(final_pillars):
                 x_pos = 0.8 + (2 - i) * (card_w + gap)
+                thm = p_info["theme"]
 
                 card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x_pos), Inches(top_y), Inches(card_w), Inches(card_h))
                 card.fill.solid()
-                card.fill.fore_color.rgb = COLOR_WHITE
-                card.line.color.rgb = COLOR_CARD_BORDER
+                card.fill.fore_color.rgb = hex_to_rgb(thm["bg"])
+                card.line.color.rgb = hex_to_rgb(thm["border"])
                 card.line.width = Pt(1.5)
 
                 tf = card.text_frame
@@ -664,7 +684,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_num.font.name = "Cairo"
                 p_num.font.size = Pt(28)
                 p_num.font.bold = True
-                p_num.font.color.rgb = COLOR_GOLD
+                p_num.font.color.rgb = hex_to_rgb(thm["badge"])
                 p_num.text = p_info["num"]
                 p_num.space_after = Pt(8)
 
@@ -674,7 +694,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 p_t.font.name = "Cairo"
                 p_t.font.size = Pt(22)
                 p_t.font.bold = True
-                p_t.font.color.rgb = COLOR_EMERALD_DARK
+                p_t.font.color.rgb = hex_to_rgb(thm["title"])
                 p_t.text = p_info["title"]
                 p_t.space_after = Pt(14)
 
@@ -688,8 +708,15 @@ def build_presentation(analysis_json_path, output_pptx_path):
             continue
 
         # ==========================================
-        # GENERAL SLIDE RENDERING (With RTL horizontal columns & unified styling)
+        # GENERAL SLIDE RENDERING (With Distinct Soft Backgrounds)
         # ==========================================
+        # Identify columns
+        col_shapes = [sh for sh in shapes_info if (sh['width'] / 914400.0) < 10.0 and sh.get('text', '').strip()]
+        distinct_xs = sorted(set(round(sh['left'] / 914400.0, 1) for sh in col_shapes))
+        col_count = len(distinct_xs)
+
+        theme_palette = [THEME_HONEY, THEME_SAGE, THEME_SKY, THEME_LAVENDER]
+
         for sh_idx, sh in enumerate(shapes_info):
             raw_text = sh.get('text', '').strip()
             if not raw_text:
@@ -731,7 +758,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                     if is_sacred_text(raw_text):
                         qbox = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(top_in), Inches(11.733), Inches(max(height_in, 0.95)))
                         qbox.fill.solid()
-                        qbox.fill.fore_color.rgb = COLOR_WHITE
+                        qbox.fill.fore_color.rgb = hex_to_rgb('FFF9EE')
                         qbox.line.color.rgb = COLOR_GOLD
                         qbox.line.width = Pt(1.5)
                         qtf = qbox.text_frame
@@ -759,10 +786,15 @@ def build_presentation(analysis_json_path, output_pptx_path):
                 rtl_left = TOTAL_WIDTH - left_in - width_in
                 rtl_left = max(0.6, min(rtl_left, 12.5))
 
+                # Determine card color based on horizontal column
+                x_round = round(left_in, 1)
+                c_idx = distinct_xs.index(x_round) if x_round in distinct_xs else 0
+                thm = theme_palette[c_idx % len(theme_palette)]
+
                 if raw_text in ['١', '٢', '٣', '٤']:
                     badge = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(rtl_left), Inches(top_in), Inches(width_in), Inches(height_in))
                     badge.fill.solid()
-                    badge.fill.fore_color.rgb = COLOR_EMERALD_DEEP
+                    badge.fill.fore_color.rgb = hex_to_rgb(thm["border"])
                     badge.line.color.rgb = COLOR_GOLD
                     badge.line.width = Pt(1.5)
                     btf = badge.text_frame
@@ -772,13 +804,13 @@ def build_presentation(analysis_json_path, output_pptx_path):
                     bp.font.name = "Cairo"
                     bp.font.size = Pt(22)
                     bp.font.bold = True
-                    bp.font.color.rgb = COLOR_GOLD
+                    bp.font.color.rgb = COLOR_WHITE
                     bp.text = raw_text
                 elif height_in > 0.4:
                     card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(rtl_left), Inches(top_in), Inches(width_in), Inches(height_in))
                     card.fill.solid()
-                    card.fill.fore_color.rgb = COLOR_WHITE
-                    card.line.color.rgb = COLOR_CARD_BORDER
+                    card.fill.fore_color.rgb = hex_to_rgb(thm["bg"])
+                    card.line.color.rgb = hex_to_rgb(thm["border"])
                     card.line.width = Pt(1.2)
                     ctf = card.text_frame
                     ctf.word_wrap = True
@@ -790,7 +822,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                         cp.font.name = "Cairo"
                         cp.font.size = Pt(18)
                         cp.font.bold = True
-                        cp.font.color.rgb = COLOR_EMERALD_DARK
+                        cp.font.color.rgb = hex_to_rgb(thm["title"])
                     else:
                         cp.font.name = "Traditional Arabic"
                         cp.font.size = Pt(16)
@@ -806,7 +838,7 @@ def build_presentation(analysis_json_path, output_pptx_path):
                     p.font.name = "Cairo" if len(raw_text) < 40 else "Traditional Arabic"
                     p.font.size = Pt(16)
                     p.font.bold = (len(raw_text) < 40)
-                    p.font.color.rgb = COLOR_EMERALD_DARK if len(raw_text) < 40 else COLOR_TEXT_DARK
+                    p.font.color.rgb = hex_to_rgb(thm["title"]) if len(raw_text) < 40 else COLOR_TEXT_DARK
                     p.text = raw_text
 
     os.makedirs(os.path.dirname(output_pptx_path), exist_ok=True)
