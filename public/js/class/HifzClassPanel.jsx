@@ -16,11 +16,14 @@
     }
 
     // planItem: today's planned range; the page controls stay inside it.
-    function HifzClassPanel({ ctx, planItem }) {
+    // tasmee: the recitation session, kept by the class so it survives leaving
+    // this panel.
+    function HifzClassPanel({ ctx, planItem, tasmee }) {
       const recitation = ctx.hifzViewMode === 'interactive_test';
       const page = ctx.mushafPageNumber;
       const surahs = typeof MUSHAF_SURAHS_PAGE_MAP !== 'undefined' ? MUSHAF_SURAHS_PAGE_MAP : [];
       const currentSurah = surahs.filter((s) => s.startPage <= page).pop();
+      const [studentsOpen, setStudentsOpen] = useState(false);
 
       return (
         <>
@@ -28,6 +31,7 @@
             <div className="flex flex-wrap gap-1.5">
               <button type="button" className={classPill(!recitation)} onClick={() => ctx.setHifzViewMode('mushaf_page')}>📖 وجه المصحف</button>
               <button type="button" className={classPill(recitation)} onClick={() => ctx.handleNavigateMushafPage(page, 'interactive_test')}>🎧 لوحة التسميع</button>
+              <button type="button" className={classPill(tasmee.active)} onClick={() => tasmee.setActive(!tasmee.active)}>📝 تسجيل أخطاء التسميع</button>
             </div>
 
             {planItem && (page < planItem.fromPage || page > planItem.toPage) && (
@@ -62,7 +66,9 @@
             {recitation ? <RecitationControls ctx={ctx} /> : <MushafMaskControls ctx={ctx} />}
           </section>
 
-          <HifzTeacherText ctx={ctx} />
+          {tasmee.active && <TasmeeCounter session={tasmee} ctx={ctx} onOpenStudents={() => setStudentsOpen(true)} />}
+          <HifzTeacherText ctx={ctx} tasmee={tasmee} />
+          {studentsOpen && <MyStudents lockedId={tasmee.mistakes.length ? tasmee.studentId : null} onClose={() => { setStudentsOpen(false); tasmee.reloadStudents(); }} />}
           <MutashabihatNotes items={ctx.hifzMutashabihat} />
         </>
       );
@@ -136,7 +142,12 @@
 
     // The whole page for the teacher: what is hidden from the students is
     // highlighted in yellow, hidden ayahs are veiled, never removed.
-    function HifzTeacherText({ ctx }) {
+    function HifzTeacherText({ ctx, tasmee }) {
+      const [pick, setPick] = useState(null);
+      const marking = tasmee && tasmee.active && !!tasmee.student;
+      // A chooser left open must not mark a word of the previous page.
+      useEffect(() => setPick(null), [ctx.mushafPageNumber]);
+      const marked = new Set(marking ? tasmee.mistakes.filter((m) => m.key).map((m) => m.key) : []);
       const masks = {
         isEndingsMasked: ctx.isEndingsMasked, isStartersMasked: ctx.isStartersMasked, isDivineNamesMasked: ctx.isDivineNamesMasked,
         isAlternatingMasked: ctx.isAlternatingMasked, isFullMasked: ctx.isFullMasked, revealedAyahs: ctx.revealedAyahSet,
@@ -147,6 +158,7 @@
       return (
         <section className="bg-[#FFFDF9] rounded-2xl p-4 border-2 border-gold-400/50">
           <h4 className="font-black text-emerald-900 text-sm mb-2">📜 النص الكامل للمعلم فقط{ctx.isFetchingQuran ? ' (جارٍ التحميل…)' : ''}</h4>
+          {marking && pick && <TasmeeWordChooser pick={pick} onCancel={() => setPick(null)} onChoose={(type) => { tasmee.add(type, pick.word, pick.ayah, pick.key); setPick(null); }} />}
           <div className="font-quran text-2xl leading-[2.2] text-right text-black" dir="rtl">
             {ctx.hifzAyahs.map((ayah) => {
               const words = ayah.text.split(' ');
@@ -155,7 +167,9 @@
                 <span key={ayahKey(ayah)} className={'font-quran ' + (hiddenAyah ? 'opacity-40' : '')}>
                   {words.map((w, i) => {
                     const masked = recitation && isRecitationWordMasked(ayahKey(ayah), words, i, masks);
-                    return <span key={i} className={'font-quran ' + (masked ? 'bg-amber-200 rounded px-0.5' : '')}>{w} </span>;
+                    const key = ayahKey(ayah) + '-' + i;
+                    const cls = 'font-quran ' + (marked.has(key) ? 'bg-rose-200 rounded px-0.5 ' : masked ? 'bg-amber-200 rounded px-0.5 ' : '') + (marking ? 'cursor-pointer hover:bg-emerald-100 rounded' : '');
+                    return <span key={i} className={cls} onClick={marking ? () => setPick({ word: w, ayah: ayah.num, key }) : undefined}>{w} </span>;
                   })}
                   <span className="font-quran text-gold-600">﴿{ayah.num}﴾ </span>
                 </span>
@@ -163,6 +177,7 @@
             })}
           </div>
           {recitation && <p className="text-xs text-slate-500 mt-2">الأصفر: مخفي عن الطلاب. الباهت: آية مقفلة عندهم.</p>}
+          {marking && <p className="text-xs text-slate-500 mt-1">الوردي: كلمة سُجّل فيها خطأ في هذا الوجه.</p>}
         </section>
       );
     }

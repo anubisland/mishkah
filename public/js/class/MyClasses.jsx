@@ -7,6 +7,9 @@
       const [saveError, setSaveError] = useState(null);
       const [planning, setPlanning] = useState(null); // the class whose plan is open
       const [title, setTitle] = useState('');
+      const [students, setStudents] = useState(loadStudents);
+      const [studentId, setStudentId] = useState('');
+      const [studentsOpen, setStudentsOpen] = useState(false);
       // Tomorrow in the teacher's own time zone (toISOString would give UTC).
       const [day, setDay] = useState(() => {
         const t = new Date(Date.now() + 86400000);
@@ -29,8 +32,9 @@
         }
         setAddError(null);
         const at = when.toISOString();
-        commit(list.concat([{ id: 'c' + Date.now().toString(36), title: title.trim(), at, plan: null, preparedAt: null }]));
+        commit(list.concat([{ id: 'c' + Date.now().toString(36), title: title.trim(), studentId: studentId || null, at, plan: null, preparedAt: null }]));
         setTitle('');
+        setStudentId('');
       };
 
       const upcoming = upcomingClasses(list);
@@ -40,7 +44,8 @@
         <div className="fixed inset-0 z-[65] bg-black/50 flex items-center justify-center p-3" dir="rtl">
           <div className="bg-[#f8f6ef] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[94vh] overflow-y-auto p-5 space-y-4 border-2 border-gold-400">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-black text-emerald-950">📅 حصصي</h3>
+              <h3 className="text-xl font-black text-emerald-950 ml-auto">📅 حصصي</h3>
+              <button type="button" onClick={() => setStudentsOpen(true)} className="px-3 py-1 rounded-xl border-2 border-emerald-900/20 font-bold ml-2">👥 طلابي</button>
               <button type="button" onClick={onClose} className="px-3 py-1 rounded-xl border border-slate-300 font-bold">✕</button>
             </div>
             {saveError && <p className="text-rose-700 font-bold bg-rose-50 border border-rose-200 rounded-xl p-2">{saveError}</p>}
@@ -48,13 +53,21 @@
             <section className="bg-white rounded-2xl p-4 border border-emerald-900/10 space-y-2">
               <h4 className="font-black text-emerald-950">➕ إضافة حصة</h4>
               <div className="flex flex-wrap items-center gap-2">
-                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="اسم الحلقة أو الطالبة"
+                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="اسم الحلقة أو الطالب"
                   className="flex-1 min-w-[160px] border-2 border-emerald-900/15 rounded-xl px-3 py-1.5 font-bold" />
+                {students.length > 0 && (
+                  <select value={studentId} onChange={(e) => { setStudentId(e.target.value); const st = students.find((x) => x.id === e.target.value); if (st && !title.trim()) setTitle(st.name); }}
+                    className="border-2 border-emerald-900/15 rounded-xl px-2 py-1.5 font-bold min-w-0 max-w-full" title="يُسجَّل تسميع هذه الحصة في سجل الطالب">
+                    <option value="">الطالب (اختياري)</option>
+                    {students.map((st) => <option key={st.id} value={st.id}>{st.name}</option>)}
+                  </select>
+                )}
                 <input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="border-2 border-emerald-900/15 rounded-xl px-2 py-1.5" />
                 <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="border-2 border-emerald-900/15 rounded-xl px-2 py-1.5" />
                 <button type="button" onClick={addClass} disabled={!title.trim()} className="px-4 py-1.5 rounded-xl bg-emerald-900 text-gold-200 font-black disabled:opacity-40">إضافة</button>
               </div>
               {addError && <p className="text-rose-700 font-bold text-sm">{addError}</p>}
+              {studentsOpen && <MyStudents onClose={() => { setStudentsOpen(false); setStudents(loadStudents()); }} />}
             </section>
 
             {upcoming.length === 0 && <p className="text-center text-slate-600 py-4">لا توجد حصص قادمة. بإضافة الحصة القادمة هنا تُجهَّز خطتها من الآن.</p>}

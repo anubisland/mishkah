@@ -1090,6 +1090,8 @@
       const [classPlan, setClassPlan] = useState(null);
       const [myClassesOpen, setMyClassesOpen] = useState(false);
       const [guideOpen, setGuideOpen] = useState(false);
+      // The student of the class now running, so recitation goes to their record.
+      const [classStudentId, setClassStudentId] = useState('');
       const [planNowFor, setPlanNowFor] = useState(null); // { title } while planning a class to start now
       const [scheduleVersion, setScheduleVersion] = useState(0);
       useEffect(() => {
@@ -1601,10 +1603,12 @@
         const due = loadClassSchedule()
           .filter((c) => c.plan && Math.abs(new Date(c.at).getTime() - now) <= window2h)
           .sort((a, b) => Math.abs(new Date(a.at).getTime() - now) - Math.abs(new Date(b.at).getTime() - now))[0];
+        setClassStudentId(due ? (due.studentId || '') : '');
         if (due) beginClass(due.plan);
         else setPlanNowFor({ title: '' });
       };
       const startScheduledClass = (cls) => {
+        setClassStudentId(cls.studentId || '');
         if (cls.plan) beginClass(cls.plan);
         else setPlanNowFor({ title: cls.title });
       };
@@ -1633,7 +1637,7 @@
         openGuide: () => setGuideOpen(true),
         openStudio: () => { setActiveTab('islamic'); setSlideStudioOpen(true); }
       };
-      const classCtx = { activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, handleArrangeStudentWindow, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
+      const classCtx = { activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, handleArrangeStudentWindow, classStudentId, hifzSurahName, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
 
       return (
         <div className="min-h-screen flex flex-col islamic-screen-pattern">

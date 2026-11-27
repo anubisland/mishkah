@@ -77,6 +77,23 @@
       const studentBeside = ctx.studentScreenOpen && !teacherFillsScreen;
       const fillsScreen = ctx.studentScreenOpen && teacherFillsScreen && !fullWidthHintHidden;
       const [previewAnyway, setPreviewAnyway] = useState(false);
+      // Mistakes counted in تسميع stay while the teacher steps out to the full
+      // program or another section.
+      const tasmee = useTasmeeSession(ctx);
+      // Mistakes counted on the open page are offered for saving before the
+      // class ends, rather than lost.
+      const endClass = () => {
+        if (tasmee.mistakes.length) {
+          const who = tasmee.student ? tasmee.student.name : null;
+          if (who && window.confirm('في العدّاد أخطاء لم تُحفظ لهذه الصفحة. حفظها في سجل ' + who + ' قبل إنهاء الحصة؟')) {
+            const error = tasmee.finish(tasmee.total < tasmee.limit ? 'passed' : 'repeat');
+            if (error) { window.alert('لم تُحفظ الأخطاء، والحصة باقية: ' + error); return; }
+          } else if (!window.confirm('إنهاء الحصة دون حفظ أخطاء هذه الصفحة؟ (إلغاء: البقاء في الحصة)')) {
+            return;
+          }
+        }
+        onEnd();
+      };
 
       // The class starts on the plan's first item.
       useEffect(() => {
@@ -156,7 +173,7 @@
       );
       const panels = (
         <>
-          {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={planItem} />}
+          {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={planItem} tasmee={tasmee} />}
           {section === 'tajweed' && <TajweedClassPanel ctx={ctx} planItem={planItem} />}
           {section === 'islamic' && <LectureClassPanel ctx={ctx} index={lectureIndex} setIndex={setLectureIndex} onOpenStudio={() => { setMinimized(true); ctx.setSlideStudioOpen(true); }} />}
           <ClassHistory history={history} currentKey={classStageKey(stage)} onRestore={restore} />
@@ -182,7 +199,7 @@
             {!ctx.studentScreenOpen && (
               <button type="button" onClick={ctx.handleOpenStudentPopout} className="px-3 py-1.5 rounded-xl text-sm font-black bg-rose-600 text-white">🖥️ فتح شاشة الطالب</button>
             )}
-            <button type="button" onClick={onEnd} className="px-3 py-1.5 rounded-xl text-sm font-bold text-gold-200 border-2 border-gold-400/60">■ إنهاء الحصة</button>
+            <button type="button" onClick={endClass} className="px-3 py-1.5 rounded-xl text-sm font-bold text-gold-200 border-2 border-gold-400/60">■ إنهاء الحصة</button>
           </div>
           {planItems.length > 0 && (
             <div className="shrink-0 bg-emerald-950 px-3 py-2 flex gap-2 overflow-x-auto">

@@ -7,6 +7,7 @@
     function StudentStage({ previewStage }) {
       const liveStage = useLiveStage();
       const isPreview = previewStage !== undefined;
+      useStudentAlertListener(!isPreview);
       const stage = isPreview ? previewStage : liveStage;
 
       useEffect(() => {
