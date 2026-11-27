@@ -172,6 +172,9 @@
               </button>
             ))}
             <button type="button" onClick={() => setMinimized(true)} className="px-3 py-1.5 rounded-xl text-sm font-bold bg-white/90 text-emerald-950 border-2 border-white" title="البرنامج الكامل، والحصة مستمرة">⚙️ كل الأدوات</button>
+            {ctx.studentScreenOpen && (
+              <button type="button" onClick={ctx.handleArrangeStudentWindow} className="px-3 py-1.5 rounded-xl text-sm font-bold bg-emerald-900/70 text-emerald-50 border-2 border-emerald-700" title="يعيد شاشة الطالب إلى النصف الأيسر وفوق النوافذ الأخرى">🖥️ إظهار شاشة الطالب</button>
+            )}
             {!ctx.studentScreenOpen && (
               <button type="button" onClick={ctx.handleOpenStudentPopout} className="px-3 py-1.5 rounded-xl text-sm font-black bg-rose-600 text-white">🖥️ فتح شاشة الطالب</button>
             )}

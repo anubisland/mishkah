@@ -746,16 +746,16 @@
             if (window.pdfjsLib) {
               let loadingTask;
               try {
-                loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+                loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer, isEvalSupported: false });
               } catch (ltErr) {
-                loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer, disableWorker: true });
+                loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer, disableWorker: true, isEvalSupported: false });
               }
               let pdf;
               try {
                 pdf = await loadingTask.promise;
               } catch (promErr) {
                 // Retry in workerless mode if worker construction failed
-                loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer, disableWorker: true });
+                loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer, disableWorker: true, isEvalSupported: false });
                 pdf = await loadingTask.promise;
               }
               let pagesText = [];
