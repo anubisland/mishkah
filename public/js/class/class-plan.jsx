@@ -5,6 +5,7 @@
     // plan = { createdAt, items: [item] }, in teaching order
     // item = { type: 'hifz', hifzMode: 'tasmee' | 'tahfeez' (older plans: none),
     //          surahId, surahName, fromAyah, toAyah, fromPage, toPage }
+    //          (a part chosen by pages has fromAyah/toAyah null; surah = the first page's)
     //      | { type: 'tajweed', lessonIds: [id] }
     //      | { type: 'lecture', deckTitle }
     const CLASS_PLAN_KEY = 'mishkah_class_plan';
@@ -30,11 +31,18 @@
       }
     }
 
+    // «سورة الملك 1–10», or for a part chosen by pages «الصفحات 300–301 (من سورة الكهف)».
+    function hifzItemPlace(item) {
+      if (item.fromAyah != null) return item.surahName + ' ' + item.fromAyah + '–' + item.toAyah;
+      const pages = item.fromPage === item.toPage ? 'صفحة ' + item.fromPage : 'الصفحات ' + item.fromPage + '–' + item.toPage;
+      return pages + ' (من ' + item.surahName + ')';
+    }
+
     function classPlanItemLabel(item) {
       if (item.type === 'hifz') {
         const pages = item.fromPage === item.toPage ? 'صفحة ' + item.fromPage : 'الصفحات ' + item.fromPage + '–' + item.toPage;
         const kind = item.hifzMode === 'tahfeez' ? '📖 تحفيظ: ' : item.hifzMode === 'tasmee' ? '🎧 تسميع: ' : '🎧 ';
-        return kind + item.surahName + ' ' + item.fromAyah + '–' + item.toAyah + ' (' + pages + ')';
+        return kind + hifzItemPlace(item) + (item.fromAyah == null ? '' : ' (' + pages + ')');
       }
       if (item.type === 'tajweed') {
         const titles = item.lessonIds.map((id) => (SUWAYD_TAJWEED_CURRICULUM.find((l) => l.id === id) || {}).titleAr).filter(Boolean);

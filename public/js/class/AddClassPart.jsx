@@ -6,10 +6,14 @@
       const lastHifz = planItems.filter((it) => it.type === 'hifz').pop();
       const suggest = () => {
         if (!lastHifz) return newHifzPart('tahfeez');
+        if (lastHifz.fromAyah == null) {
+          const next = Math.min(604, lastHifz.toPage + 1);
+          return Object.assign(newHifzPart('tahfeez'), { byPage: true, fromPage: next, toPage: next });
+        }
         const surah = surahs.find((s) => s.id === lastHifz.surahId);
         const next = lastHifz.toAyah + 1;
         if (surah && next <= surah.totalAyahs) {
-          return { hifzMode: 'tahfeez', surahId: surah.id, fromAyah: next, toAyah: surah.totalAyahs };
+          return Object.assign(newHifzPart('tahfeez', surah.id), { fromAyah: next, toAyah: surah.totalAyahs });
         }
         return newHifzPart('tahfeez', lastHifz.surahId);
       };
@@ -21,12 +25,7 @@
         setBusy(true);
         setError('');
         try {
-          const part = parts[0];
-          const surah = surahs.find((s) => s.id === part.surahId) || surahs[0];
-          const a = Math.min(part.fromAyah, part.toAyah);
-          const b = Math.max(part.fromAyah, part.toAyah);
-          const pages = await resolveHifzPages(surah.id, a, b);
-          onAdd({ type: 'hifz', hifzMode: part.hifzMode, surahId: surah.id, surahName: 'سورة ' + surah.name, fromAyah: a, toAyah: b, fromPage: pages.fromPage, toPage: pages.toPage });
+          onAdd(await hifzPartToItem(parts[0], surahs));
         } catch (e) {
           console.warn('Mishkah: could not add the class part', e);
           setError('تعذّر تحديد صفحات هذه الآيات. يلزم الاتصال بالإنترنت، ثم المحاولة مرة أخرى.');

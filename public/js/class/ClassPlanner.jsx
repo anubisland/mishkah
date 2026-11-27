@@ -14,7 +14,7 @@
       const [useHifz, setUseHifz] = useState(initialPlan ? initHifzParts.length > 0 : true);
       // Recitation of earlier pages usually opens the class.
       const [hifzParts, setHifzParts] = useState(initHifzParts.length
-        ? initHifzParts.map((it) => ({ hifzMode: it.hifzMode || 'tasmee', surahId: it.surahId, fromAyah: it.fromAyah, toAyah: it.toAyah }))
+        ? initHifzParts.map(hifzItemToPart)
         : [newHifzPart('tasmee')]);
       const [useTajweed, setUseTajweed] = useState(!!initTajweed);
       const [lessonIds, setLessonIds] = useState(initTajweed ? initTajweed.lessonIds : []);
@@ -32,13 +32,7 @@
           const items = chosen || [];
           if (!chosen) {
             if (useHifz) {
-              for (const part of hifzParts) {
-                const surah = surahs.find((s) => s.id === part.surahId) || surahs[0];
-                const a = Math.min(part.fromAyah, part.toAyah);
-                const b = Math.max(part.fromAyah, part.toAyah);
-                const pages = await resolveHifzPages(surah.id, a, b);
-                items.push({ type: 'hifz', hifzMode: part.hifzMode, surahId: surah.id, surahName: 'سورة ' + surah.name, fromAyah: a, toAyah: b, fromPage: pages.fromPage, toPage: pages.toPage });
-              }
+              for (const part of hifzParts) items.push(await hifzPartToItem(part, surahs));
             }
             if (useTajweed && lessonIds.length) items.push({ type: 'tajweed', lessonIds: SUWAYD_TAJWEED_CURRICULUM.map((l) => l.id).filter((id) => lessonIds.includes(id)) });
             if (useLecture) {

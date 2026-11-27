@@ -44,7 +44,7 @@
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" className={classPill(false)} disabled={page <= planItem.fromPage} onClick={() => ctx.handleNavigateMushafPage(page - 1)}>→ السابقة</button>
                 <span className="flex-1 text-center font-black text-emerald-950 text-sm">
-                  {planItem.surahName} {planItem.fromAyah}–{planItem.toAyah} • صفحة {page}
+                  {hifzItemPlace(planItem)} • صفحة {page}
                   {planItem.toPage > planItem.fromPage && page >= planItem.fromPage && page <= planItem.toPage ? ' (' + (page - planItem.fromPage + 1) + ' من ' + (planItem.toPage - planItem.fromPage + 1) + ')' : ''}
                 </span>
                 <button type="button" className={classPill(true)} disabled={page >= planItem.toPage} onClick={() => ctx.handleNavigateMushafPage(page + 1)}>التالية ←</button>
