@@ -29,8 +29,8 @@
                     </div>
 
                     {/* SubView Tabs Switcher: Workbench vs My Library */}
-                    <div className="flex items-center gap-2">
-                      <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="bg-slate-100 p-1 rounded-xl flex flex-wrap items-center border border-slate-200">
                         <button
                           type="button"
                           onClick={() => setIslamicSubView('workbench')}

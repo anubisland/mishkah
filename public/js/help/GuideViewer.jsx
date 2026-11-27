@@ -120,10 +120,10 @@
       return (
         <div className="fixed inset-0 z-[75] bg-black/50 flex items-center justify-center p-3" dir="rtl">
           <div className="bg-[#f8f6ef] rounded-3xl shadow-2xl w-full max-w-5xl h-[92vh] flex flex-col border-2 border-gold-400 overflow-hidden">
-            <div className="shrink-0 emerald-pattern px-4 py-3 flex items-center gap-3">
+            <div className="shrink-0 emerald-pattern px-4 py-3 flex flex-wrap items-center gap-2 sm:gap-3">
               <h3 className="text-gold-200 font-black text-xl ml-auto">❓ دليل الاستخدام</h3>
               <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="بحث في الدليل"
-                className="w-48 sm:w-64 rounded-xl px-3 py-1.5 text-emerald-950 font-bold" />
+                className="order-last sm:order-none w-full sm:w-64 rounded-xl px-3 py-1.5 text-emerald-950 font-bold" />
               <button type="button" onClick={onClose} className="px-3 py-1.5 rounded-xl border-2 border-gold-400/60 text-gold-200 font-bold">✕ إغلاق</button>
             </div>
             {error && <p className="m-4 text-rose-700 font-bold bg-rose-50 border border-rose-200 rounded-xl p-3">{error}</p>}
