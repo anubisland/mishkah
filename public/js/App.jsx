@@ -1658,7 +1658,7 @@
           {planNowFor && (
             <ClassPlanner mode="start" title={planNowFor.title} onStart={beginClass} onClose={() => setPlanNowFor(null)} />
           )}
-          {splitHintOpen && <SplitScreenHint onClose={() => setSplitHintOpen(false)} />}
+          {splitHintOpen && <SplitScreenHint onClose={() => { setSplitHintOpen(false); handleArrangeStudentWindow(); }} />}
 
           {slideStudioOpen && (
             <DeckStudio

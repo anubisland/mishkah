@@ -67,7 +67,11 @@
               {mac ? (
                 <p>بالضغط مطولاً على الزر الأخضر أعلى نافذة المتصفح، ثم اختيار «وضع النافذة على يمين الشاشة».</p>
               ) : (
-                <p>بالضغط على هذه النافذة، ثم الضغط معاً على <kbd className="px-2 py-0.5 rounded bg-slate-200 border font-mono">⊞ Windows</kbd> + <kbd className="px-2 py-0.5 rounded bg-slate-200 border font-mono">→</kbd></p>
+                <>
+                  <p>1. الضغط معاً على <kbd dir="ltr" className="px-2 py-0.5 rounded bg-slate-200 border font-mono">⊞ Windows + →</kbd></p>
+                  <p>2. سيعرض ويندوز صوراً صغيرة للنوافذ في النصف الأيسر: الضغط على صورة <b>«مِشكاة | شاشة الطالب»</b> فتستقر فيه.</p>
+                  <p className="text-sm text-slate-600">وإن اختفت شاشة الطالب خلف نافذة أخرى: زر <b>🖥️ إظهار شاشة الطالب</b> أعلى لوحة الحصة يعيدها.</p>
+                </>
               )}
               <p className="text-sm text-slate-600 mt-1">وفي زوم: تُشارَك نافذة «مِشكاة | شاشة الطالب» وحدها.</p>
             </div>
