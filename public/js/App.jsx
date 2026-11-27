@@ -148,7 +148,7 @@
         if (preloaded) {
           setHifzPassageId(preloaded.id);
           setHifzAyahs(preloaded.ayahs);
-          setHifzMutashabihat(getMutashabihatForPageNumber(p, sMatch?.id));
+          setHifzMutashabihat(getMutashabihatForPageNumber(p, sMatch?.id, preloaded.ayahs));
           setHifzSurahName(preloaded.surahAr);
           setHifzAyahRange(preloaded.ayahRange);
           setPassageTestSection('none');
@@ -170,7 +170,7 @@
               setHifzAyahs(parsed.ayahs);
               setHifzSurahName(parsed.surahName);
               setHifzAyahRange(parsed.ayahRange);
-              setHifzMutashabihat(getMutashabihatForPageNumber(p, sMatch?.id));
+              setHifzMutashabihat(getMutashabihatForPageNumber(p, sMatch?.id, parsed.ayahs));
               setHifzPassageId('page_' + p);
               setPassageTestSection('none');
               setPassageMaskedAyahs(new Set());
@@ -215,7 +215,7 @@
             ? firstAyah + ' إلى ' + lastShort + ' ' + lastAyah + ' (صفحة ' + p + ')'
             : firstAyah + '–' + lastAyah + ' (صفحة ' + p + ')';
 
-          const pageMutashabihat = getMutashabihatForPageNumber(p, sMatch?.id);
+          const pageMutashabihat = getMutashabihatForPageNumber(p, sMatch?.id, mappedAyahs);
           const pageData = {
             ayahs: mappedAyahs,
             surahName: (primarySurah.startsWith('سُورَةُ') ? primarySurah : 'سورة ' + primarySurah) + (twoSurahs ? (new Set(rawAyahs.map((a) => a.surah.number)).size > 2 ? ' إلى ' : ' و') + lastShort : ''),
