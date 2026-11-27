@@ -191,6 +191,7 @@
           {fillsScreen && (
             <div className="shrink-0 bg-gold-100 text-emerald-950 px-3 py-2 flex flex-wrap items-center gap-2 text-sm font-bold border-b-2 border-gold-400">
               <span className="flex-1">🖥️ نافذة المعلم تملأ الشاشة وتغطي شاشة الطالب. لوضعها في النصف الأيمن: {isMacComputer() ? 'الضغط مطولاً على الزر الأخضر أعلى النافذة ثم «وضع النافذة على يمين الشاشة»' : <>الضغط معاً على <span dir="ltr" className="inline-block px-1.5 rounded bg-white border font-mono">⊞ Windows + →</span></>}</span>
+              <button type="button" onClick={ctx.handleArrangeStudentWindow} className="px-3 py-1 rounded-lg bg-white border-2 border-gold-400 text-emerald-950 font-black">↩ شاشة الطالب إلى النصف الأيسر</button>
               <button type="button" onClick={() => setFullWidthHintHidden(true)} className="px-3 py-1 rounded-lg bg-emerald-900 text-gold-200 font-black">إخفاء</button>
             </div>
           )}
