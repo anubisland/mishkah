@@ -26,7 +26,12 @@
         throw new Error('not a list');
       } catch (e) {
         console.warn('Mishkah: saved list is unreadable, kept aside: ' + key, e);
-        try { if (saved) localStorage.setItem(key + '_unreadable_' + Date.now(), saved); } catch (e2) { console.warn('Mishkah: could not keep the unreadable list aside', e2); }
+        // Kept once under a fixed name, then the broken value is cleared, so
+        // reading again never piles up copies.
+        try {
+          if (saved && localStorage.getItem(key + '_unreadable') !== saved) localStorage.setItem(key + '_unreadable', saved);
+          localStorage.setItem(key, '[]');
+        } catch (e2) { console.warn('Mishkah: could not keep the unreadable list aside', e2); }
         return [];
       }
     }

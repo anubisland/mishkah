@@ -83,9 +83,15 @@
       // Mistakes counted on the open page are offered for saving before the
       // class ends, rather than lost.
       const endClass = () => {
-        if (tasmee.mistakes.length && tasmee.student &&
-          window.confirm('في العدّاد أخطاء لم تُحفظ لهذه الصفحة. حفظها في سجل ' + tasmee.student.name + ' قبل إنهاء الحصة؟') &&
-          !tasmee.finish(tasmee.total < tasmee.limit ? 'passed' : 'repeat')) return;
+        if (tasmee.mistakes.length) {
+          const who = tasmee.student ? tasmee.student.name : null;
+          if (who && window.confirm('في العدّاد أخطاء لم تُحفظ لهذه الصفحة. حفظها في سجل ' + who + ' قبل إنهاء الحصة؟')) {
+            const error = tasmee.finish(tasmee.total < tasmee.limit ? 'passed' : 'repeat');
+            if (error) { window.alert('لم تُحفظ الأخطاء، والحصة باقية: ' + error); return; }
+          } else if (!window.confirm('إنهاء الحصة دون حفظ أخطاء هذه الصفحة؟ (إلغاء: البقاء في الحصة)')) {
+            return;
+          }
+        }
         onEnd();
       };
 

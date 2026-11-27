@@ -8,6 +8,9 @@
     let alertAudio = null;
     // Resolves to true when the chime played.
     async function playAlertChime() {
+      try { return await playChimeNow(); } catch (e) { console.warn('Mishkah: the alert could not play', e); return false; }
+    }
+    async function playChimeNow() {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return false;
       if (!alertAudio) alertAudio = new Ctx();

@@ -1,6 +1,8 @@
     // «طلابي»: the teacher's students, each with a usual mistake limit and the
     // record of pages recited from memory, so progress shows from class to class.
-    function MyStudents({ onClose }) {
+    // lockedId: the student whose mistakes are being counted now; they cannot
+    // be deleted until the page is saved.
+    function MyStudents({ onClose, lockedId }) {
       const [students, setStudents] = useState(loadStudents);
       const [name, setName] = useState('');
       const [openId, setOpenId] = useState(null);
@@ -46,7 +48,15 @@
                     <button type="button" onClick={() => setOpenId(openId === s.id ? null : s.id)} className="px-3 py-1.5 rounded-xl border-2 border-emerald-900/20 font-bold text-sm">
                       {openId === s.id ? 'إخفاء السجل' : '📈 السجل'}
                     </button>
-                    <button type="button" onClick={() => { if (window.confirm('حذف «' + s.name + '» وسجل تسميعه كله؟ لا يمكن التراجع عن ذلك.')) { const err = deleteStudentRecords(s.id); if (err) setError(err); else commit(students.filter((x) => x.id !== s.id)); } }}
+                    <button type="button" onClick={() => {
+                        if (s.id === lockedId) { setError('لا يُحذف «' + s.name + '» الآن: في العدّاد أخطاء له لم تُحفظ بعد.'); return; }
+                        if (!window.confirm('حذف «' + s.name + '» وسجل تسميعه كله؟ لا يمكن التراجع عن ذلك.')) return;
+                        const list = students.filter((x) => x.id !== s.id);
+                        const err = saveStudents(list);
+                        if (err) { setError(err); return; }
+                        setStudents(list);
+                        setError(deleteStudentRecords(s.id) || '');
+                      }}
                       className="px-2 py-1.5 rounded-xl text-rose-700 font-bold text-sm">🗑 حذف</button>
                   </div>
                   {openId === s.id && <StudentRecord studentId={s.id} />}

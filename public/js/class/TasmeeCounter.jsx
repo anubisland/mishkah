@@ -74,14 +74,15 @@
           setMistakes((list) => list.concat([{ type, word: word || '', ayah: ayah || null, key: key || null }]));
         },
         undo: () => setMistakes((list) => list.slice(0, -1)),
-        // Returns true when saved.
+        // Returns null when saved, or the reason it was not.
         finish: (result) => {
           const error = saveRecord(ctx.mushafPageNumber, result);
-          if (error) { setMessage(error); return false; }
+          if (error) { setMessage(error); return error; }
           setMistakes([]);
           setMessage(result === 'passed' ? '✓ حُفظ: ينتقل إلى الوجه التالي.' : '↻ حُفظ: يُعاد الوجه.');
-          return true;
-        }
+          return null;
+        },
+        discard: () => setMistakes([])
       };
     }
 

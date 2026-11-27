@@ -68,7 +68,7 @@
 
           {tasmee.active && <TasmeeCounter session={tasmee} ctx={ctx} onOpenStudents={() => setStudentsOpen(true)} />}
           <HifzTeacherText ctx={ctx} tasmee={tasmee} />
-          {studentsOpen && <MyStudents onClose={() => { setStudentsOpen(false); tasmee.reloadStudents(); }} />}
+          {studentsOpen && <MyStudents lockedId={tasmee.mistakes.length ? tasmee.studentId : null} onClose={() => { setStudentsOpen(false); tasmee.reloadStudents(); }} />}
           <MutashabihatNotes items={ctx.hifzMutashabihat} />
         </>
       );
