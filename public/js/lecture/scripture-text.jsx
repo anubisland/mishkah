@@ -191,8 +191,12 @@
 
     // Distill a slide scripture into a clean, golden, uncluttered witness (1-3 lines max, perfect for presentation slides)
     function distillSlideScripture(rawScripture, sectionContext = '') {
-      if ((!rawScripture || typeof rawScripture !== 'string') && !sectionContext) return '';
-      const combined = ((rawScripture || '') + ' ' + (sectionContext || '')).trim();
+      // Only text the lecture itself cites is tidied here; a section title
+      // alone never brings in an ayah or hadith.
+      if (!rawScripture || typeof rawScripture !== 'string' || !rawScripture.trim()) return '';
+      // Matched on the cited text alone: the section title must not swap it
+      // for a different ayah or hadith.
+      const combined = (rawScripture || '').trim();
       let s = normalizeIslamicSacredTerms(rawScripture || '').trim();
 
       const nCombined = combined
