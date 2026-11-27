@@ -69,10 +69,14 @@
       const wide = bodyWidth >= 900;
       const previewWidth = wide ? Math.floor(bodyWidth * 0.5) : bodyWidth;
       const [fullWidthHintHidden, setFullWidthHintHidden] = useState(false);
-      // Browsers do not let the page move its own window, so the teacher is
-      // reminded how to snap it when it covers the student window.
-      const fillsScreen = ctx.studentScreenOpen && !fullWidthHintHidden && window.screen &&
-        window.outerWidth > (window.screen.availWidth || 0) * 0.7;
+      // Two ways to teach: the teacher window beside the student window (the
+      // student window is already on screen, so no preview here), or the
+      // teacher window filling the screen with the student window behind it
+      // (Zoom still shares it while it is not minimised; the preview shows it).
+      const teacherFillsScreen = !!window.screen && window.outerWidth > (window.screen.availWidth || 0) * 0.7;
+      const studentBeside = ctx.studentScreenOpen && !teacherFillsScreen;
+      const fillsScreen = ctx.studentScreenOpen && teacherFillsScreen && !fullWidthHintHidden;
+      const [previewAnyway, setPreviewAnyway] = useState(false);
 
       // The class starts on the plan's first item.
       useEffect(() => {
@@ -193,8 +197,7 @@
           )}
           {fillsScreen && (
             <div className="shrink-0 bg-gold-100 text-emerald-950 px-3 py-2 flex flex-wrap items-center gap-2 text-sm font-bold border-b-2 border-gold-400">
-              <span className="flex-1">🖥️ نافذة المعلم تملأ الشاشة وتغطي شاشة الطالب. لوضعها في النصف الأيمن: {isMacComputer() ? 'الضغط مطولاً على الزر الأخضر أعلى النافذة ثم «وضع النافذة على يمين الشاشة»' : <>الضغط معاً على <span dir="ltr" className="inline-block px-1.5 rounded bg-white border font-mono">⊞ Windows + →</span></>}</span>
-              <button type="button" onClick={ctx.handleArrangeStudentWindow} className="px-3 py-1 rounded-lg bg-white border-2 border-gold-400 text-emerald-950 font-black">↩ شاشة الطالب إلى النصف الأيسر</button>
+              <span className="flex-1">🖥️ شاشة الطالب خلف هذه النافذة، والطلاب في زوم يرونها ما دامت غير مصغّرة. وما يرونه ظاهر هنا في «ما يراه الطلاب الآن».</span>
               <button type="button" onClick={() => setFullWidthHintHidden(true)} className="px-3 py-1 rounded-lg bg-emerald-900 text-gold-200 font-black">إخفاء</button>
             </div>
           )}
@@ -207,7 +210,15 @@
                 <div className="shrink-0 overflow-y-auto" style={{ width: previewWidth }}>{preview}</div>
               </>
             ) : (
-              <>{preview}{panels}</>
+              <>
+                {studentBeside && !previewAnyway ? (
+                  <div className="bg-white rounded-2xl px-3 py-2 border border-emerald-900/10 flex flex-wrap items-center gap-2 text-sm">
+                    <span className="flex-1 font-bold text-emerald-900">👁️ ما يراه الطلاب ظاهر في نافذة شاشة الطالب بجوار هذه النافذة.</span>
+                    <button type="button" onClick={() => setPreviewAnyway(true)} className="px-3 py-1 rounded-lg border-2 border-emerald-900/20 font-bold text-emerald-900">عرضه هنا أيضاً</button>
+                  </div>
+                ) : preview}
+                {panels}
+              </>
             )}
           </div>
         </div>
