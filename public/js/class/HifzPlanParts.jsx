@@ -26,7 +26,8 @@
       if (part.byPage) {
         const fromPage = Math.min(part.fromPage, part.toPage);
         const toPage = Math.max(part.fromPage, part.toPage);
-        const surah = surahs.filter((s) => s.startPage <= fromPage).pop() || surahs[0];
+        // The surah at the top of the first page (a page can hold several).
+        const surah = surahs.find((s) => s.startPage <= fromPage && s.endPage >= fromPage) || surahs[0];
         return { type: 'hifz', hifzMode: part.hifzMode, surahId: surah.id, surahName: 'سورة ' + surah.name, fromAyah: null, toAyah: null, fromPage, toPage };
       }
       const surah = surahs.find((s) => s.id === part.surahId) || surahs[0];
