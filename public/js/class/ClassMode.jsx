@@ -77,6 +77,9 @@
       const studentBeside = ctx.studentScreenOpen && !teacherFillsScreen;
       const fillsScreen = ctx.studentScreenOpen && teacherFillsScreen && !fullWidthHintHidden;
       const [previewAnyway, setPreviewAnyway] = useState(false);
+      // Mistakes counted in تسميع stay while the teacher steps out to the full
+      // program or another section.
+      const tasmee = useTasmeeSession(ctx);
 
       // The class starts on the plan's first item.
       useEffect(() => {
@@ -156,7 +159,7 @@
       );
       const panels = (
         <>
-          {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={planItem} />}
+          {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={planItem} tasmee={tasmee} />}
           {section === 'tajweed' && <TajweedClassPanel ctx={ctx} planItem={planItem} />}
           {section === 'islamic' && <LectureClassPanel ctx={ctx} index={lectureIndex} setIndex={setLectureIndex} onOpenStudio={() => { setMinimized(true); ctx.setSlideStudioOpen(true); }} />}
           <ClassHistory history={history} currentKey={classStageKey(stage)} onRestore={restore} />
