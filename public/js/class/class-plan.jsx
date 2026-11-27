@@ -36,7 +36,7 @@
       }
       if (item.type === 'tajweed') {
         const titles = item.lessonIds.map((id) => (SUWAYD_TAJWEED_CURRICULUM.find((l) => l.id === id) || {}).titleAr).filter(Boolean);
-        return '🎙️ ' + titles.join('، ');
+        return '🎙️ ' + (titles.join('، ') || 'درس تجويد');
       }
       if (item.type === 'lecture') return '🎞️ محاضرة: ' + (item.deckTitle || 'العرض المجهّز');
       return '';

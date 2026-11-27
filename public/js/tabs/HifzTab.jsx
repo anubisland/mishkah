@@ -117,7 +117,7 @@
                           >
                             {MUSHAF_SURAHS_PAGE_MAP.map(s => (
                               <option key={s.id} value={s.id}>
-                                {s.id}. {isRtl ? 'سورة ' + s.name : 'Surah ' + (s.englishName || s.name)} ({isRtl ? 'صفحة ' : 'Page '} {s.startPage})
+                                {s.id}. {isRtl ? 'سورة ' + s.name : 'Surah ' + ((ALL_QURAN_SURAHS.find(x => x.id === s.id) || {}).en || s.name)} ({isRtl ? 'صفحة ' : 'Page '} {s.startPage})
                               </option>
                             ))}
                           </select>

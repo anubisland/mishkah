@@ -37,7 +37,7 @@
         } catch (err) {
           console.warn('Using client fallback:', err.message);
           setTajweedData(getFallbackTajweed());
-          if (!isInitial) showToast(isRtl ? 'تم التحميل من قاعدة البيانات الموثقة 💡' : 'Loaded from Verified Local Curriculum 💡');
+          if (!isInitial) showToast(isRtl ? 'عُرض نموذج محفوظ: سورة الملك 1–10 على حكم الإخفاء ⚠️' : 'Showing the stored sample: Al-Mulk 1–10, Ikhfaa ⚠️');
         } finally {
           setIsGeneratingTajweed(false);
         }
@@ -46,8 +46,9 @@
       function getFallbackTajweed() {
         return {
           metadata: {
-            surah: surahName || 'سورة الملك (Al-Mulk)',
-            ayahRange: ayahRange || '1–10',
+            // The stored sample is always Al-Mulk 1–10 on Ikhfaa, whatever was asked.
+            surah: 'سورة الملك (Al-Mulk)',
+            ayahRange: '1–10',
             ruleNameAr: 'الإخفاء الحقيقي (Al-Ikhfaa Al-Haqiqi)',
             ruleNameEn: 'True Concealment (Ikhfaa)',
             languageMode: tajweedMode,
