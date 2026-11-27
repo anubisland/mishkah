@@ -29,7 +29,7 @@
             <button type="button" onClick={() => s.navigate('dashboard')} className="flex items-center gap-3 min-w-0 text-right" title={s.isRtl ? 'الرئيسية' : 'Home'}>
               <img src="icons/mishkah-app-icon.jpg" alt="" className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border-2 border-gold-400 shrink-0" />
               <span className="min-w-0">
-                <span className="block font-amiri font-bold text-gold-200 leading-none text-[2rem] sm:text-[2.6rem]">{s.isRtl ? 'مِشكاة' : 'Mishkah'}</span>
+                <span className="block font-amiri font-bold text-gold-200 leading-none text-[1.75rem] sm:text-[2.6rem] whitespace-nowrap">{s.isRtl ? 'مِشكاة' : 'Mishkah'}</span>
                 <span className="block text-emerald-100/90 text-xs sm:text-sm font-bold mt-1 truncate">{s.isRtl ? APP_TAGLINE_AR : APP_TAGLINE_EN}</span>
               </span>
             </button>

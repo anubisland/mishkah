@@ -94,12 +94,12 @@
                         {/* Header Banner - Dr. Ayman Suwayd Certified Workbench */}
                         <div className="card-islamic-pearl rounded-3xl p-6 border-2 border-emerald-900/15 shadow-md">
                           <div className="flex flex-wrap items-center justify-between gap-4 pb-4 mb-5 border-b border-emerald-900/10">
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
                               <span className="w-12 h-12 rounded-2xl bg-emerald-900 text-gold-300 flex items-center justify-center text-2xl font-black shadow-md border border-gold-400">
                                 📖
                               </span>
-                              <div>
-                                <div className="flex items-center gap-2">
+                              <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-2">
                                   <h2 className="text-xl sm:text-2xl font-black text-emerald-950 font-cairo">
                                     {isRtl ? 'حقيبة التجويد المصور — فهرس الدروس المعتمدة (د. أيمن رشدي سويد)' : 'Illustrated Tajweed Curriculum — Lessons Catalog'}
                                   </h2>
@@ -155,7 +155,7 @@
                             <div className="space-y-3 pt-1">
                               {/* Search Bar */}
                               <div className="flex flex-wrap items-center justify-between gap-3">
-                                <div className="relative flex-1 min-w-[240px] max-w-md">
+                                <div className="relative flex-1 min-w-0 sm:min-w-[240px] max-w-md">
                                   <input
                                     type="text"
                                     value={suwaydSearchQuery}
@@ -1817,7 +1817,7 @@
 
                         {/* 2. Speed and Audio Options */}
                         <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-50/80 p-3 rounded-2xl border border-emerald-200 mb-6 text-xs">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2 min-w-0">
                             <span className="font-bold text-emerald-950 font-cairo">{isRtl ? 'سرعة التلاوة:' : 'Pace:'}</span>
                             {[
                               { id: 'tahqeeq', labelAr: 'تحقيق (بطيء)' },

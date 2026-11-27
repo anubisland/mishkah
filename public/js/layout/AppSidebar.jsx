@@ -35,10 +35,10 @@
     function AppSidebar({ s }) {
       const [collapsed, toggle] = useSidebarCollapsed();
       const item = (active) => 'relative w-full flex items-center gap-3 rounded-xl font-bold transition ' +
-        (collapsed ? 'justify-center px-0 py-3 text-2xl' : 'px-3 py-2.5 text-base') + ' ' +
+        (collapsed ? 'justify-center px-0 py-2 sm:py-3 text-xl sm:text-2xl' : 'px-3 py-2.5 text-base') + ' ' +
         (active ? 'bg-emerald-900 text-gold-200 shadow' : 'text-emerald-950 hover:bg-emerald-900/10');
       return (
-        <aside className={'no-print shrink-0 border-l-2 border-gold-400/40 bg-white/45 sticky top-0 self-start h-screen flex flex-col p-2 gap-1 transition-all ' + (collapsed ? 'w-16' : 'w-52')}>
+        <aside className={'no-print shrink-0 border-l-2 border-gold-400/40 bg-white/45 sticky top-0 self-start h-screen flex flex-col p-1 sm:p-2 gap-1 transition-all ' + (collapsed ? 'w-12 sm:w-16' : 'w-52')}>
           {APP_SECTIONS.map((sec) => {
             const active = sec.id === 'classes' ? s.myClassesOpen : (s.activeTab === sec.id && !s.myClassesOpen);
             return (

@@ -20,7 +20,7 @@
 
                     {/* Authentic Mode Switcher Bar */}
                     <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-emerald-800/80">
-                      <div className="bg-emerald-950 p-1.5 rounded-2xl border-2 border-gold-400 flex items-center gap-2 shadow-lg">
+                      <div className="bg-emerald-950 p-1.5 rounded-2xl border-2 border-gold-400 flex flex-wrap items-center gap-2 shadow-lg">
                         {/* 1. Printed Mushaf Page (Primary Default) */}
                         <button
                           type="button"
@@ -102,7 +102,7 @@
                     <div className="card-islamic-pearl rounded-2xl p-4 shadow-sm border border-emerald-800/15 flex flex-wrap items-center justify-between gap-3">
                       <div className="flex flex-wrap items-center gap-3">
                         {/* Surah Dropdown */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 min-w-0 max-w-full">
                           <span className="text-xs font-bold text-emerald-950">{isRtl ? 'السورة المباركة:' : 'Surah:'}</span>
                           <select
                             value={mushafCurrentSurahId}
@@ -113,7 +113,7 @@
                                 handleNavigateMushafPage(surahItem.startPage);
                               }
                             }}
-                            className="bg-white border-2 border-emerald-700/40 rounded-xl px-3 py-1.5 text-xs text-emerald-950 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                            className="max-w-full min-w-0 bg-white border-2 border-emerald-700/40 rounded-xl px-3 py-1.5 text-xs text-emerald-950 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-700"
                           >
                             {MUSHAF_SURAHS_PAGE_MAP.map(s => (
                               <option key={s.id} value={s.id}>
@@ -628,9 +628,9 @@
                       {/* Mode 2 Synchronized Quran Page Navigator (Full 604-Page Freedom & Twin Sync) */}
                       <div className="w-full bg-emerald-950/5 border-2 border-gold-400/60 rounded-2xl p-3.5 mb-5 space-y-3">
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div className="flex flex-wrap items-center gap-3">
+                          <div className="flex flex-wrap items-center gap-3 min-w-0 max-w-full">
                             {/* Surah Dropdown in Mode 2 */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2 min-w-0 max-w-full">
                               <span className="text-xs font-bold text-emerald-950">{isRtl ? 'السورة المباركة:' : 'Surah:'}</span>
                               <select
                                 value={mushafCurrentSurahId}
@@ -641,7 +641,7 @@
                                     handleNavigateMushafPage(surahItem.startPage);
                                   }
                                 }}
-                                className="bg-white border-2 border-emerald-700/40 rounded-xl px-3 py-1.5 text-xs text-emerald-950 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                                className="max-w-full min-w-0 bg-white border-2 border-emerald-700/40 rounded-xl px-3 py-1.5 text-xs text-emerald-950 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-700"
                               >
                                 {MUSHAF_SURAHS_PAGE_MAP.map(s => (
                                   <option key={s.id} value={s.id}>
@@ -707,7 +707,7 @@
                             </button>
 
                             {/* Font Size Toggle */}
-                            <div className="flex items-center gap-1 bg-white border border-slate-300 rounded-xl px-2 py-1 text-xs shadow-xs">
+                            <div className="flex flex-wrap items-center gap-1 bg-white border border-slate-300 rounded-xl px-2 py-1 text-xs shadow-xs">
                               <span className="text-[11px] font-bold text-slate-500">{isRtl ? 'الخط:' : 'Font:'}</span>
                               {['small', 'medium', 'large'].map(sz => (
                                 <button
@@ -877,7 +877,7 @@
                       )}
 
 {/* Repetition Loop Counter */}
-                        <div className="flex items-center gap-2 bg-emerald-950 text-gold-200 rounded-xl px-3 py-1.5 border border-gold-400/40 text-xs shadow-sm">
+                        <div className="flex flex-wrap items-center gap-2 bg-emerald-950 text-gold-200 rounded-xl px-3 py-1.5 border border-gold-400/40 text-xs shadow-sm">
                           <span>🔁 {isRtl ? 'عدد مرات التكرار:' : 'Loop:'}</span>
                           <div className="flex items-center gap-1">
                             {[3, 5, 7].map(num => (

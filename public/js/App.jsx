@@ -1673,7 +1673,7 @@
           {/* The sections menu beside the page content. */}
           <div className="flex-1 flex items-stretch">
           <AppSidebar s={headerCtx} />
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 min-w-0 w-full">
+          <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8 flex-1 min-w-0 w-full">
 
             {/* ================= VIEW: DASHBOARD ================= */}
             {activeTab === 'dashboard' && <HomeTab h={homeCtx} />}
