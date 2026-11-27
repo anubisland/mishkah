@@ -11,7 +11,8 @@
       return { hifzMode, surahId: surahId || 67, fromAyah: 1, toAyah: 10 };
     }
 
-    function HifzPlanParts({ parts, setParts, surahs }) {
+    // single: one part only (adding a part during class).
+    function HifzPlanParts({ parts, setParts, surahs, single }) {
       const update = (i, change) => setParts(parts.map((p, j) => (j === i ? Object.assign({}, p, change) : p)));
       const add = (hifzMode) => setParts(parts.concat([newHifzPart(hifzMode, parts.length ? parts[parts.length - 1].surahId : 67)]));
 
@@ -43,10 +44,10 @@
               </div>
             );
           })}
-          <div className="flex flex-wrap gap-2">
+          {!single && <div className="flex flex-wrap gap-2">
             <button type="button" onClick={() => add('tasmee')} className="px-3 py-1.5 rounded-xl border-2 border-emerald-900/20 font-bold text-sm">➕ تسميع</button>
             <button type="button" onClick={() => add('tahfeez')} className="px-3 py-1.5 rounded-xl border-2 border-emerald-900/20 font-bold text-sm">➕ تحفيظ جديد</button>
-          </div>
+          </div>}
         </div>
       );
     }

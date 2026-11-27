@@ -1653,7 +1653,8 @@
           {/* TOP GRAND EMERALD HEADER */}
           <AppHeader s={headerCtx} />
 
-          {classModeOpen && <ClassMode ctx={classCtx} plan={classPlan} onEnd={() => setClassModeOpen(false)} />}
+          {classModeOpen && <ClassMode ctx={classCtx} plan={classPlan} onEnd={() => setClassModeOpen(false)}
+            onAddPlanItem={(item) => setClassPlan((p) => Object.assign({ createdAt: Date.now() }, p, { items: ((p && p.items) || []).concat([item]) }))} />}
           {guideOpen && <GuideViewer onClose={() => setGuideOpen(false)} />}
           {myClassesOpen && (
             <MyClasses onStartClass={startScheduledClass} onStartUnscheduled={() => setPlanNowFor({ title: '' })}

@@ -68,11 +68,12 @@
       }
     }
 
-    function ClassMode({ ctx, plan, onEnd }) {
+    function ClassMode({ ctx, plan, onEnd, onAddPlanItem }) {
       const section = CLASS_SECTIONS.some((s) => s.id === ctx.activeTab) ? ctx.activeTab : 'hifz';
       const planItems = (plan && plan.items) || [];
       // The part opened last; a class may have several hifz parts.
       const [itemIndex, setItemIndex] = useState(0);
+      const [addingPart, setAddingPart] = useState(false);
       const openedItem = planItems[itemIndex];
       // Back in a section from elsewhere: the hifz part holding the open page.
       const sectionItems = planItems.filter((it) => PLAN_SECTION[it.type] === section);
@@ -224,6 +225,7 @@
           {planItems.length > 0 && (
             <div className="shrink-0 bg-emerald-950 px-3 py-2 flex gap-2 overflow-x-auto">
               <span className="text-gold-300 font-black text-sm self-center shrink-0">📋 جدول الحصة:</span>
+              <button type="button" onClick={() => setAddingPart(true)} className="shrink-0 px-3 py-1.5 rounded-xl text-sm font-bold border-2 border-dashed border-gold-400/70 text-gold-200">➕ جزء جديد</button>
               {planItems.map((it, i) => (
                 <button key={i} type="button" onClick={() => { setItemIndex(i); openPlanItem(ctx, it, setLectureIndex, tasmee); }}
                   className={'shrink-0 px-3 py-1.5 rounded-xl text-sm font-bold border-2 ' + (it === planItem ? 'bg-gold-400 text-emerald-950 border-gold-200' : 'bg-emerald-900 text-emerald-50 border-emerald-700')}>
@@ -231,6 +233,14 @@
                 </button>
               ))}
             </div>
+          )}
+          {addingPart && (
+            <AddClassPart planItems={planItems} onClose={() => setAddingPart(false)} onAdd={(item) => {
+              onAddPlanItem(item);
+              setAddingPart(false);
+              setItemIndex(planItems.length);
+              openPlanItem(ctx, item, setLectureIndex, tasmee);
+            }} />
           )}
           {fillsScreen && (
             <div className="shrink-0 bg-gold-100 text-emerald-950 px-3 py-2 flex flex-wrap items-center gap-2 text-sm font-bold border-b-2 border-gold-400">
