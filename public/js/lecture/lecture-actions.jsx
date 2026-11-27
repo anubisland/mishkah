@@ -12,7 +12,7 @@
             const valid = rawSentences.map(s => s.replace(/^[#*\-•\s\d\.\)\:،]+/, '').trim()).filter(s => s.length >= 25 && s.length <= 130);
             if (valid.length > 0) return valid[0];
           }
-          return `تأصيل مسائل (${st}) وبيان مقتضاها المنهجي والتربوي في الشريعة`;
+          return st ? `تأصيل مسائل (${st}) وبيان مقتضاها المنهجي والتربوي في الشريعة` : '';
         };
       };
       const synthesizeSubstantiveStatement = getSynthesizeSubstantiveStatement();
@@ -588,21 +588,13 @@
               englishTranslation: 'Authentic Prophetic Hadith Extracted from Lecture',
               citation: h.source,
               narrator: h.narrator,
-              grading: h.grading || 'صحيح'
+              grading: h.grading || ''
             });
           });
         }
 
-        if (allEvidences.length === 0) {
-          allEvidences.push({
-            type: 'quran',
-            arabicText: 'يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ ٱتَّقُوا۟ ٱللَّهَ وَقُولُوا۟ قَوْلًۭا سَدِيدًۭا',
-            englishTranslation: 'O you who have believed, fear Allah and speak words of appropriate justice.',
-            citation: 'سورة الأحزاب: 70',
-            narrator: '—',
-            grading: 'متواتر قطعي الثبوت'
-          });
-        }
+        // No evidence in the lecture means none is shown: an ayah the
+        // lecture never cited is not added as if it had.
 
         // Build Dynamic 10-Line WhatsApp Broadcast Summary from actual lecture modules:
         // Build Dynamic 10-Line WhatsApp Broadcast Summary from actual lecture modules (strictly unique points):
@@ -611,27 +603,21 @@
           const numEmojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
           let stmt = synthesizeSubstantiveStatement(sec.title, sec.lines.join(' '));
           if (usedStatements.has(stmt)) {
-            // Provide a varied pedagogical takeaway based on index and title
-            const altFallbacks = [
-              'استقرار العقيدة في القلب يثمر طمأنينة النفس ورسوخ اليقين عند ورود الفتن',
-              'العقيدة هي الأساس المحكم الذي تُبنى عليه سائر الأحكام والأعمال الصالحة',
-              'سلامة المعتقد تثمر الاستقامة التامة في السلوك وحسن المعاملة مع الخلق',
-              'الاعتصام بنصوص الوحي المعصوم يحفظ العقل من الشبهات والضلالات الفكرية',
-              'اليقين بحكمة الله وسننه في خلقه يورث الرضا التام والتوكل الصادق'
-            ];
-            stmt = altFallbacks[i % altFallbacks.length];
+            // A repeated point is dropped rather than replaced by a stock
+            // sentence that may not belong to this lecture's topic.
+            return null;
           }
           usedStatements.add(stmt);
           const cleanT = cleanSlideTitle(sec.title).replace(/[\(（\[]\s*$/, '');
           return `${numEmojis[i] || '▫️'} *${cleanT}:* ${stmt}`;
-        }).join('\n');
+        }).filter(Boolean).join('\n');
 
-        const bestAyah = (allEvidences.find(e => e.type === 'quran')?.arabicText) || '﴿يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَالَّذِينَ أُوتُوا الْعِلْمَ دَرَجَاتٍ﴾ [المجادلة: 11]';
+        const bestAyah = (allEvidences.find(e => e.type === 'quran')?.arabicText) || '';
         const bestAction = blueprintPhases[0]?.practicalImpact || `التطبيق العملي لمسائل (${topic}) في واقعنا اليومي والاعتزاز بالهدي النبوي الشريف.`;
 
         const dynamicWhatsAppSummary = {
           headline: `🌿 خلاصة درس اليوم: ${topic} 🌿`,
-          formattedText: `السلام عليكم ورحمة الله وبركاته يا أحبة 🌸\n\n📌 *موضوع حلقتنا اليوم:* ${topic}\n\n✨ *أهم الفوائد والمعالم المستفادة:*\n${whatsappBullets}\n\n📖 *آية اللقاء للتأمل والتدبر:* ${bestAyah}\n\n🎯 *الواجب والتطبيق السلوكي:* ${bestAction}\n\n🔗 *رابط الاختبار الذاتي القصير للمدارسة في منصة مشكاة:* حفظكم الله جميعاً وبارك في أوقاتكم! 🤍`,
+          formattedText: `السلام عليكم ورحمة الله وبركاته يا أحبة 🌸\n\n📌 *موضوع حلقتنا اليوم:* ${topic}\n\n✨ *أهم الفوائد والمعالم المستفادة:*\n${whatsappBullets}${bestAyah ? '\n\n📖 *آية اللقاء للتأمل والتدبر:* ' + bestAyah : ''}\n\n🎯 *الواجب والتطبيق السلوكي:* ${bestAction}\n\n🔗 *رابط الاختبار الذاتي القصير للمدارسة في منصة مشكاة:* حفظكم الله جميعاً وبارك في أوقاتكم! 🤍`,
           actionItem: 'شاركونا عبر المجموعة تطبيقكم العملي لدرس اليوم!'
         };
 
@@ -927,7 +913,9 @@ function getFallbackIslamic() {
         return {
           metadata: {
             category: subjectCategory,
-            topic: lessonTopic,
+            // A stored sample (faith and the Jibreel hadith), not the requested
+            // topic, so it is labelled as such.
+            topic: 'نموذج محفوظ: أركان الإيمان (ليس موضوع ' + (lessonTopic || 'المحاضرة') + ')',
             durationMinutes: lessonDuration,
             audienceLevel: audienceLevel,
             languageMode: 'bilingual'

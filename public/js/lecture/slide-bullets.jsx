@@ -208,7 +208,7 @@
       }
 
       // Priority 2: Pedagogical synthesis based on clean title
-      return `تأصيل مسائل (${st}) وبيان مقتضاها المنهجي والتربوي في الشريعة`;
+      return st ? `تأصيل مسائل (${st}) وبيان مقتضاها المنهجي والتربوي في الشريعة` : '';
     }
 
     if (typeof window !== 'undefined') {

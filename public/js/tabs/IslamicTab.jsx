@@ -172,7 +172,7 @@
                                     {lec.data.metadata.category}
                                   </span>
                                   <span className="text-[10px] text-slate-400">
-                                    ⏱️ {lec.data.metadata.durationMinutes} د • {lec.savedAt}
+                                    {(lec.data.metadata.durationMinutes || lec.data.metadata.duration) ? '⏱️ ' + (lec.data.metadata.durationMinutes || lec.data.metadata.duration) + ' د • ' : ''}{/^\d{4}-\d{2}-\d{2}T/.test(lec.savedAt || '') ? new Date(lec.savedAt).toLocaleDateString('ar-EG') : lec.savedAt}
                                   </span>
                                 </div>
                                 <h4 className="font-extrabold text-emerald-950 text-sm font-cairo leading-snug">
@@ -966,7 +966,7 @@
                             </span>
                           </div>
                           <span className="text-xs text-slate-500 font-bold">
-                            {islamicData.metadata.category} • {islamicData.metadata.durationMinutes} دقيقة • {islamicData.metadata.audience}
+                            {[islamicData.metadata.category, (islamicData.metadata.durationMinutes || islamicData.metadata.duration) ? (islamicData.metadata.durationMinutes || islamicData.metadata.duration) + ' دقيقة' : '', islamicData.metadata.audience || islamicData.metadata.audienceLevel].filter(Boolean).join(' • ')}
                           </span>
                         </div>
                       </div>
@@ -1233,18 +1233,18 @@
                             <div key={idx} className="bg-white/90 rounded-2xl p-4 border border-gold-300 shadow-xs">
                               <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                                 <span className="bg-emerald-900 text-gold-200 text-xs px-3 py-1 rounded-full font-bold">
-                                  {hd.source || hd.citation || 'صحيح البخاري'}
+                                  {hd.source || hd.citation || 'بلا تخريج'}
                                 </span>
                                 <span className="text-xs font-bold text-slate-600">
-                                  {isRtl ? 'الراوي / الشاهد:' : 'Narrator:'} {hd.narrator || 'الصحابي الجليل'}
+                                  {isRtl ? 'الراوي / الشاهد:' : 'Narrator:'} {hd.narrator || '—'}
                                 </span>
                               </div>
                               <p className="font-amiri text-sm sm:text-base text-emerald-950 font-medium leading-relaxed my-2">
                                 {formatScriptureDisplay(hd.text || hd.arabicText)}
                               </p>
                               <div className="text-xs text-slate-600 font-amiri pt-2 border-t border-slate-100 flex items-center justify-between">
-                                <span><strong>{isRtl ? 'التخريج والحكم:' : 'Grade:'}</strong> {hd.ruling || hd.grading || 'صحيح معتمد'}</span>
-                                <span className="text-emerald-800 font-bold">✓ صحيح معتمد</span>
+                                <span><strong>{isRtl ? 'التخريج والحكم:' : 'Grade:'}</strong> {hd.ruling || hd.grading || 'لم يُحدَّد'}</span>
+                                {(hd.ruling || hd.grading) ? <span className="text-emerald-800 font-bold">✓ {hd.ruling || hd.grading}</span> : null}
                               </div>
                             </div>
                           ))}

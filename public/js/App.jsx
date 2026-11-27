@@ -834,7 +834,8 @@
           : (islamicData.blueprint || []).map((b, idx) => ({
             num: idx + 1,
             topic: b.phaseNameAr || ('المحور ' + (idx + 1)),
-            scripture: b.scripture || (islamicData.hadithVerification && islamicData.hadithVerification[0]?.text) || (islamicData.evidences && islamicData.evidences[0]?.arabicText) || 'الدليل الشرعي المعتمد',
+            // Each axis shows only its own evidence; one hadith is not copied to all.
+            scripture: b.scripture || '',
             studentQuestion: b.studentQuestion || ('ما المستفاد العملي والتأصيلي من محور: ' + (b.phaseNameAr || 'هذا المحور') + '؟ مع الاستدلال.'),
             teacherAnswer: b.teacherFocusAr || b.teacherGuidanceAr || 'التأصيل العلمي والتربوي المنضبط المستخلص من المحاضرة.',
             practicalImpact: b.practicalImpact || b.keyTakeawayAr || 'التطبيق العملي والسلوكي في حياة المسلم والدارس.',
@@ -851,7 +852,7 @@
             titleEn: 'Worksheet: ' + ((islamicData.metadata && islamicData.metadata.topic) || 'Islamic Lecture'),
             targetAudience: (islamicData.metadata && islamicData.metadata.audience) || 'الدارسين والحلقة',
             quranRef: 'مقتبس من محاور المحاضرة الشرعية المعتمدة',
-            hadithRef: (islamicData.hadithVerification && islamicData.hadithVerification[0]?.text) || (islamicData.evidences && islamicData.evidences[0]?.arabicText) || 'تخريج صحيح البخاري / مسلم',
+            hadithRef: (islamicData.hadithVerification && islamicData.hadithVerification[0]?.text) || (islamicData.evidences && islamicData.evidences[0]?.arabicText) || '',
             items: newItems
           }
         }));
@@ -909,7 +910,7 @@
         setCustomTajweedWorksheet({
           titleAr: 'ورقة عمل في أحكام التجويد: ' + (currentSuwaydLesson?.titleAr || tajweedData.metadata?.titleAr || 'درس التجويد'),
           titleEn: 'Tajweed Worksheet',
-          surah: tajweedData.metadata?.surah || currentSuwaydLesson?.titleAr || 'سورة الملك',
+          surah: tajweedData.metadata?.surah || '',
           items
         });
         setWorksheetBranch('tajweed');
@@ -1040,7 +1041,7 @@
 
       // Module B: Islamic Studies State
       const [subjectCategory, setSubjectCategory] = useState('العقيدة (Aqeedah)');
-      const [lessonTopic, setLessonTopic] = useState('أركان الإيمان الستة والسكينة النفسية');
+      const [lessonTopic, setLessonTopic] = useState('');
       const [lessonDuration, setLessonDuration] = useState(45);
       const [audienceLevel, setAudienceLevel] = useState('اليافعين والمهتدين الجدد (Bilingual Youth)');
       const [islamicData, setIslamicData] = useState(() => {
@@ -1475,6 +1476,7 @@
         } catch (err) {
           console.warn('Using client fallback:', err.message);
           setIslamicData(getFallbackIslamic());
+          showToast(isRtl ? 'تعذّر تجهيز المحاضرة، فعُرض نموذج محفوظ عن أركان الإيمان بدلاً منها ⚠️' : 'Could not prepare the lecture; a stored sample is shown ⚠️');
         } finally {
           setIsGeneratingIslamic(false);
         }

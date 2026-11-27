@@ -10,7 +10,7 @@
       try {
         const saved = localStorage.getItem(CLASS_SCHEDULE_KEY);
         const list = saved ? JSON.parse(saved) : [];
-        return Array.isArray(list) ? list.filter((c) => c && c.id && c.at) : [];
+        return Array.isArray(list) ? list.filter((c) => c && c.id && c.at && !isNaN(Date.parse(c.at)) && typeof c.title === 'string' && c.title) : [];
       } catch (e) {
         console.warn('Mishkah: saved class schedule is unreadable', e);
         return [];
