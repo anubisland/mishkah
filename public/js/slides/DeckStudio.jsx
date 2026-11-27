@@ -1,17 +1,19 @@
     // The slide studio: build a deck from the lecture, review and edit every
     // slide, then present it. While presenting, the student window shows the
-    // slide and the teacher sees the slide with her notes.
+    // slide and the teacher sees the slide with the notes.
 
+    // A callback ref, so an element that unmounts and mounts again (a panel
+    // minimised and restored) is measured afresh.
     function useElementWidth() {
-      const ref = useRef(null);
+      const [el, setEl] = useState(null);
       const [width, setWidth] = useState(800);
       useEffect(() => {
-        if (!ref.current) return;
+        if (!el) return;
         const observer = new ResizeObserver(([entry]) => setWidth(Math.floor(entry.contentRect.width)));
-        observer.observe(ref.current);
+        observer.observe(el);
         return () => observer.disconnect();
-      }, []);
-      return [ref, width];
+      }, [el]);
+      return [setEl, width];
     }
 
     function DeckStudio({ lectureText, onClose, studentScreenOpen, onOpenStudentScreen }) {
