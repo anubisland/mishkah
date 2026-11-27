@@ -74,7 +74,10 @@
       // The part opened last; a class may have several hifz parts.
       const [itemIndex, setItemIndex] = useState(0);
       const openedItem = planItems[itemIndex];
-      const planItem = (openedItem && PLAN_SECTION[openedItem.type] === section ? openedItem : planItems.find((it) => PLAN_SECTION[it.type] === section)) || null;
+      // Back in a section from elsewhere: the hifz part holding the open page.
+      const sectionItems = planItems.filter((it) => PLAN_SECTION[it.type] === section);
+      const planItem = (openedItem && PLAN_SECTION[openedItem.type] === section ? openedItem
+        : sectionItems.find((it) => it.type === 'hifz' && ctx.mushafPageNumber >= it.fromPage && ctx.mushafPageNumber <= it.toPage) || sectionItems[0]) || null;
       const [lectureIndex, setLectureIndex] = useState(0);
       const [history, setHistory] = useState([]);
       const [minimized, setMinimized] = useState(false);
