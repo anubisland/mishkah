@@ -498,24 +498,9 @@
     ]
   };
 
-  // Build remaining Surahs 21 to 114 dynamically to ensure 100% full Quran coverage
-  for (let sId = 21; sId <= 114; sId++) {
-    if (!QURAN_ALL_SURAHS_MUTASHABIHAT[sId]) {
-      const sItem = ALL_QURAN_SURAHS.find(s => s.id === sId) || { nameAr: 'السورة المباركة', ayahsCount: 20 };
-      QURAN_ALL_SURAHS_MUTASHABIHAT[sId] = [
-        {
-          ayah: 'فَاصْبِرْ إِنَّ وَعْدَ اللَّهِ حَقٌّ (سورة ' + sItem.nameAr + ')',
-          similar: 'فَاصْبِرْ لِحُكْمِ رَبِّكَ وَلَا تَكُن كَصَاحِبِ الْحُوتِ (القلم: 48)',
-          difference: 'التوجيه النبوي القرآني العظيم بالصبر واليقين بوعد الله في عموم السور المكية والمدنية.'
-        },
-        {
-          ayah: 'إِنَّ فِي ذَٰلِكَ لَآيَاتٍ لِّقَوْمٍ يَتَفَكَّرُونَ (سورة ' + sItem.nameAr + ')',
-          similar: 'إِنَّ فِي ذَٰلِكَ لَآيَاتٍ لِّقَوْمٍ يَعْقِلُونَ / يَسْمَعُونَ (الروم / النحل / يونس)',
-          difference: 'ضابط خواتيم الآيات: (يَتَفَكَّرُونَ) مع دلائل الخلق، و(يَعْقِلُونَ) مع الأمثال والحجج، و(يَسْمَعُونَ) مع التذكير والمواعظ.'
-        }
-      ];
-    }
-  }
+  // Surahs with no entry here show only what the page itself yields (the
+  // keyword scan below) and what the teacher adds. A generic note would put
+  // ayahs on surahs that do not contain them.
 
   // Universal Quranic Keyword Matcher for Any Verse on Any Page
   function detectAlgorithmicMutashabihatForAyahs(ayahs, surahId, pageNum) {
@@ -588,19 +573,7 @@
       }
     }
 
-    // 4. Default Guaranteed Quranic Rule if entirely empty
-    if (list.length === 0) {
-      const sMatch = MUSHAF_SURAHS_PAGE_MAP.find(s => p >= s.startPage && p <= s.endPage) || { name: 'المصحف الشريف' };
-      list = [
-        {
-          ayah: 'متشابهات وتنبيهات حفظ صفحة ' + p + ' (سورة ' + sMatch.name + ')',
-          similar: 'الربط اللفظي ومراجعة أوائل الآيات وخواتيمها في السور المتشابهة',
-          difference: 'يُنصح المحفظ بمراجعة فواصل الآيات وخواتيم الأسماء الحسنى لضبط الصفحة والتثبيت في صدر القارئ.'
-        }
-      ];
-    }
-
-    // 5. Append Teacher Custom Saved entries for this page
+    // 4. Append Teacher Custom Saved entries for this page
     try {
       const customKey = 'mishkah_custom_muta_page_' + p;
       const customSaved = localStorage.getItem(customKey);
