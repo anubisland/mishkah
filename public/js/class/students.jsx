@@ -15,13 +15,18 @@
     const MISTAKE_WEIGHTS = { memo: 1, tash: 0.5, prompt: 1 };
     const MISTAKE_LABELS = { memo: 'خطأ حفظ', tash: 'خطأ تشكيل أو تجويد', prompt: 'تلقين' };
 
+    // An unreadable saved list is copied aside before anything can overwrite
+    // it, so a later save never erases the teacher's records.
     function readList(key) {
+      let saved = null;
       try {
-        const saved = localStorage.getItem(key);
+        saved = localStorage.getItem(key);
         const list = saved ? JSON.parse(saved) : [];
-        return Array.isArray(list) ? list : [];
+        if (Array.isArray(list)) return list;
+        throw new Error('not a list');
       } catch (e) {
-        console.warn('Mishkah: saved list is unreadable: ' + key, e);
+        console.warn('Mishkah: saved list is unreadable, kept aside: ' + key, e);
+        try { if (saved) localStorage.setItem(key + '_unreadable_' + Date.now(), saved); } catch (e2) { console.warn('Mishkah: could not keep the unreadable list aside', e2); }
         return [];
       }
     }
@@ -53,8 +58,16 @@
       return readList(TASMEE_RECORDS_KEY).filter((r) => r && r.id && r.studentId && !isNaN(Date.parse(r.at)));
     }
 
+    // The newest records are kept when the list grows very long, so saving
+    // never starts failing for lack of space.
+    const TASMEE_RECORDS_MAX = 3000;
     function addTasmeeRecord(record) {
-      return writeList(TASMEE_RECORDS_KEY, loadTasmeeRecords().concat([record]));
+      return writeList(TASMEE_RECORDS_KEY, loadTasmeeRecords().concat([record]).slice(-TASMEE_RECORDS_MAX));
+    }
+
+    // A student removed from the list takes their record with them.
+    function deleteStudentRecords(studentId) {
+      return writeList(TASMEE_RECORDS_KEY, loadTasmeeRecords().filter((r) => r.studentId !== studentId));
     }
 
     function recordsForStudent(studentId) {

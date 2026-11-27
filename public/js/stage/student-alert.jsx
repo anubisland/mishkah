@@ -6,11 +6,14 @@
     const STUDENT_ALERT_CHANNEL = 'mishkah_student_alert';
 
     let alertAudio = null;
-    function playAlertChime() {
+    // Resolves to true when the chime played.
+    async function playAlertChime() {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return false;
       if (!alertAudio) alertAudio = new Ctx();
-      if (alertAudio.state === 'suspended') alertAudio.resume();
+      if (alertAudio.state === 'suspended') {
+        try { await alertAudio.resume(); } catch (e) { console.warn('Mishkah: the browser kept the alert silent', e); return false; }
+      }
       if (alertAudio.state !== 'running') return false;
       // Two soft notes, falling: noticeable without being harsh.
       [[880, 0], [660, 0.16]].forEach(([freq, delay]) => {
@@ -35,25 +38,25 @@
       return alertChannel;
     }
 
-    // Teacher side. onBlocked runs when the student window could not play it.
-    function sendStudentAlert(studentWindowOpen, onBlocked) {
+    // Teacher side. Without a student window the chime plays here, and
+    // onLocal(played) reports whether it did.
+    function sendStudentAlert(studentWindowOpen, onLocal) {
       const channel = getAlertChannel();
       if (!studentWindowOpen || !channel) {
-        if (!playAlertChime() && onBlocked) onBlocked();
+        playAlertChime().then((played) => { if (onLocal) onLocal(played); });
         return;
       }
       channel.postMessage({ type: 'alert', at: Date.now() });
     }
 
-    function useAlertBlockedNotice(onBlocked) {
+    // onPlayedHere(played): the student window was silent, so the chime was
+    // tried on the teacher's computer.
+    function useAlertBlockedNotice(onPlayedHere) {
       useEffect(() => {
         const channel = getAlertChannel();
         if (!channel) return;
         const onMessage = (event) => {
-          if (event.data && event.data.type === 'alert-blocked') {
-            playAlertChime();
-            onBlocked();
-          }
+          if (event.data && event.data.type === 'alert-blocked') playAlertChime().then(onPlayedHere);
         };
         channel.addEventListener('message', onMessage);
         return () => channel.removeEventListener('message', onMessage);
@@ -67,14 +70,14 @@
         if (!channel) return;
         const onMessage = (event) => {
           if (!event.data || event.data.type !== 'alert') return;
-          if (!playAlertChime()) channel.postMessage({ type: 'alert-blocked' });
+          playAlertChime().then((played) => { if (!played) channel.postMessage({ type: 'alert-blocked' }); });
         };
         // One click anywhere in the student window allows its sound from then on.
         const unlock = () => {
           const Ctx = window.AudioContext || window.webkitAudioContext;
           if (!Ctx) return;
           if (!alertAudio) alertAudio = new Ctx();
-          alertAudio.resume();
+          alertAudio.resume().catch((e) => console.warn('Mishkah: could not enable the alert sound', e));
         };
         channel.addEventListener('message', onMessage);
         window.addEventListener('pointerdown', unlock);

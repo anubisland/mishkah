@@ -6,7 +6,11 @@
       const [openId, setOpenId] = useState(null);
       const [error, setError] = useState('');
 
-      const commit = (list) => { setStudents(list); setError(saveStudents(list) || ''); };
+      const commit = (list) => {
+        const err = saveStudents(list);
+        setError(err || '');
+        if (!err) setStudents(list);
+      };
       const add = () => {
         if (!name.trim()) return;
         commit(students.concat([newStudent(name)]));
@@ -42,7 +46,7 @@
                     <button type="button" onClick={() => setOpenId(openId === s.id ? null : s.id)} className="px-3 py-1.5 rounded-xl border-2 border-emerald-900/20 font-bold text-sm">
                       {openId === s.id ? 'إخفاء السجل' : '📈 السجل'}
                     </button>
-                    <button type="button" onClick={() => { if (window.confirm('حذف «' + s.name + '» من القائمة؟ يبقى سجله محفوظاً.')) commit(students.filter((x) => x.id !== s.id)); }}
+                    <button type="button" onClick={() => { if (window.confirm('حذف «' + s.name + '» وسجل تسميعه كله؟ لا يمكن التراجع عن ذلك.')) { const err = deleteStudentRecords(s.id); if (err) setError(err); else commit(students.filter((x) => x.id !== s.id)); } }}
                       className="px-2 py-1.5 rounded-xl text-rose-700 font-bold text-sm">🗑 حذف</button>
                   </div>
                   {openId === s.id && <StudentRecord studentId={s.id} />}

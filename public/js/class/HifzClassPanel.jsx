@@ -68,7 +68,7 @@
 
           {tasmee.active && <TasmeeCounter session={tasmee} ctx={ctx} onOpenStudents={() => setStudentsOpen(true)} />}
           <HifzTeacherText ctx={ctx} tasmee={tasmee} />
-          {studentsOpen && <MyStudents onClose={() => setStudentsOpen(false)} />}
+          {studentsOpen && <MyStudents onClose={() => { setStudentsOpen(false); tasmee.reloadStudents(); }} />}
           <MutashabihatNotes items={ctx.hifzMutashabihat} />
         </>
       );
@@ -144,7 +144,9 @@
     // highlighted in yellow, hidden ayahs are veiled, never removed.
     function HifzTeacherText({ ctx, tasmee }) {
       const [pick, setPick] = useState(null);
-      const marking = tasmee && tasmee.active;
+      const marking = tasmee && tasmee.active && !!tasmee.student;
+      // A chooser left open must not mark a word of the previous page.
+      useEffect(() => setPick(null), [ctx.mushafPageNumber]);
       const marked = new Set(marking ? tasmee.mistakes.filter((m) => m.key).map((m) => m.key) : []);
       const masks = {
         isEndingsMasked: ctx.isEndingsMasked, isStartersMasked: ctx.isStartersMasked, isDivineNamesMasked: ctx.isDivineNamesMasked,

@@ -80,6 +80,14 @@
       // Mistakes counted in تسميع stay while the teacher steps out to the full
       // program or another section.
       const tasmee = useTasmeeSession(ctx);
+      // Mistakes counted on the open page are offered for saving before the
+      // class ends, rather than lost.
+      const endClass = () => {
+        if (tasmee.mistakes.length && tasmee.student &&
+          window.confirm('في العدّاد أخطاء لم تُحفظ لهذه الصفحة. حفظها في سجل ' + tasmee.student.name + ' قبل إنهاء الحصة؟') &&
+          !tasmee.finish(tasmee.total < tasmee.limit ? 'passed' : 'repeat')) return;
+        onEnd();
+      };
 
       // The class starts on the plan's first item.
       useEffect(() => {
@@ -185,7 +193,7 @@
             {!ctx.studentScreenOpen && (
               <button type="button" onClick={ctx.handleOpenStudentPopout} className="px-3 py-1.5 rounded-xl text-sm font-black bg-rose-600 text-white">🖥️ فتح شاشة الطالب</button>
             )}
-            <button type="button" onClick={onEnd} className="px-3 py-1.5 rounded-xl text-sm font-bold text-gold-200 border-2 border-gold-400/60">■ إنهاء الحصة</button>
+            <button type="button" onClick={endClass} className="px-3 py-1.5 rounded-xl text-sm font-bold text-gold-200 border-2 border-gold-400/60">■ إنهاء الحصة</button>
           </div>
           {planItems.length > 0 && (
             <div className="shrink-0 bg-emerald-950 px-3 py-2 flex gap-2 overflow-x-auto">

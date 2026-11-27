@@ -3,7 +3,9 @@
     // says whether it is passed or to be repeated, and keeps the record.
 
     // The session is shared by the counter bar and the teacher's text (where a
-    // mistake can be marked on the word itself).
+    // mistake can be marked on the word itself). Counting needs a chosen
+    // student, so every counted mistake has a record to go to; and counted
+    // mistakes are only cleared once they are saved.
     function useTasmeeSession(ctx) {
       const [active, setActive] = useState(false);
       const [students, setStudents] = useState(loadStudents);
@@ -11,7 +13,8 @@
       const student = students.find((s) => s.id === studentId) || null;
       const [limit, setLimit] = useState(student ? student.mistakeLimit : DEFAULT_MISTAKE_LIMIT);
       const [mistakes, setMistakes] = useState([]);
-      const [message, setMessage] = useState('');
+      const [message, setMessage] = useState(
+        ctx.classStudentId && !student ? 'طالب هذه الحصة لم يعد في قائمة «طلابي»: يلزم اختياره أو إضافته.' : '');
 
       // The limit follows the chosen student; the teacher may change it for this page.
       useEffect(() => { if (student) setLimit(student.mistakeLimit); }, [studentId]);
@@ -28,42 +31,56 @@
         });
       };
 
-      // Moving to another page with mistakes counted keeps them in the record,
-      // rather than losing them.
+      // Moving to another page saves the mistakes counted on the previous one,
+      // even with counting switched off meanwhile.
       const pageRef = useRef(ctx.mushafPageNumber);
       useEffect(() => {
         const previous = pageRef.current;
         pageRef.current = ctx.mushafPageNumber;
-        if (previous === ctx.mushafPageNumber || !active || !mistakes.length || !student) return;
+        if (previous === ctx.mushafPageNumber || !mistakes.length) return;
         const error = saveRecord(previous, total < limit ? 'passed' : 'repeat');
+        if (error) {
+          setMessage('لم تُحفظ أخطاء الصفحة ' + previous + ': ' + error + ' وهي باقية في العدّاد.');
+          return;
+        }
         setMistakes([]);
-        setMessage(error || ('حُفظت أخطاء الصفحة ' + previous + ' في سجل ' + student.name + '.'));
+        setMessage('حُفظت أخطاء الصفحة ' + previous + ' في سجل ' + student.name + '.');
       }, [ctx.mushafPageNumber]);
+
+      const commitStudents = (list, okMessage) => {
+        const error = saveStudents(list);
+        if (error) { setMessage(error); return false; }
+        setStudents(list);
+        if (okMessage) setMessage(okMessage);
+        return true;
+      };
 
       return {
         active, setActive, students, student, studentId, limit, setLimit, mistakes, total, message, setMessage,
         selectStudent: setStudentId,
+        reloadStudents: () => setStudents(loadStudents()),
         addStudent: (name) => {
           if (!name || !name.trim()) return;
           const s = newStudent(name);
-          const list = students.concat([s]);
-          const error = saveStudents(list);
-          setStudents(list);
-          setStudentId(s.id);
-          if (error) setMessage(error);
+          if (commitStudents(loadStudents().concat([s]))) setStudentId(s.id);
         },
         saveLimitForStudent: () => {
           if (!student) return;
-          const list = students.map((s) => (s.id === student.id ? Object.assign({}, s, { mistakeLimit: limit }) : s));
-          setStudents(list);
-          setMessage(saveStudents(list) || ('صار حد الأخطاء الأساسي لـ' + student.name + ': ' + formatMistakes(limit) + '.'));
+          const list = loadStudents().map((s) => (s.id === student.id ? Object.assign({}, s, { mistakeLimit: limit }) : s));
+          commitStudents(list, 'صار حد الأخطاء الأساسي لـ' + student.name + ': ' + formatMistakes(limit) + '.');
         },
-        add: (type, word, ayah, key) => setMistakes((list) => list.concat([{ type, word: word || '', ayah: ayah || null, key: key || null }])),
+        add: (type, word, ayah, key) => {
+          if (!student) { setMessage('يلزم اختيار الطالب أولاً ليُحفظ في سجله.'); return; }
+          setMistakes((list) => list.concat([{ type, word: word || '', ayah: ayah || null, key: key || null }]));
+        },
         undo: () => setMistakes((list) => list.slice(0, -1)),
+        // Returns true when saved.
         finish: (result) => {
           const error = saveRecord(ctx.mushafPageNumber, result);
+          if (error) { setMessage(error); return false; }
           setMistakes([]);
-          setMessage(error || (result === 'passed' ? '✓ حُفظ: ينتقل إلى الوجه التالي.' : '↻ حُفظ: يُعاد الوجه.'));
+          setMessage(result === 'passed' ? '✓ حُفظ: ينتقل إلى الوجه التالي.' : '↻ حُفظ: يُعاد الوجه.');
+          return true;
         }
       };
     }
@@ -71,9 +88,12 @@
     function TasmeeCounter({ session, ctx, onOpenStudents }) {
       const s = session;
       const over = s.total >= s.limit;
+      const ready = !!s.student;
       const [alertNote, setAlertNote] = useState('');
-      useAlertBlockedNotice(() => setAlertNote('صوت التنبيه خرج من جهاز المعلم: نافذة الطالب لا تسمح بالصوت حتى يُضغط داخلها مرة واحدة.'));
-      const btn = 'px-3 py-2 rounded-xl font-black text-sm border-2 ';
+      useAlertBlockedNotice((played) => setAlertNote(played
+        ? 'صوت التنبيه خرج من جهاز المعلم، لأن نافذة الطالب لا تسمح بالصوت حتى يُضغط داخلها مرة واحدة.'
+        : 'تعذّر تشغيل صوت التنبيه: يلزم الضغط مرة داخل نافذة الطالب.'));
+      const btn = 'px-3 py-2 rounded-xl font-black text-sm border-2 disabled:opacity-40 ';
 
       return (
         <section className="bg-white rounded-2xl p-3 border-2 border-emerald-800/30 space-y-2">
@@ -89,6 +109,7 @@
             </select>
             <button type="button" onClick={onOpenStudents} className="text-sm font-bold text-emerald-800 underline">سجل الطلاب</button>
           </div>
+          {!ready && <p className="text-sm font-bold text-amber-900">يبدأ العدّ بعد اختيار الطالب، ليُحفظ في سجله.</p>}
 
           <div className={'flex flex-wrap items-center gap-2 rounded-xl px-3 py-2 ' + (over ? 'bg-rose-50 border border-rose-300' : 'bg-emerald-50 border border-emerald-200')}>
             <span className={'text-xl font-black ' + (over ? 'text-rose-800' : 'text-emerald-900')}>
@@ -105,17 +126,17 @@
           </div>
 
           <div className="flex flex-wrap gap-1.5">
-            <button type="button" className={btn + 'bg-rose-600 text-white border-rose-600'} onClick={() => s.add('memo')}>خطأ حفظ +1</button>
-            <button type="button" className={btn + 'bg-amber-400 text-emerald-950 border-amber-400'} onClick={() => s.add('tash')}>تشكيل/تجويد +½</button>
-            <button type="button" className={btn + 'bg-white text-emerald-950 border-emerald-900/20'} onClick={() => s.add('prompt')}>تلقين +1</button>
-            <button type="button" className={btn + 'bg-emerald-900 text-gold-200 border-emerald-900'} onClick={() => sendStudentAlert(ctx.studentScreenOpen, () => setAlertNote('صوت التنبيه خرج من جهاز المعلم.'))}>🔔 تنبيه</button>
+            <button type="button" disabled={!ready} className={btn + 'bg-rose-600 text-white border-rose-600'} onClick={() => s.add('memo')}>خطأ حفظ +1</button>
+            <button type="button" disabled={!ready} className={btn + 'bg-amber-400 text-emerald-950 border-amber-400'} onClick={() => s.add('tash')}>تشكيل/تجويد +½</button>
+            <button type="button" disabled={!ready} className={btn + 'bg-white text-emerald-950 border-emerald-900/20'} onClick={() => s.add('prompt')}>تلقين +1</button>
+            <button type="button" className={btn + 'bg-emerald-900 text-gold-200 border-emerald-900'} onClick={() => { setAlertNote(''); sendStudentAlert(ctx.studentScreenOpen, (played) => setAlertNote(played ? '' : 'تعذّر تشغيل صوت التنبيه على هذا الجهاز.')); }}>🔔 تنبيه</button>
             {s.mistakes.length > 0 && <button type="button" className={btn + 'bg-white text-slate-600 border-slate-200'} onClick={s.undo}>↶ تراجع</button>}
           </div>
           <p className="text-xs text-slate-600">للتسجيل على الكلمة نفسها: الضغط عليها في النص الكامل أدناه. وصوت التنبيه يصل إلى الطالب في زوم مع خيار «Share sound» عند المشاركة.</p>
 
           <div className="flex flex-wrap gap-1.5 pt-1 border-t border-slate-100">
-            <button type="button" className={btn + (over ? 'bg-white text-emerald-900 border-emerald-900/20' : 'bg-emerald-700 text-white border-emerald-700')} onClick={() => s.finish('passed')}>✓ انتهى الوجه: ينتقل</button>
-            <button type="button" className={btn + (over ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-rose-700 border-rose-200')} onClick={() => s.finish('repeat')}>↻ يُعاد الوجه</button>
+            <button type="button" disabled={!ready} className={btn + (over ? 'bg-white text-emerald-900 border-emerald-900/20' : 'bg-emerald-700 text-white border-emerald-700')} onClick={() => s.finish('passed')}>✓ انتهى الوجه: ينتقل</button>
+            <button type="button" disabled={!ready} className={btn + (over ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-rose-700 border-rose-200')} onClick={() => s.finish('repeat')}>↻ يُعاد الوجه</button>
           </div>
           {over && <p className="text-sm font-black text-rose-800">بلغت الأخطاء الحد: يُعاد الوجه.</p>}
           {s.message && <p className="text-sm font-bold text-emerald-900">{s.message}</p>}
