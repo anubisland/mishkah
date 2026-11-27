@@ -38,7 +38,7 @@
         <div className="shrink-0 bg-gold-50 border-b-2 border-gold-400 px-3 py-2 space-y-2">
           <div className="flex items-center gap-2">
             <h4 className="font-black text-emerald-950 flex-1">➕ جزء جديد في هذه الحصة</h4>
-            <button type="button" onClick={onClose} className="px-2 py-1 rounded-lg border border-slate-300 font-bold text-sm">إلغاء</button>
+            <button type="button" onClick={onClose} disabled={busy} className="px-2 py-1 rounded-lg border border-slate-300 font-bold text-sm disabled:opacity-40">إلغاء</button>
           </div>
           <HifzPlanParts parts={parts} setParts={setParts} surahs={surahs} single />
           {error && <p className="text-rose-700 font-bold text-sm">{error}</p>}

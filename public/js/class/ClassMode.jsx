@@ -213,6 +213,7 @@
                 {s.label}
               </button>
             ))}
+            {!planItems.length && <button type="button" onClick={() => setAddingPart(true)} className="px-3 py-1.5 rounded-xl text-sm font-bold border-2 border-dashed border-gold-400/70 text-gold-200">➕ جزء جديد</button>}
             <button type="button" onClick={() => setMinimized(true)} className="px-3 py-1.5 rounded-xl text-sm font-bold bg-white/90 text-emerald-950 border-2 border-white" title="البرنامج الكامل، والحصة مستمرة">⚙️ كل الأدوات</button>
             {ctx.studentScreenOpen && (
               <button type="button" onClick={ctx.handleArrangeStudentWindow} className="px-3 py-1.5 rounded-xl text-sm font-bold bg-emerald-900/70 text-emerald-50 border-2 border-emerald-700" title="يعيد شاشة الطالب إلى النصف الأيسر وفوق النوافذ الأخرى">🖥️ إظهار شاشة الطالب</button>
