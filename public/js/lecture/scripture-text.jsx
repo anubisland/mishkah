@@ -194,7 +194,9 @@
       // Only text the lecture itself cites is tidied here; a section title
       // alone never brings in an ayah or hadith.
       if (!rawScripture || typeof rawScripture !== 'string' || !rawScripture.trim()) return '';
-      const combined = ((rawScripture || '') + ' ' + (sectionContext || '')).trim();
+      // Matched on the cited text alone: the section title must not swap it
+      // for a different ayah or hadith.
+      const combined = (rawScripture || '').trim();
       let s = normalizeIslamicSacredTerms(rawScripture || '').trim();
 
       const nCombined = combined
