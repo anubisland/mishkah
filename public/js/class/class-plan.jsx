@@ -3,7 +3,8 @@
     // that, and class mode is organised around it.
     //
     // plan = { createdAt, items: [item] }, in teaching order
-    // item = { type: 'hifz', surahId, surahName, fromAyah, toAyah, fromPage, toPage }
+    // item = { type: 'hifz', hifzMode: 'tasmee' | 'tahfeez' (older plans: none),
+    //          surahId, surahName, fromAyah, toAyah, fromPage, toPage }
     //      | { type: 'tajweed', lessonIds: [id] }
     //      | { type: 'lecture', deckTitle }
     const CLASS_PLAN_KEY = 'mishkah_class_plan';
@@ -32,7 +33,8 @@
     function classPlanItemLabel(item) {
       if (item.type === 'hifz') {
         const pages = item.fromPage === item.toPage ? 'صفحة ' + item.fromPage : 'الصفحات ' + item.fromPage + '–' + item.toPage;
-        return '🎧 ' + item.surahName + ' ' + item.fromAyah + '–' + item.toAyah + ' (' + pages + ')';
+        const kind = item.hifzMode === 'tahfeez' ? '📖 تحفيظ: ' : item.hifzMode === 'tasmee' ? '🎧 تسميع: ' : '🎧 ';
+        return kind + item.surahName + ' ' + item.fromAyah + '–' + item.toAyah + ' (' + pages + ')';
       }
       if (item.type === 'tajweed') {
         const titles = item.lessonIds.map((id) => (SUWAYD_TAJWEED_CURRICULUM.find((l) => l.id === id) || {}).titleAr).filter(Boolean);

@@ -5,16 +5,17 @@
     function ClassPlanner({ mode, title, initialPlan, onStart, onSave, onClose }) {
       const lastPlan = useMemo(() => (mode === 'start' && !initialPlan ? loadClassPlan() : null), []);
       const initial = (type) => (initialPlan && initialPlan.items.find((it) => it.type === type)) || null;
-      const initHifz = initial('hifz');
+      const initHifzParts = initialPlan ? initialPlan.items.filter((it) => it.type === 'hifz') : [];
       const initTajweed = initial('tajweed');
       const surahs = typeof MUSHAF_SURAHS_PAGE_MAP !== 'undefined' ? MUSHAF_SURAHS_PAGE_MAP : [];
       const deck = useMemo(() => readSavedDeck(), []);
       const deckReady = !!(deck && deck.slides.length);
 
-      const [useHifz, setUseHifz] = useState(initialPlan ? !!initHifz : true);
-      const [surahId, setSurahId] = useState(initHifz ? initHifz.surahId : 67);
-      const [fromAyah, setFromAyah] = useState(initHifz ? initHifz.fromAyah : 1);
-      const [toAyah, setToAyah] = useState(initHifz ? initHifz.toAyah : 10);
+      const [useHifz, setUseHifz] = useState(initialPlan ? initHifzParts.length > 0 : true);
+      // Recitation of earlier pages usually opens the class.
+      const [hifzParts, setHifzParts] = useState(initHifzParts.length
+        ? initHifzParts.map((it) => ({ hifzMode: it.hifzMode || 'tasmee', surahId: it.surahId, fromAyah: it.fromAyah, toAyah: it.toAyah }))
+        : [newHifzPart('tasmee')]);
       const [useTajweed, setUseTajweed] = useState(!!initTajweed);
       const [lessonIds, setLessonIds] = useState(initTajweed ? initTajweed.lessonIds : []);
       const [useLecture, setUseLecture] = useState(!!initial('lecture'));
@@ -24,10 +25,6 @@
       const [plan, setPlan] = useState(null);
       const [failedCount, setFailedCount] = useState(0);
 
-      const surah = surahs.find((s) => s.id === surahId) || surahs[0];
-      const maxAyah = surah ? surah.totalAyahs : 286;
-      const clampAyah = (v) => Math.max(1, Math.min(maxAyah, parseInt(v, 10) || 1));
-
       const prepare = async (chosen) => {
         setError(null);
         setPhase('preparing');
@@ -35,10 +32,13 @@
           const items = chosen || [];
           if (!chosen) {
             if (useHifz) {
-              const a = Math.min(fromAyah, toAyah);
-              const b = Math.max(fromAyah, toAyah);
-              const pages = await resolveHifzPages(surah.id, a, b);
-              items.push({ type: 'hifz', surahId: surah.id, surahName: 'سورة ' + surah.name, fromAyah: a, toAyah: b, fromPage: pages.fromPage, toPage: pages.toPage });
+              for (const part of hifzParts) {
+                const surah = surahs.find((s) => s.id === part.surahId) || surahs[0];
+                const a = Math.min(part.fromAyah, part.toAyah);
+                const b = Math.max(part.fromAyah, part.toAyah);
+                const pages = await resolveHifzPages(surah.id, a, b);
+                items.push({ type: 'hifz', hifzMode: part.hifzMode, surahId: surah.id, surahName: 'سورة ' + surah.name, fromAyah: a, toAyah: b, fromPage: pages.fromPage, toPage: pages.toPage });
+              }
             }
             if (useTajweed && lessonIds.length) items.push({ type: 'tajweed', lessonIds: SUWAYD_TAJWEED_CURRICULUM.map((l) => l.id).filter((id) => lessonIds.includes(id)) });
             if (useLecture) {
@@ -84,19 +84,7 @@
                   <label className="flex items-center gap-2 font-black text-emerald-950">
                     <input type="checkbox" checked={useHifz} onChange={(e) => setUseHifz(e.target.checked)} /> التحفيظ والتسميع
                   </label>
-                  {useHifz && (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <select value={surahId} onChange={(e) => { setSurahId(parseInt(e.target.value, 10)); setFromAyah(1); setToAyah(1); }}
-                        className="border-2 border-emerald-900/15 rounded-xl px-2 py-1.5 font-bold min-w-[150px]">
-                        {surahs.map((s) => <option key={s.id} value={s.id}>{s.id}. {s.name}</option>)}
-                      </select>
-                      <span className="font-bold">من الآية</span>
-                      <input type="number" min="1" max={maxAyah} value={fromAyah} onChange={(e) => setFromAyah(clampAyah(e.target.value))} className="w-20 border-2 border-emerald-900/15 rounded-xl px-2 py-1.5 font-bold" />
-                      <span className="font-bold">إلى</span>
-                      <input type="number" min="1" max={maxAyah} value={toAyah} onChange={(e) => setToAyah(clampAyah(e.target.value))} className="w-20 border-2 border-emerald-900/15 rounded-xl px-2 py-1.5 font-bold" />
-                      <span className="text-xs text-slate-500">(السورة {maxAyah} آية)</span>
-                    </div>
-                  )}
+                  {useHifz && <HifzPlanParts parts={hifzParts} setParts={setHifzParts} surahs={surahs} />}
                 </div>
 
                 <div className={card(useTajweed)}>
