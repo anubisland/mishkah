@@ -62,7 +62,17 @@
       const [history, setHistory] = useState([]);
       const [minimized, setMinimized] = useState(false);
       const [syncProblem, setSyncProblem] = useState(false);
-      const [previewRef, previewWidth] = useElementWidth();
+      const [bodyRef, bodyWidth] = useElementWidth();
+      // A wide window shows the controls and the student screen side by side
+      // (student screen on the left, as on the split screen), so nothing sits
+      // below the fold.
+      const wide = bodyWidth >= 900;
+      const previewWidth = wide ? Math.floor(bodyWidth * 0.5) : bodyWidth;
+      const [fullWidthHintHidden, setFullWidthHintHidden] = useState(false);
+      // Browsers do not let the page move its own window, so the teacher is
+      // reminded how to snap it when it covers the student window.
+      const fillsScreen = ctx.studentScreenOpen && !fullWidthHintHidden && window.screen &&
+        window.outerWidth > (window.screen.availWidth || 0) * 0.7;
 
       // The class starts on the plan's first item.
       useEffect(() => {
@@ -132,6 +142,23 @@
         );
       }
 
+      const preview = (
+        <section className="bg-white rounded-2xl p-3 border border-emerald-900/10">
+          <h4 className="font-black text-emerald-900 text-sm mb-2">👁️ ما يراه الطلاب الآن</h4>
+          <div className="flex justify-center">
+            <StudentPreview stage={stage} width={Math.max(200, Math.min(wide ? 1400 : 440, previewWidth - 24))} />
+          </div>
+        </section>
+      );
+      const panels = (
+        <>
+          {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={planItem} />}
+          {section === 'tajweed' && <TajweedClassPanel ctx={ctx} planItem={planItem} />}
+          {section === 'islamic' && <LectureClassPanel ctx={ctx} index={lectureIndex} setIndex={setLectureIndex} onOpenStudio={() => { setMinimized(true); ctx.setSlideStudioOpen(true); }} />}
+          <ClassHistory history={history} currentKey={classStageKey(stage)} onRestore={restore} />
+        </>
+      );
+
       return (
         <div className="fixed inset-0 z-50 bg-[#f3f1ea] flex flex-col" dir="rtl">
           <div className="shrink-0 emerald-pattern px-3 py-2 flex flex-wrap items-center gap-2">
@@ -161,21 +188,24 @@
               ))}
             </div>
           )}
+          {fillsScreen && (
+            <div className="shrink-0 bg-gold-100 text-emerald-950 px-3 py-2 flex flex-wrap items-center gap-2 text-sm font-bold border-b-2 border-gold-400">
+              <span className="flex-1">🖥️ نافذة المعلم تملأ الشاشة وتغطي شاشة الطالب. لوضعها في النصف الأيمن: {isMacComputer() ? 'الضغط مطولاً على الزر الأخضر أعلى النافذة ثم «وضع النافذة على يمين الشاشة»' : <>الضغط معاً على <span dir="ltr" className="inline-block px-1.5 rounded bg-white border font-mono">⊞ Windows + →</span></>}</span>
+              <button type="button" onClick={ctx.handleArrangeStudentWindow} className="px-3 py-1 rounded-lg bg-white border-2 border-gold-400 text-emerald-950 font-black">↩ شاشة الطالب إلى النصف الأيسر</button>
+              <button type="button" onClick={() => setFullWidthHintHidden(true)} className="px-3 py-1 rounded-lg bg-emerald-900 text-gold-200 font-black">إخفاء</button>
+            </div>
+          )}
           {syncProblem && <p className="bg-rose-600 text-white text-center font-bold py-1 text-sm">⚠️ قد لا تتابع شاشة الطالب. الحل: إغلاقها ثم فتحها من جديد.</p>}
 
-          <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3">
-            <section ref={previewRef} className="bg-white rounded-2xl p-3 border border-emerald-900/10">
-              <h4 className="font-black text-emerald-900 text-sm mb-2">👁️ ما يراه الطلاب الآن</h4>
-              <div className="flex justify-center">
-                <StudentPreview stage={stage} width={Math.min(520, Math.max(200, previewWidth - 24))} />
-              </div>
-            </section>
-
-            {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={planItem} />}
-            {section === 'tajweed' && <TajweedClassPanel ctx={ctx} planItem={planItem} />}
-            {section === 'islamic' && <LectureClassPanel ctx={ctx} index={lectureIndex} setIndex={setLectureIndex} onOpenStudio={() => { setMinimized(true); ctx.setSlideStudioOpen(true); }} />}
-
-            <ClassHistory history={history} currentKey={classStageKey(stage)} onRestore={restore} />
+          <div ref={bodyRef} className={'flex-1 min-h-0 p-3 ' + (wide ? 'flex gap-3' : 'overflow-y-auto space-y-3')}>
+            {wide ? (
+              <>
+                <div className="flex-1 min-w-0 overflow-y-auto space-y-3">{panels}</div>
+                <div className="shrink-0 overflow-y-auto" style={{ width: previewWidth }}>{preview}</div>
+              </>
+            ) : (
+              <>{preview}{panels}</>
+            )}
           </div>
         </div>
       );

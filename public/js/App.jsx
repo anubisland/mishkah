@@ -1192,6 +1192,13 @@
           showToast(isRtl ? 'يرجى السماح بالنوافذ المنبثقة لفتح نافذة الطلاب' : 'Please allow popups in your browser');
         }
       };
+      // Mid-class: puts the open student window back on the left half without
+      // reloading it, so Zoom keeps sharing the same window.
+      const handleArrangeStudentWindow = () => {
+        const w = studentWindowRef.current;
+        if (w && !w.closed) { placeStudentWindow(w); w.focus(); }
+        else handleOpenStudentPopout();
+      };
       const [islamicViewMode, setIslamicViewMode] = useState('stepper'); // 'stepper' (single stage focus) or 'all' (continuous)
       const [librarySearchQuery, setLibrarySearchQuery] = useState('');
       const [libraryFilterDiscipline, setLibraryFilterDiscipline] = useState('all');
@@ -1626,7 +1633,7 @@
         openGuide: () => setGuideOpen(true),
         openStudio: () => { setActiveTab('islamic'); setSlideStudioOpen(true); }
       };
-      const classCtx = { activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
+      const classCtx = { activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, handleArrangeStudentWindow, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
 
       return (
         <div className="min-h-screen flex flex-col islamic-screen-pattern">
