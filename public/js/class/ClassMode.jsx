@@ -40,10 +40,24 @@
     const PLAN_SECTION = { hifz: 'hifz', tajweed: 'tajweed', lecture: 'islamic' };
 
     // Moves the teacher (and the student window) to the start of a plan item.
-    function openPlanItem(ctx, item, setLectureIndex) {
+    // A hifz part opens ready for its kind: recitation hides the page from the
+    // student and starts counting mistakes; new memorisation shows the whole
+    // mushaf page (the teacher points with the mouse) and stops counting.
+    function openPlanItem(ctx, item, setLectureIndex, tasmee) {
       if (item.type === 'hifz') {
         ctx.setActiveTab('hifz');
-        ctx.handleNavigateMushafPage(item.fromPage);
+        if (item.hifzMode === 'tasmee') {
+          ctx.handleNavigateMushafPage(item.fromPage, 'interactive_test');
+          ctx.setIsFullMasked(true);
+          if (tasmee) tasmee.setActive(true);
+        } else if (item.hifzMode === 'tahfeez') {
+          ctx.handleNavigateMushafPage(item.fromPage, 'mushaf_page');
+          ctx.setMushafOverlayMode('none');
+          ctx.setIsFullMasked(false);
+          if (tasmee) tasmee.setActive(false);
+        } else {
+          ctx.handleNavigateMushafPage(item.fromPage);
+        }
       } else if (item.type === 'tajweed') {
         ctx.setActiveTab('tajweed');
         ctx.setSuwaydLessonId(item.lessonIds[0]);
@@ -57,7 +71,10 @@
     function ClassMode({ ctx, plan, onEnd }) {
       const section = CLASS_SECTIONS.some((s) => s.id === ctx.activeTab) ? ctx.activeTab : 'hifz';
       const planItems = (plan && plan.items) || [];
-      const planItem = planItems.find((it) => PLAN_SECTION[it.type] === section) || null;
+      // The part opened last; a class may have several hifz parts.
+      const [itemIndex, setItemIndex] = useState(0);
+      const openedItem = planItems[itemIndex];
+      const planItem = (openedItem && PLAN_SECTION[openedItem.type] === section ? openedItem : planItems.find((it) => PLAN_SECTION[it.type] === section)) || null;
       const [lectureIndex, setLectureIndex] = useState(0);
       const [history, setHistory] = useState([]);
       const [minimized, setMinimized] = useState(false);
@@ -97,7 +114,7 @@
 
       // The class starts on the plan's first item.
       useEffect(() => {
-        if (planItems[0]) openPlanItem(ctx, planItems[0], setLectureIndex);
+        if (planItems[0]) openPlanItem(ctx, planItems[0], setLectureIndex, tasmee);
       }, []);
 
       const stage = section === 'islamic' ? { kind: 'deck', index: lectureIndex } : ctx.sectionStage;
@@ -205,7 +222,7 @@
             <div className="shrink-0 bg-emerald-950 px-3 py-2 flex gap-2 overflow-x-auto">
               <span className="text-gold-300 font-black text-sm self-center shrink-0">📋 جدول الحصة:</span>
               {planItems.map((it, i) => (
-                <button key={i} type="button" onClick={() => openPlanItem(ctx, it, setLectureIndex)}
+                <button key={i} type="button" onClick={() => { setItemIndex(i); openPlanItem(ctx, it, setLectureIndex, tasmee); }}
                   className={'shrink-0 px-3 py-1.5 rounded-xl text-sm font-bold border-2 ' + (it === planItem ? 'bg-gold-400 text-emerald-950 border-gold-200' : 'bg-emerald-900 text-emerald-50 border-emerald-700')}>
                   {(i + 1) + '. ' + classPlanItemLabel(it)}
                 </button>
