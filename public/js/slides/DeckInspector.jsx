@@ -32,6 +32,16 @@
           </section>
 
           <section>
+            <h4 className="font-black text-emerald-950 mb-2">إطار هذه الشريحة</h4>
+            <div className="flex flex-wrap gap-1.5">
+              <button type="button" className={pill(!slide.frame)} onClick={() => onChange('frame', '')}>مثل العرض كله</button>
+              {DECK_FRAMES.map((f) => (
+                <button key={f.id} type="button" className={pill(slide.frame === f.id)} onClick={() => onChange('frame', f.id)}>{f.label}</button>
+              ))}
+            </div>
+          </section>
+
+          <section>
             <h4 className="font-black text-emerald-950 mb-2">حجم الخط</h4>
             <div className="flex gap-1.5">
               {SLIDE_SIZES.map((z) => (

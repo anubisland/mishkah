@@ -75,6 +75,8 @@
       if (s.layout && layout !== wanted) say('النوع «' + s.layout + '» غير معروف، فصارت «نقاط مرقّمة»');
       const tone = SLIDE_TONES.some((t) => t.id === s.tone) ? s.tone : 'pearl';
       const size = SLIDE_SIZES.some((z) => z.id === s.size) ? s.size : 'medium';
+      // '' = the deck's frame; otherwise this slide's own frame.
+      const frame = DECK_FRAME_IDS.includes(s.frame) ? s.frame : '';
       const rawItems = Array.isArray(s.items) ? s.items : [];
       const items = rawItems.map(normalizeItem).filter((it) => it.title || it.text);
       if (items.length < rawItems.length) say('سقطت ' + (rawItems.length - items.length) + ' من نقاطها لأنها فارغة أو بصيغة غير مفهومة');
@@ -87,7 +89,7 @@
       }
       return {
         id: typeof s.id === 'string' && s.id ? s.id : newSlideId(),
-        layout, tone, size,
+        layout, tone, size, frame,
         eyebrow: asText(s.eyebrow),
         title: asText(s.title),
         body: asText(s.body),

@@ -71,7 +71,7 @@
       const editQuote = (key) => (onEdit ? (value) => onEdit('quote', Object.assign({ text: '', source: '' }, slide.quote, { [key]: value })) : null);
 
       const props = { slide, edit, editItem, editQuote };
-      const frame = (deck && deck.frame) || 'classic';
+      const frame = slide.frame || (deck && deck.frame) || 'classic';
       const Layout = SLIDE_LAYOUT_VIEWS[slide.layout] || PointsLayout;
       return (
         <div className={'mk-slide mk-tone-' + slide.tone + (isOrnamentFrame(frame) ? ' mk-ornamented' : '')} style={{ '--mk-scale': scale }}>
