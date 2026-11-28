@@ -39,8 +39,20 @@
       );
     }
 
-    // Shrinks its content (never enlarges it) so a whole slide always fits the
-    // student window, whatever size the teacher gives that window.
+    // True when the student window is tall and narrow (a half screen).
+    function useTallWindow() {
+      const check = () => window.innerHeight > window.innerWidth * 0.85;
+      const [tall, setTall] = useState(check);
+      useEffect(() => {
+        const onResize = () => setTall(check());
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+      }, []);
+      return tall;
+    }
+
+    // Scales its content to fill the student window (shrinking, or growing up
+    // to twice its size), whatever size the teacher gives that window.
     function FitToScreen({ children }) {
       const boxRef = useRef(null);
       const contentRef = useRef(null);
@@ -50,7 +62,9 @@
           const box = boxRef.current;
           const content = contentRef.current;
           if (!box || !content) return;
-          const next = Math.min(1, box.clientWidth / content.scrollWidth, box.clientHeight / content.scrollHeight);
+          // Grows to fill a large window too (up to twice its size), so students
+          // on Zoom see it as big as the window allows.
+          const next = Math.min(2, box.clientWidth / content.scrollWidth, box.clientHeight / content.scrollHeight);
           setScale(next > 0 ? next : 1);
         };
         fit();
@@ -159,10 +173,13 @@
       const slides = buildTajweedZoomSlides(lesson);
       const metronome = stage.metronome || {};
       const ignore = () => {};
+      // A half-screen window is tall and narrow: a narrower slide stacks taller
+      // and then grows to fill it, instead of leaving space above and below.
+      const tall = useTallWindow();
       return (
         <StudentFrame title={lesson.titleAr} subtitle={lesson.suwaydRef}>
           <FitToScreen>
-            <div className="bg-gradient-to-b from-emerald-950 via-slate-950 to-slate-950 text-white rounded-3xl border-2 border-gold-400/80 shadow-2xl p-6 sm:p-8" style={{ width: '1024px' }}>
+            <div className="bg-gradient-to-b from-emerald-950 via-slate-950 to-slate-950 text-white rounded-3xl border-2 border-gold-400/80 shadow-2xl p-6 sm:p-8" style={{ width: tall ? '720px' : '1024px' }}>
             <TajweedZoomSlideBody
               activeSuwaydPlateId={stage.plateId}
               currentSuwaydLesson={lesson}
