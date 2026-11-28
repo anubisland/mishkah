@@ -1,8 +1,10 @@
     // A class plan: the teacher says what a class covers and the program
     // prepares it. mode 'save' plans a scheduled class ahead of time
     // (onSave); mode 'start' plans and starts a class now (onStart).
-    // initialPlan fills the form when she edits an existing plan.
-    function ClassPlanner({ mode, title, initialPlan, onStart, onSave, onClose }) {
+    // initialPlan fills the form when an existing plan is edited.
+    // startSection: the page the teacher is on ('hifz' | 'tajweed' |
+    // 'islamic'); a new class starts with that part chosen.
+    function ClassPlanner({ mode, title, initialPlan, onStart, onSave, onClose, startSection }) {
       const lastPlan = useMemo(() => (mode === 'start' && !initialPlan ? loadClassPlan() : null), []);
       const initial = (type) => (initialPlan && initialPlan.items.find((it) => it.type === type)) || null;
       const initHifzParts = initialPlan ? initialPlan.items.filter((it) => it.type === 'hifz') : [];
@@ -14,13 +16,14 @@
       // The language the class is taught in: the student screen and the
       // teacher's notes follow it, whatever the program's own language.
       const [language, setLanguage] = useState(((initialPlan || lastPlan || {}).language) || 'ar');
-      const [useHifz, setUseHifz] = useState(initialPlan ? initHifzParts.length > 0 : true);
+      const fresh = !initialPlan;
+      const [useHifz, setUseHifz] = useState(fresh ? startSection !== 'tajweed' && startSection !== 'islamic' : initHifzParts.length > 0);
       // Recitation of earlier pages usually opens the class.
       const [hifzParts, setHifzParts] = useState(initHifzParts.length
         ? initHifzParts.map(hifzItemToPart)
         : [newHifzPart('tasmee')]);
-      const [useTajweed, setUseTajweed] = useState(!!initTajweed);
-      const [useLecture, setUseLecture] = useState(!!initial('lecture'));
+      const [useTajweed, setUseTajweed] = useState(fresh ? startSection === 'tajweed' : !!initTajweed);
+      const [useLecture, setUseLecture] = useState(fresh ? startSection === 'islamic' : !!initial('lecture'));
       const [phase, setPhase] = useState('edit'); // edit | preparing | ready
       const [progress, setProgress] = useState({ done: 0, total: 0 });
       const [error, setError] = useState(null);

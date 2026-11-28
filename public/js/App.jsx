@@ -1677,7 +1677,7 @@
               onClose={() => { setMyClassesOpen(false); setScheduleVersion((v) => v + 1); }} />
           )}
           {planNowFor && (
-            <ClassPlanner mode="start" title={planNowFor.title} onStart={beginClass} onClose={() => setPlanNowFor(null)} />
+            <ClassPlanner mode="start" title={planNowFor.title} startSection={activeTab} onStart={beginClass} onClose={() => setPlanNowFor(null)} />
           )}
           {splitHintOpen && <SplitScreenHint onClose={() => { setSplitHintOpen(false); handleArrangeStudentWindow(); }} />}
 
