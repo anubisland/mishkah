@@ -142,7 +142,7 @@
       }, []);
 
       const stage = section === 'islamic' ? { kind: 'deck', index: lectureIndex }
-        : section === 'tajweed' ? bookPlace.stage : ctx.sectionStage;
+        : section === 'tajweed' ? Object.assign({}, bookPlace.stage, { lang: ctx.classLanguage }) : ctx.sectionStage;
 
       // Class mode publishes while its panel is open. While minimized, the
       // slide studio may drive the student window, so on returning to the
@@ -222,7 +222,7 @@
         <>
           {section === 'hifz' && ctx.classStudentId && !briefHidden && <StudentBrief studentId={ctx.classStudentId} onClose={() => setBriefHidden(true)} />}
           {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={fromTajweed ? null : planItem} tasmee={tasmee} onBackToTajweed={fromTajweed ? () => { setFromTajweed(false); ctx.setActiveTab('tajweed'); } : null} />}
-          {section === 'tajweed' && <TajweedBookPanel key={books.bookId} books={books} onReadFromPage={readFromPage} />}
+          {section === 'tajweed' && <TajweedBookPanel key={books.bookId} books={books} onReadFromPage={readFromPage} language={ctx.classLanguage} />}
           {section === 'islamic' && <LectureClassPanel ctx={ctx} index={lectureIndex} setIndex={setLectureIndex} onOpenStudio={() => { setMinimized(true); ctx.setSlideStudioOpen(true); }} />}
           <ClassHistory history={history} currentKey={classStageKey(stage)} onRestore={restore} />
         </>
