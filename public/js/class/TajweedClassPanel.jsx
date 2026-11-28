@@ -5,8 +5,9 @@
     // lesson's last slide moves on to the next planned lesson.
     // onReadFromPage(page): the students read from a mushaf page the teacher picks.
     function TajweedClassPanel({ ctx, planItem, onReadFromPage }) {
-      const lesson = ctx.currentSuwaydLesson;
-      const slides = ctx.currentZoomSlides;
+      // In an English class the lesson's teaching texts are in English.
+      const lesson = localiseTajweedLesson(ctx.currentSuwaydLesson, ctx.classLanguage);
+      const slides = useMemo(() => buildTajweedZoomSlides(lesson), [lesson.id, lesson.isEnglish]);
       const index = Math.min(ctx.suwaydZoomSlideIndex, Math.max(0, slides.length - 1));
       const slide = slides[index];
       const lessons = planItem ? SUWAYD_TAJWEED_CURRICULUM.filter((l) => planItem.lessonIds.includes(l.id)) : SUWAYD_TAJWEED_CURRICULUM;
@@ -55,6 +56,9 @@
           {slide && slide.type === 'breakdown' && <TajweedBreakdownNotes item={slide.item} />}
           {slide && slide.type === 'example' && <TajweedExampleNotes example={slide.example} lesson={lesson} ctx={ctx} />}
           <TajweedTeachingNotes lesson={lesson} />
+          {lesson.isEnglish && !SUWAYD_ENGLISH_REVIEWED && (
+            <p className="text-xs font-bold text-amber-900 bg-amber-50 border border-amber-300 rounded-xl p-2">الشرح الإنجليزي ترجمة أولية تنتظر مراجعة المعلم قبل اعتمادها.</p>
+          )}
           {onReadFromPage && <TajweedReadingPicker onRead={onReadFromPage} />}
         </>
       );
@@ -65,7 +69,7 @@
       return (
         <section className={'rounded-2xl p-4 border ' + (tone || 'bg-white border-emerald-900/10')}>
           <h4 className="font-black text-emerald-900 text-sm mb-1.5">{title}</h4>
-          <div className="text-slate-800 leading-relaxed whitespace-pre-line">{children}</div>
+          <div dir="auto" className="text-slate-800 leading-relaxed whitespace-pre-line">{children}</div>
         </section>
       );
     }

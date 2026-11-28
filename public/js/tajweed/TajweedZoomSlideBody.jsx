@@ -110,10 +110,10 @@
                                         </div>
                                         <div>
                                           <h4 className="text-lg sm:text-2xl font-black text-gold-200 font-cairo">
-                                            {item.titleAr}
+                                            <span dir="auto">{item.titleAr}</span>
                                           </h4>
                                           <span className="inline-block mt-1 text-xs font-bold px-3 py-0.5 rounded-full bg-emerald-800 text-gold-200 border border-gold-400/30">
-                                            {item.tagAr}
+                                            <span dir="auto">{item.tagAr}</span>
                                           </span>
                                         </div>
                                       </div>
@@ -129,7 +129,7 @@
                                         {isRtl ? 'الآلية المخرجية والصوتية الدقيقة للحرف والحكم:' : 'Phonetic Articulation Mechanism:'}
                                       </span>
                                       <p className="text-sm sm:text-base text-slate-100 font-cairo leading-relaxed">
-                                        {item.explanationAr}
+                                        <span dir="auto">{item.explanationAr}</span>
                                       </p>
                                     </div>
 
@@ -164,7 +164,7 @@
                                             {isRtl ? 'تنبيه الأداء والإتقان للشيخ والمعلم:' : 'Authentic Performance Alert:'}
                                           </strong>
                                           <p className="leading-relaxed">
-                                            {item.warningAr}
+                                            <span dir="auto">{item.warningAr}</span>
                                           </p>
                                         </div>
                                       </div>
@@ -191,7 +191,7 @@
 
                                     {/* Note */}
                                     <div className="bg-white/10 rounded-2xl p-4 max-w-xl mx-auto border border-white/20 text-slate-200 text-sm font-cairo">
-                                      {example.note}
+                                      <span dir="auto">{example.note}</span>
                                     </div>
 
                                     {/* Live Metronome inside Zoom slide */}

@@ -1,0 +1,44 @@
+# مراجعة الترجمة الإنجليزية لدروس التجويد
+
+الترجمة الإنجليزية لشرح دروس منهج د. أيمن سويد (التعريف، وكيف يخرج الصوت، والأخطاء الشائعة، وشرح الحروف والتنبيهات، وملاحظات الأمثلة) **ترجمة أولية** تحتاج مراجعة المعلم قبل اعتمادها. تظهر في الحصص الإنجليزية فقط، ومعها تنبيه للمعلم بأنها أولية. والمتن والكلمات القرآنية والحروف تبقى بالعربية.
+
+بعد المراجعة: يُغيَّر `SUWAYD_ENGLISH_REVIEWED` إلى `true` في `public/js/tajweed/suwayd-english.jsx` فيختفي التنبيه. والنصوص نفسها في `public/js/tajweed/suwayd-english-data.jsx`.
+
+## قد تكون أخطاء في البيانات العربية الأصلية (للتحقق)
+
+لاحظها المترجمان، وتُرجمت كما هي دون تغيير:
+
+- **الميم الساكنة، البند 2:** المثال الثالث «أَن بُورِكَ» فيه نون ساكنة قبل الباء (إقلاب) لا ميم ساكنة، وهو مدرج تحت «الميم الساكنة قبل الباء».
+- **التفخيم والترقيق، البند 1:** المرتبة الخامسة توصف بأنها «التفخيم النسبي في حروف الانفتاح (ق، غ، خ)»، وهذه حروف استعلاء.
+- **التفخيم والترقيق، البند 2:** يذكر أن الراء تفخم في 8 أحوال وترقق في 4، والمذكور أقل من ذلك.
+- **التفخيم والترقيق، البند 3:** المثال «قُلْ هُوَ ٱللَّهُ أَحَدٌ ٱللَّهُ» تحت «الترقيق بعد التنوين»، ولفظ الجلالة الأول فيه ليس بعد تنوين.
+- **الصفات غير المتضادة، تنبيه البند 2:** «زَرَزَقْنَا» تبدو خطأً مطبعياً عن «رَزَقْنَا».
+- **مد الفواتح، الخطأ الشائع 3:** عبارة «حرف مبني» غير واضحة المعنى.
+- **الوقف والابتداء، البند 1:** «رؤوس السور» قد يكون المقصود بها «أواخر السور».
+- **المقطوع والموصول:** يتنقل النص بين «اضطراراً» و«اختباراً» في الوقف على الكلمات المقطوعة.
+
+## ملاحظات المترجمَين (مصطلحات وجمل تحتاج تأكيداً)
+
+- mabadi_tajweed: «حقه ومستحقه» → "its due (inherent qualities) and its entitlement (conditional qualities)"؛ ما بين القوسين إضافة للتوضيح.
+- mabadi_tajweed، البند 1 المثال 3: «تطنين الغنة» → "over-resonant, droning Ghunnah".
+- mabadi_tajweed، الملاحظة 3: «ترك الغنة المفخمة» → "the heavy Ghunnah" (ترجمة حرفية).
+- mabadi_tajweed، تنبيه البند 1: «الرياضة الفكية» → "jaw training".
+- makharij_halq، الزمن: «زمن البينية / الرخاوة» → "Duration of in-between letters / softness".
+- makharij_lisan، البند 2: «شجر اللسان» → "Shajr al-lisan (middle opening of the mouth)".
+- makharij_lisan، البند 1: «المنطقة اللهوية العلوية» → "Upper uvular area".
+- makharij_lisan، البند 5: «نطع الغار الأعلى» → "The upper palate ridge".
+- makharij_lisan، البند 3: اللام «من أدنى حافة اللسان إلى منتهاها» → "from the nearest part of the side of the tongue to its end".
+- sifat_mutadaddah: عبارات الحفظ (فحثه شخص سكت، أجد قط بكت…) بقيت بالعربية.
+- sifat_ghayr_mutadaddah، البند 4 المثال 3: «هاء الكناية» → "the pronoun هـ – Haa' al-Kinayah".
+- sifat_ghayr_mutadaddah، التعريف: «صفات عارضة» → "qualities particular to some letters"؛ كلمة «عارضة» لم تُترجم وحدها.
+- izhar_halqi، تنبيه البند 5: «(نطق مِن غل وليس مِنْغ غل)» بقي بالعربية.
+- izhar_halqi، توجيه المعلم: «درب الطالب على وضع علامة ضبط المصحف» → "Train the student on the Mushaf's marking".
+- idgham_ahkam، التعريف: «ولا يقع إلا في كلمتين» → "it only occurs across two words".
+- iqlab_hukm، تنبيه البند 1: «حصرة فجة» → "a harsh constriction".
+- lamat_sawakin، البند 1: «رأس خاء» → "a small head of خ (the sukoon sign)"؛ ما بين القوسين إضافة.
+- lamat_sawakin، المخرج: «بصفة التوسط» → "Tawassut (in-between flow)"؛ يُراجع المقصود.
+- madd_asli_fari، المخرج: «بسط إصبع أو قبضه باعتدال» → "extending or folding a finger at a moderate pace".
+- madd_asli_fari، البند 2: «من الشاطبية» → "by the way of ash-Shatibiyyah".
+- madd_lazim_fawatih، تنبيه البند 3: العين في «مريم والشورى» كما في الأصل.
+- meem_sakinah_mushaddadatayn، البند 1: «(فيهما أصل الغنة)» بعد المرتبة الخامسة → "in these two" (قد تعود على الرابعة والخامسة).
+- hamzat_wasl_qat، المخرج: «الأسماء القياسية والسماعية السبعة» → "the regular nouns and the seven heard (sama'i) nouns".
