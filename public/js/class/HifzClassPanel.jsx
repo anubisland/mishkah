@@ -67,6 +67,13 @@
             </div>
             )}
 
+            {ctx.classLanguage === 'en' && recitation && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-black text-emerald-900 text-sm">ترجمة المعاني عند الطلاب:</span>
+                <button type="button" className={classPill(ctx.showMeanings)} onClick={() => ctx.setShowMeanings(!ctx.showMeanings)}>{ctx.showMeanings ? 'ظاهرة' : 'مخفية'}</button>
+                <span className="text-xs text-slate-500">{MEANING_SOURCE_NOTE}</span>
+              </div>
+            )}
             {recitation ? <RecitationControls ctx={ctx} /> : <MushafMaskControls ctx={ctx} />}
           </section>
 
@@ -159,12 +166,14 @@
         customMaskedWords: ctx.customMaskedWords, passageMaskedAyahs: ctx.passageMaskedAyahs, passageStatus: ctx.passageStatus
       };
       const recitation = ctx.hifzViewMode === 'interactive_test';
+      // English class: the meaning under each ayah, for the teacher to read from.
+      const en = ctx.classLanguage === 'en';
       if (!ctx.hifzAyahs || !ctx.hifzAyahs.length) return null;
       return (
         <section className="bg-[#FFFDF9] rounded-2xl p-4 border-2 border-gold-400/50">
           <h4 className="font-black text-emerald-900 text-sm mb-2">📜 النص الكامل للمعلم فقط{ctx.isFetchingQuran ? ' (جارٍ التحميل…)' : ''}</h4>
           {marking && pick && <TasmeeWordChooser pick={pick} onCancel={() => setPick(null)} onChoose={(type) => { tasmee.add(type, pick.word, pick.ayah, pick.key); setPick(null); }} />}
-          <div className="font-quran text-2xl leading-[2.2] text-right text-black" dir="rtl">
+          <div className={(en ? '' : 'font-quran ') + 'text-2xl leading-[2.2] text-right text-black'} dir="rtl">
             {ctx.hifzAyahs.map((ayah) => {
               const words = ayah.text.split(' ');
               const hiddenAyah = recitation && !recitationAyahVisibility(ayahKey(ayah), masks).isRevealed;
@@ -186,6 +195,7 @@
                   })}
                   <span className="font-quran text-gold-600">﴿{ayah.num}﴾ </span>
                 </span>
+                {en && ctx.meaningFor(ayah) && <span className="block text-left text-base leading-relaxed text-slate-700 font-sans my-1" dir="ltr">({ayah.num}) {ctx.meaningFor(ayah)}</span>}
                 </React.Fragment>
               );
             })}

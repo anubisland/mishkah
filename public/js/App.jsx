@@ -1090,6 +1090,22 @@
       const [classPlan, setClassPlan] = useState(null);
       // The teacher enlarged the makhraj plate on the student screen.
       const [tajweedPlateLarge, setTajweedPlateLarge] = useState(false);
+      // A class taught in English: the student screen and the teacher's notes in
+      // English, with the meanings of the ayahs under them.
+      const classLanguage = classModeOpen && classPlan && classPlan.language === 'en' ? 'en' : 'ar';
+      const [showMeanings, setShowMeanings] = useState(true);
+      const [meanings, setMeanings] = useState({});
+      useEffect(() => {
+        if (classLanguage !== 'en') return;
+        let cancelled = false;
+        fetchPageMeanings(mushafPageNumber).then((map) => { if (!cancelled && map) setMeanings((m) => Object.assign({}, m, map)); });
+        return () => { cancelled = true; };
+      }, [classLanguage, mushafPageNumber]);
+      // Built-in passages give only the ayah number; their surah is the page's.
+      const meaningFor = (ayah) => {
+        const sid = ayah.surahNumber || (MUSHAF_SURAHS_PAGE_MAP.find((s) => s.startPage <= mushafPageNumber && s.endPage >= mushafPageNumber) || {}).id;
+        return meanings[sid + ':' + ayah.num] || '';
+      };
       // Each lesson, and each class, starts with the plate at its usual size.
       useEffect(() => { setTajweedPlateLarge(false); }, [suwaydLessonId, classModeOpen]);
       const [myClassesOpen, setMyClassesOpen] = useState(false);
@@ -1553,7 +1569,9 @@
             page: mushafPageNumber,
             surahName: hifzSurahName,
             ayahRange: hifzAyahRange,
-            ayahs: hifzAyahs.map((a) => ({ num: a.num, text: a.text, surahNumber: a.surahNumber })),
+            lang: classLanguage,
+            ayahs: hifzAyahs.map((a) => ({ num: a.num, text: a.text, surahNumber: a.surahNumber,
+              meaning: classLanguage === 'en' && showMeanings ? meaningFor(a) : '' })),
             isReverseOrder,
             masks: recitationMasksToStage({
               isEndingsMasked, isStartersMasked, isDivineNamesMasked, isAlternatingMasked, isFullMasked,
@@ -1562,11 +1580,12 @@
           };
         }
         if (activeTab === 'hifz') {
-          return { kind: 'mushaf', page: mushafPageNumber, overlayMode: mushafOverlayMode, rulerLine: activeRulerLine };
+          return { kind: 'mushaf', lang: classLanguage, page: mushafPageNumber, overlayMode: mushafOverlayMode, rulerLine: activeRulerLine };
         }
         if (activeTab === 'tajweed') {
           return {
             kind: 'tajweed',
+            lang: classLanguage,
             lessonId: currentSuwaydLesson && currentSuwaydLesson.id,
             // In class mode the teacher steps through the slides from her panel.
             slideIndex: (suwaydZoomModalOpen || classModeOpen) ? Math.min(suwaydZoomSlideIndex, Math.max(0, currentZoomSlides.length - 1)) : 0,
@@ -1580,7 +1599,7 @@
       }, [activeTab, hifzViewMode, hifzSurahName, hifzAyahRange, hifzAyahs, isReverseOrder, isEndingsMasked, isStartersMasked,
           isDivineNamesMasked, isAlternatingMasked, isFullMasked, revealedAyahSet, customMaskedWords, passageMaskedAyahs, passageStatus,
           mushafPageNumber, mushafOverlayMode, activeRulerLine, currentSuwaydLesson, suwaydZoomModalOpen, classModeOpen,
-          suwaydZoomSlideIndex, currentZoomSlides, activeSuwaydPlateId, tajweedPlateLarge, metronomeCount, metronomePlaying, metronomeBeat]);
+          suwaydZoomSlideIndex, currentZoomSlides, activeSuwaydPlateId, tajweedPlateLarge, metronomeCount, metronomePlaying, metronomeBeat, classLanguage, showMeanings, meanings]);
 
       useEffect(() => {
         // The slide studio and class mode publish to the student window themselves.
@@ -1642,7 +1661,7 @@
         openGuide: () => setGuideOpen(true),
         openStudio: () => { setActiveTab('islamic'); setSlideStudioOpen(true); }
       };
-      const classCtx = { tajweedPlateLarge, setTajweedPlateLarge, activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, handleArrangeStudentWindow, classStudentId, hifzSurahName, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
+      const classCtx = { classLanguage, showMeanings, setShowMeanings, meaningFor, tajweedPlateLarge, setTajweedPlateLarge, activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, handleArrangeStudentWindow, classStudentId, hifzSurahName, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
 
       return (
         <div className="min-h-screen flex flex-col islamic-screen-pattern">
