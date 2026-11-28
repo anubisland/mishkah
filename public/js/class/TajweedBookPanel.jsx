@@ -103,7 +103,7 @@
           {info.id === 'suwayd' && (
             <button type="button" className={'w-full ' + classPill(showEnglish)} onClick={() => setShowEnglish(!showEnglish)}>🇬🇧 الشرح بالإنجليزية لهذا الباب</button>
           )}
-          {info.id === 'suwayd' && showEnglish && <TajweedEnglishNotes chapter={chapter} />}
+          {info.id === 'suwayd' && showEnglish && <TajweedEnglishNotes chapter={chapter} shown={place.english} onShow={place.setEnglish} />}
           {onReadFromPage && <TajweedReadingPicker onRead={onReadFromPage} />}
           <BookSettings place={place} onChooseAgain={choose} busy={busy} error={error} />
         </>

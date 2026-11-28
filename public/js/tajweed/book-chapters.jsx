@@ -80,17 +80,22 @@
       const page = clamp(pdfPage);
       const [offset, setOffsetState] = useState(() => readBookNumber(info.offsetKey, info.defaultOffset));
       const [focus, setFocus] = useState('full');
+      // In an English class: the English topic shown beside the page
+      // ({ topic: lesson id, item: breakdown index or -1 for the whole topic }), or null.
+      const [english, setEnglish] = useState(null);
       const setPdfPage = (p) => {
         const next = clamp(p);
         if (next === page) return;
         setPdfPageState(next); writeBookNumber(info.pageKey, next); setFocus('full');
+        // A new chapter has other topics; within a chapter the topic stays.
+        if (english && tajweedBookChapterFor(info.id, next - offset) !== tajweedBookChapterFor(info.id, page - offset)) setEnglish(null);
       };
       const setOffset = (o) => { setOffsetState(o); writeBookNumber(info.offsetKey, o); };
       return {
-        bookId: info.id, pdfPage: page, total, setTotal, focus, offset, setFocus, setOffset, setPdfPage,
+        bookId: info.id, pdfPage: page, total, setTotal, focus, offset, setFocus, setOffset, setPdfPage, english, setEnglish,
         printed: page - offset,
         openPrinted: (printed) => setPdfPage(Math.max(1, printed + offset)),
-        stage: { kind: 'book', book: info.id, page, focus, offset }
+        stage: { kind: 'book', book: info.id, page, focus, offset, english }
       };
     }
 

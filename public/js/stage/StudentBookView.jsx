@@ -8,9 +8,14 @@
       const [boxRef, size] = useElementSize();
       const printed = stage.page - (stage.offset != null ? stage.offset : tajweedBookOffset(bookId));
       const chapter = tajweedBookChapterFor(bookId, printed);
+      // In an English class the teacher may show an English topic beside the page.
+      const english = stage.lang === 'en' && stage.english ? stage.english : null;
+      const englishEn = stage.lang === 'en';
       return (
-        <StudentFrame title={chapter ? (stage.lang === 'en' && chapter.titleEn ? chapter.titleEn : chapter.title) : info.title} subtitle={info.title + (info.author ? ' — ' + info.author : '') + (printed >= 1 ? ' • صفحة ' + printed : '')}>
-          <div className="relative w-full h-full self-stretch">
+        <StudentFrame title={chapter ? (stage.lang === 'en' && chapter.titleEn ? chapter.titleEn : chapter.title) : info.title} subtitle={info.title + (info.author ? ' — ' + info.author : '') + (printed >= 1 ? (englishEn ? ' • page ' : ' • صفحة ') + printed : '')}>
+          <div className="w-full h-full self-stretch flex gap-3">
+          {english && <div className="w-[42%] shrink-0 order-last"><StudentEnglishTopic english={english} /></div>}
+          <div className="relative flex-1 h-full">
           {/* Absolutely placed, so the page drawn inside cannot grow the box it is measured from. */}
           <div ref={boxRef} className="absolute inset-0 flex items-center justify-center">
             {book.status === 'ready' && size.width > 0 && (
@@ -20,6 +25,7 @@
             {(book.status === 'missing' || book.status === 'error') && (
               <p className="text-gold-200 font-bold text-xl text-center">لم يُختر ملف الكتاب بعد على هذا الجهاز. يظهر هنا تلقائياً بعد اختياره من لوحة المعلم.</p>
             )}
+          </div>
           </div>
           </div>
         </StudentFrame>
