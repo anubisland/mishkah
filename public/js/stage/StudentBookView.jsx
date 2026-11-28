@@ -4,7 +4,7 @@
     function StudentBookView({ stage }) {
       const book = useTajweedBookDoc(0);
       const [boxRef, size] = useElementSize();
-      const printed = stage.page - readBookNumber(TAJWEED_BOOK_OFFSET_KEY, TAJWEED_BOOK_DEFAULT_OFFSET);
+      const printed = stage.page - (stage.offset != null ? stage.offset : readBookNumber(TAJWEED_BOOK_OFFSET_KEY, TAJWEED_BOOK_DEFAULT_OFFSET));
       const chapter = tajweedBookChapterFor(printed);
       return (
         <StudentFrame title={chapter ? chapter.title : 'التجويد المصور'} subtitle={'التجويد المصور — د. أيمن رشدي سويد' + (printed >= 1 ? ' • صفحة ' + printed : '')}>
@@ -12,11 +12,11 @@
           {/* Absolutely placed, so the page drawn inside cannot grow the box it is measured from. */}
           <div ref={boxRef} className="absolute inset-0 flex items-center justify-center">
             {book.status === 'ready' && size.width > 0 && (
-              <BookPageCanvas doc={book.doc} page={Math.min(stage.page, book.doc.numPages)} focus={stage.focus || 'full'} maxWidth={size.width} maxHeight={size.height} />
+              <BookPageCanvas doc={book.doc} page={Math.max(1, Math.min(stage.page, book.doc.numPages))} focus={stage.focus || 'full'} maxWidth={size.width} maxHeight={size.height} />
             )}
             {book.status === 'loading' && <p className="text-gold-200 font-bold text-xl">جارٍ فتح الكتاب…</p>}
             {(book.status === 'missing' || book.status === 'error') && (
-              <p className="text-gold-200 font-bold text-xl text-center">لم يُفتح الكتاب في هذه الشاشة. تُفتح شاشة الطالب من البرنامج نفسه على الجهاز الذي اختير عليه ملف الكتاب.</p>
+              <p className="text-gold-200 font-bold text-xl text-center">لم يُختر ملف الكتاب بعد على هذا الجهاز. يظهر هنا تلقائياً بعد اختياره من لوحة المعلم.</p>
             )}
           </div>
           </div>

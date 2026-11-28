@@ -5,6 +5,14 @@
     const TAJWEED_BOOK_DB = 'mishkah-books';
     const TAJWEED_BOOK_STORE = 'files';
     const TAJWEED_BOOK_KEY = 'tajweed-suwayd';
+    // Changed whenever the book is chosen or removed, so the other window
+    // (teacher or student) reopens it through the storage event.
+    const TAJWEED_BOOK_VERSION_KEY = 'mishkah_tajweed_book_version';
+
+    function markTajweedBookChanged() {
+      tajweedBookDocPromise = null;
+      try { localStorage.setItem(TAJWEED_BOOK_VERSION_KEY, String(Date.now())); } catch (e) { console.warn('Mishkah: could not tell the other window about the book', e); }
+    }
 
     function openBookDb() {
       return new Promise((resolve, reject) => {
@@ -30,7 +38,7 @@
       if (!file || !/\.pdf$/i.test(file.name || '')) return 'يلزم اختيار ملف الكتاب بصيغة PDF.';
       try {
         await bookDbRequest('readwrite', (s) => s.put({ name: file.name, size: file.size, blob: file }, TAJWEED_BOOK_KEY));
-        tajweedBookDocPromise = null;
+        markTajweedBookChanged();
         return null;
       } catch (e) {
         console.warn('Mishkah: could not keep the tajweed book', e);
@@ -43,8 +51,7 @@
     }
 
     function removeTajweedBookFile() {
-      tajweedBookDocPromise = null;
-      return bookDbRequest('readwrite', (s) => s.delete(TAJWEED_BOOK_KEY));
+      return bookDbRequest('readwrite', (s) => s.delete(TAJWEED_BOOK_KEY)).then(markTajweedBookChanged);
     }
 
     // The opened PDF, shared by every page drawn in this window.
@@ -60,7 +67,8 @@
           // isEvalSupported: false — see the PDF.js security note in lecture-actions.jsx.
           return window.pdfjsLib.getDocument({ data, isEvalSupported: false }).promise;
         })();
-        tajweedBookDocPromise.catch(() => { tajweedBookDocPromise = null; });
+        // A missing book or a failure is not kept: the next look tries again.
+        tajweedBookDocPromise.then((doc) => { if (!doc) tajweedBookDocPromise = null; }, () => { tajweedBookDocPromise = null; });
       }
       return tajweedBookDocPromise;
     }
@@ -68,6 +76,16 @@
     // { status: 'loading' | 'missing' | 'ready' | 'error', doc, error }
     function useTajweedBookDoc(version) {
       const [state, setState] = useState({ status: 'loading' });
+      const [changed, setChanged] = useState(0);
+      useEffect(() => {
+        const onStorage = (e) => {
+          if (e.key !== TAJWEED_BOOK_VERSION_KEY) return;
+          tajweedBookDocPromise = null;
+          setChanged((n) => n + 1);
+        };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
+      }, []);
       useEffect(() => {
         let alive = true;
         setState({ status: 'loading' });
@@ -79,7 +97,7 @@
           }
         );
         return () => { alive = false; };
-      }, [version]);
+      }, [version, changed]);
       return state;
     }
 
@@ -102,6 +120,7 @@
           const ratio = Math.min(2, window.devicePixelRatio || 1);
           const viewport = p.getViewport({ scale: fit * ratio });
           const canvas = canvasRef.current;
+          if (!canvas) return;
           canvas.width = viewport.width; canvas.height = viewport.height;
           setShape({ w: base.width * fit, h: base.height * fit, shownW: shownW * fit, shift: focus === 'left' ? 0 : focus === 'right' ? -shownW * fit : 0 });
           task = p.render({ canvasContext: canvas.getContext('2d'), viewport });
@@ -113,10 +132,11 @@
         });
         return () => { alive = false; if (task) task.cancel(); };
       }, [doc, page, focus, maxWidth, maxHeight]);
-      if (error) return <p className="text-rose-200 font-bold">{error}</p>;
+      // The canvas always stays mounted, so the next page can draw on it.
       return (
         <div dir="ltr" className="overflow-hidden bg-white shadow-2xl rounded-md" style={shape ? { width: shape.shownW, height: shape.h } : null}>
-          <canvas ref={canvasRef} style={shape ? { width: shape.w, height: shape.h, marginLeft: shape.shift, display: 'block' } : { display: 'block' }} />
+          <canvas ref={canvasRef} style={shape && !error ? { width: shape.w, height: shape.h, marginLeft: shape.shift, display: 'block' } : { display: 'none' }} />
+          {error && <p className="p-4 text-rose-700 font-bold">{error}</p>}
         </div>
       );
     }

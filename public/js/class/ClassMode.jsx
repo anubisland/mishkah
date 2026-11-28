@@ -31,7 +31,7 @@
         return '🎙️ ' + (lesson ? lesson.titleAr : 'درس تجويد') + (slide ? ' — ' + slide.titleAr : '');
       }
       if (stage.kind === 'book') {
-        const printed = stage.page - readBookNumber(TAJWEED_BOOK_OFFSET_KEY, TAJWEED_BOOK_DEFAULT_OFFSET);
+        const printed = stage.page - (stage.offset != null ? stage.offset : readBookNumber(TAJWEED_BOOK_OFFSET_KEY, TAJWEED_BOOK_DEFAULT_OFFSET));
         return '📘 التجويد المصور' + (printed >= 1 ? ' — صفحة ' + printed : '');
       }
       if (stage.kind === 'deck') {
@@ -183,7 +183,7 @@
           if (planItem) next = Math.max(planItem.fromPage, Math.min(planItem.toPage, next));
           if (next !== ctx.mushafPageNumber) ctx.handleNavigateMushafPage(next);
         }
-        else if (section === 'tajweed') bookPlace.setPdfPage(Math.max(1, bookPlace.pdfPage + delta));
+        else if (section === 'tajweed') bookPlace.setPdfPage(bookPlace.pdfPage + delta);
         else setLectureIndex((i) => Math.max(0, i + delta));
       };
       useEffect(() => {

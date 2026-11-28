@@ -9,6 +9,8 @@
       const [error, setError] = useState('');
       const [busy, setBusy] = useState(false);
       const [boxRef, boxWidth] = useElementWidth();
+      // The place needs the page count to keep the page inside the book.
+      useEffect(() => { if (book.status === 'ready') place.setTotal(book.doc.numPages); }, [book.status, book.doc]);
 
       const choose = async (file) => {
         if (!file) return;

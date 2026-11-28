@@ -54,15 +54,23 @@
     // Where the class is in the book: the PDF page shown (remembered, so the
     // next class carries on), the focus, and the page offset.
     function useTajweedBookPlace() {
-      const [pdfPage, setPdfPageState] = useState(() => readBookNumber(TAJWEED_BOOK_PAGE_KEY, 1));
+      const [pdfPage, setPdfPageState] = useState(() => Math.max(1, readBookNumber(TAJWEED_BOOK_PAGE_KEY, 1)));
+      // The book's page count, reported by the panel once the book is open.
+      const [total, setTotal] = useState(0);
+      const clamp = (p) => Math.max(1, total ? Math.min(total, p) : p);
+      const page = clamp(pdfPage);
       const [offset, setOffsetState] = useState(() => readBookNumber(TAJWEED_BOOK_OFFSET_KEY, TAJWEED_BOOK_DEFAULT_OFFSET));
       const [focus, setFocus] = useState('full');
-      const setPdfPage = (p) => { setPdfPageState(p); writeBookNumber(TAJWEED_BOOK_PAGE_KEY, p); setFocus('full'); };
+      const setPdfPage = (p) => {
+        const next = clamp(p);
+        if (next === page) return;
+        setPdfPageState(next); writeBookNumber(TAJWEED_BOOK_PAGE_KEY, next); setFocus('full');
+      };
       const setOffset = (o) => { setOffsetState(o); writeBookNumber(TAJWEED_BOOK_OFFSET_KEY, o); };
       return {
-        pdfPage, focus, offset, setFocus, setOffset, setPdfPage,
-        printed: pdfPage - offset,
+        pdfPage: page, total, setTotal, focus, offset, setFocus, setOffset, setPdfPage,
+        printed: page - offset,
         openPrinted: (printed) => setPdfPage(Math.max(1, printed + offset)),
-        stage: { kind: 'book', page: pdfPage, focus }
+        stage: { kind: 'book', page, focus, offset }
       };
     }
