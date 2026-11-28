@@ -239,6 +239,7 @@
             <div className="flex-1 min-h-[180px] overflow-y-auto bg-white rounded-2xl p-5 border-2 border-gold-400/60">
               <h4 className="font-black text-emerald-900 mb-2">📝 ملاحظات المعلم (لا يراها الطلاب)</h4>
               <p className="whitespace-pre-line leading-loose text-lg text-slate-800 font-amiri">{slide.notes || '—'}</p>
+              <div className="mt-3"><LectureTextPane deck={deck} index={index} onPick={(k) => go(k - index)} /></div>
             </div>
             {next && (
               <div className="bg-white/70 rounded-2xl p-2 border border-emerald-900/10">

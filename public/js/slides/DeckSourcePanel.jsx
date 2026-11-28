@@ -38,7 +38,7 @@
         setError(null);
         try {
           const result = parseClaudeDeckReply(reply);
-          onDeck(result.deck, result.warnings);
+          onDeck(Object.assign({}, result.deck, { sourceText: text }), result.warnings);
         } catch (e) {
           setError(e.message);
         }
@@ -74,7 +74,7 @@
               <div className="card-islamic-sage rounded-2xl p-4 space-y-2 border border-emerald-300">
                 <h4 className="font-black text-emerald-950">⚡ الطريقة السريعة (بدون ذكاء اصطناعي)</h4>
                 <p className="text-sm text-slate-700">تقسّم المحاضرة حسب عناوينها وآياتها وأحاديثها. تحتاج محاضرة مرتبة بعناوين واضحة (أولاً، ثانياً، …).</p>
-                <button type="button" disabled={!text.trim()} onClick={() => onDeck(buildQuickDeck(text, fromPdf), [])}
+                <button type="button" disabled={!text.trim()} onClick={() => onDeck(Object.assign({}, buildQuickDeck(text, fromPdf), { sourceText: text }), [])}
                   className="w-full py-2.5 rounded-xl bg-emerald-800 text-white font-black disabled:opacity-40">إنشاء العرض الآن</button>
               </div>
 

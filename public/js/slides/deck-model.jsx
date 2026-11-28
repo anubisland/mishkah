@@ -112,7 +112,8 @@
         return slide;
       });
       const frame = DECK_FRAME_IDS.includes(d.frame) ? d.frame : 'classic';
-      return { title: asText(d.title), subtitle: asText(d.subtitle), series: asText(d.series), frame, slides };
+      // sourceText: the whole lecture, shown to the teacher beside the slides.
+      return { title: asText(d.title), subtitle: asText(d.subtitle), series: asText(d.series), frame, sourceText: asText(d.sourceText), slides };
     }
 
     function blankSlide(layout) {
