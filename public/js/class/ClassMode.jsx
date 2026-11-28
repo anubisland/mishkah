@@ -181,8 +181,8 @@
         if (minimized) return;
         const onKey = (e) => {
           if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
-          if (e.key === 'ArrowLeft' || e.key === 'PageDown') { e.preventDefault(); step(1); }
-          if (e.key === 'ArrowRight' || e.key === 'PageUp') { e.preventDefault(); step(-1); }
+          if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); step(1); }
+          if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); step(-1); }
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);

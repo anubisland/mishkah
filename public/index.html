@@ -14,7 +14,7 @@
   <script>
     // The one place the version lives. Raised with every release (and the
     // cache name in sw.js with it), so the teacher sees that an update arrived.
-    window.MISHKAH_VERSION = { number: '92', date: '2026-11-27', note: 'فصل السور في نص المعلم، وأزرار الصفحات تحت النص، وشرائح تجويد أكبر عند الطالب' };
+    window.MISHKAH_VERSION = { number: '93', date: '2026-11-27', note: 'التالية يميناً والسابقة يساراً، وخط النسخ لعناوين شاشة الطالب، ولوحة المخرج بعرض الشاشة' };
     (function() {
       const CURRENT_VER = window.MISHKAH_VERSION.number;
       const p = new URLSearchParams(window.location.search);
@@ -92,6 +92,7 @@
           fontFamily: {
             cairo: ['Cairo', 'sans-serif'],
             amiri: ['Amiri', 'serif'],
+            naskh: ['"Noto Naskh Arabic"', 'Amiri', 'serif'],
             sans: ['"Plus Jakarta Sans"', 'Cairo', 'sans-serif']
           }
         }
@@ -150,6 +151,12 @@
       font-family: var(--active-app-font) !important;
     }
 
+    /* Naskh for titles and texts that ask for it (student screen titles, the
+       matn of the tajweed lessons). Same weight as the rule above, so later wins. */
+    html .font-naskh, html .font-naskh * {
+      font-family: 'Noto Naskh Arabic', 'Amiri', serif !important;
+    }
+
     /* Page background: the header's eight-pointed star motif, soft green on
        ivory, across the whole program (covenant: Islamic patterns stay visible
        behind the content). Faint enough that text stays easy to read. */
@@ -165,7 +172,8 @@
     }
 
     /* Sacred Quranic Text strictly locked to Uthmani font with maximum crispness and high contrast */
-    .font-quran, .font-quran * {
+    /* "html" so it always beats other font rules (e.g. .font-naskh around it). */
+    html .font-quran, html .font-quran * {
       font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif !important;
       font-weight: 700 !important;
       color: #021a12;
