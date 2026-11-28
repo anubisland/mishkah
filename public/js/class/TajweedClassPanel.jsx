@@ -35,10 +35,10 @@
               {lessons.map((l, i) => <option key={l.id} value={l.id}>{(i + 1) + '. ' + l.titleAr}</option>)}
             </select>
             <div className="flex items-center gap-2">
-              <button type="button" className={classPill(false)} disabled={index === 0} onClick={() => go(index - 1)}>→ السابقة</button>
+              <button type="button" className={'order-last ' + classPill(false)} disabled={index === 0} onClick={() => go(index - 1)}>السابقة ←</button>
               <span className="flex-1 text-center font-black text-emerald-950 text-sm">الشريحة {index + 1} من {slides.length}</span>
-              <button type="button" className={classPill(true)} disabled={index >= slides.length - 1 && !nextLesson} onClick={() => go(index + 1)}>
-                {index >= slides.length - 1 && nextLesson ? 'الدرس التالي ←' : 'التالية ←'}
+              <button type="button" className={'order-first ' + classPill(true)} disabled={index >= slides.length - 1 && !nextLesson} onClick={() => go(index + 1)}>
+                {index >= slides.length - 1 && nextLesson ? '→ الدرس التالي' : '→ التالية'}
               </button>
             </div>
             <div className="flex flex-wrap gap-1">

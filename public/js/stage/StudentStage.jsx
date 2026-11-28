@@ -29,7 +29,7 @@
         <div className="h-screen max-h-screen flex flex-col text-white overflow-hidden select-none emerald-pattern" dir="rtl">
           <div className="shrink-0 flex items-center justify-between px-5 py-2 border-b border-gold-400/30">
             <div>
-              <h1 className="text-lg sm:text-xl font-black font-cairo text-gold-200 leading-tight">{title}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold font-naskh text-gold-200 leading-snug">{title}</h1>
               {subtitle && <span className="text-xs sm:text-sm text-gold-300/80 font-bold">{subtitle}</span>}
             </div>
             <span className="text-xs font-bold text-gold-300/70 font-cairo">مِشكاة</span>

@@ -32,9 +32,9 @@
         <>
           <section className="bg-white rounded-2xl p-3 border border-emerald-900/10 space-y-2">
             <div className="flex items-center gap-2">
-              <button type="button" className={classPill(false)} disabled={i === 0} onClick={() => setIndex(i - 1)}>→ السابقة</button>
+              <button type="button" className={'order-last ' + classPill(false)} disabled={i === 0} onClick={() => setIndex(i - 1)}>السابقة ←</button>
               <span className="flex-1 text-center font-black text-emerald-950 text-sm">الشريحة {i + 1} من {total}</span>
-              <button type="button" className={classPill(true)} disabled={!next} onClick={() => setIndex(i + 1)}>التالية ←</button>
+              <button type="button" className={'order-first ' + classPill(true)} disabled={!next} onClick={() => setIndex(i + 1)}>→ التالية</button>
             </div>
             <select value={i} onChange={(e) => setIndex(parseInt(e.target.value, 10))} className="w-full border-2 border-emerald-900/15 rounded-xl px-2 py-1.5 font-bold text-sm">
               {deck.slides.map((s, k) => <option key={s.id} value={k}>{(k + 1) + '. ' + (s.title || s.eyebrow || (s.quote && s.quote.text) || 'شريحة')}</option>)}

@@ -46,16 +46,16 @@
             )}
             {planItem ? (
               <div className="flex flex-wrap items-center gap-2">
-                <button type="button" className={classPill(false)} disabled={page <= planItem.fromPage} onClick={() => ctx.handleNavigateMushafPage(page - 1)}>→ السابقة</button>
+                <button type="button" className={'order-last ' + classPill(false)} disabled={page <= planItem.fromPage} onClick={() => ctx.handleNavigateMushafPage(page - 1)}>السابقة ←</button>
                 <span className="flex-1 text-center font-black text-emerald-950 text-sm">
                   {hifzItemPlace(planItem)} • صفحة {page}
                   {planItem.toPage > planItem.fromPage && page >= planItem.fromPage && page <= planItem.toPage ? ' (' + (page - planItem.fromPage + 1) + ' من ' + (planItem.toPage - planItem.fromPage + 1) + ')' : ''}
                 </span>
-                <button type="button" className={classPill(true)} disabled={page >= planItem.toPage} onClick={() => ctx.handleNavigateMushafPage(page + 1)}>التالية ←</button>
+                <button type="button" className={'order-first ' + classPill(true)} disabled={page >= planItem.toPage} onClick={() => ctx.handleNavigateMushafPage(page + 1)}>→ التالية</button>
               </div>
             ) : (
             <div className="flex flex-wrap items-center gap-2">
-              <button type="button" className={classPill(false)} onClick={() => ctx.handleNavigateMushafPage(page - 1)}>→ السابقة</button>
+              <button type="button" className={'order-last ' + classPill(false)} onClick={() => ctx.handleNavigateMushafPage(page - 1)}>السابقة ←</button>
               <select value={currentSurah ? currentSurah.id : ''} onChange={(e) => {
                 const s = surahs.find((x) => String(x.id) === e.target.value);
                 if (s) ctx.handleNavigateMushafPage(s.startPage);
@@ -63,7 +63,7 @@
                 {surahs.map((s) => <option key={s.id} value={s.id}>{s.id}. {s.name}</option>)}
               </select>
               <span className="font-black text-emerald-950 text-sm">صفحة {page}</span>
-              <button type="button" className={classPill(false)} onClick={() => ctx.handleNavigateMushafPage(page + 1)}>التالية ←</button>
+              <button type="button" className={'order-first ' + classPill(false)} onClick={() => ctx.handleNavigateMushafPage(page + 1)}>→ التالية</button>
             </div>
             )}
 
@@ -222,9 +222,9 @@
       const max = planItem ? planItem.toPage : 604;
       return (
         <div className="flex items-center gap-2">
-          <button type="button" className={classPill(false)} disabled={page <= min} onClick={() => ctx.handleNavigateMushafPage(page - 1)}>→ الصفحة السابقة</button>
+          <button type="button" className={'order-last ' + classPill(false)} disabled={page <= min} onClick={() => ctx.handleNavigateMushafPage(page - 1)}>الصفحة السابقة ←</button>
           <span className="flex-1 text-center font-black text-emerald-950 text-sm">صفحة {page}</span>
-          <button type="button" className={classPill(true)} disabled={page >= max} onClick={() => ctx.handleNavigateMushafPage(page + 1)}>الصفحة التالية ←</button>
+          <button type="button" className={'order-first ' + classPill(true)} disabled={page >= max} onClick={() => ctx.handleNavigateMushafPage(page + 1)}>→ الصفحة التالية</button>
         </div>
       );
     }

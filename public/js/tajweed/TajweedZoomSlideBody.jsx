@@ -12,9 +12,9 @@
                                 const currentPlate = lessonPlates.find(p => p.id === activeSuwaydPlateId) || lessonPlates[0] || SUWAYD_PLATES[0];
                                 if (plateLarge) {
                                   return (
-                                    <div className="bg-white rounded-3xl p-4 border-2 border-gold-400 shadow-2xl text-center space-y-2">
-                                      <h4 className="text-2xl font-black text-emerald-950 font-cairo">{currentPlate.titleAr}</h4>
-                                      <img src={'images/tajweed/' + currentPlate.filename} alt={currentPlate.titleAr} className="mx-auto w-auto object-contain rounded-xl" style={{ maxHeight: '640px' }} />
+                                    <div className="bg-white rounded-3xl p-2 border-2 border-gold-400 shadow-2xl text-center space-y-1">
+                                      <h4 className="text-2xl font-bold text-emerald-950 font-naskh">{currentPlate.titleAr}</h4>
+                                      <img src={'images/tajweed/' + currentPlate.filename} alt={currentPlate.titleAr} className="mx-auto w-full h-auto object-contain rounded-xl" />
                                       <p className="text-base text-slate-700 font-cairo">{currentPlate.descAr}</p>
                                       <p className="text-xs text-emerald-800">كتاب التجويد المصور — ص {currentPlate.pageInBook} (د. أيمن رشدي سويد)</p>
                                     </div>

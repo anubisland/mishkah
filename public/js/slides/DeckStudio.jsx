@@ -63,8 +63,8 @@
       useEffect(() => {
         if (mode !== 'present') return;
         const onKey = (e) => {
-          if (e.key === 'ArrowLeft' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(1); }
-          if (e.key === 'ArrowRight' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+          if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(1); }
+          if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
           if (e.key === 'Escape') setMode('edit');
         };
         window.addEventListener('keydown', onKey);
@@ -226,9 +226,9 @@
               </ScaledSlide>
             </div>
             <div className="flex items-center gap-3">
-              <button type="button" onClick={() => go(-1)} disabled={index === 0} className="px-6 py-2 rounded-xl bg-white border-2 border-emerald-900/20 font-black disabled:opacity-40">→ السابقة</button>
+              <button type="button" onClick={() => go(-1)} disabled={index === 0} className="order-last px-6 py-2 rounded-xl bg-white border-2 border-emerald-900/20 font-black disabled:opacity-40">السابقة ←</button>
               <span className="font-black text-emerald-950">{index + 1} / {deck.slides.length}</span>
-              <button type="button" onClick={() => go(1)} disabled={!next} className="px-6 py-2 rounded-xl bg-emerald-900 text-gold-200 font-black disabled:opacity-40">التالية ←</button>
+              <button type="button" onClick={() => go(1)} disabled={!next} className="order-first px-6 py-2 rounded-xl bg-emerald-900 text-gold-200 font-black disabled:opacity-40">→ التالية</button>
             </div>
           </div>
           <div className="min-h-0 flex flex-col gap-3">
