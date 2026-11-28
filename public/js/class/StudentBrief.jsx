@@ -9,8 +9,10 @@
       const recent = records.slice(0, 3);
       // Words to review: from the last three pages, without repeats.
       const words = [];
-      recent.forEach((r) => (r.words || []).forEach((w) => { if (!words.some((x) => x.word === w.word)) words.push(w); }));
-      const line = (r) => (r.result === 'passed' ? '✓ انتقل' : '↻ أُعيد') + ' — ' + r.surahName + ' ص ' + r.page + ' (' + formatMistakes(r.total) + ' من ' + formatMistakes(r.limit) + ')';
+      recent.forEach((r) => (Array.isArray(r.words) ? r.words : []).forEach((w) => {
+        if (w && typeof w.word === 'string' && !words.some((x) => x.word === w.word)) words.push(w);
+      }));
+      const line = (r) => (r.result === 'passed' ? '✓ انتقل' : '↻ أُعيد') + ' — ' + (r.surahName || '') + ' ص ' + (r.page || '—') + ' (' + formatMistakes(r.total) + ' من ' + formatMistakes(r.limit) + ')';
 
       if (compact) {
         return (
@@ -37,7 +39,7 @@
                 </li>
               ))}
             </ul>
-          ) : <p className="text-sm text-slate-600">لم يُسجَّل له تسميع بعد.</p>}
+          ) : <p className="text-sm text-slate-600">لم يُسجَّل تسميع بعد.</p>}
           {words.length > 0 && (
             <p className="text-sm"><b>للمراجعة:</b> {words.map((w, i) => <span key={i} className="font-quran text-lg mx-1">{w.word}</span>)}</p>
           )}
