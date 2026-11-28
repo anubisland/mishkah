@@ -6,7 +6,7 @@
     // item = { type: 'hifz', hifzMode: 'tasmee' | 'tahfeez' (older plans: none),
     //          surahId, surahName, fromAyah, toAyah, fromPage, toPage }
     //          (a part chosen by pages has fromAyah/toAyah null; surah = the first page's)
-    //      | { type: 'tajweed', lessonIds: [id] }
+    //      | { type: 'tajweed', lessonIds: [] }  (taught from the book; older plans may list lesson ids)
     //      | { type: 'lecture', deckTitle }
     const CLASS_PLAN_KEY = 'mishkah_class_plan';
 
@@ -44,10 +44,7 @@
         const kind = item.hifzMode === 'tahfeez' ? '📖 تحفيظ: ' : item.hifzMode === 'tasmee' ? '🎧 تسميع: ' : '🎧 ';
         return kind + hifzItemPlace(item) + (item.fromAyah == null ? '' : ' (' + pages + ')');
       }
-      if (item.type === 'tajweed') {
-        const titles = item.lessonIds.map((id) => (SUWAYD_TAJWEED_CURRICULUM.find((l) => l.id === id) || {}).titleAr).filter(Boolean);
-        return '🎙️ ' + (titles.join('، ') || 'درس تجويد');
-      }
+      if (item.type === 'tajweed') return '📘 التجويد المصور';
       if (item.type === 'lecture') return '🎞️ محاضرة: ' + (item.deckTitle || 'العرض المجهّز');
       return '';
     }

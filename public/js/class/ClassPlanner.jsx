@@ -20,7 +20,6 @@
         ? initHifzParts.map(hifzItemToPart)
         : [newHifzPart('tasmee')]);
       const [useTajweed, setUseTajweed] = useState(!!initTajweed);
-      const [lessonIds, setLessonIds] = useState(initTajweed ? initTajweed.lessonIds : []);
       const [useLecture, setUseLecture] = useState(!!initial('lecture'));
       const [phase, setPhase] = useState('edit'); // edit | preparing | ready
       const [progress, setProgress] = useState({ done: 0, total: 0 });
@@ -37,7 +36,7 @@
             if (useHifz) {
               for (const part of hifzParts) items.push(await hifzPartToItem(part, surahs));
             }
-            if (useTajweed && lessonIds.length) items.push({ type: 'tajweed', lessonIds: SUWAYD_TAJWEED_CURRICULUM.map((l) => l.id).filter((id) => lessonIds.includes(id)) });
+            if (useTajweed) items.push({ type: 'tajweed', lessonIds: [] });
             if (useLecture) {
               if (!deckReady) throw new Error('لا يوجد عرض جاهز للمحاضرة. يُجهَّز أولاً في استوديو الشرائح، أو يُلغى اختيار المحاضرة.');
               items.push({ type: 'lecture', deckTitle: deck.title });
@@ -96,17 +95,7 @@
                   <label className="flex items-center gap-2 font-black text-emerald-950">
                     <input type="checkbox" checked={useTajweed} onChange={(e) => setUseTajweed(e.target.checked)} /> التجويد
                   </label>
-                  {useTajweed && (
-                    <div className="max-h-48 overflow-y-auto grid sm:grid-cols-2 gap-1">
-                      {SUWAYD_TAJWEED_CURRICULUM.map((l, i) => (
-                        <label key={l.id} className="flex items-start gap-2 text-sm py-0.5">
-                          <input type="checkbox" checked={lessonIds.includes(l.id)}
-                            onChange={(e) => setLessonIds(e.target.checked ? lessonIds.concat([l.id]) : lessonIds.filter((x) => x !== l.id))} />
-                          <span>{(i + 1) + '. ' + l.titleAr}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
+                  {useTajweed && <p className="text-sm text-slate-700">من كتاب «التجويد المصور»، من الصفحة التي وقف عندها الدرس السابق.</p>}
                 </div>
 
                 <div className={card(useLecture)}>
@@ -120,7 +109,7 @@
 
                 {error && <p className="text-rose-700 font-bold bg-rose-50 border border-rose-200 rounded-xl p-3">{error}</p>}
                 <button type="button" onClick={() => prepare(null)}
-                  disabled={!useHifz && !(useTajweed && lessonIds.length) && !(useLecture && deckReady)}
+                  disabled={!useHifz && !useTajweed && !(useLecture && deckReady)}
                   className="w-full py-3 rounded-2xl bg-emerald-900 text-gold-200 font-black text-lg disabled:opacity-40">تجهيز الحصة</button>
               </>
             )}

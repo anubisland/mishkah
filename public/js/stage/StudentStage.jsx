@@ -19,6 +19,7 @@
       if (stage.kind === 'recitation') return <StudentRecitationView stage={stage} />;
       if (stage.kind === 'tajweed') return <StudentTajweedView stage={stage} />;
       if (stage.kind === 'deck') return <StudentDeckView stage={stage} />;
+      if (stage.kind === 'book') return <StudentBookView stage={stage} />;
       if (stage.kind === 'slides') return <StudentProjectorScreen />;
       return <StudentWaitingScreen />;
     }
