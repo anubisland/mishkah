@@ -183,7 +183,7 @@
     // The tajweed lesson slide the teacher is presenting. The student window
     // only displays it, so every setter it is given does nothing.
     function StudentTajweedView({ stage }) {
-      const lesson = SUWAYD_TAJWEED_CURRICULUM.find((l) => l.id === stage.lessonId) || SUWAYD_TAJWEED_CURRICULUM[0];
+      const lesson = localiseTajweedLesson(SUWAYD_TAJWEED_CURRICULUM.find((l) => l.id === stage.lessonId) || SUWAYD_TAJWEED_CURRICULUM[0], stage.lang);
       const slides = buildTajweedZoomSlides(lesson);
       const metronome = stage.metronome || {};
       const ignore = () => {};
@@ -191,7 +191,7 @@
       // and then grows to fill it, instead of leaving space above and below.
       const tall = useTallWindow();
       return (
-        <StudentFrame title={stage.lang === 'en' ? (lesson.titleEn || lesson.titleAr) : lesson.titleAr} subtitle={lesson.suwaydRef}>
+        <StudentFrame title={lesson.titleAr} subtitle={lesson.suwaydRef}>
           <FitToScreen>
             <div className="bg-gradient-to-b from-emerald-950 via-slate-950 to-slate-950 text-white rounded-3xl border-2 border-gold-400/80 shadow-2xl p-6 sm:p-8" style={{ width: tall ? '720px' : '1024px' }}>
             <TajweedZoomSlideBody
