@@ -212,11 +212,12 @@
         '',
         'أنواع الشرائح (layout): cover غلاف، section عنوان محور، points نقاط مرقمة، cards بطاقات (2-4)، ayah آية، hadith حديث، compare مقارنة بين أمرين (عنصران في items)، closing خاتمة.',
         'الألوان (tone): pearl، sage، amber، sky، lavender.',
+        'الإطار المزخرف للعرض كله (frame): violet-floral زخارف نباتية بنفسجية، emerald-floral زخارف نباتية خضراء، rose-floral زخارف نباتية وردية، gold-star نجمة ثمانية ذهبية، classic إطار ذهبي بسيط، none بلا إطار. اختر واحداً يناسب موضوع المحاضرة (الافتراضي violet-floral).',
         '',
         'أعد النتيجة JSON فقط، داخل ```json ... ```، بهذا الشكل بالضبط:',
         '```json',
         JSON.stringify({
-          title: 'عنوان المحاضرة', series: 'اسم السلسلة (اختياري)',
+          title: 'عنوان المحاضرة', series: 'اسم السلسلة (اختياري)', frame: 'violet-floral',
           slides: [
             { layout: 'cover', tone: 'pearl', eyebrow: 'اسم السلسلة', title: 'عنوان المحاضرة', body: 'سطر تعريفي', notes: 'ما يقوله المعلم' },
             { layout: 'cards', tone: 'sage', eyebrow: 'المحور الأول', title: 'عنوان', body: 'تمهيد قصير', items: [{ title: 'عنوان البطاقة', text: 'شرح قصير' }], footer: 'سطر ختامي (اختياري)', notes: '...' },

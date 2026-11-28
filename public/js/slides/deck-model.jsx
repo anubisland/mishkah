@@ -109,7 +109,8 @@
         seen.add(slide.id);
         return slide;
       });
-      return { title: asText(d.title), subtitle: asText(d.subtitle), series: asText(d.series), slides };
+      const frame = DECK_FRAME_IDS.includes(d.frame) ? d.frame : 'classic';
+      return { title: asText(d.title), subtitle: asText(d.subtitle), series: asText(d.series), frame, slides };
     }
 
     function blankSlide(layout) {

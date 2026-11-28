@@ -185,7 +185,7 @@
             {deck.slides.map((s, i) => (
               <div key={s.id} onClick={() => setSelectedId(s.id)}
                 className={'shrink-0 w-[204px] xl:w-auto rounded-lg cursor-pointer border-4 ' + (s.id === selectedId ? 'border-gold-500' : 'border-transparent hover:border-gold-300')}>
-                <ScaledSlide width={196}><SlideView slide={s} /></ScaledSlide>
+                <ScaledSlide width={196}><SlideView slide={s} deck={deck} /></ScaledSlide>
                 <div className="flex items-center justify-between text-xs font-bold text-emerald-900 px-1">
                   <span>{i + 1}</span>
                   <span className="flex gap-1">
@@ -211,6 +211,7 @@
           </div>
 
           <div className="xl:overflow-y-auto bg-white rounded-2xl p-4 border border-emerald-900/10">
+            <div className="mb-4 pb-4 border-b border-slate-200"><DeckFramePicker value={deck.frame} onChange={store.setFrame} /></div>
             <DeckInspector slide={slide} onChange={(field, value) => store.updateSlide(slide.id, field, value)} />
           </div>
         </div>
@@ -242,7 +243,7 @@
             {next && (
               <div className="bg-white/70 rounded-2xl p-2 border border-emerald-900/10">
                 <p className="text-xs font-bold text-slate-500 mb-1 px-1">الشريحة التالية</p>
-                <ScaledSlide width={360}><SlideView slide={next} /></ScaledSlide>
+                <ScaledSlide width={360}><SlideView slide={next} deck={deck} /></ScaledSlide>
               </div>
             )}
           </div>
