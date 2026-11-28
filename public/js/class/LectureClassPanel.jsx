@@ -52,7 +52,8 @@
             {slide.notes && <p className="whitespace-pre-line leading-relaxed text-base text-slate-800 font-amiri bg-gold-50 rounded-lg px-2 py-1 max-h-24 overflow-y-auto">📝 {slide.notes}</p>}
           </section>
 
-          <LectureTextPane deck={deck} index={i} onPick={setIndex} topGap={stickyHeight + 12 + 'px'} />
+          <LectureTextPane deck={deck} index={i} onPick={setIndex} topGap={stickyHeight + 12 + 'px'}
+            onAttachText={(text) => { const err = saveDeck(Object.assign({}, deck, { sourceText: text })); if (err) window.alert(err); setDeckVersion((v) => v + 1); }} />
 
           <button type="button" onClick={onOpenStudio} className="w-full py-2 rounded-xl border-2 border-emerald-900/20 font-bold text-emerald-900 bg-white">✎ تعديل العرض في الاستوديو</button>
         </>
