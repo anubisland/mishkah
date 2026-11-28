@@ -12,8 +12,11 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <script>
+    // The one place the version lives. Raised with every release (and the
+    // cache name in sw.js with it), so the teacher sees that an update arrived.
+    window.MISHKAH_VERSION = { number: '90', date: '2026-11-27', note: 'التحفيظ والتسميع: سجل الطلاب، وحصة من جزأين' };
     (function() {
-      const CURRENT_VER = '81.3';
+      const CURRENT_VER = window.MISHKAH_VERSION.number;
       const p = new URLSearchParams(window.location.search);
       if (p.get('v') !== CURRENT_VER && !window.location.search.includes('mode=student-display')) {
         const u = new URL(window.location.href);

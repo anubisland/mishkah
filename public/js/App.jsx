@@ -1628,7 +1628,7 @@
       const headerCtx = {
         isRtl, lang, setLang, activeTab, navigate, myClassesOpen, unplannedCount: unplannedSoon.length,
         onStartClass: handleStartClass, onOpenGuide: () => setGuideOpen(true), handleOpenStudentPopout, studentScreenOpen,
-        FONT_SIZE_LEVELS, fontSizeLevel, setFontSizeLevel, FONT_MAP, appFont, setAppFont, setIsPinModalOpen, version: 'v82',
+        FONT_SIZE_LEVELS, fontSizeLevel, setFontSizeLevel, FONT_MAP, appFont, setAppFont, setIsPinModalOpen, version: window.MISHKAH_VERSION,
         theme, setTheme
       };
       const homeCtx = {
