@@ -1085,6 +1085,9 @@
       // show hidden lines through a light veil instead of hiding them from her.
       const [studentScreenOpen, setStudentScreenOpen] = useState(false);
       const [slideStudioOpen, setSlideStudioOpen] = useState(false);
+      // Where the teacher is in the tajweed books; shared by the tajweed page
+      // and the class, so both open on the same page.
+      const tajweedBooks = useTajweedBooks();
       const [splitHintOpen, setSplitHintOpen] = useState(false);
       const [classModeOpen, setClassModeOpen] = useState(false);
       const [classPlan, setClassPlan] = useState(null);
@@ -1582,24 +1585,13 @@
         if (activeTab === 'hifz') {
           return { kind: 'mushaf', lang: classLanguage, page: mushafPageNumber, overlayMode: mushafOverlayMode, rulerLine: activeRulerLine };
         }
-        if (activeTab === 'tajweed') {
-          return {
-            kind: 'tajweed',
-            lang: classLanguage,
-            lessonId: currentSuwaydLesson && currentSuwaydLesson.id,
-            // In class mode the teacher steps through the slides from her panel.
-            slideIndex: (suwaydZoomModalOpen || classModeOpen) ? Math.min(suwaydZoomSlideIndex, Math.max(0, currentZoomSlides.length - 1)) : 0,
-            plateId: activeSuwaydPlateId,
-            plateLarge: classModeOpen && tajweedPlateLarge,
-            metronome: { count: metronomeCount, playing: metronomePlaying, beat: metronomeBeat }
-          };
-        }
+        if (activeTab === 'tajweed') return tajweedBooks.place.stage;
         if (activeTab === 'islamic') return { kind: 'slides' };
         return null;
       }, [activeTab, hifzViewMode, hifzSurahName, hifzAyahRange, hifzAyahs, isReverseOrder, isEndingsMasked, isStartersMasked,
           isDivineNamesMasked, isAlternatingMasked, isFullMasked, revealedAyahSet, customMaskedWords, passageMaskedAyahs, passageStatus,
           mushafPageNumber, mushafOverlayMode, activeRulerLine, currentSuwaydLesson, suwaydZoomModalOpen, classModeOpen,
-          suwaydZoomSlideIndex, currentZoomSlides, activeSuwaydPlateId, tajweedPlateLarge, metronomeCount, metronomePlaying, metronomeBeat, classLanguage, showMeanings, meanings]);
+          suwaydZoomSlideIndex, currentZoomSlides, activeSuwaydPlateId, tajweedPlateLarge, tajweedBooks.place.stage.page, tajweedBooks.place.stage.focus, tajweedBooks.bookId, tajweedBooks.place.offset, metronomeCount, metronomePlaying, metronomeBeat, classLanguage, showMeanings, meanings]);
 
       useEffect(() => {
         // The slide studio and class mode publish to the student window themselves.
@@ -1661,7 +1653,7 @@
         openGuide: () => setGuideOpen(true),
         openStudio: () => { setActiveTab('islamic'); setSlideStudioOpen(true); }
       };
-      const classCtx = { classLanguage, showMeanings, setShowMeanings, meaningFor, tajweedPlateLarge, setTajweedPlateLarge, activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, handleArrangeStudentWindow, classStudentId, hifzSurahName, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
+      const classCtx = { tajweedBooks, classLanguage, showMeanings, setShowMeanings, meaningFor, tajweedPlateLarge, setTajweedPlateLarge, activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, handleArrangeStudentWindow, classStudentId, hifzSurahName, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
 
       return (
         <div className="min-h-screen flex flex-col islamic-screen-pattern">
@@ -1710,7 +1702,9 @@
             {/* ================= VIEW: MODULE A (TAJWEED COPILOT) ================= */}
                         {/* ================= VIEW: HIFZ & RECITATION WORKBENCH (BRANCH 1) ================= */}
             {activeTab === 'hifz' && <HifzTab {...{ studentScreenOpen, activeRepeatAyah, activeRulerLine, customMaskedWords, handleActivatePassageTest, handleDeleteMutashabiha, handleFetchTargetMutaAyah, handleNavigateMushafPage, handlePassageVerdict, handleSaveNewMutashabiha, handleSearchMutaAyahs, handleSelectMutaMatch, hifzAyahRange, hifzAyahs, hifzMutashabihat, hifzSurahName, hifzViewMode, hifzWorksheetModalOpen, isAddMutaOpen, isAlternatingMasked, isDivineNamesMasked, isEndingsMasked, isFetchingQuran, isFullMasked, isReverseOrder, isRtl, isSearchingMuta, isStartersMasked, mushafCurrentSurahId, mushafOverlayMode, mushafPageNumber, mutaGuideNote, mutaSearchQuery, mutaSearchResults, mutaTargetAyahNum, mutaTargetSurahId, mutaTargetText, passageMaskedAyahs, passageRetryCount, passageStatus, passageTestSection, quranFontSize, repeatCount, repeatTarget, revealedAyahSet, setActiveRepeatAyah, setActiveRulerLine, setCustomMaskedWords, setHifzViewMode, setHifzWorksheetModalOpen, setIsAddMutaOpen, setIsAlternatingMasked, setIsDivineNamesMasked, setIsEndingsMasked, setIsFullMasked, setIsReverseOrder, setIsStartersMasked, setMaskedMushafLines, setMushafOverlayMode, setMutaGuideNote, setMutaSearchQuery, setPassageMaskedAyahs, setPassageTestSection, setQuranFontSize, setRepeatCount, setRepeatTarget, setRevealedAyahSet, showToast, toggleRevealAyah, toggleWordMask }} />}
-            {activeTab === 'tajweed' && <TajweedTab {...{ activeMakhrajId, activeSuwaydPlateId, atlasCategory, atlasSearch, currentSuwaydLesson, currentZoomSlides, filterMatchesSuwaydLesson, isRtl, metronomeBeat, metronomeCount, metronomePlaying, metronomeSound, metronomeSpeed, plateZoomLevel, playMetronomeTick, setActiveMakhrajId, setActiveSuwaydPlateId, setAtlasCategory, setAtlasSearch, setMetronomeBeat, setMetronomeCount, setMetronomePlaying, setMetronomeSound, setMetronomeSpeed, setPlateZoomLevel, setSuwaydCatalogSubTab, setSuwaydFilterCategory, setSuwaydLessonId, setSuwaydPlateZoomModal, setSuwaydQuizAnswers, setSuwaydQuizModalOpen, setSuwaydQuizSubmitted, setSuwaydSearchQuery, setSuwaydViewMode, setSuwaydWorksheetModalOpen, setSuwaydZoomModalOpen, setSuwaydZoomSlideIndex, setTajweedSubTab, suwaydCatalogSubTab, suwaydFilterCategory, suwaydLessonId, suwaydPlateZoomModal, suwaydQuizAnswers, suwaydQuizModalOpen, suwaydQuizSubmitted, suwaydSearchQuery, suwaydViewMode, suwaydWorksheetModalOpen, suwaydZoomModalOpen, suwaydZoomSlideIndex, tajweedSubTab }} />}
+            {/* Tajweed is taught from the books themselves (TajweedBookPanel); the
+                older 20 generated lessons are no longer shown. */}
+            {activeTab === 'tajweed' && <TajweedBooksPage books={tajweedBooks} />}
 
             {/* ================= VIEW: ISLAMIC STUDIES & SERMON WORKBENCH (BRANCH 3) ================= */}
             {/* One way to prepare and give a lecture: the slide studio. The older
