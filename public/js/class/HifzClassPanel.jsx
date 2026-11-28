@@ -18,7 +18,8 @@
     // planItem: today's planned range; the page controls stay inside it.
     // tasmee: the recitation session, kept by the class so it survives leaving
     // this panel.
-    function HifzClassPanel({ ctx, planItem, tasmee }) {
+    // onBackToTajweed: set while the students read a page for tajweed practice.
+    function HifzClassPanel({ ctx, planItem, tasmee, onBackToTajweed }) {
       const recitation = ctx.hifzViewMode === 'interactive_test';
       const page = ctx.mushafPageNumber;
       const surahs = typeof MUSHAF_SURAHS_PAGE_MAP !== 'undefined' ? MUSHAF_SURAHS_PAGE_MAP : [];
@@ -27,6 +28,9 @@
 
       return (
         <>
+          {onBackToTajweed && (
+            <button type="button" onClick={onBackToTajweed} className="w-full py-2 rounded-xl bg-emerald-900 text-gold-200 font-black">↩ العودة إلى درس التجويد</button>
+          )}
           <section className="bg-white rounded-2xl p-3 border border-emerald-900/10 space-y-3">
             <div className="flex flex-wrap gap-1.5">
               <button type="button" className={classPill(!recitation)} onClick={() => ctx.setHifzViewMode('mushaf_page')}>📖 وجه المصحف</button>

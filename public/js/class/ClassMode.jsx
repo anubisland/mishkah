@@ -75,6 +75,16 @@
       const [itemIndex, setItemIndex] = useState(0);
       const [addingPart, setAddingPart] = useState(false);
       const [briefHidden, setBriefHidden] = useState(false);
+      // Tajweed reading practice moved the class to a mushaf page.
+      const [fromTajweed, setFromTajweed] = useState(false);
+      const readFromPage = (page) => {
+        tasmee.setActive(false);
+        ctx.setActiveTab('hifz');
+        ctx.handleNavigateMushafPage(page, 'mushaf_page');
+        ctx.setMushafOverlayMode('none');
+        ctx.setIsFullMasked(false);
+        setFromTajweed(true);
+      };
       const openedItem = planItems[itemIndex];
       // Back in a section from elsewhere: the hifz part holding the open page.
       const sectionItems = planItems.filter((it) => PLAN_SECTION[it.type] === section);
@@ -196,8 +206,8 @@
       const panels = (
         <>
           {section === 'hifz' && ctx.classStudentId && !briefHidden && <StudentBrief studentId={ctx.classStudentId} onClose={() => setBriefHidden(true)} />}
-          {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={planItem} tasmee={tasmee} />}
-          {section === 'tajweed' && <TajweedClassPanel ctx={ctx} planItem={planItem} />}
+          {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={fromTajweed ? null : planItem} tasmee={tasmee} onBackToTajweed={fromTajweed ? () => { setFromTajweed(false); ctx.setActiveTab('tajweed'); } : null} />}
+          {section === 'tajweed' && <TajweedClassPanel ctx={ctx} planItem={planItem} onReadFromPage={readFromPage} />}
           {section === 'islamic' && <LectureClassPanel ctx={ctx} index={lectureIndex} setIndex={setLectureIndex} onOpenStudio={() => { setMinimized(true); ctx.setSlideStudioOpen(true); }} />}
           <ClassHistory history={history} currentKey={classStageKey(stage)} onRestore={restore} />
         </>
@@ -230,7 +240,7 @@
               <span className="text-gold-300 font-black text-sm self-center shrink-0">📋 جدول الحصة:</span>
               <button type="button" onClick={() => setAddingPart(true)} className="shrink-0 px-3 py-1.5 rounded-xl text-sm font-bold border-2 border-dashed border-gold-400/70 text-gold-200">➕ جزء جديد</button>
               {planItems.map((it, i) => (
-                <button key={i} type="button" onClick={() => { setItemIndex(i); openPlanItem(ctx, it, setLectureIndex, tasmee); }}
+                <button key={i} type="button" onClick={() => { setItemIndex(i); setFromTajweed(false); openPlanItem(ctx, it, setLectureIndex, tasmee); }}
                   className={'shrink-0 px-3 py-1.5 rounded-xl text-sm font-bold border-2 ' + (it === planItem ? 'bg-gold-400 text-emerald-950 border-gold-200' : 'bg-emerald-900 text-emerald-50 border-emerald-700')}>
                   {(i + 1) + '. ' + classPlanItemLabel(it)}
                 </button>

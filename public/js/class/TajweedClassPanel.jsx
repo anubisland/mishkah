@@ -3,7 +3,8 @@
     // students see (from Dr. Ayman Suwayd's curriculum data).
     // planItem: today's lessons; the picker lists only them, and "next" on a
     // lesson's last slide moves on to the next planned lesson.
-    function TajweedClassPanel({ ctx, planItem }) {
+    // onReadFromPage(page): the students read from a mushaf page the teacher picks.
+    function TajweedClassPanel({ ctx, planItem, onReadFromPage }) {
       const lesson = ctx.currentSuwaydLesson;
       const slides = ctx.currentZoomSlides;
       const index = Math.min(ctx.suwaydZoomSlideIndex, Math.max(0, slides.length - 1));
@@ -54,6 +55,7 @@
           {slide && slide.type === 'breakdown' && <TajweedBreakdownNotes item={slide.item} />}
           {slide && slide.type === 'example' && <TajweedExampleNotes example={slide.example} lesson={lesson} ctx={ctx} />}
           <TajweedTeachingNotes lesson={lesson} />
+          <TajweedReadingPicker onRead={onReadFromPage} />
         </>
       );
     }
@@ -72,6 +74,12 @@
       const plates = getSuwaydPlatesForLesson(lesson.id);
       return (
         <>
+          <section className="bg-white rounded-2xl p-3 border border-emerald-900/10 flex flex-wrap items-center gap-2">
+            <span className="font-black text-emerald-900 text-sm flex-1">🔍 لوحة المخرج عند الطلاب</span>
+            <button type="button" className={classPill(ctx.tajweedPlateLarge)} onClick={() => ctx.setTajweedPlateLarge(!ctx.tajweedPlateLarge)}>
+              {ctx.tajweedPlateLarge ? 'عرض المتن مع اللوحة' : 'تكبير اللوحة'}
+            </button>
+          </section>
           <TeacherNote title="💎 التعريف">{lesson.definitionAr}</TeacherNote>
           <TeacherNote title="👄 كيف يخرج الصوت">{lesson.mechanismAr}</TeacherNote>
           {lesson.timingLabelAr && <TeacherNote title="⏱️ الزمن">{lesson.timingLabelAr}</TeacherNote>}
@@ -99,7 +107,7 @@
             <TeacherNote title="📖 أمثلة للتطبيق">
               <ul className="space-y-1">
                 {item.examples.map((ex, i) => (
-                  <li key={i}><span className="font-quran text-xl text-emerald-950">{ex.word}</span> <span className="text-xs text-slate-500">({ex.surah}{ex.type ? ' — ' + ex.type : ''})</span></li>
+                  <li key={i} className="flex flex-wrap items-center gap-2"><span className="font-quran text-xl text-emerald-950">{ex.word}</span> <span className="text-xs text-slate-500">({ex.surah}{ex.type ? ' — ' + ex.type : ''})</span> <ExampleAudioButton refText={ex.surah} /></li>
                 ))}
               </ul>
             </TeacherNote>
@@ -115,6 +123,7 @@
           <TeacherNote title={'📖 ' + (example.surah || '')}>
             <p className="font-quran text-3xl text-emerald-950">{example.word}</p>
             {example.note && <p className="mt-1">💡 {example.note}</p>}
+            <div className="mt-2"><ExampleAudioButton refText={example.surah} /></div>
           </TeacherNote>
           <section className="bg-white rounded-2xl p-3 border border-emerald-900/10 flex items-center gap-2">
             <span className="font-black text-emerald-900 text-sm flex-1">⏱️ ميزان الحركات ({counts})</span>
@@ -131,8 +140,35 @@
     function TajweedTeachingNotes({ lesson }) {
       return (
         <>
-          <TeacherNote title="❓ سؤال يُطرح على الطلاب" tone="card-islamic-sky border-sky-200">{lesson.teacherPromptAr}</TeacherNote>
+          <TeacherNote title="🎯 توجيه للمعلم في هذا الدرس" tone="card-islamic-sky border-sky-200">{lesson.teacherPromptAr}</TeacherNote>
           <TeacherNote title="👂 أخطاء شائعة يُنتبه لها" tone="card-islamic-amber border-gold-300">{lesson.commonMistakesAr}</TeacherNote>
         </>
+      );
+    }
+
+    // The reading practice after the lesson: the students read, one by one as
+    // the teacher calls them, from a mushaf page she picks.
+    function TajweedReadingPicker({ onRead }) {
+      const surahs = typeof MUSHAF_SURAHS_PAGE_MAP !== 'undefined' ? MUSHAF_SURAHS_PAGE_MAP : [];
+      const [page, setPage] = useState(1);
+      const clampPage = (v) => Math.max(1, Math.min(604, parseInt(v, 10) || 1));
+      const select = 'border-2 border-emerald-900/15 rounded-xl px-2 py-1.5 font-bold min-w-0 max-w-full';
+      return (
+        <section className="card-islamic-sage rounded-2xl p-3 border border-emerald-200 space-y-2">
+          <h4 className="font-black text-emerald-900 text-sm">📖 التطبيق: القراءة من المصحف</h4>
+          <div className="flex flex-wrap items-center gap-2">
+            <select value="" onChange={(e) => { const s = surahs.find((x) => String(x.id) === e.target.value); if (s) setPage(s.startPage); }} className={select}>
+              <option value="">السورة…</option>
+              {surahs.map((s) => <option key={s.id} value={s.id}>{s.id}. {s.name}</option>)}
+            </select>
+            <select value="" onChange={(e) => { if (e.target.value) setPage(JUZ_START_PAGES[parseInt(e.target.value, 10) - 1]); }} className={select}>
+              <option value="">الجزء…</option>
+              {JUZ_START_PAGES.map((_, j) => <option key={j} value={j + 1}>الجزء {j + 1}</option>)}
+            </select>
+            <span className="font-bold">صفحة</span>
+            <input type="number" min="1" max="604" value={page} onChange={(e) => setPage(clampPage(e.target.value))} className="w-20 border-2 border-emerald-900/15 rounded-xl px-2 py-1.5 font-bold" />
+            <button type="button" className={classPill(true)} onClick={() => onRead(page)}>عرض الصفحة للطلاب</button>
+          </div>
+        </section>
       );
     }
