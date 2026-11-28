@@ -9,7 +9,7 @@
       const printed = stage.page - (stage.offset != null ? stage.offset : tajweedBookOffset(bookId));
       const chapter = tajweedBookChapterFor(bookId, printed);
       return (
-        <StudentFrame title={chapter ? chapter.title : info.title} subtitle={info.title + ' — د. أيمن رشدي سويد' + (printed >= 1 ? ' • صفحة ' + printed : '')}>
+        <StudentFrame title={chapter ? chapter.title : info.title} subtitle={info.title + (info.author ? ' — ' + info.author : '') + (printed >= 1 ? ' • صفحة ' + printed : '')}>
           <div className="relative w-full h-full self-stretch">
           {/* Absolutely placed, so the page drawn inside cannot grow the box it is measured from. */}
           <div ref={boxRef} className="absolute inset-0 flex items-center justify-center">

@@ -32,11 +32,12 @@
     // The books a tajweed class can be taught from. The book's keys keep
     // their first names so a place saved before the atlas came stays.
     const TAJWEED_BOOKS = [
-      { id: 'suwayd', label: '📘 التجويد المصور', title: 'التجويد المصور', storeKey: 'tajweed-suwayd', chapters: TAJWEED_BOOK_CHAPTERS,
+      { id: 'suwayd', label: '📘 التجويد المصور', title: 'التجويد المصور', author: 'د. أيمن رشدي سويد', storeKey: 'tajweed-suwayd', chapters: TAJWEED_BOOK_CHAPTERS,
         pageKey: 'mishkah_tajweed_book_page', offsetKey: 'mishkah_tajweed_book_offset', defaultOffset: 2 },
       // «أطلس التجويد — دروس نظرية مرئية»: each rule in one coloured chart,
-      // for summing up and revising. Its chapter pages are not listed yet.
-      { id: 'atlas', label: '🎨 أطلس التجويد', title: 'أطلس التجويد', storeKey: 'tajweed-atlas', chapters: [],
+      // for summing up and revising (its credits page: «المادة العلمية: الدكتور
+      // أيمن رشدي سويد»). Its chapter pages are not listed yet.
+      { id: 'atlas', label: '🎨 أطلس التجويد', title: 'أطلس التجويد', author: 'د. أيمن رشدي سويد', storeKey: 'tajweed-atlas', chapters: [],
         pageKey: 'mishkah_tajweed_atlas_page', offsetKey: 'mishkah_tajweed_atlas_offset', defaultOffset: 0 }
     ];
     const TAJWEED_BOOK_CHOICE_KEY = 'mishkah_tajweed_book_choice';

@@ -171,8 +171,9 @@
           ctx.setSuwaydZoomSlideIndex(st.slideIndex || 0);
         } else if (st.kind === 'book') {
           ctx.setActiveTab('tajweed');
-          books.setBookId(st.book || 'suwayd');
-          books.places[st.book || 'suwayd'].setPdfPage(st.page);
+          const id = tajweedBookInfo(st.book).id;
+          books.setBookId(id);
+          books.places[id].setPdfPage(st.page);
         } else if (st.kind === 'deck') {
           ctx.setActiveTab('islamic');
           setLectureIndex(st.index);
