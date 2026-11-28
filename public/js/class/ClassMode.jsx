@@ -74,6 +74,7 @@
       // The part opened last; a class may have several hifz parts.
       const [itemIndex, setItemIndex] = useState(0);
       const [addingPart, setAddingPart] = useState(false);
+      const [briefHidden, setBriefHidden] = useState(false);
       const openedItem = planItems[itemIndex];
       // Back in a section from elsewhere: the hifz part holding the open page.
       const sectionItems = planItems.filter((it) => PLAN_SECTION[it.type] === section);
@@ -194,6 +195,7 @@
       );
       const panels = (
         <>
+          {section === 'hifz' && ctx.classStudentId && !briefHidden && <StudentBrief studentId={ctx.classStudentId} onClose={() => setBriefHidden(true)} />}
           {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={planItem} tasmee={tasmee} />}
           {section === 'tajweed' && <TajweedClassPanel ctx={ctx} planItem={planItem} />}
           {section === 'islamic' && <LectureClassPanel ctx={ctx} index={lectureIndex} setIndex={setLectureIndex} onOpenStudio={() => { setMinimized(true); ctx.setSlideStudioOpen(true); }} />}
