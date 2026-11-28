@@ -175,6 +175,8 @@
               setMetronomeCount={ignore}
               setMetronomePlaying={ignore}
               suwaydZoomSlideIndex={stage.slideIndex || 0}
+              readOnly
+              plateLarge={!!stage.plateLarge}
             />
             </div>
           </FitToScreen>

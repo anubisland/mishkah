@@ -1,6 +1,8 @@
     // TajweedZoomSlideBody: one slide of the tajweed Zoom presentation. Shared by the
     // teacher's presentation modal and the student screen.
-    function TajweedZoomSlideBody({ activeSuwaydPlateId, currentSuwaydLesson, currentZoomSlides, isRtl, metronomeBeat, metronomeCount, metronomePlaying, setActiveSuwaydPlateId, setMetronomeCount, setMetronomePlaying, suwaydZoomSlideIndex }) {
+    function TajweedZoomSlideBody({ activeSuwaydPlateId, currentSuwaydLesson, currentZoomSlides, isRtl, metronomeBeat, metronomeCount, metronomePlaying, setActiveSuwaydPlateId, setMetronomeCount, setMetronomePlaying, suwaydZoomSlideIndex, readOnly, plateLarge }) {
+                              // readOnly: the student screen, where nothing can be pressed, so no buttons.
+                              // plateLarge: the teacher enlarged the makhraj plate for the students.
                               const curSlide = currentZoomSlides[suwaydZoomSlideIndex] || currentZoomSlides[0];
                               if (!curSlide) return null;
 
@@ -8,6 +10,16 @@
                               if (curSlide.type === 'overview') {
                                 const lessonPlates = getSuwaydPlatesForLesson(currentSuwaydLesson.id);
                                 const currentPlate = lessonPlates.find(p => p.id === activeSuwaydPlateId) || lessonPlates[0] || SUWAYD_PLATES[0];
+                                if (plateLarge) {
+                                  return (
+                                    <div className="bg-white rounded-3xl p-4 border-2 border-gold-400 shadow-2xl text-center space-y-2">
+                                      <h4 className="text-2xl font-black text-emerald-950 font-cairo">{currentPlate.titleAr}</h4>
+                                      <img src={'images/tajweed/' + currentPlate.filename} alt={currentPlate.titleAr} className="mx-auto w-auto object-contain rounded-xl" style={{ maxHeight: '640px' }} />
+                                      <p className="text-base text-slate-700 font-cairo">{currentPlate.descAr}</p>
+                                      <p className="text-xs text-emerald-800">كتاب التجويد المصور — ص {currentPlate.pageInBook} (د. أيمن رشدي سويد)</p>
+                                    </div>
+                                  );
+                                }
 
                                 return (
                                   <div className="space-y-5 animate-fadeIn">
@@ -40,7 +52,7 @@
                                       </div>
 
                                       {/* Horizontal Letter / Plate Switcher if lesson has multiple plates */}
-                                      {lessonPlates.length > 1 && (
+                                      {lessonPlates.length > 1 && !readOnly && (
                                         <div className="flex items-center justify-center gap-1.5 flex-wrap pt-1 pb-1">
                                           {lessonPlates.map(lp => {
                                             const isSel = lp.id === currentPlate.id;
@@ -201,7 +213,7 @@
                                         );
                                       })}
 
-                                      <button
+                                      {!readOnly && <button
                                         type="button"
                                         onClick={() => {
                                           if (metronomeCount !== currentSuwaydLesson.timingCounts) {
@@ -214,7 +226,7 @@
                                         )}
                                       >
                                         {metronomePlaying ? (isRtl ? '⏸️ إيقاف النبض' : '⏸️ Stop Metronome') : (isRtl ? '▶️ تشغيل النبض الصوتي' : '▶️ Play Metronome')}
-                                      </button>
+                                      </button>}
                                     </div>
                                   </div>
                                 );

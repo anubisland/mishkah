@@ -14,7 +14,7 @@
   <script>
     // The one place the version lives. Raised with every release (and the
     // cache name in sw.js with it), so the teacher sees that an update arrived.
-    window.MISHKAH_VERSION = { number: '90', date: '2026-11-27', note: 'التحفيظ والتسميع: سجل الطلاب، وحصة من جزأين' };
+    window.MISHKAH_VERSION = { number: '91', date: '2026-11-27', note: 'التجويد: تلاوة الحصري للأمثلة، وتكبير لوحة المخرج، والقراءة من صفحة يختارها المعلم' };
     (function() {
       const CURRENT_VER = window.MISHKAH_VERSION.number;
       const p = new URLSearchParams(window.location.search);
@@ -344,6 +344,7 @@
   <script type="text/babel" src="js/class/MyStudents.jsx"></script>
   <script type="text/babel" src="js/class/StudentBrief.jsx"></script>
   <script type="text/babel" src="js/class/HifzClassPanel.jsx"></script>
+  <script type="text/babel" src="js/tajweed/example-audio.jsx"></script>
   <script type="text/babel" src="js/class/TajweedClassPanel.jsx"></script>
   <script type="text/babel" src="js/class/LectureClassPanel.jsx"></script>
   <script type="text/babel" src="js/class/ClassMode.jsx"></script>

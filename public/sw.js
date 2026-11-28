@@ -10,7 +10,7 @@
  */
 
 // Raised with window.MISHKAH_VERSION in index.html at every release.
-const APP_CACHE = 'mishkah-app-v90';
+const APP_CACHE = 'mishkah-app-v91';
 const QURAN_CACHE = 'mishkah-quran-v1';
 const QURAN_HOSTS = ['android.quran.com', 'api.alquran.cloud'];
 // Libraries and fonts the app loads from CDNs: treated like the app's own

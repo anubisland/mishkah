@@ -1088,6 +1088,10 @@
       const [splitHintOpen, setSplitHintOpen] = useState(false);
       const [classModeOpen, setClassModeOpen] = useState(false);
       const [classPlan, setClassPlan] = useState(null);
+      // The teacher enlarged the makhraj plate on the student screen.
+      const [tajweedPlateLarge, setTajweedPlateLarge] = useState(false);
+      // Each lesson, and each class, starts with the plate at its usual size.
+      useEffect(() => { setTajweedPlateLarge(false); }, [suwaydLessonId, classModeOpen]);
       const [myClassesOpen, setMyClassesOpen] = useState(false);
       const [guideOpen, setGuideOpen] = useState(false);
       // The student of the class now running, so recitation goes to their record.
@@ -1567,6 +1571,7 @@
             // In class mode the teacher steps through the slides from her panel.
             slideIndex: (suwaydZoomModalOpen || classModeOpen) ? Math.min(suwaydZoomSlideIndex, Math.max(0, currentZoomSlides.length - 1)) : 0,
             plateId: activeSuwaydPlateId,
+            plateLarge: classModeOpen && tajweedPlateLarge,
             metronome: { count: metronomeCount, playing: metronomePlaying, beat: metronomeBeat }
           };
         }
@@ -1575,7 +1580,7 @@
       }, [activeTab, hifzViewMode, hifzSurahName, hifzAyahRange, hifzAyahs, isReverseOrder, isEndingsMasked, isStartersMasked,
           isDivineNamesMasked, isAlternatingMasked, isFullMasked, revealedAyahSet, customMaskedWords, passageMaskedAyahs, passageStatus,
           mushafPageNumber, mushafOverlayMode, activeRulerLine, currentSuwaydLesson, suwaydZoomModalOpen, classModeOpen,
-          suwaydZoomSlideIndex, currentZoomSlides, activeSuwaydPlateId, metronomeCount, metronomePlaying, metronomeBeat]);
+          suwaydZoomSlideIndex, currentZoomSlides, activeSuwaydPlateId, tajweedPlateLarge, metronomeCount, metronomePlaying, metronomeBeat]);
 
       useEffect(() => {
         // The slide studio and class mode publish to the student window themselves.
@@ -1637,7 +1642,7 @@
         openGuide: () => setGuideOpen(true),
         openStudio: () => { setActiveTab('islamic'); setSlideStudioOpen(true); }
       };
-      const classCtx = { activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, handleArrangeStudentWindow, classStudentId, hifzSurahName, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
+      const classCtx = { tajweedPlateLarge, setTajweedPlateLarge, activeTab, setActiveTab, isRtl, studentScreenOpen, handleOpenStudentPopout, handleArrangeStudentWindow, classStudentId, hifzSurahName, sectionStage, setSlideStudioOpen, mushafPageNumber, handleNavigateMushafPage, hifzViewMode, setHifzViewMode, mushafOverlayMode, setMushafOverlayMode, activeRulerLine, setActiveRulerLine, hifzAyahs, hifzMutashabihat, isFetchingQuran, isEndingsMasked, setIsEndingsMasked, isStartersMasked, setIsStartersMasked, isDivineNamesMasked, setIsDivineNamesMasked, isAlternatingMasked, setIsAlternatingMasked, isReverseOrder, setIsReverseOrder, isFullMasked, setIsFullMasked, revealedAyahSet, toggleRevealAyah, customMaskedWords, passageMaskedAyahs, passageStatus, passageTestSection, handleActivatePassageTest, handlePassageVerdict, currentSuwaydLesson, setSuwaydLessonId, currentZoomSlides, suwaydZoomSlideIndex, setSuwaydZoomSlideIndex, activeSuwaydPlateId, setActiveSuwaydPlateId, metronomeCount, setMetronomeCount, metronomePlaying, setMetronomePlaying };
 
       return (
         <div className="min-h-screen flex flex-col islamic-screen-pattern">
