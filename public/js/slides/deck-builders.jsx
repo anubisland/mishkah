@@ -10,14 +10,28 @@
     // is also used for book titles, so it is not enough.
     const HADITH_PATTERN = /(?:قال رسول الله|قال النبي|عن النبي|ﷺ)[^«]*«[^»]{12,}»/;
 
-    function isHeadingLine(line) {
+    // A heading is either marked (أولاً، المحور، #، or ending with «:»), or a
+    // short line of its own, numbered or not, with no closing punctuation and
+    // longer text after it, as teachers usually type headings in Word. A run
+    // of short numbered lines is a list, not headings.
+    const NUMBERED_LINE = /^\s*(?:[0-9٠-٩]+|[أ-ي])\s*[-.)–:]\s*/;
+    // «قال الله تعالى» or «قال رسول الله ﷺ» on its own line introduces the
+    // ayah or hadith on the next line: it is joined to it, never a heading.
+    const LEAD_IN = /^(?:و?قال|يقول|و?عن|روى|أخرج)\s/;
+    function isHeadingLine(line, next) {
       const t = line.trim();
       if (!t || t.length > 80) return false;
-      return HEADING_PATTERN.test(t) || (t.endsWith(':') && t.length < 60);
+      if (HEADING_PATTERN.test(t) || (t.endsWith(':') && t.length < 60)) return true;
+      if (t.length > 60 || t.split(/\s+/).length > 8) return false;
+      if (/^[\s0-9٠-٩\-–—|/.]+$/.test(t) || LEAD_IN.test(t)) return false;
+      if (AYAH_PATTERN.test(t) || /[«»]/.test(t) || /[.،؛!؟,]$/.test(t)) return false;
+      const n = (next || '').trim();
+      if (!n || n.length <= t.length) return false;
+      return !(NUMBERED_LINE.test(t) && NUMBERED_LINE.test(n));
     }
 
     function cleanHeading(line) {
-      return line.trim().replace(/^#+\s*/, '').replace(/[:：]\s*$/, '').trim();
+      return line.trim().replace(/^#+\s*/, '').replace(NUMBERED_LINE, '').replace(/[:：]\s*$/, '').trim();
     }
 
     // A bullet line is already a point. A paragraph gives one point: its first
@@ -36,11 +50,20 @@
       return line.replace(/\*\*/g, '').replace(/\{([^}]+)\}/g, '﴿$1﴾').trim();
     }
 
-    function splitSections(lines) {
+    function splitSections(lines, markedOnly) {
       const sections = [];
       let current = { heading: '', lines: [] };
-      lines.forEach((line) => {
-        if (isHeadingLine(line)) {
+      // Join a short lead-in line to the ayah or hadith that follows it, and
+      // drop lines that are only a page number (PDF headers and footers).
+      lines = lines.filter((l) => !/^[\s0-9٠-٩\-–—|/.]+$/.test(l) || !l.trim()).reduce((out, l) => {
+        const prev = out[out.length - 1];
+        if (prev && prev.trim().length < 60 && LEAD_IN.test(prev.trim()) && /^\s*[﴿«]/.test(l)) out[out.length - 1] = prev.trim() + ' ' + l.trim();
+        else out.push(l);
+        return out;
+      }, []);
+      const nextText = (i) => lines.slice(i + 1).find((l) => l.trim()) || '';
+      lines.forEach((line, i) => {
+        if (isHeadingLine(line, markedOnly ? '' : nextText(i))) {
           if (current.heading || current.lines.length) sections.push(current);
           current = { heading: cleanHeading(line), lines: [] };
         } else if (line.trim()) {
@@ -98,13 +121,26 @@
       return slides;
     }
 
-    function buildQuickDeck(lectureText) {
+    // markedOnly: only marked headings (a PDF wraps lines, so short lines mislead).
+    function buildQuickDeck(lectureText, markedOnly) {
       const lines = (lectureText || '').split(/\r?\n/).map(cleanLectureLine);
       const firstLine = lines.find((l) => l.trim()) || 'محاضرة';
       const rest = lines.slice(lines.indexOf(firstLine) + 1);
-      const sections = splitSections(rest);
+      const sections = splitSections(rest, markedOnly);
       const slides = [normalizeSlide({ layout: 'cover', title: cleanHeading(firstLine), notes: 'افتتاح المحاضرة: ' + cleanHeading(firstLine) })];
       sections.forEach((sec, i) => { slides.push(...sectionToSlides(sec, i + 1)); });
+      // Text taken from a PDF can carry broken Quranic words: each ayah slide
+      // is flagged, on the slide itself, until the teacher checks it.
+      if (markedOnly) {
+        slides.forEach((s, i) => {
+          if (s.layout === 'ayah') {
+            slides[i] = normalizeSlide(Object.assign({}, s, {
+              eyebrow: '⚠️ تُراجع الآية على المصحف',
+              notes: '⚠️ نص هذه الآية منقول من ملف PDF وقد تكون حروفه مكسورة: يُراجع على المصحف ويُصحَّح، ثم يُحذف هذا التنبيه من أعلى الشريحة.\n' + (s.notes || '')
+            }));
+          }
+        });
+      }
       return normalizeDeck({ title: cleanHeading(firstLine), slides });
     }
 

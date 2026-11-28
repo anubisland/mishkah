@@ -2,6 +2,24 @@
     // (copy a ready request into Claude, paste the answer back).
     function DeckSourcePanel({ lectureText, onDeck, onClose }) {
       const [text, setText] = useState(lectureText || '');
+      const [reading, setReading] = useState(false);
+      const [fromPdf, setFromPdf] = useState(false);
+      // A Word or PDF lecture fills the box with its text, to check before the deck is made.
+      const readFile = async (file) => {
+        setError(null);
+        setReading(true);
+        try {
+          const t = await readLectureFile(file);
+          if (!t.trim()) throw new Error('لم يُعثر على نص في الملف (قد يكون صوراً ممسوحة).');
+          setText(t);
+          setFromPdf(/\.pdf$/i.test(file.name || ''));
+        } catch (e) {
+          console.warn('Mishkah: could not read the lecture file', e);
+          setError(e && /[؀-ۿ]/.test(e.message || '') ? e.message : 'تعذّر قراءة الملف.');
+        } finally {
+          setReading(false);
+        }
+      };
       const [reply, setReply] = useState('');
       const [copied, setCopied] = useState(false);
       const [error, setError] = useState(null);
@@ -34,6 +52,18 @@
               <button type="button" onClick={onClose} className="px-3 py-1 rounded-xl border border-slate-300 font-bold">✕ إغلاق</button>
             </div>
 
+            {(
+              <div className="flex flex-wrap items-center gap-2 card-islamic-sky rounded-2xl p-3 border border-sky-200">
+                <span className="font-black text-emerald-950">📄 ملف المحاضرة (وورد أو PDF):</span>
+                <label className="px-4 py-1.5 rounded-xl bg-emerald-900 text-gold-200 font-black cursor-pointer">
+                  {reading ? 'جارٍ قراءة الملف…' : 'اختيار الملف'}
+                  <input type="file" accept=".docx,.pdf,.txt,.md" className="hidden" disabled={reading}
+                    onChange={(e) => { const f = e.target.files && e.target.files[0]; if (f) readFile(f); e.target.value = ''; }} />
+                </label>
+                <span className="text-xs text-slate-600">يظهر نصه في المربع أدناه للمراجعة قبل إنشاء العرض.</span>
+                {fromPdf && <span className="block w-full text-xs font-bold text-amber-900">ملفات PDF تُخرج النص العربي أحياناً بحروف مفصولة؛ فإن وُجد ملف الوورد الأصلي فهو أدق. وتُعتمد هنا العناوين المرقّمة أو المعلَّمة فقط.</span>}
+              </div>
+            )}
             <label className="block">
               <span className="font-bold text-emerald-900">نص المحاضرة</span>
               <textarea value={text} onChange={(e) => setText(e.target.value)} rows={7}
@@ -44,7 +74,7 @@
               <div className="card-islamic-sage rounded-2xl p-4 space-y-2 border border-emerald-300">
                 <h4 className="font-black text-emerald-950">⚡ الطريقة السريعة (بدون ذكاء اصطناعي)</h4>
                 <p className="text-sm text-slate-700">تقسّم المحاضرة حسب عناوينها وآياتها وأحاديثها. تحتاج محاضرة مرتبة بعناوين واضحة (أولاً، ثانياً، …).</p>
-                <button type="button" disabled={!text.trim()} onClick={() => onDeck(buildQuickDeck(text), [])}
+                <button type="button" disabled={!text.trim()} onClick={() => onDeck(buildQuickDeck(text, fromPdf), [])}
                   className="w-full py-2.5 rounded-xl bg-emerald-800 text-white font-black disabled:opacity-40">إنشاء العرض الآن</button>
               </div>
 

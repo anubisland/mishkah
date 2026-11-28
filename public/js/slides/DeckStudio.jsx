@@ -22,6 +22,7 @@
       const [selectedId, setSelectedId] = useState(deck.slides[0] ? deck.slides[0].id : null);
       const [mode, setMode] = useState('edit');
       const [sourceOpen, setSourceOpen] = useState(deck.slides.length === 0);
+      const [whatsAppOpen, setWhatsAppOpen] = useState(false);
       const [importWarnings, setImportWarnings] = useState([]);
       const [syncProblem, setSyncProblem] = useState(false);
       const [exporting, setExporting] = useState(null); // { label, done, total }
@@ -89,7 +90,7 @@
             deck={deck} mode={mode} store={store} slide={slide}
             studentScreenOpen={studentScreenOpen}
             onSource={() => setSourceOpen(true)} onPresent={startPresenting}
-            onExport={runExport} exporting={exporting}
+            onExport={runExport} exporting={exporting} onWhatsApp={() => setWhatsAppOpen(true)}
             onEdit={() => setMode('edit')}
             onClose={() => { if (document.activeElement) document.activeElement.blur(); onClose(); }}
           />
@@ -129,12 +130,13 @@
             <DeckEditor deck={deck} slide={slide} index={index} store={store} selectedId={selectedId} setSelectedId={setSelectedId} />
           )}
 
+          {whatsAppOpen && <DeckWhatsAppPanel deck={deck} exporting={exporting} onExportPdf={() => runExport(DECK_EXPORTS.find((o) => o.id === 'pdf'))} onClose={() => setWhatsAppOpen(false)} />}
           {sourceOpen && <DeckSourcePanel lectureText={lectureText} onDeck={onNewDeck} onClose={() => setSourceOpen(false)} />}
         </div>
       );
     }
 
-    function DeckStudioBar({ deck, mode, store, slide, studentScreenOpen, onSource, onPresent, onEdit, onClose, onExport, exporting }) {
+    function DeckStudioBar({ deck, mode, store, slide, studentScreenOpen, onSource, onPresent, onEdit, onClose, onExport, exporting, onWhatsApp }) {
       const btn = 'px-3 py-1.5 rounded-xl font-black text-sm border-2 transition disabled:opacity-40';
       const [exportMenuOpen, setExportMenuOpen] = useState(false);
       return (
@@ -159,6 +161,7 @@
                   </div>
                 )}
               </div>
+              <button type="button" className={btn + ' bg-white/90 text-emerald-950 border-white'} disabled={!slide} onClick={onWhatsApp}>📱 رسالة الواتساب</button>
               <button type="button" className={btn + ' bg-gold-500 text-emerald-950 border-gold-300'} disabled={!slide} onClick={onPresent}>▶ بدء العرض</button>
             </>
           ) : (
