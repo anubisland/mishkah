@@ -71,6 +71,7 @@
         },
         replaceDeck: (next) => commit(normalizeDeck(next)),
         setFrame: (frame) => commit(Object.assign({}, deck, { frame })),
+        setSourceText: (sourceText) => commit(Object.assign({}, deck, { sourceText })),
         updateSlide: (id, field, value) => replaceSlides((slides) => slides.map((s) => (s.id === id ? Object.assign({}, s, { [field]: value }) : s))),
         moveSlide: (id, delta) => replaceSlides((slides) => {
           const i = slides.findIndex((s) => s.id === id);

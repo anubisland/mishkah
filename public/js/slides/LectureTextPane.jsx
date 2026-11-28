@@ -42,23 +42,19 @@
 
     // topGap: space kept above the highlighted paragraph (room for a fixed
     // box over the text, like the class panel's slide box).
-    function LectureTextPane({ deck, index, onPick, topGap }) {
+    // onAttachText(text): keeps a lecture text with a deck made before the
+    // text was kept (the slides stay as they are).
+    function LectureTextPane({ deck, index, onPick, topGap, onAttachText }) {
       const paragraphs = useMemo(() => String(deck.sourceText || '').split(/\n+/).map((p) => p.trim()).filter(Boolean), [deck.sourceText]);
       const matches = useMemo(() => matchSlidesToParagraphs(deck.slides, paragraphs), [deck.slides, paragraphs]);
       const current = matches[index];
       const refs = useRef([]);
       useEffect(() => {
         const el = refs.current[current];
-        if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        if (el) el.scrollIntoView({ block: 'start' });
       }, [current]);
 
-      if (!paragraphs.length) {
-        return (
-          <section className="bg-white rounded-2xl p-4 border border-emerald-900/10 text-sm text-slate-600">
-            📜 نص المحاضرة الكامل يظهر هنا للعروض التي تُنشأ من ملف المحاضرة أو نصها في الاستوديو.
-          </section>
-        );
-      }
+      if (!paragraphs.length) return <LectureTextMissing onAttachText={onAttachText} />;
       return (
         <section className="bg-white rounded-2xl p-4 border-2 border-emerald-900/10" dir="rtl">
           <h4 className="font-black text-emerald-900 text-sm mb-2">📜 نص المحاضرة كاملاً <span className="font-bold text-slate-500">(للمعلم فقط؛ المظلَّل موضع الشريحة الحالية، والضغط على فقرة يعرض شريحتها)</span></h4>
@@ -70,7 +66,42 @@
                 {withQuranRuns(p)}
               </p>
             ))}
+            {/* Room after the last paragraph, so even the last ones can come up under the slide. */}
+            <div aria-hidden="true" style={{ height: '60vh' }} />
           </div>
+        </section>
+      );
+    }
+
+    // A deck without its lecture text: the teacher chooses the lecture file
+    // once and its text is kept with the deck.
+    function LectureTextMissing({ onAttachText }) {
+      const [busy, setBusy] = useState(false);
+      const [error, setError] = useState('');
+      const choose = async (file) => {
+        if (!file) return;
+        setBusy(true); setError('');
+        try {
+          const text = await readLectureFile(file);
+          if (!String(text || '').trim()) throw new Error('لم يُعثر على نص في هذا الملف.');
+          onAttachText(text);
+        } catch (e) {
+          console.warn('Mishkah: could not read the lecture file', e);
+          setError(e && e.message ? e.message : 'تعذّرت قراءة الملف.');
+        }
+        setBusy(false);
+      };
+      return (
+        <section className="bg-white rounded-2xl p-4 border-2 border-dashed border-gold-400 space-y-2">
+          <p className="font-bold text-emerald-950">📜 نص المحاضرة الكامل غير محفوظ مع هذا العرض (أُنشئ قبل حفظ النص).</p>
+          {onAttachText && (
+            <label className="inline-block px-4 py-2 rounded-xl bg-emerald-900 text-gold-200 font-black cursor-pointer">
+              {busy ? 'جارٍ القراءة…' : '📄 إضافة نص المحاضرة من ملفها (وورد أو PDF)'}
+              <input type="file" accept=".docx,.pdf,.txt" className="hidden" disabled={busy} onChange={(e) => choose(e.target.files[0])} />
+            </label>
+          )}
+          <p className="text-xs text-slate-600">تبقى الشرائح كما هي؛ يُضاف النص فقط ليظهر للمعلم تحت الشريحة.</p>
+          {error && <p className="text-rose-700 font-bold text-sm">{error}</p>}
         </section>
       );
     }

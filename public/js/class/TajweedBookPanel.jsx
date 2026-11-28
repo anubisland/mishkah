@@ -63,6 +63,15 @@
       return (
         <>
           <section className="bg-white rounded-2xl p-3 border border-emerald-900/10 space-y-3">
+            {/* In plain sight: a wrong file (the other book) is easy to choose by mistake. */}
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="flex-1 font-bold text-slate-600">الملف المختار: عدد صفحاته {total}</span>
+              <label className="px-3 py-1 rounded-xl border-2 border-emerald-900/20 font-bold cursor-pointer">
+                {busy ? 'جارٍ الحفظ…' : '🔄 تغيير ملف هذا الكتاب'}
+                <input type="file" accept="application/pdf,.pdf" className="hidden" disabled={busy} onChange={(e) => choose(e.target.files[0])} />
+              </label>
+            </div>
+            {error && <p className="text-rose-700 font-bold text-sm">{error}</p>}
             {info.chapters.length > 0 && (
               <select value={chapter ? chapter.page : ''} onChange={(e) => place.openPrinted(parseInt(e.target.value, 10))}
                 className="w-full border-2 border-emerald-900/15 rounded-xl px-2 py-2 font-bold">

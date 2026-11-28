@@ -125,7 +125,7 @@
               لا توجد شرائح بعد. البداية من زر «إنشاء من المحاضرة».
             </div>
           ) : mode === 'present' ? (
-            <DeckPresenter deck={deck} slide={slide} index={index} go={go} />
+            <DeckPresenter deck={deck} slide={slide} index={index} go={go} store={store} />
           ) : (
             <DeckEditor deck={deck} slide={slide} index={index} store={store} selectedId={selectedId} setSelectedId={setSelectedId} />
           )}
@@ -218,36 +218,37 @@
       );
     }
 
-    function DeckPresenter({ deck, slide, index, go }) {
-      const [canvasRef, canvasWidth] = useElementWidth();
+    // Presenting: the slide small and fixed at the top with previous/next,
+    // and under it the teacher's notes and the whole lecture text, which
+    // scroll freely (the text follows the current slide).
+    function DeckPresenter({ deck, slide, index, go, store }) {
+      const [widthRef, width] = useElementWidth();
+      const headRef = useRef(null);
+      const [headHeight, setHeadHeight] = useState(0);
+      useEffect(() => { if (headRef.current) setHeadHeight(headRef.current.offsetHeight); });
       const next = deck.slides[index + 1];
       return (
-        <div className="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-[1fr_380px] content-start lg:content-stretch gap-4 p-3 lg:p-4">
-          <div ref={canvasRef} className="min-w-0 flex flex-col items-center justify-center gap-3">
-            <div className="shadow-2xl rounded-md overflow-hidden">
-              <ScaledSlide width={Math.max(320, canvasWidth)}>
+        <div ref={widthRef} className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3">
+          <div ref={headRef} className="sticky top-0 z-10 bg-white/95 rounded-2xl p-2 border border-emerald-900/10 shadow-md flex flex-col items-center gap-2">
+            <div className="rounded-md overflow-hidden shadow">
+              <ScaledSlide width={Math.max(240, Math.min(480, width - 40))}>
                 <SlideView slide={slide} deck={deck} index={index} total={deck.slides.length} />
               </ScaledSlide>
             </div>
             <div className="flex items-center gap-3">
-              <button type="button" onClick={() => go(-1)} disabled={index === 0} className="order-last px-6 py-2 rounded-xl bg-white border-2 border-emerald-900/20 font-black disabled:opacity-40">السابقة ←</button>
+              <button type="button" onClick={() => go(-1)} disabled={index === 0} className="order-last px-5 py-1.5 rounded-xl bg-white border-2 border-emerald-900/20 font-black disabled:opacity-40">السابقة ←</button>
               <span className="font-black text-emerald-950">{index + 1} / {deck.slides.length}</span>
-              <button type="button" onClick={() => go(1)} disabled={!next} className="order-first px-6 py-2 rounded-xl bg-emerald-900 text-gold-200 font-black disabled:opacity-40">→ التالية</button>
+              <button type="button" onClick={() => go(1)} disabled={!next} className="order-first px-5 py-1.5 rounded-xl bg-emerald-900 text-gold-200 font-black disabled:opacity-40">→ التالية</button>
             </div>
           </div>
-          <div className="min-h-0 flex flex-col gap-3">
-            <div className="flex-1 min-h-[180px] overflow-y-auto bg-white rounded-2xl p-5 border-2 border-gold-400/60">
-              <h4 className="font-black text-emerald-900 mb-2">📝 ملاحظات المعلم (لا يراها الطلاب)</h4>
-              <p className="whitespace-pre-line leading-loose text-lg text-slate-800 font-amiri">{slide.notes || '—'}</p>
-              <div className="mt-3"><LectureTextPane deck={deck} index={index} onPick={(k) => go(k - index)} /></div>
+          {slide.notes && (
+            <div className="bg-white rounded-2xl p-4 border-2 border-gold-400/60">
+              <h4 className="font-black text-emerald-900 mb-1 text-sm">📝 ملاحظات المعلم (لا يراها الطلاب)</h4>
+              <p className="whitespace-pre-line leading-loose text-lg text-slate-800 font-amiri">{slide.notes}</p>
             </div>
-            {next && (
-              <div className="bg-white/70 rounded-2xl p-2 border border-emerald-900/10">
-                <p className="text-xs font-bold text-slate-500 mb-1 px-1">الشريحة التالية</p>
-                <ScaledSlide width={360}><SlideView slide={next} deck={deck} /></ScaledSlide>
-              </div>
-            )}
-          </div>
+          )}
+          <LectureTextPane deck={deck} index={index} onPick={(k) => go(k - index)} topGap={headHeight + 12 + 'px'}
+            onAttachText={(text) => store.setSourceText(text)} />
         </div>
       );
     }
