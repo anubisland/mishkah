@@ -35,7 +35,9 @@
       return (
         <>
           {/* Stays in view while the lecture text below scrolls. */}
-          <section ref={stickyRef} className="sticky top-0 z-10 bg-white rounded-2xl p-3 border border-emerald-900/10 space-y-2 shadow-md">
+          {/* Pinned to the very top of the scrolling column (over its padding), so no text shows above it. */}
+          <div ref={stickyRef} className="sticky -top-3 z-10 -mt-3 pt-3 bg-[#F4EEDF]">
+          <section className="bg-white rounded-2xl p-3 border border-emerald-900/10 space-y-2 shadow-md">
             <div className="flex items-start gap-3">
               <div className="shrink-0 w-[200px] rounded-md overflow-hidden border border-slate-200"><ScaledSlide width={200}><SlideView slide={slide} deck={deck} /></ScaledSlide></div>
               <div className="flex-1 min-w-0 space-y-2">
@@ -51,6 +53,7 @@
             </div>
             {slide.notes && <p className="whitespace-pre-line leading-relaxed text-base text-slate-800 font-amiri bg-gold-50 rounded-lg px-2 py-1 max-h-24 overflow-y-auto">📝 {slide.notes}</p>}
           </section>
+          </div>
 
           <LectureTextPane deck={deck} index={i} onPick={setIndex} topGap={stickyHeight + 12 + 'px'}
             onAttachText={(text) => { const err = saveDeck(Object.assign({}, deck, { sourceText: text })); if (err) window.alert(err); setDeckVersion((v) => v + 1); }} />
