@@ -49,7 +49,7 @@
           {next && (
             <section className="bg-white/70 rounded-2xl p-2 border border-emerald-900/10">
               <p className="text-xs font-bold text-slate-500 mb-1 px-1">الشريحة التالية</p>
-              <ScaledSlide width={300}><SlideView slide={next} /></ScaledSlide>
+              <ScaledSlide width={300}><SlideView slide={next} deck={deck} /></ScaledSlide>
             </section>
           )}
 

@@ -70,6 +70,7 @@
           setHistory((h) => h.slice(0, -1));
         },
         replaceDeck: (next) => commit(normalizeDeck(next)),
+        setFrame: (frame) => commit(Object.assign({}, deck, { frame })),
         updateSlide: (id, field, value) => replaceSlides((slides) => slides.map((s) => (s.id === id ? Object.assign({}, s, { [field]: value }) : s))),
         moveSlide: (id, delta) => replaceSlides((slides) => {
           const i = slides.findIndex((s) => s.id === id);
