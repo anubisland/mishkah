@@ -39,8 +39,7 @@
       );
     }
 
-    // Shrinks its content (never enlarges it) so a whole slide always fits the
-    // student window, whatever size the teacher gives that window.
+    // True when the student window is tall and narrow (a half screen).
     function useTallWindow() {
       const check = () => window.innerHeight > window.innerWidth * 0.85;
       const [tall, setTall] = useState(check);
@@ -52,6 +51,8 @@
       return tall;
     }
 
+    // Scales its content to fill the student window (shrinking, or growing up
+    // to twice its size), whatever size the teacher gives that window.
     function FitToScreen({ children }) {
       const boxRef = useRef(null);
       const contentRef = useRef(null);
