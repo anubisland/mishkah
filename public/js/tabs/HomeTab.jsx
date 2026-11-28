@@ -14,7 +14,7 @@
         { icon: '➕', label: 'حصة جديدة', hint: 'إضافة حصة وتجهيز خطتها', run: h.openMyClasses },
         { icon: '🎞️', label: 'عرض محاضرة', hint: 'استوديو الشرائح', run: h.openStudio },
         { icon: '📖', label: 'المصحف والتسميع', hint: 'صفحات مصحف المدينة', run: () => h.navigate('hifz') },
-        { icon: '🎙️', label: 'دروس التجويد', hint: 'منهج د. أيمن سويد', run: () => h.navigate('tajweed') },
+        { icon: '🎙️', label: 'التجويد', hint: 'التجويد المصور وأطلس التجويد', run: () => h.navigate('tajweed') },
         { icon: '❓', label: 'دليل الاستخدام', hint: 'كل خطوات البرنامج', run: h.openGuide }
       ];
 

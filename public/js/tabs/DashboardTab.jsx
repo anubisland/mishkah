@@ -132,7 +132,7 @@
                           onClick={() => setActiveTab('tajweed')}
                           className="bg-emerald-700 text-white hover:bg-emerald-800 text-xs px-3.5 py-1.5 rounded-lg font-bold transition"
                         >
-                          {isRtl ? 'عرض بطاقات الشرح' : 'View Presentation'}
+                          {isRtl ? 'فتح كتاب التجويد' : 'Open the tajweed book'}
                         </button>
                         <button 
                           onClick={() => setActiveTab('worksheet')}

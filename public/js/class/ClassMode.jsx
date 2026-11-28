@@ -75,7 +75,7 @@
     function ClassMode({ ctx, plan, onEnd, onAddPlanItem }) {
       const section = CLASS_SECTIONS.some((s) => s.id === ctx.activeTab) ? ctx.activeTab : 'hifz';
       // Tajweed is taught from the book, page by page (TajweedBookPanel).
-      const books = useTajweedBooks();
+      const books = ctx.tajweedBooks;
       const bookPlace = books.place;
       const planItems = (plan && plan.items) || [];
       // The part opened last; a class may have several hifz parts.
