@@ -9,8 +9,13 @@
       const en = lang === 'en' && lesson && typeof SUWAYD_ENGLISH !== 'undefined' ? SUWAYD_ENGLISH[lesson.id] : null;
       if (!en) return lesson;
       const pick = (english, arabic) => (english && english.trim() ? english : arabic);
-      const notes = (examples, englishNotes) => (examples || []).map((ex, i) =>
-        Object.assign({}, ex, { note: pick(englishNotes && englishNotes[i], ex.note) }));
+      // Examples with a note get it in English; examples with only a label
+      // («في كلمة واحدة») get the label in English, without its brackets.
+      const notes = (examples, englishNotes) => (examples || []).map((ex, i) => {
+        const english = englishNotes && englishNotes[i];
+        if (ex.note) return Object.assign({}, ex, { note: pick(english, ex.note) });
+        return english ? Object.assign({}, ex, { type: english.replace(/^\(|\)$/g, '') }) : ex;
+      });
       return Object.assign({}, lesson, {
         titleAr: lesson.titleEn || lesson.titleAr,
         timingLabelAr: pick(en.timingLabelEn, lesson.timingLabelAr),
