@@ -1090,6 +1090,8 @@
       const [classPlan, setClassPlan] = useState(null);
       // The teacher enlarged the makhraj plate on the student screen.
       const [tajweedPlateLarge, setTajweedPlateLarge] = useState(false);
+      // Each lesson, and each class, starts with the plate at its usual size.
+      useEffect(() => { setTajweedPlateLarge(false); }, [suwaydLessonId, classModeOpen]);
       const [myClassesOpen, setMyClassesOpen] = useState(false);
       const [guideOpen, setGuideOpen] = useState(false);
       // The student of the class now running, so recitation goes to their record.
@@ -1569,7 +1571,7 @@
             // In class mode the teacher steps through the slides from her panel.
             slideIndex: (suwaydZoomModalOpen || classModeOpen) ? Math.min(suwaydZoomSlideIndex, Math.max(0, currentZoomSlides.length - 1)) : 0,
             plateId: activeSuwaydPlateId,
-            plateLarge: tajweedPlateLarge,
+            plateLarge: classModeOpen && tajweedPlateLarge,
             metronome: { count: metronomeCount, playing: metronomePlaying, beat: metronomeBeat }
           };
         }

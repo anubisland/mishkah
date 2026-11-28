@@ -55,7 +55,7 @@
           {slide && slide.type === 'breakdown' && <TajweedBreakdownNotes item={slide.item} />}
           {slide && slide.type === 'example' && <TajweedExampleNotes example={slide.example} lesson={lesson} ctx={ctx} />}
           <TajweedTeachingNotes lesson={lesson} />
-          <TajweedReadingPicker onRead={onReadFromPage} />
+          {onReadFromPage && <TajweedReadingPicker onRead={onReadFromPage} />}
         </>
       );
     }

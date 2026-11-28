@@ -77,6 +77,8 @@
       const [briefHidden, setBriefHidden] = useState(false);
       // Tajweed reading practice moved the class to a mushaf page.
       const [fromTajweed, setFromTajweed] = useState(false);
+      // Only «عرض الصفحة للطلاب» keeps it: any other way out of hifz clears it.
+      useEffect(() => { if (section !== 'hifz') setFromTajweed(false); }, [section]);
       const readFromPage = (page) => {
         tasmee.setActive(false);
         ctx.setActiveTab('hifz');
@@ -251,6 +253,7 @@
             <AddClassPart planItems={planItems} onClose={() => setAddingPart(false)} onAdd={(item) => {
               onAddPlanItem(item);
               setAddingPart(false);
+              setFromTajweed(false);
               setItemIndex(planItems.length);
               openPlanItem(ctx, item, setLectureIndex, tasmee);
             }} />
