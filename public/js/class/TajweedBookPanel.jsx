@@ -3,7 +3,9 @@
     // picture beside its text, or the charts of «أطلس التجويد» to sum up.
     // books: useTajweedBooks() (ClassMode owns it so the student window
     // follows). onReadFromPage(page): reading practice from a mushaf page.
-    function TajweedBookPanel({ books, onReadFromPage }) {
+    // language: the class language; in an English class the English notes
+    // open under the book page.
+    function TajweedBookPanel({ books, onReadFromPage, language }) {
       return (
         <>
           <div className="flex gap-2">
@@ -11,12 +13,13 @@
               <button key={b.id} type="button" className={'flex-1 ' + classPill(books.bookId === b.id)} onClick={() => books.setBookId(b.id)}>{b.label}</button>
             ))}
           </div>
-          <TajweedBookPanelBody place={books.place} info={tajweedBookInfo(books.bookId)} onReadFromPage={onReadFromPage} />
+          <TajweedBookPanelBody place={books.place} info={tajweedBookInfo(books.bookId)} onReadFromPage={onReadFromPage} language={language} />
         </>
       );
     }
 
-    function TajweedBookPanelBody({ place, info, onReadFromPage }) {
+    function TajweedBookPanelBody({ place, info, onReadFromPage, language }) {
+      const [showEnglish, setShowEnglish] = useState(language === 'en');
       const [version, setVersion] = useState(0);
       const book = useTajweedBookDoc(info.id, version);
       const [error, setError] = useState('');
@@ -97,6 +100,10 @@
             </div>
             <BookPageJump total={total} offset={place.offset} onOpen={place.openPrinted} />
           </section>
+          {info.id === 'suwayd' && (
+            <button type="button" className={'w-full ' + classPill(showEnglish)} onClick={() => setShowEnglish(!showEnglish)}>🇬🇧 الشرح بالإنجليزية لهذا الباب</button>
+          )}
+          {info.id === 'suwayd' && showEnglish && <TajweedEnglishNotes chapter={chapter} />}
           {onReadFromPage && <TajweedReadingPicker onRead={onReadFromPage} />}
           <BookSettings place={place} onChooseAgain={choose} busy={busy} error={error} />
         </>
