@@ -9,6 +9,50 @@
     // A hadith is quoted text explicitly attributed to the Prophet ﷺ; «» alone
     // is also used for book titles, so it is not enough.
     const HADITH_PATTERN = /(?:قال رسول الله|قال النبي|عن النبي|ﷺ)[^«]*«[^»]{12,}»/;
+    // A hadith pasted from Dorar comes as three lines: its text, «خلاصة حكم
+    // المحدث : صحيح», and «الراوي : … | المحدث : …». They are joined into one
+    // line «text» — الراوي: … | المحدث: … | صحيح, the words left as they are.
+    const DORAR_HADITH = /^«[^»]{12,}»\s*—\s*الراوي:/;
+    // Index of the quotation mark that opens the line's last quotation, or -1.
+    // A plain " opens only when an even number of " come before it.
+    function lastOpeningQuote(s) {
+      for (let k = s.length - 1; k >= 0; k--) {
+        const c = s[k];
+        if (c === '«' || c === '“') return k;
+        if (c === '"' && (s.slice(0, k).split('"').length - 1) % 2 === 0) return k;
+      }
+      return -1;
+    }
+
+    function joinDorarHadiths(lines) {
+      const out = [];
+      for (let i = 0; i < lines.length; i++) {
+        const grade = lines[i].trim().match(/^خلاصة حكم المحدث\s*[:：]\s*(.+)$/);
+        const narr = grade && (lines[i + 1] || '').trim().match(/^الراوي\s*[:：]\s*([^|]+?)\s*\|\s*المحدث\s*[:：]\s*([^|]+?)\s*(?:\||$)/);
+        let p = out.length - 1;
+        while (p >= 0 && !out[p].trim()) p--;
+        if (!grade || !narr || p < 0) { out.push(lines[i]); continue; }
+        // The hadith is the whole line before, unless that line is a paragraph
+        // ending with a quotation opened after a lead-in («…قال:» or «…،»):
+        // then only the quotation. Text that already holds «» is left as the
+        // three lines it was, so its wording can never be cut.
+        const prev = out[p].trim();
+        let text = prev;
+        let before = '';
+        const open = lastOpeningQuote(prev);
+        // A short frame before the quote («أن رجلاً قال: …») is part of the
+        // hadith as Dorar gives it; only a long lead-in is the teacher's own.
+        if (open > 80 && /[:،,]\s*$/.test(prev.slice(0, open))) {
+          const quoted = prev.slice(open + 1).replace(/[»"”]\s*$/, '').trim();
+          if (quoted.length >= 12) { text = quoted; before = prev.slice(0, open).trim(); }
+        }
+        if (/[«»]/.test(text)) { out.push(lines[i]); continue; }
+        const hadith = '«' + text + '» — الراوي: ' + narr[1].trim() + ' | المحدث: ' + narr[2].trim() + ' | ' + grade[1].trim();
+        out.splice(p, 1, ...(before ? [before, hadith] : [hadith]));
+        i++; // the «الراوي» line is used
+      }
+      return out;
+    }
 
     // A heading is either marked (أولاً، المحور، #، or ending with «:»), or a
     // short line of its own, numbered or not, with no closing punctuation and
@@ -21,6 +65,8 @@
     function isHeadingLine(line, next) {
       const t = line.trim();
       if (!t || t.length > 80) return false;
+      // A bulleted line (• * - –) is a point, never a heading.
+      if (/^[•*\-–]/.test(t)) return false;
       if (HEADING_PATTERN.test(t) || (t.endsWith(':') && t.length < 60)) return true;
       if (t.length > 60 || t.split(/\s+/).length > 8) return false;
       if (/^[\s0-9٠-٩\-–—|/.]+$/.test(t) || LEAD_IN.test(t)) return false;
@@ -55,17 +101,24 @@
       let current = { heading: '', lines: [] };
       // Join a short lead-in line to the ayah or hadith that follows it, and
       // drop lines that are only a page number (PDF headers and footers).
-      lines = lines.filter((l) => !/^[\s0-9٠-٩\-–—|/.]+$/.test(l) || !l.trim()).reduce((out, l) => {
+      lines = joinDorarHadiths(lines.filter((l) => !/^[\s0-9٠-٩\-–—|/.]+$/.test(l) || !l.trim())).reduce((out, l) => {
         const prev = out[out.length - 1];
         if (prev && prev.trim().length < 60 && LEAD_IN.test(prev.trim()) && /^\s*[﴿«]/.test(l)) out[out.length - 1] = prev.trim() + ' ' + l.trim();
         else out.push(l);
         return out;
       }, []);
       const nextText = (i) => lines.slice(i + 1).find((l) => l.trim()) || '';
+      // «المحور الأول: …» is a main axis; the headings under it (أولاً، 1.)
+      // carry its name above their slides instead of a new «المحور» number.
+      let main = '';
       lines.forEach((line, i) => {
         if (isHeadingLine(line, markedOnly ? '' : nextText(i))) {
           if (current.heading || current.lines.length) sections.push(current);
-          current = { heading: cleanHeading(line), lines: [] };
+          const heading = cleanHeading(line);
+          if (/^المحور\s/.test(heading)) main = heading.split(/[:：]/)[0].trim();
+          // An introduction, conclusion or chapter is not under the last axis.
+          else if (/^(?:ال)?(?:مقدمة|خاتمة)|^(?:المبحث|الفصل|فوائد|الأسئلة|التطبيق)/.test(heading)) main = '';
+          current = { heading, main, lines: [] };
         } else if (line.trim()) {
           current.lines.push(line.trim());
         }
@@ -88,7 +141,7 @@
         for (let i = 0; i < points.length; i += 4) {
           slides.push(normalizeSlide({
             layout: 'points',
-            eyebrow: 'المحور ' + sectionNumber.toLocaleString('ar-EG'),
+            eyebrow: section.main || ('المحور ' + sectionNumber.toLocaleString('ar-EG')),
             title: section.heading + (i > 0 ? ' (تابع)' : ''),
             items: points.slice(i, i + 4).map((t) => ({ title: '', text: t })),
             notes
@@ -102,12 +155,12 @@
           flushPoints();
           const source = (line.replace(ayah[0], '').match(/[\[(]([^\])]+)[\])]/) || [])[1] || '';
           slides.push(normalizeSlide({ layout: 'ayah', eyebrow: section.heading, quote: { text: ayah[0], source }, notes }));
-        } else if (HADITH_PATTERN.test(line)) {
+        } else if (HADITH_PATTERN.test(line) || DORAR_HADITH.test(line)) {
           flushPoints();
           // «text» becomes the quote; what follows it (e.g. متفق عليه) is the source.
           const quoted = line.match(/«[^»]+»/);
           const text = quoted ? quoted[0] : line;
-          const source = quoted ? line.slice(line.indexOf(quoted[0]) + quoted[0].length).replace(/^[\s.،:-]+/, '').trim() : '';
+          const source = quoted ? line.slice(line.indexOf(quoted[0]) + quoted[0].length).replace(/^[\s.،:—-]+/, '').trim() : '';
           const lead = quoted ? line.slice(0, line.indexOf(quoted[0])).replace(/[:\s]+$/, '').trim() : '';
           slides.push(normalizeSlide({ layout: 'hadith', eyebrow: section.heading, title: lead, quote: { text, source }, notes }));
         } else {
@@ -116,7 +169,7 @@
       });
       flushPoints();
       if (!slides.length && section.heading) {
-        slides.push(normalizeSlide({ layout: 'section', eyebrow: 'المحور ' + sectionNumber.toLocaleString('ar-EG'), title: section.heading, notes }));
+        slides.push(normalizeSlide({ layout: 'section', eyebrow: section.main || ('المحور ' + sectionNumber.toLocaleString('ar-EG')), title: section.heading, notes }));
       }
       return slides;
     }
