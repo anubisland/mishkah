@@ -229,7 +229,7 @@
       const next = deck.slides[index + 1];
       return (
         <div ref={widthRef} className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3">
-          <div ref={headRef} className="sticky top-0 z-10 bg-white/95 rounded-2xl p-2 border border-emerald-900/10 shadow-md flex flex-col items-center gap-2">
+          <div ref={headRef} className="sticky -top-3 -mt-3 z-10 bg-white rounded-b-2xl p-2 pt-5 border border-emerald-900/10 shadow-md flex flex-col items-center gap-2">
             <div className="rounded-md overflow-hidden shadow">
               <ScaledSlide width={Math.max(240, Math.min(480, width - 40))}>
                 <SlideView slide={slide} deck={deck} index={index} total={deck.slides.length} />
