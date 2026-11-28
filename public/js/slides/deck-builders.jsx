@@ -212,7 +212,7 @@
         '',
         'أنواع الشرائح (layout): cover غلاف، section عنوان محور، points نقاط مرقمة، cards بطاقات (2-4)، ayah آية، hadith حديث، compare مقارنة بين أمرين (عنصران في items)، closing خاتمة.',
         'الألوان (tone): pearl، sage، amber، sky، lavender.',
-        'الإطار المزخرف للعرض كله (frame): violet-floral زخارف نباتية بنفسجية، emerald-floral زخارف نباتية خضراء، rose-floral زخارف نباتية وردية، gold-star نجمة ثمانية ذهبية، classic إطار ذهبي بسيط، none بلا إطار. اختر واحداً يناسب موضوع المحاضرة (الافتراضي violet-floral). ويمكن لشريحة بعينها أن تأخذ إطاراً مختلفاً بحقل frame فيها.',
+        'الإطار المزخرف للعرض كله (frame): violet-floral زخارف نباتية بنفسجية، emerald-floral زخارف نباتية خضراء، rose-floral زخارف نباتية وردية، tulip-crimson خزامى وقرنفل عثماني، rumi-gold أرابيسك ذهبي، medallion-blue شمسات زرقاء، lattice-sage تشبيك هندسي، gold-star نجمة ثمانية ذهبية، classic إطار ذهبي بسيط، none بلا إطار. اختر واحداً يناسب موضوع المحاضرة (الافتراضي violet-floral). ويمكن لشريحة بعينها أن تأخذ إطاراً مختلفاً بحقل frame فيها.',
         '',
         'أعد النتيجة JSON فقط، داخل ```json ... ```، بهذا الشكل بالضبط:',
         '```json',
