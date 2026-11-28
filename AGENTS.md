@@ -52,3 +52,6 @@
   - رابط GitHub Pages الرسمي والوحيد: `https://anubisland.github.io/mishkah/`
   - مستودع المنظمة: `https://github.com/anubisland/mishkah`
 - **حظر بات للأسماء الشخصية:** يُمنع منعاً باتاً نسبة المشروع أو كتابة أي حساب شخصي (مثل `melwazeer`)؛ العمل مؤسسي بالكامل لشركة AnubisLand.
+
+### 6. رقم الإصدار
+- مع كل تعديل يُدمج: رفع `window.MISHKAH_VERSION` في `public/index.html` (الرقم والتاريخ وسطر يصف الجديد)، ورفع `APP_CACHE` في `public/sw.js` بالرقم نفسه، حتى يرى المعلم أن التحديث وصل.

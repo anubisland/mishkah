@@ -94,7 +94,7 @@
               <button type="button" className={row} onClick={() => { onClose(); s.setIsPinModalOpen(true); }}>🔒 {s.isRtl ? 'الأمان' : 'Security'}</button>
             </section>
             <section className="border-t border-emerald-900/10 pt-2 flex items-center justify-between text-xs text-slate-500">
-              <span>{s.isRtl ? 'الإصدار' : 'Version'} {s.version}</span>
+              <span title={s.version.note}>{s.isRtl ? 'الإصدار' : 'Version'} {s.version.number} • {new Date(s.version.date + 'T12:00').toLocaleDateString(s.isRtl ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
               <button type="button" onClick={forceRefreshApp} className="px-2 py-1 rounded-lg border border-slate-300 font-bold text-slate-700">{s.isRtl ? 'تحديث البرنامج' : 'Update now'}</button>
             </section>
           </div>
