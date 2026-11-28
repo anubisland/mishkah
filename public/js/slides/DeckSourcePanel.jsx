@@ -3,6 +3,7 @@
     function DeckSourcePanel({ lectureText, onDeck, onClose }) {
       const [text, setText] = useState(lectureText || '');
       const [reading, setReading] = useState(false);
+      const [fromPdf, setFromPdf] = useState(false);
       // A Word or PDF lecture fills the box with its text, to check before the deck is made.
       const readFile = async (file) => {
         setError(null);
@@ -11,6 +12,7 @@
           const t = await readLectureFile(file);
           if (!t.trim()) throw new Error('لم يُعثر على نص في الملف (قد يكون صوراً ممسوحة).');
           setText(t);
+          setFromPdf(/\.pdf$/i.test(file.name || ''));
         } catch (e) {
           console.warn('Mishkah: could not read the lecture file', e);
           setError(e && /[؀-ۿ]/.test(e.message || '') ? e.message : 'تعذّر قراءة الملف.');
@@ -59,6 +61,7 @@
                     onChange={(e) => { const f = e.target.files && e.target.files[0]; if (f) readFile(f); e.target.value = ''; }} />
                 </label>
                 <span className="text-xs text-slate-600">يظهر نصه في المربع أدناه للمراجعة قبل إنشاء العرض.</span>
+                {fromPdf && <span className="block w-full text-xs font-bold text-amber-900">ملفات PDF تُخرج النص العربي أحياناً بحروف مفصولة؛ فإن وُجد ملف الوورد الأصلي فهو أدق. وتُعتمد هنا العناوين المرقّمة أو المعلَّمة فقط.</span>}
               </div>
             )}
             <label className="block">
@@ -71,7 +74,7 @@
               <div className="card-islamic-sage rounded-2xl p-4 space-y-2 border border-emerald-300">
                 <h4 className="font-black text-emerald-950">⚡ الطريقة السريعة (بدون ذكاء اصطناعي)</h4>
                 <p className="text-sm text-slate-700">تقسّم المحاضرة حسب عناوينها وآياتها وأحاديثها. تحتاج محاضرة مرتبة بعناوين واضحة (أولاً، ثانياً، …).</p>
-                <button type="button" disabled={!text.trim()} onClick={() => onDeck(buildQuickDeck(text), [])}
+                <button type="button" disabled={!text.trim()} onClick={() => onDeck(buildQuickDeck(text, fromPdf), [])}
                   className="w-full py-2.5 rounded-xl bg-emerald-800 text-white font-black disabled:opacity-40">إنشاء العرض الآن</button>
               </div>
 

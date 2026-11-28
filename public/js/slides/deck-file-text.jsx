@@ -39,5 +39,9 @@
           lines.push(r.parts.sort((a, b) => b.x - a.x).map((pt) => pt.str).join(' ').replace(/\s+/g, ' ').trim());
         });
       }
-      return lines.filter(Boolean).join('\n');
+      // Word-made PDFs often store Arabic in broken forms («باهلل» for «بالله»).
+      // The letter repair fixes those line by line; Quran lines are left as
+      // they are, never rewritten.
+      const repair = typeof sanitizeArabicExtractedText === 'function' ? sanitizeArabicExtractedText : (l) => l;
+      return lines.filter(Boolean).map((l) => (/[﴿﴾]/.test(l) ? l : String(repair(l) || l))).join('\n');
     }
