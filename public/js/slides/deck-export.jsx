@@ -155,7 +155,7 @@
     }
 
     const DECK_EXPORTS = [
-      { id: 'pdf', label: 'ملف PDF', hint: 'للإرسال للطالبات', run: exportDeckAsPdf },
+      { id: 'pdf', label: 'ملف PDF', hint: 'للإرسال إلى الطلاب', run: exportDeckAsPdf },
       { id: 'images', label: 'صور (ملف مضغوط)', hint: 'صورة لكل شريحة', run: exportDeckAsImages },
       { id: 'pptx', label: 'باوربوينت', hint: 'مع ملاحظات المعلم في ملاحظات المتحدث', run: exportDeckAsPowerPoint }
     ];
