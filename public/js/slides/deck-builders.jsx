@@ -13,6 +13,17 @@
     // المحدث : صحيح», and «الراوي : … | المحدث : …». They are joined into one
     // line «text» — الراوي: … | المحدث: … | صحيح, the words left as they are.
     const DORAR_HADITH = /^«[^»]{12,}»\s*—\s*الراوي:/;
+    // Index of the quotation mark that opens the line's last quotation, or -1.
+    // A plain " opens only when an even number of " come before it.
+    function lastOpeningQuote(s) {
+      for (let k = s.length - 1; k >= 0; k--) {
+        const c = s[k];
+        if (c === '«' || c === '“') return k;
+        if (c === '"' && (s.slice(0, k).split('"').length - 1) % 2 === 0) return k;
+      }
+      return -1;
+    }
+
     function joinDorarHadiths(lines) {
       const out = [];
       for (let i = 0; i < lines.length; i++) {
@@ -21,11 +32,21 @@
         let p = out.length - 1;
         while (p >= 0 && !out[p].trim()) p--;
         if (!grade || !narr || p < 0) { out.push(lines[i]); continue; }
-        // The hadith is the quoted part of the line before, or the whole line.
+        // The hadith is the whole line before, unless that line is a paragraph
+        // ending with a quotation opened after a lead-in («…قال:» or «…،»):
+        // then only the quotation. Text that already holds «» is left as the
+        // three lines it was, so its wording can never be cut.
         const prev = out[p].trim();
-        const q = prev.match(/[«"“]([^»"”]{12,})[»"”]?\s*$/);
-        const text = q ? q[1].trim() : prev;
-        const before = q ? prev.slice(0, prev.indexOf(q[0])).trim() : '';
+        let text = prev;
+        let before = '';
+        const open = lastOpeningQuote(prev);
+        // A short frame before the quote («أن رجلاً قال: …») is part of the
+        // hadith as Dorar gives it; only a long lead-in is the teacher's own.
+        if (open > 80 && /[:،,]\s*$/.test(prev.slice(0, open))) {
+          const quoted = prev.slice(open + 1).replace(/[»"”]\s*$/, '').trim();
+          if (quoted.length >= 12) { text = quoted; before = prev.slice(0, open).trim(); }
+        }
+        if (/[«»]/.test(text)) { out.push(lines[i]); continue; }
         const hadith = '«' + text + '» — الراوي: ' + narr[1].trim() + ' | المحدث: ' + narr[2].trim() + ' | ' + grade[1].trim();
         out.splice(p, 1, ...(before ? [before, hadith] : [hadith]));
         i++; // the «الراوي» line is used
@@ -95,6 +116,8 @@
           if (current.heading || current.lines.length) sections.push(current);
           const heading = cleanHeading(line);
           if (/^المحور\s/.test(heading)) main = heading.split(/[:：]/)[0].trim();
+          // An introduction, conclusion or chapter is not under the last axis.
+          else if (/^(?:ال)?(?:مقدمة|خاتمة)|^(?:المبحث|الفصل|فوائد|الأسئلة|التطبيق)/.test(heading)) main = '';
           current = { heading, main, lines: [] };
         } else if (line.trim()) {
           current.lines.push(line.trim());
