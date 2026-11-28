@@ -29,9 +29,26 @@
       { title: 'الفرق بين رسم المصحف والرسم الإملائي الحديث', page: 551 },
       { title: 'حفظ القرآن الكريم', page: 567 }
     ];
-    const TAJWEED_BOOK_PAGE_KEY = 'mishkah_tajweed_book_page';
-    const TAJWEED_BOOK_OFFSET_KEY = 'mishkah_tajweed_book_offset';
-    const TAJWEED_BOOK_DEFAULT_OFFSET = 2;
+    // The books a tajweed class can be taught from. The book's keys keep
+    // their first names so a place saved before the atlas came stays.
+    const TAJWEED_BOOKS = [
+      { id: 'suwayd', label: '📘 التجويد المصور', title: 'التجويد المصور', storeKey: 'tajweed-suwayd', chapters: TAJWEED_BOOK_CHAPTERS,
+        pageKey: 'mishkah_tajweed_book_page', offsetKey: 'mishkah_tajweed_book_offset', defaultOffset: 2 },
+      // «أطلس التجويد — دروس نظرية مرئية»: each rule in one coloured chart,
+      // for summing up and revising. Its chapter pages are not listed yet.
+      { id: 'atlas', label: '🎨 أطلس التجويد', title: 'أطلس التجويد', storeKey: 'tajweed-atlas', chapters: [],
+        pageKey: 'mishkah_tajweed_atlas_page', offsetKey: 'mishkah_tajweed_atlas_offset', defaultOffset: 0 }
+    ];
+    const TAJWEED_BOOK_CHOICE_KEY = 'mishkah_tajweed_book_choice';
+
+    function tajweedBookInfo(bookId) {
+      return TAJWEED_BOOKS.find((b) => b.id === bookId) || TAJWEED_BOOKS[0];
+    }
+
+    function tajweedBookOffset(bookId) {
+      const info = tajweedBookInfo(bookId);
+      return readBookNumber(info.offsetKey, info.defaultOffset);
+    }
 
     function readBookNumber(key, fallback) {
       try {
@@ -45,32 +62,41 @@
     }
 
     // The chapter a printed page belongs to.
-    function tajweedBookChapterFor(printed) {
+    function tajweedBookChapterFor(bookId, printed) {
       let found = null;
-      TAJWEED_BOOK_CHAPTERS.forEach((c) => { if (c.page <= printed) found = c; });
+      tajweedBookInfo(bookId).chapters.forEach((c) => { if (c.page <= printed) found = c; });
       return found;
     }
 
     // Where the class is in the book: the PDF page shown (remembered, so the
     // next class carries on), the focus, and the page offset.
-    function useTajweedBookPlace() {
-      const [pdfPage, setPdfPageState] = useState(() => Math.max(1, readBookNumber(TAJWEED_BOOK_PAGE_KEY, 1)));
+    function useTajweedBookPlace(bookId) {
+      const info = tajweedBookInfo(bookId);
+      const [pdfPage, setPdfPageState] = useState(() => Math.max(1, readBookNumber(info.pageKey, 1)));
       // The book's page count, reported by the panel once the book is open.
       const [total, setTotal] = useState(0);
       const clamp = (p) => Math.max(1, total ? Math.min(total, p) : p);
       const page = clamp(pdfPage);
-      const [offset, setOffsetState] = useState(() => readBookNumber(TAJWEED_BOOK_OFFSET_KEY, TAJWEED_BOOK_DEFAULT_OFFSET));
+      const [offset, setOffsetState] = useState(() => readBookNumber(info.offsetKey, info.defaultOffset));
       const [focus, setFocus] = useState('full');
       const setPdfPage = (p) => {
         const next = clamp(p);
         if (next === page) return;
-        setPdfPageState(next); writeBookNumber(TAJWEED_BOOK_PAGE_KEY, next); setFocus('full');
+        setPdfPageState(next); writeBookNumber(info.pageKey, next); setFocus('full');
       };
-      const setOffset = (o) => { setOffsetState(o); writeBookNumber(TAJWEED_BOOK_OFFSET_KEY, o); };
+      const setOffset = (o) => { setOffsetState(o); writeBookNumber(info.offsetKey, o); };
       return {
-        pdfPage: page, total, setTotal, focus, offset, setFocus, setOffset, setPdfPage,
+        bookId: info.id, pdfPage: page, total, setTotal, focus, offset, setFocus, setOffset, setPdfPage,
         printed: page - offset,
         openPrinted: (printed) => setPdfPage(Math.max(1, printed + offset)),
-        stage: { kind: 'book', page, focus, offset }
+        stage: { kind: 'book', book: info.id, page, focus, offset }
       };
+    }
+
+    // Both books' places, and which one the class is on (remembered).
+    function useTajweedBooks() {
+      const places = { suwayd: useTajweedBookPlace('suwayd'), atlas: useTajweedBookPlace('atlas') };
+      const [bookId, setBookIdState] = useState(() => { try { return localStorage.getItem(TAJWEED_BOOK_CHOICE_KEY) || 'suwayd'; } catch (e) { return 'suwayd'; } });
+      const setBookId = (id) => { setBookIdState(id); try { localStorage.setItem(TAJWEED_BOOK_CHOICE_KEY, id); } catch (e) { console.warn('Mishkah: could not remember the tajweed book', e); } };
+      return { bookId: places[bookId] ? bookId : 'suwayd', setBookId, place: places[bookId] || places.suwayd, places };
     }

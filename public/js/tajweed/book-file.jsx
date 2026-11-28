@@ -1,16 +1,15 @@
-    // The teacher's own copy of «التجويد المصور» (a PDF she chooses once). It
-    // is kept in this browser's IndexedDB, never uploaded: the teacher window
+    // The teacher's own copies of the tajweed books (PDFs chosen once; see
+    // TAJWEED_BOOKS in book-chapters.jsx for which). Each is kept in this browser's IndexedDB, never uploaded: the teacher window
     // and the student window (same site, same browser) both read it from
     // there and draw pages with PDF.js.
     const TAJWEED_BOOK_DB = 'mishkah-books';
     const TAJWEED_BOOK_STORE = 'files';
-    const TAJWEED_BOOK_KEY = 'tajweed-suwayd';
     // Changed whenever the book is chosen or removed, so the other window
     // (teacher or student) reopens it through the storage event.
     const TAJWEED_BOOK_VERSION_KEY = 'mishkah_tajweed_book_version';
 
     function markTajweedBookChanged() {
-      tajweedBookDocPromise = null;
+      tajweedBookDocPromises = {};
       try { localStorage.setItem(TAJWEED_BOOK_VERSION_KEY, String(Date.now())); } catch (e) { console.warn('Mishkah: could not tell the other window about the book', e); }
     }
 
@@ -34,10 +33,10 @@
     }
 
     // Returns an Arabic error message, or null when kept.
-    async function saveTajweedBookFile(file) {
+    async function saveTajweedBookFile(bookId, file) {
       if (!file || !/\.pdf$/i.test(file.name || '')) return 'يلزم اختيار ملف الكتاب بصيغة PDF.';
       try {
-        await bookDbRequest('readwrite', (s) => s.put({ name: file.name, size: file.size, blob: file }, TAJWEED_BOOK_KEY));
+        await bookDbRequest('readwrite', (s) => s.put({ name: file.name, size: file.size, blob: file }, tajweedBookInfo(bookId).storeKey));
         markTajweedBookChanged();
         return null;
       } catch (e) {
@@ -46,41 +45,43 @@
       }
     }
 
-    function readTajweedBookRecord() {
-      return bookDbRequest('readonly', (s) => s.get(TAJWEED_BOOK_KEY));
+    function readTajweedBookRecord(bookId) {
+      return bookDbRequest('readonly', (s) => s.get(tajweedBookInfo(bookId).storeKey));
     }
 
-    function removeTajweedBookFile() {
-      return bookDbRequest('readwrite', (s) => s.delete(TAJWEED_BOOK_KEY)).then(markTajweedBookChanged);
+    function removeTajweedBookFile(bookId) {
+      return bookDbRequest('readwrite', (s) => s.delete(tajweedBookInfo(bookId).storeKey)).then(markTajweedBookChanged);
     }
 
-    // The opened PDF, shared by every page drawn in this window.
-    // Resolves to null when no book has been chosen on this device.
-    let tajweedBookDocPromise = null;
-    function loadTajweedBookDoc() {
-      if (!tajweedBookDocPromise) {
-        tajweedBookDocPromise = (async () => {
+    // Each opened PDF, shared by every page drawn in this window, by book id.
+    // Resolves to null when that book has not been chosen on this device.
+    let tajweedBookDocPromises = {};
+    function loadTajweedBookDoc(bookId) {
+      if (!tajweedBookDocPromises[bookId]) {
+        const promise = (async () => {
           if (!window.pdfjsLib) throw new Error('قارئ ملفات PDF لم يُحمَّل.');
-          const record = await readTajweedBookRecord();
+          const record = await readTajweedBookRecord(bookId);
           if (!record || !record.blob) return null;
           const data = new Uint8Array(await record.blob.arrayBuffer());
           // isEvalSupported: false — see the PDF.js security note in lecture-actions.jsx.
           return window.pdfjsLib.getDocument({ data, isEvalSupported: false }).promise;
         })();
+        tajweedBookDocPromises[bookId] = promise;
         // A missing book or a failure is not kept: the next look tries again.
-        tajweedBookDocPromise.then((doc) => { if (!doc) tajweedBookDocPromise = null; }, () => { tajweedBookDocPromise = null; });
+        const forget = () => { if (tajweedBookDocPromises[bookId] === promise) delete tajweedBookDocPromises[bookId]; };
+        promise.then((doc) => { if (!doc) forget(); }, forget);
       }
-      return tajweedBookDocPromise;
+      return tajweedBookDocPromises[bookId];
     }
 
     // { status: 'loading' | 'missing' | 'ready' | 'error', doc, error }
-    function useTajweedBookDoc(version) {
+    function useTajweedBookDoc(bookId, version) {
       const [state, setState] = useState({ status: 'loading' });
       const [changed, setChanged] = useState(0);
       useEffect(() => {
         const onStorage = (e) => {
           if (e.key !== TAJWEED_BOOK_VERSION_KEY) return;
-          tajweedBookDocPromise = null;
+          tajweedBookDocPromises = {};
           setChanged((n) => n + 1);
         };
         window.addEventListener('storage', onStorage);
@@ -89,7 +90,7 @@
       useEffect(() => {
         let alive = true;
         setState({ status: 'loading' });
-        loadTajweedBookDoc().then(
+        loadTajweedBookDoc(bookId).then(
           (doc) => { if (alive) setState(doc ? { status: 'ready', doc } : { status: 'missing' }); },
           (e) => {
             console.warn('Mishkah: could not open the tajweed book', e);
@@ -97,7 +98,7 @@
           }
         );
         return () => { alive = false; };
-      }, [version, changed]);
+      }, [bookId, version, changed]);
       return state;
     }
 

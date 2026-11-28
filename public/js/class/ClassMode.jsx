@@ -18,7 +18,7 @@
       if (stage.kind === 'mushaf' || stage.kind === 'recitation') return stage.kind + ':' + stage.page;
       if (stage.kind === 'tajweed') return 'tajweed:' + stage.lessonId + ':' + (stage.slideIndex || 0);
       if (stage.kind === 'deck') return 'deck:' + stage.index;
-      if (stage.kind === 'book') return 'book:' + stage.page;
+      if (stage.kind === 'book') return 'book:' + (stage.book || 'suwayd') + ':' + stage.page;
       return null;
     }
 
@@ -31,8 +31,9 @@
         return '🎙️ ' + (lesson ? lesson.titleAr : 'درس تجويد') + (slide ? ' — ' + slide.titleAr : '');
       }
       if (stage.kind === 'book') {
-        const printed = stage.page - (stage.offset != null ? stage.offset : readBookNumber(TAJWEED_BOOK_OFFSET_KEY, TAJWEED_BOOK_DEFAULT_OFFSET));
-        return '📘 التجويد المصور' + (printed >= 1 ? ' — صفحة ' + printed : '');
+        const book = stage.book || 'suwayd';
+        const printed = stage.page - (stage.offset != null ? stage.offset : tajweedBookOffset(book));
+        return tajweedBookInfo(book).label + (printed >= 1 ? ' — صفحة ' + printed : '');
       }
       if (stage.kind === 'deck') {
         const deck = readSavedDeck();
@@ -74,7 +75,8 @@
     function ClassMode({ ctx, plan, onEnd, onAddPlanItem }) {
       const section = CLASS_SECTIONS.some((s) => s.id === ctx.activeTab) ? ctx.activeTab : 'hifz';
       // Tajweed is taught from the book, page by page (TajweedBookPanel).
-      const bookPlace = useTajweedBookPlace();
+      const books = useTajweedBooks();
+      const bookPlace = books.place;
       const planItems = (plan && plan.items) || [];
       // The part opened last; a class may have several hifz parts.
       const [itemIndex, setItemIndex] = useState(0);
@@ -169,7 +171,8 @@
           ctx.setSuwaydZoomSlideIndex(st.slideIndex || 0);
         } else if (st.kind === 'book') {
           ctx.setActiveTab('tajweed');
-          bookPlace.setPdfPage(st.page);
+          books.setBookId(st.book || 'suwayd');
+          books.places[st.book || 'suwayd'].setPdfPage(st.page);
         } else if (st.kind === 'deck') {
           ctx.setActiveTab('islamic');
           setLectureIndex(st.index);
@@ -218,7 +221,7 @@
         <>
           {section === 'hifz' && ctx.classStudentId && !briefHidden && <StudentBrief studentId={ctx.classStudentId} onClose={() => setBriefHidden(true)} />}
           {section === 'hifz' && <HifzClassPanel ctx={ctx} planItem={fromTajweed ? null : planItem} tasmee={tasmee} onBackToTajweed={fromTajweed ? () => { setFromTajweed(false); ctx.setActiveTab('tajweed'); } : null} />}
-          {section === 'tajweed' && <TajweedBookPanel place={bookPlace} onReadFromPage={readFromPage} />}
+          {section === 'tajweed' && <TajweedBookPanel key={books.bookId} books={books} onReadFromPage={readFromPage} />}
           {section === 'islamic' && <LectureClassPanel ctx={ctx} index={lectureIndex} setIndex={setLectureIndex} onOpenStudio={() => { setMinimized(true); ctx.setSlideStudioOpen(true); }} />}
           <ClassHistory history={history} currentKey={classStageKey(stage)} onRestore={restore} />
         </>
