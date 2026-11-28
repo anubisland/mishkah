@@ -69,3 +69,11 @@
     function startsSurahMidList(ayah, index) {
       return index > 0 && ayah.num === 1 && !!ayah.surahNumber && ayah.surahNumber !== 1 && ayah.surahNumber !== 9;
     }
+
+    // Where a new surah begins inside a page's ayahs: its name, and whether the
+    // basmalah heads it (not in At-Tawbah; in Al-Fatiha it is ayah 1 itself).
+    // null when the ayah does not start a surah or the surah is unknown.
+    function surahHeadingFor(ayah) {
+      if (!ayah || ayah.num !== 1 || !ayah.surahNumber) return null;
+      return { name: ayah.surahName || '', basmalah: ayah.surahNumber !== 1 && ayah.surahNumber !== 9 };
+    }

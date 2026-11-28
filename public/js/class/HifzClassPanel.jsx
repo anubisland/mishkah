@@ -72,6 +72,7 @@
 
           {tasmee.active && <TasmeeCounter session={tasmee} ctx={ctx} onOpenStudents={() => setStudentsOpen(true)} />}
           <HifzTeacherText ctx={ctx} tasmee={tasmee} />
+          <PageStepBar ctx={ctx} planItem={planItem} />
           {studentsOpen && <MyStudents lockedId={tasmee.mistakes.length ? tasmee.studentId : null} onClose={() => { setStudentsOpen(false); tasmee.reloadStudents(); }} />}
           <MutashabihatNotes items={ctx.hifzMutashabihat} />
         </>
@@ -167,8 +168,16 @@
             {ctx.hifzAyahs.map((ayah) => {
               const words = ayah.text.split(' ');
               const hiddenAyah = recitation && !recitationAyahVisibility(ayahKey(ayah), masks).isRevealed;
+              const heading = surahHeadingFor(ayah);
               return (
-                <span key={ayahKey(ayah)} className={'font-quran ' + (hiddenAyah ? 'opacity-40' : '')}>
+                <React.Fragment key={ayahKey(ayah)}>
+                {heading && (
+                  <span className="block text-center my-3 py-2 border-y border-gold-400/50">
+                    <span className="block font-quran text-xl text-emerald-900">{heading.name}</span>
+                    {heading.basmalah && <span className="block font-quran text-2xl">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span>}
+                  </span>
+                )}
+                <span className={'font-quran ' + (hiddenAyah ? 'opacity-40' : '')}>
                   {words.map((w, i) => {
                     const masked = recitation && isRecitationWordMasked(ayahKey(ayah), words, i, masks);
                     const key = ayahKey(ayah) + '-' + i;
@@ -177,6 +186,7 @@
                   })}
                   <span className="font-quran text-gold-600">﴿{ayah.num}﴾ </span>
                 </span>
+                </React.Fragment>
               );
             })}
           </div>
@@ -201,5 +211,20 @@
             ))}
           </div>
         </section>
+      );
+    }
+
+    // The same page steps under the text, so reading on through a surah needs
+    // no scrolling back up.
+    function PageStepBar({ ctx, planItem }) {
+      const page = ctx.mushafPageNumber;
+      const min = planItem ? planItem.fromPage : 1;
+      const max = planItem ? planItem.toPage : 604;
+      return (
+        <div className="flex items-center gap-2">
+          <button type="button" className={classPill(false)} disabled={page <= min} onClick={() => ctx.handleNavigateMushafPage(page - 1)}>→ الصفحة السابقة</button>
+          <span className="flex-1 text-center font-black text-emerald-950 text-sm">صفحة {page}</span>
+          <button type="button" className={classPill(true)} disabled={page >= max} onClick={() => ctx.handleNavigateMushafPage(page + 1)}>الصفحة التالية ←</button>
+        </div>
       );
     }
