@@ -25,7 +25,8 @@
       } catch (e) {
         console.warn('Mishkah: the presentations library is unreadable', e);
         try {
-          if (saved) localStorage.setItem(DECK_LIBRARY_KEY + '_unreadable_' + Date.now(), saved);
+          // One copy only: reads happen on every render of the page.
+          if (saved && localStorage.getItem(DECK_LIBRARY_KEY + '_unreadable') === null) localStorage.setItem(DECK_LIBRARY_KEY + '_unreadable', saved);
         } catch (backupError) {
           console.warn('Mishkah: could not keep a copy of the unreadable library', backupError);
         }

@@ -13,7 +13,8 @@
       } catch (e) {
         console.warn('Mishkah: saved deck is unreadable', e);
         try {
-          if (saved) localStorage.setItem(DECK_STORAGE_KEY + '_unreadable_' + Date.now(), saved);
+          // One copy only: the deck is read on many renders.
+          if (saved && localStorage.getItem(DECK_STORAGE_KEY + '_unreadable') === null) localStorage.setItem(DECK_STORAGE_KEY + '_unreadable', saved);
         } catch (backupError) {
           console.warn('Mishkah: could not keep a copy of the unreadable deck', backupError);
         }

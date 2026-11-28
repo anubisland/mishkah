@@ -6,7 +6,8 @@
       const [error, setError] = useState('');
       // Read again whenever the studio closes, so the page shows its latest work.
       const deck = useMemo(() => readSavedDeck(), [studioOpen, version]);
-      const library = useMemo(() => loadDeckLibrary(), [studioOpen, version]);
+      const libraryRead = useMemo(() => readDeckLibrary(), [studioOpen, version]);
+      const library = libraryRead.list.filter(isLibraryEntry);
       const openId = currentLibraryId();
       const refresh = () => setVersion((v) => v + 1);
 
@@ -51,7 +52,8 @@
 
           <section className="bg-white rounded-2xl p-4 border border-emerald-900/10 space-y-2">
             <h3 className="font-black text-emerald-950">📚 مكتبة المحاضرات ({library.length})</h3>
-            {!library.length && <p className="text-sm text-slate-600">لا محاضرات محفوظة بعد. تُحفظ المحاضرة المفتوحة تلقائياً عند بدء محاضرة أخرى.</p>}
+            {libraryRead.error && <p className="text-rose-700 font-bold text-sm">{libraryRead.error}</p>}
+            {!library.length && !libraryRead.error && <p className="text-sm text-slate-600">لا محاضرات محفوظة بعد. تُحفظ المحاضرة المفتوحة تلقائياً عند بدء محاضرة أخرى.</p>}
             {library.map((e) => (
               <div key={e.id} className={'flex flex-wrap items-center gap-2 rounded-xl px-3 py-2 border ' + (e.id === openId ? 'border-gold-400 bg-gold-50' : 'border-slate-200')}>
                 <div className="flex-1 min-w-0">
