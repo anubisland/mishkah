@@ -14,7 +14,7 @@
   <script>
     // The one place the version lives. Raised with every release (and the
     // cache name in sw.js with it), so the teacher sees that an update arrived.
-    window.MISHKAH_VERSION = { number: '94', date: '2026-11-27', note: 'حصص بالإنجليزية: لغة لكل حصة، وترجمة معاني الآيات تحتها' };
+    window.MISHKAH_VERSION = { number: '95', date: '2026-11-28', note: 'إصلاح: كلمات الأمثلة في شرائح التجويد عادت ظاهرة' };
     (function() {
       const CURRENT_VER = window.MISHKAH_VERSION.number;
       const p = new URLSearchParams(window.location.search);
@@ -172,9 +172,13 @@
     }
 
     /* Sacred Quranic Text strictly locked to Uthmani font with maximum crispness and high contrast */
-    /* "html" so it always beats other font rules (e.g. .font-naskh around it). */
+    /* The font alone is held with "html" so it beats other font rules (e.g.
+       .font-naskh around it); the colour stays weak so a slide or card can
+       still colour its Quran words (gold on dark slides). */
     html .font-quran, html .font-quran * {
       font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif !important;
+    }
+    .font-quran, .font-quran * {
       font-weight: 700 !important;
       color: #021a12;
       line-height: 2.5 !important;
