@@ -2,12 +2,14 @@
     // the teacher is on, as large as the window allows. The book is read from
     // this browser (book-file.jsx), the same copy the teacher chose.
     function StudentBookView({ stage }) {
-      const book = useTajweedBookDoc(0);
+      const bookId = stage.book || 'suwayd';
+      const info = tajweedBookInfo(bookId);
+      const book = useTajweedBookDoc(bookId, 0);
       const [boxRef, size] = useElementSize();
-      const printed = stage.page - (stage.offset != null ? stage.offset : readBookNumber(TAJWEED_BOOK_OFFSET_KEY, TAJWEED_BOOK_DEFAULT_OFFSET));
-      const chapter = tajweedBookChapterFor(printed);
+      const printed = stage.page - (stage.offset != null ? stage.offset : tajweedBookOffset(bookId));
+      const chapter = tajweedBookChapterFor(bookId, printed);
       return (
-        <StudentFrame title={chapter ? chapter.title : 'التجويد المصور'} subtitle={'التجويد المصور — د. أيمن رشدي سويد' + (printed >= 1 ? ' • صفحة ' + printed : '')}>
+        <StudentFrame title={chapter ? chapter.title : info.title} subtitle={info.title + (info.author ? ' — ' + info.author : '') + (printed >= 1 ? ' • صفحة ' + printed : '')}>
           <div className="relative w-full h-full self-stretch">
           {/* Absolutely placed, so the page drawn inside cannot grow the box it is measured from. */}
           <div ref={boxRef} className="absolute inset-0 flex items-center justify-center">
