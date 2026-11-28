@@ -86,6 +86,7 @@
 
     // 1.5 reads «1½», as teachers write it.
     function formatMistakes(n) {
+      if (!Number.isFinite(n)) return '—';
       const whole = Math.floor(n);
       const half = n - whole >= 0.5;
       if (!whole && half) return '½';

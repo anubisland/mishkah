@@ -35,6 +35,7 @@
                   <div>
                     <p className="text-2xl font-black text-emerald-950">{next.title}</p>
                     <p className="text-slate-700 font-bold">{formatClassTime(next.at)}</p>
+                    {next.studentId && <div className="mt-1"><StudentBrief studentId={next.studentId} compact /></div>}
                   </div>
                   {next.plan ? (
                     <div className="rounded-2xl bg-white/80 border border-emerald-200 p-3">
