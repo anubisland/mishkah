@@ -1366,14 +1366,14 @@
         const handleKeyDown = (e) => {
           if (e.key === 'Escape') {
             setIsFullscreenZoom(false);
-          } else if (e.key === 'ArrowLeft') {
+          } else if (e.key === 'ArrowRight') {
             setActiveSlideIndex(prev => {
               const max = presentationTarget === 'islamic'
                 ? (((islamicData && (islamicData.zoomCards || islamicData.blueprint || [])).length || 1) - 1)
                 : (((tajweedData && (tajweedData.presentationCards || [])).length || 1) - 1);
               return Math.min(max, prev + 1);
             });
-          } else if (e.key === 'ArrowRight') {
+          } else if (e.key === 'ArrowLeft') {
             setActiveSlideIndex(prev => Math.max(0, prev - 1));
           } else if (e.key === ' ' || e.key === 'Spacebar') {
             e.preventDefault();

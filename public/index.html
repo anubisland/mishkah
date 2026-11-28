@@ -172,7 +172,8 @@
     }
 
     /* Sacred Quranic Text strictly locked to Uthmani font with maximum crispness and high contrast */
-    .font-quran, .font-quran * {
+    /* "html" so it always beats other font rules (e.g. .font-naskh around it). */
+    html .font-quran, html .font-quran * {
       font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif !important;
       font-weight: 700 !important;
       color: #021a12;
