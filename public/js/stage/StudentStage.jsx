@@ -29,8 +29,8 @@
         <div className="h-screen max-h-screen flex flex-col text-white overflow-hidden select-none emerald-pattern" dir="rtl">
           <div className="shrink-0 flex items-center justify-between px-5 py-2 border-b border-gold-400/30">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold font-naskh text-gold-200 leading-snug">{title}</h1>
-              {subtitle && <span className="text-xs sm:text-sm text-gold-300/80 font-bold">{subtitle}</span>}
+              <h1 dir="auto" className="text-xl sm:text-2xl font-bold font-naskh text-gold-200 leading-snug">{title}</h1>
+              {subtitle && <span dir="auto" className="text-xs sm:text-sm text-gold-300/80 font-bold">{subtitle}</span>}
             </div>
             <span className="text-xs font-bold text-gold-300/70 font-cairo">مِشكاة</span>
           </div>
@@ -93,6 +93,12 @@
       );
     }
 
+    function surahIdForPage(page) {
+      const surahs = typeof MUSHAF_SURAHS_PAGE_MAP !== 'undefined' ? MUSHAF_SURAHS_PAGE_MAP : [];
+      const hit = surahs.find((s) => s.startPage <= page && s.endPage >= page);
+      return hit ? hit.id : 0;
+    }
+
     function surahNameForPage(page) {
       const surahs = typeof MUSHAF_SURAHS_PAGE_MAP !== 'undefined' ? MUSHAF_SURAHS_PAGE_MAP : [];
       const hit = surahs.filter((s) => s.startPage <= page).pop();
@@ -104,7 +110,7 @@
     function StudentMushafView({ stage }) {
       const page = parseInt(stage.page, 10) || 1;
       return (
-        <StudentFrame title={surahNameForPage(page)} subtitle={'الصفحة ' + page}>
+        <StudentFrame title={stage.lang === 'en' ? surahEnglishName(surahIdForPage(page)) : surahNameForPage(page)} subtitle={stage.lang === 'en' ? 'Page ' + page : 'الصفحة ' + page}>
           <div className="relative h-full bg-[#FFFDF9] rounded-xl shadow-2xl border-4 border-gold-500/70 p-2">
             <div className="relative h-full">
               <img
@@ -130,8 +136,10 @@
     function StudentRecitationView({ stage }) {
       const masks = recitationMasksFromStage(stage);
       const ayahs = stage.isReverseOrder ? [...(stage.ayahs || [])].reverse() : (stage.ayahs || []);
+      const en = stage.lang === 'en';
       return (
-        <StudentFrame title={stage.surahName} subtitle={'الآيات ' + stage.ayahRange + ' — الصفحة ' + stage.page}>
+        <StudentFrame title={en ? surahEnglishName((stage.ayahs && stage.ayahs[0] && stage.ayahs[0].surahNumber) || surahIdForPage(stage.page)) || 'Recitation' : stage.surahName}
+          subtitle={en ? 'Page ' + stage.page : 'الآيات ' + stage.ayahRange + ' — الصفحة ' + stage.page}>
           <FitToScreen>
             <div className="bg-[#FFFDF9] text-black rounded-3xl border-4 border-gold-500/70 shadow-2xl px-10 py-6" style={{ width: '1100px' }}>
               {shouldShowBasmalah(stage.surahName, stage.ayahs) && (
@@ -139,12 +147,16 @@
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
               </div>
               )}
-              <div className="font-quran text-4xl leading-[2.3] text-right" dir="rtl">
+              {/* Not a font-quran container in English: the meanings between the
+                  ayahs must not take the Quran font. */}
+              <div className={(en ? '' : 'font-quran ') + 'text-4xl leading-[2.3] text-right'} dir="rtl">
                 {ayahs.map((ayah, ayahIdx) => {
                   const { isRevealed } = recitationAyahVisibility(ayahKey(ayah), masks);
                   const words = ayah.text.split(' ');
+                  const meaning = ayah.meaning && meaningVisible(ayahKey(ayah), words, masks) ? ayah.meaning : '';
                   return (
-                    <span key={ayahKey(ayah)} className="font-quran">
+                    <React.Fragment key={ayahKey(ayah)}>
+                    <span className="font-quran">
                       {!stage.isReverseOrder && startsSurahMidList(ayah, ayahIdx) && (
                         <span className="block text-center text-3xl text-emerald-900 my-3 py-2 border-y border-gold-400/40">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
                       )}
@@ -157,6 +169,8 @@
                       )}
                       <span className="font-quran text-gold-600 mx-1">﴿{ayah.num}﴾</span>{' '}
                     </span>
+                    {meaning && <span className="block text-left text-2xl leading-relaxed text-slate-700 font-sans my-2" dir="ltr">({ayah.num}) {meaning}</span>}
+                    </React.Fragment>
                   );
                 })}
               </div>
@@ -177,14 +191,14 @@
       // and then grows to fill it, instead of leaving space above and below.
       const tall = useTallWindow();
       return (
-        <StudentFrame title={lesson.titleAr} subtitle={lesson.suwaydRef}>
+        <StudentFrame title={stage.lang === 'en' ? (lesson.titleEn || lesson.titleAr) : lesson.titleAr} subtitle={lesson.suwaydRef}>
           <FitToScreen>
             <div className="bg-gradient-to-b from-emerald-950 via-slate-950 to-slate-950 text-white rounded-3xl border-2 border-gold-400/80 shadow-2xl p-6 sm:p-8" style={{ width: tall ? '720px' : '1024px' }}>
             <TajweedZoomSlideBody
               activeSuwaydPlateId={stage.plateId}
               currentSuwaydLesson={lesson}
               currentZoomSlides={slides}
-              isRtl={true}
+              isRtl={stage.lang !== 'en'}
               metronomeBeat={metronome.beat || 1}
               metronomeCount={metronome.count || lesson.timingCounts || 2}
               metronomePlaying={!!metronome.playing}

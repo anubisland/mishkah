@@ -11,6 +11,9 @@
       const deck = useMemo(() => readSavedDeck(), []);
       const deckReady = !!(deck && deck.slides.length);
 
+      // The language the class is taught in: the student screen and the
+      // teacher's notes follow it, whatever the program's own language.
+      const [language, setLanguage] = useState(((initialPlan || lastPlan || {}).language) || 'ar');
       const [useHifz, setUseHifz] = useState(initialPlan ? initHifzParts.length > 0 : true);
       // Recitation of earlier pages usually opens the class.
       const [hifzParts, setHifzParts] = useState(initHifzParts.length
@@ -41,7 +44,7 @@
             }
           }
           if (!items.length) throw new Error('لم يُحدَّد بعدُ ما سيُشرح في هذه الحصة.');
-          const next = { createdAt: Date.now(), items };
+          const next = { createdAt: Date.now(), items, language };
           const result = await prepareClassPlan(next, (done, total) => setProgress({ done, total }));
           setFailedCount(result.failed.length);
           setPlan(next);
@@ -72,6 +75,14 @@
                     <span className="block text-sm text-slate-700">{lastPlan.items.map(classPlanItemLabel).join(' • ')}</span>
                   </button>
                 )}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-black text-emerald-950">لغة الحصة:</span>
+                  {[['ar', 'عربي'], ['en', 'English']].map(([id, label]) => (
+                    <button key={id} type="button" onClick={() => setLanguage(id)}
+                      className={'px-4 py-1.5 rounded-xl font-black border-2 ' + (language === id ? 'bg-emerald-900 text-gold-200 border-emerald-900' : 'bg-white text-emerald-950 border-emerald-900/15')}>{label}</button>
+                  ))}
+                  {language === 'en' && <span className="text-xs text-slate-600">شاشة الطالب بالإنجليزية، مع ترجمة معاني الآيات.</span>}
+                </div>
                 <p className="text-sm text-slate-600">ماذا سيُشرح في هذه الحصة؟ يجهّز البرنامج المختار فقط.</p>
 
                 <div className={card(useHifz)}>
