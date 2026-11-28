@@ -18,7 +18,7 @@
         if (!window.confirm('حذف «' + e.title + '» من المكتبة؟ لا يمكن التراجع عن ذلك.')) return;
         act(deleteFromDeckLibrary(e.id));
       };
-      const date = (iso) => new Date(iso).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+      const date = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }); };
       const btn = 'px-4 py-2 rounded-xl font-black text-sm border-2';
 
       return (
@@ -56,13 +56,15 @@
               <div key={e.id} className={'flex flex-wrap items-center gap-2 rounded-xl px-3 py-2 border ' + (e.id === openId ? 'border-gold-400 bg-gold-50' : 'border-slate-200')}>
                 <div className="flex-1 min-w-0">
                   <p className="font-black text-emerald-950 truncate">{e.title}{e.id === openId ? ' (مفتوحة الآن)' : ''}</p>
-                  <p className="text-xs text-slate-500">{e.slideCount} شريحة • {date(e.savedAt)}</p>
+                  <p className="text-xs text-slate-500">{e.slideCount} شريحة{date(e.savedAt) ? ' • ' + date(e.savedAt) : ''}</p>
                 </div>
                 {e.id !== openId && <button type="button" onClick={() => open(e.id)} className={btn + ' bg-white text-emerald-950 border-emerald-900/20'}>فتح</button>}
                 <button type="button" onClick={() => remove(e)} className="px-2 py-1 rounded-lg text-rose-700 font-bold text-sm">🗑 حذف</button>
               </div>
             ))}
           </section>
+
+          <OldToolLectures />
         </div>
       );
     }
